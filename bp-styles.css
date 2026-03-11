@@ -1,0 +1,200 @@
+:root {
+    --bp-color-0: #0c0d0c;    /* 底層背景色 */
+    --bp-color-1: #333333;    /* 區域填充 */
+    --bp-color-1h: #3a3a3a;   /* 區域填充 hover */
+    --bp-color-2: #c6c7bd;    /* 文字主色 */
+    --bp-color-3: #C3A5E5;    /* 薰衣草色 */
+    --bp-color-4: #b9c971;    /* 特殊標記 */
+    --bp-color-5: #F08080;    /* 警告色 */
+    --bp-color-6: #E5C3B3;    /* 柔和色 */
+    --bp-color-7: #E5E5A6;    /* 注意色 */
+    --bp-color-8: #04b5a3;    /* 天空藍 */
+    --bp-color-9: #81E6D9;    /* 安全色 */
+    --bp-color-10: #d9b375;   /* 棕色 */
+    --bp-color-11: #90CDF4;   /* 資訊色 */
+    --bp-color-12: #FFB3D9;   /* 粉紅色 */
+    --bp-color-13: #f69653;   /* 橘色 */
+	--bp-color-14: #4A4A4D;   /* 灰色 */
+}
+ 
+
+.bp-c-0 { color: #0c0d0c; }
+.bp-c-1 { color: #333333; }
+.bp-c-1h { color: #3a3a3a; }
+.bp-c-2 { color: #c6c7bd; }
+.bp-c-3 { color: #C3A5E5; }
+.bp-c-4 { color: #b9c971; }
+.bp-c-5 { color: #F08080; }
+.bp-c-6 { color: #E5C3B3; }
+.bp-c-7 { color: #E5E5A6; }
+.bp-c-8 { color: #04b5a3; }
+.bp-c-9 { color: #81E6D9; }
+.bp-c-10 { color: #d9b375; }
+.bp-c-11 { color: #90CDF4; }
+.bp-c-12 { color: #FFB3D9; }
+.bp-c-13 { color: #f69653; }
+
+.bp-bg-0 { background-color: #0c0d0c; }
+.bp-bg-1 { background-color: #333333; }
+.bp-bg-1h { background-color: #3a3a3a; }
+.bp-bg-2 { background-color: #c6c7bd; }
+.bp-bg-3 { background-color: #C3A5E5; }
+.bp-bg-4 { background-color: #b9c971; }
+.bp-bg-5 { background-color: #F08080; }
+.bp-bg-6 { background-color: #E5C3B3; }
+.bp-bg-7 { background-color: #E5E5A6; }
+.bp-bg-8 { background-color: #04b5a3; }
+.bp-bg-9 { background-color: #81E6D9; }
+.bp-bg-10 { background-color: #d9b375; }
+.bp-bg-11 { background-color: #90CDF4; }
+.bp-bg-12 { background-color: #FFB3D9; }
+.bp-bg-13 { background-color: #f69653; }
+
+.bp-text-base { color: #0c0d0c; }
+.bp-text-fill { color: #333333; }
+.bp-text-fill-hover { color: #3a3a3a; }
+.bp-text-shell { color: #c6c7bd; }
+.bp-text-lavender { color: #C3A5E5; }
+.bp-text-special { color: #b9c971; }
+.bp-text-warning { color: #F08080; }
+.bp-text-salmon { color: #E5C3B3; }
+.bp-text-attention { color: #E5E5A6; }
+.bp-text-sky { color: #04b5a3; }
+.bp-text-safe { color: #81E6D9; }
+.bp-text-brown { color: #d9b375; }
+.bp-text-info { color: #90CDF4; }
+.bp-text-pink { color: #FFB3D9; }
+.bp-text-orange { color: #f69653; }
+.bp-text-carbon { color: #4A4A4D; }
+
+.bp-bg-base { background-color: #0c0d0c; }
+.bp-bg-fill { background-color: #333333; }
+.bp-bg-fill-hover { background-color: #3a3a3a; }
+.bp-bg-shell { background-color: #c6c7bd; }
+.bp-bg-lavender { background-color: #C3A5E5; }
+.bp-bg-special { background-color: #b9c971; }
+.bp-bg-warning { background-color: #F08080; }
+.bp-bg-salmon { background-color: #E5C3B3; }
+.bp-bg-attention { background-color: #E5E5A6; }
+.bp-bg-sky { background-color: #04b5a3; }
+.bp-bg-safe { background-color: #81E6D9; }
+.bp-bg-brown { background-color: #d9b375; }
+.bp-bg-info { background-color: #90CDF4; }
+.bp-bg-pink { background-color: #FFB3D9; }
+.bp-bg-orange { background-color: #f69653; }
+.bp-bg-carbon { background-color: #4A4A4D; }
+
+.bp-border-base { border: 1px solid #0c0d0c; }
+.bp-border-fill { border: 1px solid #333333; }
+.bp-border-fill-hover { border: 1px solid #3a3a3a; }
+.bp-border-shell { border: 1px solid #c6c7bd; }
+.bp-border-lavender { border: 1px solid #C3A5E5; }
+.bp-border-special { border: 1px solid #b9c971; }
+.bp-border-warning { border: 1px solid #F08080; }
+.bp-border-salmon { border: 1px solid #E5C3B3; }
+.bp-border-attention { border: 1px solid #E5E5A6; }
+.bp-border-sky { border: 1px solid #04b5a3; }
+.bp-border-safe { border: 1px solid #81E6D9; }
+.bp-border-brown { border: 1px solid #d9b375; }
+.bp-border-info { border: 1px solid #90CDF4; }
+.bp-border-pink { border: 1px solid #FFB3D9; }
+.bp-border-orange { border: 1px solid #f69653; }
+
+.fs-xlarge {font-size: 3rem;}
+.fs-larger {font-size: 2.25rem;}
+.fs-large {font-size: 1.5rem;}
+.fs-regular {font-size: 1rem;}
+.fs-small {font-size: 0.9rem;}
+.fs-smaller {font-size: 0.8rem;}
+.fs-xsmall {font-size: 0.65rem;}
+.w-90 {width: 90%;}
+.w-80 {width: 80%;}
+.w-70 {width: 70%;}
+.w-60 {width: 60%;}
+.w-40 {width: 40%;}
+.w-30 {width: 33%;}
+
+.m-6 { margin: 4rem !important; }
+.mt-6, .my-6 { margin-top: 4rem !important; }
+.mb-6, .my-6 { margin-bottom: 4rem !important; }
+.ms-6, .mx-6 { margin-left: 4rem !important; }
+.me-6, .mx-6 { margin-right: 4rem !important; }
+
+.m-7 { margin: 5rem !important; }
+.mt-7, .my-7 { margin-top: 5rem !important; }
+.mb-7, .my-7 { margin-bottom: 5rem !important; }
+.ms-7, .mx-7 { margin-left: 5rem !important; }
+.me-7, .mx-7 { margin-right: 5rem !important; }
+
+.m-8 { margin: 8rem !important; }
+.mt-8, .my-8 { margin-top: 8rem !important; }
+.mb-8, .my-8 { margin-bottom: 8rem !important; }
+.ms-8, .mx-8 { margin-left: 8rem !important; }
+.me-8, .mx-8 { margin-right: 8rem !important; }
+
+.p-6 { padding: 4rem !important; }
+.pt-6, .py-6 { padding-top: 4rem !important; }
+.pb-6, .py-6 { padding-bottom: 4rem !important; }
+.ps-6, .px-6 { padding-left: 4rem !important; }
+.pe-6, .px-6 { padding-right: 4rem !important; }
+
+.p-7 { padding: 5rem !important; }
+.pt-7, .py-7 { padding-top: 5rem !important; }
+.pb-7, .py-7 { padding-bottom: 5rem !important; }
+.ps-7, .px-7 { padding-left: 5rem !important; }
+.pe-7, .px-7 { padding-right: 5rem !important; }
+
+.p-8 { padding: 8rem !important; }
+.pt-8, .py-8 { padding-top: 8rem !important; }
+.pb-8, .py-8 { padding-bottom: 8rem !important; }
+.ps-8, .px-8 { padding-left: 8rem !important; }
+.pe-8, .px-8 { padding-right: 8rem !important; }
+
+
+blockquote {
+    margin: 16px 0px;
+    font-size: 1.25rem;
+    padding: 16px 24px 16px 60px; /* 左側留空間給符號 */
+    background: #333333;
+    color: #c6c7bd;
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+}
+
+blockquote::before {
+    content: ''; /* 不放文字 */
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    
+    /* 使用線性漸層製作「重複出現的 ░ 質感」 */
+    background-image: radial-gradient(#FFF 30%, transparent 30%);
+    background-size: 10px 10px; /* 這裡可以調整點點或網格的密度 */
+    opacity: 0.5;
+}
+
+.bp-hidden {
+	display: none;
+}
+
+.bp-annotation {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dashed var(--note-color, #5BC0DE); 
+    padding-bottom: 1px;
+	margin-bottom: 24px;
+}
+
+.bp-annotation::after {
+    content: attr(data-note);
+    position: absolute;
+    left: 50%;
+    bottom: -1.25rem;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    white-space: nowrap;
+    color: var(--note-color, #8E8E93); 
+}
