@@ -1,6 +1,5 @@
 class BrandColors {
 
-
   static dark = {
     name:         'dark',
     bg:           '#0c0d0c',
@@ -17,14 +16,12 @@ class BrandColors {
     info:         '#90CDF4',
     pink:         '#FFB3D9',
     orange:       '#f69653',
-
     floatBg:      '#1e1f1e',
     floatBg2:     '#242524',
     floatBg3:     '#2a2b2a',
     borderSubtle: 'rgba(198,199,189,0.15)',
     progressTrack:'#151615',
   };
-
 
   static light = {
     name:         'light',
@@ -73,13 +70,17 @@ class BrandColors {
     progressTrack:'--color-progress-track',
   };
 
-
+  /** 取得目前主題名稱 */
   static get currentTheme() { return BrandColors.#currentTheme; }
 
-
+  /** 取得目前主題物件 */
   static get current() { return BrandColors[BrandColors.#currentTheme]; }
 
-
+  /**
+   * 將指定主題寫入 :root CSS 變數，並更新 data-theme 屬性。
+   * 所有使用 var(--color-*) 的元件會自動反映變更。
+   * @param {'dark'|'light'} themeName
+   */
   static applyTheme(themeName = 'dark') {
     const theme = BrandColors[themeName];
     if (!theme) { console.warn(`BrandColors.applyTheme：找不到主題 "${themeName}"`); return; }
@@ -91,22 +92,31 @@ class BrandColors {
     BrandColors.#currentTheme = themeName;
   }
 
-
+  /**
+   * 取單一顏色值。
+   * @param {string} colorKey  例如 'sky'
+   * @param {'dark'|'light'} [themeName]  省略則用目前主題
+   */
   static get(colorKey, themeName) {
     return BrandColors[themeName ?? BrandColors.#currentTheme]?.[colorKey];
   }
 
-
+  /** 取整份主題物件的淺拷貝 */
   static getTheme(themeName) { return { ...BrandColors[themeName] }; }
 
-
+  /**
+   * 以色彩名稱（或 hex）解析出 hex 字串。
+   * 找不到名稱時原值回傳，符合 resolveColor 常見用途。
+   * @param {string|null} val
+   * @param {'dark'|'light'} [themeName]
+   */
   static resolve(val, themeName) {
     if (!val) return null;
     const theme = BrandColors[themeName ?? BrandColors.#currentTheme];
     return theme?.[val.toLowerCase()] ?? val;
   }
 
-
+  /** 輸出 CSS 變數字串（可貼入 <style> :root 區塊）*/
   static toCSSVars(themeName = 'dark') {
     const theme = BrandColors[themeName];
     if (!theme) return '';
@@ -117,6 +127,7 @@ class BrandColors {
   }
 }
 
+// 預設注入深色主題 CSS 變數
 if (typeof document !== 'undefined') {
   const _inject = () => {
     BrandColors.applyTheme('dark');
@@ -128,6 +139,11 @@ if (typeof document !== 'undefined') {
   }
   window.BrandColors = BrandColors;
 }
+
+
+// ════════════════════════════════════════════════════════════════
+// DualCell
+// ════════════════════════════════════════════════════════════════
 
 class DualCell {
 
@@ -206,11 +222,11 @@ class DualCell {
     this.init();
   }
 
-
+  // ── 主題配置（深色 + 淺色）──────────────────────────────────
   static getThemeConfig(name) {
     const mode = BrandColors.currentTheme;
 
-    const D = {
+    const D = {  // dark
       lavender:  { borderColor:'#C3A5E5', cellBgColor:'#2a2435', hoverBgColor:'#3d344a', textColor:'#e8dff5', menuButtonColor:'#C3A5E5', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C3A5E5' },
       special:   { borderColor:'#C8DD5A', cellBgColor:'#2a2e23', hoverBgColor:'#3d4333', textColor:'#e8ead9', menuButtonColor:'#C8DD5A', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C8DD5A' },
       warning:   { borderColor:'#F08080', cellBgColor:'#2e2422', hoverBgColor:'#443532', textColor:'#f5e8e6', menuButtonColor:'#F08080', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#F08080' },
@@ -225,7 +241,7 @@ class DualCell {
       default:   { borderColor:'#c6c7bd', cellBgColor:'#333333', hoverBgColor:'#404040', textColor:'#c6c7bd', menuButtonColor:'#c6c7bd', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#c6c7bd' },
     };
 
-    const L = {
+    const L = {  // light
       lavender:  { borderColor:'#6B35B5', cellBgColor:'#f2edf9', hoverBgColor:'#e5ddf2', textColor:'#2a1a4a', menuButtonColor:'#6B35B5', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#6B35B5' },
       special:   { borderColor:'#5a6e00', cellBgColor:'#f4f6e8', hoverBgColor:'#e8eccc', textColor:'#2a3000', menuButtonColor:'#5a6e00', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#5a6e00' },
       warning:   { borderColor:'#b53030', cellBgColor:'#faf0f0', hoverBgColor:'#f2e0e0', textColor:'#3a1010', menuButtonColor:'#b53030', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#b53030' },
@@ -244,10 +260,10 @@ class DualCell {
     return map[name?.toLowerCase()] || map.default;
   }
 
-
+  // ── 顏色解析（委派給 BrandColors）──────────────────────────
   static resolveColor(color) {
     if (!color) return null;
-
+    // 相容舊名稱 area/region
     const alias = { area: 'surface', region: 'surface' };
     const key = alias[color.toLowerCase()] ?? color.toLowerCase();
     return BrandColors.resolve(key) ?? color;
@@ -477,7 +493,7 @@ class DualCell {
     DualCell._injectGlobalTipStyles();
   }
 
-
+  // 全域 tip CSS（position:fixed，不受容器 scoping 限制，只注入一次）
   static _injectGlobalTipStyles() {
     if (document.getElementById('dc-global-tip-styles')) return;
     const s = document.createElement('style');
@@ -652,14 +668,14 @@ class DualCell {
       track.appendChild(bar); cell.appendChild(track);
       this._carouselCells.set(cell, colData);
     }
-
+    // ── 側邊條 ─────────────────────────────────────────────────
     if (colData.barSide) {
       cell.classList.add(`has-bar-${colData.barSide}`);
       cell.style.setProperty('--dc-bar-width', (colData.barWidth || 4) + 'px');
       const bColor = colData.barColor || this.options.accentColor || 'var(--color-shell)';
       cell.style.setProperty('--dc-bar-color', DualCell.resolveColor(bColor) || bColor);
     }
-
+    // ── info 圖示懸停說明 ────────────────────────────────────
     if (colData.infoText || colData.infoSrc) {
       const infoBtn = document.createElement('span');
       infoBtn.className = 'dc-info-btn';
@@ -671,7 +687,7 @@ class DualCell {
       infoBtn.dataset.tipColor = DualCell.resolveColor(iColor) || iColor;
       cell.appendChild(infoBtn);
     }
-
+    // ── hover-tip 整格懸停 tooltip ───────────────────────────
     if (colData.hoverTip || colData.hoverTipSrc) {
       cell.classList.add('has-hover-tip');
       cell.dataset.hoverTip    = colData.hoverTip    || '';
@@ -763,7 +779,7 @@ class DualCell {
       if (cell && this.options.onCellClick)
         this.options.onCellClick(parseInt(cell.dataset.rowIdx), parseInt(cell.dataset.colIdx));
     });
-
+    // ── 共用 tooltip DOM ─────────────────────────────────────
     const tipEl = document.createElement('div');
     tipEl.className = 'dc-cell-tip';
     document.body.appendChild(tipEl);
@@ -784,10 +800,15 @@ class DualCell {
     };
 
     const showTip = (anchor, html, color) => {
+      _tipTarget = anchor;
+      tipEl.classList.remove('dc-tip-show', 'dc-tip-above');
       tipEl.innerHTML = html;
       tipEl.style.setProperty('--dc-tip-color', color || 'var(--color-shell)');
-      requestAnimationFrame(() => { positionTip(anchor); tipEl.classList.add('dc-tip-show'); });
-      _tipTarget = anchor;
+      void tipEl.offsetWidth;
+      positionTip(anchor);
+      requestAnimationFrame(() => {
+        if (_tipTarget === anchor) tipEl.classList.add('dc-tip-show');
+      });
     };
 
     const hideTip = () => {
@@ -800,7 +821,7 @@ class DualCell {
       const infoBtn = e.target.closest('.dc-info-btn');
       if (!cell) return;
 
-
+      // 現有 hover-source/hover-target 行為（更新持久元素）
       const col = this.getColData(parseInt(cell.dataset.rowIdx), parseInt(cell.dataset.colIdx));
       if (col?.hoverSource && col?.hoverTarget) {
         const src = document.getElementById(col.hoverSource);
@@ -808,7 +829,7 @@ class DualCell {
         if (src && tgt) tgt.innerHTML = src.innerHTML;
       }
 
-
+      // info 圖示 hover
       if (infoBtn) {
         if (_tipTarget === infoBtn) return;
         const text  = infoBtn.dataset.infoText;
@@ -824,7 +845,7 @@ class DualCell {
         return;
       }
 
-
+      // hover-tip 整格懸停 tooltip
       if (cell.classList.contains('has-hover-tip')) {
         if (_tipTarget === cell) return;
         const text  = cell.dataset.hoverTip;
@@ -843,7 +864,15 @@ class DualCell {
     tableEl.addEventListener('mouseout', (e) => {
       const infoBtn = e.target.closest('.dc-info-btn');
       const cell    = e.target.closest('.dc-cell');
-      if (infoBtn && !infoBtn.contains(e.relatedTarget)) { hideTip(); return; }
+
+      if (infoBtn && !infoBtn.contains(e.relatedTarget)) {
+        // 離開 info 圖示：若 relatedTarget 仍在同一格且該格有 hover-tip，
+        // 不主動 hideTip，讓 mouseover 接手切換成 hover-tip
+        const stillInCell = cell && cell.contains(e.relatedTarget);
+        if (!(stillInCell && cell.classList.contains('has-hover-tip'))) hideTip();
+        return;
+      }
+
       if (cell && cell.classList.contains('has-hover-tip') && !cell.contains(e.relatedTarget)) hideTip();
     });
   }
@@ -980,6 +1009,7 @@ class DualCell {
   }
 }
 
+// ── DualCell Custom Elements ────────────────────────────────────
 class DualCellElement extends HTMLElement {
   connectedCallback() { this.dualCellInstance = new DualCell(this.id, this._buildOptions()); }
   _buildOptions() {
@@ -1026,6 +1056,7 @@ class DualColElement   extends HTMLElement {}
 class DualSlotElement  extends HTMLElement {}
 class DualItemElement  extends HTMLElement {}
 
+// data-dual-cell 屬性自動初始化
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-dual-cell]').forEach(el => {
     const d = el.dataset, opt = {};
@@ -1061,6 +1092,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+
+// ════════════════════════════════════════════════════════════════
+// InfoRegion
+// ════════════════════════════════════════════════════════════════
+
 (function () {
   'use strict';
 
@@ -1071,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return val + unit;
   };
 
-
+  // 全域預設值（bgColor/textColor 使用 CSS 變數，自動跟隨主題）
   const defaults = {
     defaultColor:       'sky',
     animDuration:       500,
@@ -1121,7 +1157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const vDur = cfg.animDuration + 'ms';
     const hDur = cfg.horizontalAnimDur + 'ms';
 
-
+    // 顏色 variants：使用 CSS 變數，自動跟隨主題
     const colorKeys = ['shell','lavender','special','warning','salmon','attention','sky','safe','brown','info','pink','orange'];
 
     const irColorVariants = colorKeys.map(name =>
@@ -1216,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(styleEl);
   }
 
-
+  // ── InfoRegion ──────────────────────────────────────────────
   class InfoRegion extends HTMLElement {
     static get observedAttributes() {
       return [
@@ -1330,7 +1366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-
+  // ── InfoRegionGroup ─────────────────────────────────────────
   class InfoRegionGroup extends HTMLElement {
     constructor() { super(); this._progressBar = null; this._percentEl = null; this._observer = null; }
     connectedCallback() { injectStyles(); setTimeout(() => this._build(), 0); }
@@ -1493,6 +1529,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 })();
 
+
+// ════════════════════════════════════════════════════════════════
+// WordFlip
+// ════════════════════════════════════════════════════════════════
+
+// ── 色彩工具（委派給 BrandColors）───────────────────────────────
 function wfResolveColor(val) {
   if (!val) return null;
   return BrandColors.resolve(val) ?? val;
@@ -1524,11 +1566,12 @@ function wfRenderFix(val) {
   return val;
 }
 
+// ── CSS 注入（使用 CSS 變數，自動跟隨主題）──────────────────────
 (function injectWFStyles() {
   if (document.getElementById('word-flip-styles')) return;
 
   const css = `
-
+/* ── Word Flip 私有變數（引用 BrandColors CSS 變數）── */
 :root {
   --wf-bg-base:         var(--color-bg,        #0c0d0c);
   --wf-bg-fill:         var(--color-surface,   #333333);
@@ -1546,6 +1589,7 @@ function wfRenderFix(val) {
   --wf-color-orange:    var(--color-orange,    #f69653);
 }
 
+/* ════ word-flip 預設外觀 ════ */
 word-flip {
   display: inline-block; position: relative; cursor: pointer;
   border-bottom: 2px dotted var(--wf-accent, var(--wf-color-lavender));
@@ -1565,6 +1609,7 @@ word-flip.wf-flipped {
 word-flip.wf-animating { pointer-events: none; }
 word-flip.wf-has-style { border-bottom: none; padding-bottom: 0; }
 
+/* ════ Trigger Styles ════ */
 word-flip.wf-style-underline { text-decoration: underline; text-decoration-style: dotted; text-decoration-thickness: 2px; text-underline-offset: 4px; }
 word-flip.wf-style-underline:hover { text-decoration-style: solid; }
 word-flip.wf-style-highlight { border-radius: 3px; padding: 1px 4px; }
@@ -1585,6 +1630,7 @@ word-flip.wf-style-icon { display: inline-flex; align-items: center; gap: 5px; }
 word-flip.wf-style-icon:hover { opacity: 0.8; }
 word-flip.wf-active { opacity: 0.75; }
 
+/* ════ 已讀標記 ════ */
 word-flip.wf-read::after {
   content: ''; position: absolute; top: -4px; right: -4px;
   width: var(--wf-read-size, 6px); height: var(--wf-read-size, 6px);
@@ -1597,6 +1643,7 @@ word-flip.wf-read[data-read-mark="star"]::after  { content: '★'; background: n
 word-flip.wf-read[data-read-mark="icon"]::after  { content: ''; background: none; width: auto; height: auto; font-family: 'bootstrap-icons'; color: var(--wf-read-color, var(--wf-color-safe)); font-size: calc(var(--wf-read-size, 6px) * 2); line-height: 1; }
 word-flip.wf-read[data-read-mark="icon"][data-read-mark-icon]::after { content: attr(data-read-mark-icon-content); }
 
+/* ════ word-trigger ════ */
 word-trigger {
   display: inline; position: relative; cursor: pointer;
   border-bottom: 2px solid var(--wf-accent, var(--wf-color-special));
@@ -1609,6 +1656,7 @@ word-trigger.wf-active { background: var(--wf-accent-alpha, rgba(200,221,90,0.15
 word-trigger.wf-read::after { content: ''; position: absolute; top: -4px; right: -4px; width: var(--wf-read-size, 6px); height: var(--wf-read-size, 6px); background: var(--wf-read-color, var(--wf-color-safe)); border-radius: 50%; opacity: 0; transition: opacity 0.3s ease; }
 word-trigger.wf-read.wf-show-mark::after { opacity: 1; }
 
+/* ════ flip-cards / flip-card ════ */
 flip-cards { display: block; margin: 32px 0; padding: 0; }
 flip-card { display: block; position: relative; margin-bottom: 20px; perspective: 1200px; min-height: 120px; }
 .wf-card-inner { position: relative; width: 100%; min-height: 120px; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; }
@@ -1641,6 +1689,7 @@ flip-card:not(.wf-flipped):hover card-front { transform: translateX(3px); box-sh
 flip-card.wf-flipped card-back { cursor: pointer; transition: all 0.3s ease; }
 flip-card.wf-flipped:hover card-back { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
 
+/* ════ data-color 對照 ════ */
 word-flip[data-color="shell"],word-trigger[data-color="shell"]    { --wf-accent:var(--wf-color-shell);     --wf-accent-alpha:rgba(198,199,189,0.12); }
 flip-card[data-color="shell"]    { --wf-accent:var(--wf-color-shell); }
 word-flip[data-color="lavender"],word-trigger[data-color="lavender"] { --wf-accent:var(--wf-color-lavender); --wf-accent-alpha:rgba(195,165,229,0.12); }
@@ -1679,6 +1728,7 @@ word-flip[data-read-mark-color="info"]     ,word-trigger[data-read-mark-color="i
 word-flip[data-read-mark-color="pink"]     ,word-trigger[data-read-mark-color="pink"]     { --wf-read-color:var(--wf-color-pink); }
 word-flip[data-read-mark-color="orange"]   ,word-trigger[data-read-mark-color="orange"]   { --wf-read-color:var(--wf-color-orange); }
 
+/* ════ 浮動面板 ════ */
 .wf-tooltip-box {
   position: fixed; z-index: 99999; max-width: 280px; min-width: 120px;
   background: var(--color-float-bg-3, #2a2b2a);
@@ -1773,6 +1823,7 @@ word-flip[data-read-mark-color="orange"]   ,word-trigger[data-read-mark-color="o
   document.head.appendChild(style);
 })();
 
+// ── 全域配置 ────────────────────────────────────────────────────
 const WF_DEFAULT_CONFIG = {
   defaultColor: 'lavender', defaultAnimation: 'flip', autoFlipBack: 0,
   focusMode: false, readMark: 'dot', readMarkColor: 'safe',
@@ -1839,6 +1890,7 @@ function applyFontSizes(titleEl, bodyEl, titleFs, bodyFs) {
   if (bodyEl  && bodyFs)  bodyEl.style.fontSize  = bodyFs;
 }
 
+// ── WordFlip 元件 ───────────────────────────────────────────────
 class WordFlip extends HTMLElement {
   static get observedAttributes() {
     return ['data-content','data-color','mode','trigger-style','title','prefix','postfix','icon','box-width','box-height','title-fontsize','body-fontsize'];
@@ -2195,6 +2247,11 @@ class WordFlipConfig extends HTMLElement {
   }
 }
 
+
+// ════════════════════════════════════════════════════════════════
+// 全部 Custom Elements 統一註冊
+// ════════════════════════════════════════════════════════════════
+
 [
   ['dual-cell',         DualCellElement],
   ['dual-group',        DualGroupElement],
@@ -2233,5 +2290,3 @@ window.WordFlip = {
     });
   },
 };
-
-console.log('[bp-tools] BrandColors / DualCell / InfoRegion / WordFlip loaded.');
