@@ -1,5 +1,4 @@
 class BrandColors {
-
   // ── 深色主題 ─────────────────────────────────────────────────
   static dark = {
     name:         'dark',
@@ -143,6 +142,11 @@ if (typeof document !== 'undefined') {
   window.BrandColors = BrandColors;
 }
 
+
+// ════════════════════════════════════════════════════════════════
+// DualCell
+// ════════════════════════════════════════════════════════════════
+
 class DualCell {
 
   constructor(containerId, options = {}) {
@@ -204,6 +208,9 @@ class DualCell {
       autoRevealInterval:      parseInt(options.autoRevealInterval) || 0,
       carouselIndicatorColor:  R(options.carouselIndicatorColor) || tc.menuButtonColor || BrandColors.get('special'),
       carouselIndicatorHeight: options.carouselIndicatorHeight || '3px',
+      barSide:  options.barSide  || null,
+      barWidth: parseInt(options.barWidth) || 4,
+      barColor: R(options.barColor) || null,
       onCellClick:   options.onCellClick   || null,
       onMenuClick:   options.onMenuClick   || null,
       onContentPush: options.onContentPush || null,
@@ -362,6 +369,15 @@ class DualCell {
       carouselItems, carouselInterval: ciInterval,
       carouselIndicator: ciIndicator, carouselIndicatorColor: ciColor,
       carouselIndicatorHeight: ciHeight, flex: 1,
+      barSide:    a('bar-side')  || this.options.barSide  || null,
+      barWidth:   a('bar-width') !== null ? parseInt(a('bar-width')) : this.options.barWidth,
+      barColor:   R(a('bar-color')) || this.options.barColor || null,
+      hoverTip:   a('hover-tip')    || null,
+      hoverTipSrc:a('hover-tip-src')|| null,
+      infoText:   a('info')         || null,
+      infoSrc:    a('info-src')     || null,
+      infoIcon:   a('info-icon')    || null,
+      infoColor:  R(a('info-color'))|| null,
     };
   }
 
@@ -373,6 +389,9 @@ class DualCell {
       ovInvert:false, hasOverlay:false, hoverSource:null, hoverTarget:null,
       carouselItems:null, carouselInterval:null, carouselIndicator:null,
       carouselIndicatorColor:null, carouselIndicatorHeight:null, flex:1,
+      barSide:null, barWidth:4, barColor:null,
+      hoverTip:null, hoverTipSrc:null,
+      infoText:null, infoSrc:null, infoIcon:null, infoColor:null,
     };
   }
 
@@ -458,6 +477,37 @@ class DualCell {
       @keyframes dc-shrink{from{width:100%}to{width:0%}}
       @keyframes dc-row-reveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
       #${id} .dc-reveal-row{animation:dc-row-reveal .35s ease forwards}
+      #${id} .dc-cell.has-bar-left::before,
+      #${id} .dc-cell.has-bar-right::before{
+        content:'';position:absolute;top:0;bottom:0;
+        width:var(--dc-bar-width,4px);
+        background:var(--dc-bar-color,${o.menuButtonColor});
+        pointer-events:none;z-index:2}
+      #${id} .dc-cell.has-bar-left::before{left:0}
+      #${id} .dc-cell.has-bar-right::before{right:0}
+      #${id} .dc-info-btn{
+        position:absolute;top:6px;right:6px;width:20px;height:20px;
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;z-index:5;opacity:.55;transition:opacity .2s,transform .2s}
+      #${id} .dc-info-btn:hover{opacity:1;transform:scale(1.2)}
+      #${id} .dc-cell-tip{
+        position:fixed;z-index:999990;max-width:260px;min-width:100px;
+        background:var(--color-float-bg-3,#2a2b2a);
+        border:1px solid var(--dc-tip-color,#c6c7bd);
+        color:var(--color-shell,#c6c7bd);
+        padding:8px 12px;border-radius:6px;font-size:.85rem;line-height:1.65;
+        box-shadow:0 6px 24px rgba(0,0,0,.55);
+        pointer-events:none;opacity:0;transform:translateY(6px);
+        transition:opacity .2s ease,transform .2s ease}
+      #${id} .dc-cell-tip.dc-tip-show{opacity:1;transform:translateY(0)}
+      #${id} .dc-cell-tip::before{
+        content:'';position:absolute;bottom:100%;left:12px;
+        border:5px solid transparent;
+        border-bottom-color:var(--dc-tip-color,#c6c7bd)}
+      #${id} .dc-cell-tip.dc-tip-above::before{
+        bottom:auto;top:100%;
+        border-bottom-color:transparent;
+        border-top-color:var(--dc-tip-color,#c6c7bd)}
     `;
     document.head.appendChild(style);
   }
@@ -609,6 +659,31 @@ class DualCell {
       track.appendChild(bar); cell.appendChild(track);
       this._carouselCells.set(cell, colData);
     }
+    // ── 側邊條 ─────────────────────────────────────────────────
+    if (colData.barSide) {
+      cell.classList.add(`has-bar-${colData.barSide}`);
+      cell.style.setProperty('--dc-bar-width', (colData.barWidth || 4) + 'px');
+      const bColor = colData.barColor || this.options.accentColor || 'var(--color-shell)';
+      cell.style.setProperty('--dc-bar-color', DualCell.resolveColor(bColor) || bColor);
+    }
+    // ── info 圖示懸停說明 ────────────────────────────────────
+    if (colData.infoText || colData.infoSrc) {
+      const infoBtn = document.createElement('span');
+      infoBtn.className = 'dc-info-btn';
+      infoBtn.dataset.infoText = colData.infoText || '';
+      infoBtn.dataset.infoSrc  = colData.infoSrc  || '';
+      const iName  = colData.infoIcon || 'info-circle';
+      const iColor = colData.infoColor || this.options.accentColor || 'var(--color-shell)';
+      infoBtn.innerHTML = `<i class="bi bi-${iName}" style="color:${iColor};font-size:.95rem"></i>`;
+      infoBtn.dataset.tipColor = DualCell.resolveColor(iColor) || iColor;
+      cell.appendChild(infoBtn);
+    }
+    // ── hover-tip 整格懸停 tooltip ───────────────────────────
+    if (colData.hoverTip || colData.hoverTipSrc) {
+      cell.classList.add('has-hover-tip');
+      cell.dataset.hoverTip    = colData.hoverTip    || '';
+      cell.dataset.hoverTipSrc = colData.hoverTipSrc || '';
+    }
     return cell;
   }
 
@@ -695,15 +770,88 @@ class DualCell {
       if (cell && this.options.onCellClick)
         this.options.onCellClick(parseInt(cell.dataset.rowIdx), parseInt(cell.dataset.colIdx));
     });
+    // ── 共用 tooltip DOM ─────────────────────────────────────
+    const tipEl = document.createElement('div');
+    tipEl.className = 'dc-cell-tip';
+    document.body.appendChild(tipEl);
+    let _tipTarget = null;
+
+    const positionTip = (anchor) => {
+      const r  = anchor.getBoundingClientRect();
+      const tw = tipEl.offsetWidth  || 200;
+      const th = tipEl.offsetHeight || 80;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      let left = r.left, top = r.bottom + 8;
+      if (left + tw > vw - 8) left = vw - tw - 8;
+      if (left < 8) left = 8;
+      const above = top + th > vh - 8;
+      if (above) { top = r.top - th - 8; tipEl.classList.add('dc-tip-above'); }
+      else tipEl.classList.remove('dc-tip-above');
+      tipEl.style.left = left + 'px'; tipEl.style.top = top + 'px';
+    };
+
+    const showTip = (anchor, html, color) => {
+      tipEl.innerHTML = html;
+      tipEl.style.setProperty('--dc-tip-color', color || 'var(--color-shell)');
+      requestAnimationFrame(() => { positionTip(anchor); tipEl.classList.add('dc-tip-show'); });
+      _tipTarget = anchor;
+    };
+
+    const hideTip = () => {
+      tipEl.classList.remove('dc-tip-show', 'dc-tip-above');
+      _tipTarget = null;
+    };
+
     tableEl.addEventListener('mouseover', (e) => {
-      const cell = e.target.closest('.dc-cell');
+      const cell    = e.target.closest('.dc-cell');
+      const infoBtn = e.target.closest('.dc-info-btn');
       if (!cell) return;
-      if (e.relatedTarget?.closest('.dc-cell') === cell) return;
+
+      // 現有 hover-source/hover-target 行為（更新持久元素）
       const col = this.getColData(parseInt(cell.dataset.rowIdx), parseInt(cell.dataset.colIdx));
-      if (!col?.hoverSource || !col?.hoverTarget) return;
-      const src = document.getElementById(col.hoverSource);
-      const tgt = document.getElementById(col.hoverTarget);
-      if (src && tgt) tgt.innerHTML = src.innerHTML;
+      if (col?.hoverSource && col?.hoverTarget) {
+        const src = document.getElementById(col.hoverSource);
+        const tgt = document.getElementById(col.hoverTarget);
+        if (src && tgt) tgt.innerHTML = src.innerHTML;
+      }
+
+      // info 圖示 hover
+      if (infoBtn) {
+        if (_tipTarget === infoBtn) return;
+        const text  = infoBtn.dataset.infoText;
+        const srcId = infoBtn.dataset.infoSrc;
+        let html = text;
+        if (srcId) {
+          const id = srcId.startsWith('#') ? srcId.slice(1) : srcId;
+          const el = document.getElementById(id);
+          if (el) html = el.innerHTML;
+        }
+        if (!html) return;
+        showTip(infoBtn, html, infoBtn.dataset.tipColor);
+        return;
+      }
+
+      // hover-tip 整格懸停 tooltip
+      if (cell.classList.contains('has-hover-tip')) {
+        if (_tipTarget === cell) return;
+        const text  = cell.dataset.hoverTip;
+        const srcId = cell.dataset.hoverTipSrc;
+        let html = text;
+        if (srcId) {
+          const id = srcId.startsWith('#') ? srcId.slice(1) : srcId;
+          const el = document.getElementById(id);
+          if (el) html = el.innerHTML;
+        }
+        if (!html) return;
+        showTip(cell, html, 'var(--color-shell)');
+      }
+    });
+
+    tableEl.addEventListener('mouseout', (e) => {
+      const infoBtn = e.target.closest('.dc-info-btn');
+      const cell    = e.target.closest('.dc-cell');
+      if (infoBtn && !infoBtn.contains(e.relatedTarget)) { hideTip(); return; }
+      if (cell && cell.classList.contains('has-hover-tip') && !cell.contains(e.relatedTarget)) hideTip();
     });
   }
 
@@ -869,6 +1017,7 @@ class DualCellElement extends HTMLElement {
       'group-title-bg-color':'groupTitleBgColor','group-title-padding':'groupTitlePadding',
       'group-icon-size':'groupIconSize','group-collapsed-icon':'groupCollapsedIcon',
       'group-expanded-icon':'groupExpandedIcon',
+      'bar-side':'barSide','bar-width':'barWidth','bar-color':'barColor',
     };
     for (const [attr, key] of Object.entries(MAP)) {
       if (this.hasAttribute(attr)) {
@@ -916,9 +1065,15 @@ document.addEventListener('DOMContentLoaded', () => {
     p('groupTitleBgColor',d.groupTitleBgColor); p('groupTitlePadding',d.groupTitlePadding);
     p('groupIconSize',d.groupIconSize);
     p('groupCollapsedIcon',d.groupCollapsedIcon); p('groupExpandedIcon',d.groupExpandedIcon);
+    p('barSide',d.barSide); p('barWidth',d.barWidth); p('barColor',d.barColor);
     el.dualCellInstance = new DualCell(el.id, opt);
   });
 });
+
+
+// ════════════════════════════════════════════════════════════════
+// InfoRegion
+// ════════════════════════════════════════════════════════════════
 
 (function () {
   'use strict';
@@ -1352,6 +1507,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 })();
 
+
+// ════════════════════════════════════════════════════════════════
+// WordFlip
+// ════════════════════════════════════════════════════════════════
+
+// ── 色彩工具（委派給 BrandColors）───────────────────────────────
 function wfResolveColor(val) {
   if (!val) return null;
   return BrandColors.resolve(val) ?? val;
@@ -2064,6 +2225,11 @@ class WordFlipConfig extends HTMLElement {
   }
 }
 
+
+// ════════════════════════════════════════════════════════════════
+// 全部 Custom Elements 統一註冊
+// ════════════════════════════════════════════════════════════════
+
 [
   ['dual-cell',         DualCellElement],
   ['dual-group',        DualGroupElement],
@@ -2082,6 +2248,7 @@ class WordFlipConfig extends HTMLElement {
   if (!customElements.get(name)) customElements.define(name, cls);
 });
 
+// word-flip-config 補掃（DOMContentLoaded 前已掛載的 config 標籤）
 function processExistingConfigs() {
   document.querySelectorAll('word-flip-config').forEach(c => c._processConfig?.());
 }
