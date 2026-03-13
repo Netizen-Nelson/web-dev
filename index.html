@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bp-tools.js 綜合範例</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ── 全域過渡 ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--color-bg, #0c0d0c);
+  color: var(--color-shell, #c6c7bd);
+  font-size: 1rem;
+  line-height: 1.75;
+  min-height: 100vh;
+  transition: background .4s ease, color .4s ease;
+}
+
+/* ── 頁面骨架 ─────────────────────────────────────────── */
+.page-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* ── 頂部橫幅 ─────────────────────────────────────────── */
+.site-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 56px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border-subtle, rgba(198,199,189,.15));
+}
+
+.logo-block {}
+.logo-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .7rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--color-sky);
+  margin-bottom: 4px;
+}
+.logo-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--color-shell);
+  letter-spacing: -.02em;
+}
+.logo-title span { color: var(--color-special); }
+
+/* ── 主題切換按鈕 ─────────────────────────────────────── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle, rgba(198,199,189,.2));
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .78rem;
+  color: var(--color-shell);
+  cursor: pointer;
+  transition: background .25s, border-color .25s, color .25s;
+}
+.theme-toggle:hover { border-color: var(--color-sky); color: var(--color-sky); }
+.theme-toggle i { font-size: 1rem; }
+
+/* ── 區塊標題 ─────────────────────────────────────────── */
+.section-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--color-lavender);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-shell);
+  margin-bottom: 20px;
+}
+.section-desc {
+  font-size: .9rem;
+  color: var(--color-shell);
+  opacity: .7;
+  margin-bottom: 24px;
+  max-width: 580px;
+}
+
+.demo-block {
+  margin-bottom: 64px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-border-subtle, rgba(198,199,189,.1));
+  margin: 56px 0;
+}
+
+/* ── 行內程式碼 ──────────────────────────────────────── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .83em;
+  background: var(--color-surface);
+  color: var(--color-sky);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/* ── 示範內容卡 ──────────────────────────────────────── */
+#content-a, #content-b {
+  display: none;
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-lavender);
+  padding: 12px 16px;
+  border-radius: 0 6px 6px 0;
+  font-size: .9rem;
+  margin-top: 8px;
+}
+
+/* ── flip-card 高度 ──────────────────────────────────── */
+flip-card { min-height: 90px; }
+.wf-card-inner { min-height: 90px; }
+card-front, card-back { min-height: 90px; }
+
+/* ── WordFlip 示範段落 ───────────────────────────────── */
+.wf-paragraph {
+  font-size: 1rem;
+  line-height: 2;
+  margin-bottom: 20px;
+}
+.wf-paragraph + .wf-paragraph { margin-top: 4px; }
+
+/* ── InfoRegion 示範目標區 ──────────────────────────── */
+#dc-push-target {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-subtle, rgba(198,199,189,.2));
+  border-radius: 6px;
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: .88rem;
+  color: var(--color-shell);
+  opacity: .6;
+  margin-top: 12px;
+  transition: opacity .3s;
+}
+#dc-push-target:not(:empty) { opacity: 1; border-style: solid; border-color: var(--color-sky); }
+
+/* ── 步驟說明 ────────────────────────────────────────── */
+.step-note {
+  font-size: .8rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--color-attention);
+  margin-top: 6px;
+  opacity: .75;
+}
+
+/* ── 淺色主題下 wf-modal/drawer 背景補正 ────────────── */
+[data-theme="light"] .wf-tooltip-box,
+[data-theme="light"] .wf-popover-box,
+[data-theme="light"] .wf-modal-box,
+[data-theme="light"] .wf-drawer-panel { color: var(--color-shell); }
+
+/* ── 進場動畫 ────────────────────────────────────────── */
+@keyframes fade-up { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.page-wrap > * { animation: fade-up .5s ease both; }
+.page-wrap > *:nth-child(1) { animation-delay: .05s; }
+.page-wrap > *:nth-child(2) { animation-delay: .12s; }
+.page-wrap > *:nth-child(3) { animation-delay: .18s; }
+.page-wrap > *:nth-child(4) { animation-delay: .24s; }
+.page-wrap > *:nth-child(5) { animation-delay: .30s; }
+.page-wrap > *:nth-child(6) { animation-delay: .36s; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ 隱藏內容範本 ══════════════ -->
+<div style="display:none">
+
+  <div id="tpl-word">
+    <p>「字詞翻轉」是 <code>bp-tools.js</code> 的核心功能之一。點擊帶有底線的詞彙後，會就地展開補充說明，無需跳轉頁面。</p>
+    <p>支援 <strong>自動返回</strong>、<strong>已讀標記</strong>、以及多種觸發樣式。</p>
+  </div>
+
+  <div id="tpl-inline">
+    <p>這是 <strong>inline 模式</strong>：內容直接在文字中展開，不彈出任何浮動面板。適合短段補充說明或詞彙解釋。</p>
+  </div>
+
+  <div id="tpl-tooltip">
+    <p>輕量浮動提示，hover 或 click 觸發，自動計算位置，超出視窗邊界時會翻轉方向。</p>
+  </div>
+
+  <div id="tpl-popover">
+    <h5 style="margin-bottom:8px">Popover 面板</h5>
+    <p>比 tooltip 更豐富的浮動面板，包含標題列與關閉按鈕。支援自訂寬高與字體大小。</p>
+    <ul style="padding-left:18px;margin-top:8px">
+      <li>自動定位（上下左右皆可）</li>
+      <li>點擊外部自動關閉</li>
+      <li>同時只開一個面板</li>
+    </ul>
+  </div>
+
+  <div id="tpl-modal">
+    <p>Modal 模式適合較長篇幅的內容。點擊遮罩或按 <code>ESC</code> 即可關閉。</p>
+    <h5 style="margin:12px 0 6px">特點</h5>
+    <ul style="padding-left:18px">
+      <li>背景滾動鎖定</li>
+      <li>入場動畫（scale + translate）</li>
+      <li>支援自訂寬高</li>
+      <li>標題可附加 Bootstrap Icon</li>
+    </ul>
+  </div>
+
+  <div id="tpl-drawer">
+    <p>Drawer 從右側滑入，適合需要保留頁面脈絡同時查閱詳細資料的場景。</p>
+    <p style="margin-top:10px">按 <code>ESC</code> 或左側遮罩可關閉。支援自訂寬度。</p>
+    <p style="margin-top:10px;font-size:.85rem;opacity:.75">這個詞彙是 <em>drawer 模式</em> 的示範，所有四種浮動模式共用同一套動畫與定位邏輯。</p>
+  </div>
+
+  <div id="tpl-badge">
+    <p>Badge 與 Pill 觸發樣式讓詞彙在視覺上更像「標籤」，適合用於專業術語、狀態標示或分類標記。</p>
+  </div>
+
+  <div id="tpl-button">
+    <p>Button 樣式讓詞彙看起來像可點擊的操作按鈕，顏色會自動計算對比色，確保可讀性。</p>
+  </div>
+
+  <!-- word-flip in dual-cell 用的範本 -->
+  <div id="tpl-mvc">
+    <p><strong>MVC</strong>（Model-View-Controller）是一種將應用程式分為三個核心層的架構模式。</p>
+    <ul style="padding-left:18px;margin-top:6px">
+      <li><em>Model</em>：資料與商業邏輯</li>
+      <li><em>View</em>：使用者介面</li>
+      <li><em>Controller</em>：協調 Model 與 View</li>
+    </ul>
+  </div>
+  <div id="tpl-spa">
+    <p><strong>SPA</strong>（Single Page Application）在初次載入後不再重新整理整個頁面，而是透過 JS 動態更新 DOM，帶來接近原生 App 的操作體驗。</p>
+  </div>
+  <div id="tpl-ssr">
+    <p><strong>SSR</strong>（Server-Side Rendering）在伺服器端將 HTML 完整渲染後再傳送給瀏覽器，有助於 SEO 與首屏載入速度。</p>
+    <p style="margin-top:6px;font-size:.88rem;opacity:.8">相關：Next.js、Nuxt.js、SvelteKit 均支援 SSR。</p>
+  </div>
+  <div id="tpl-cdn">
+    <p><strong>CDN</strong>（Content Delivery Network）透過分散在各地的伺服器節點，讓使用者從距離最近的節點取得靜態資源，降低延遲。</p>
+  </div>
+  <div id="tpl-wasm">
+    <p><strong>WebAssembly</strong> 是一種低階二進位指令格式，可在瀏覽器中以接近原生速度執行 C/C++/Rust 等語言編譯的程式。</p>
+  </div>
+  <div id="tpl-pwa">
+    <p><strong>PWA</strong>（Progressive Web App）利用 Service Worker 與 Web App Manifest，讓網頁具備離線運作、推播通知、安裝到桌面等原生 App 特性。</p>
+  </div>
+
+  <div id="fc-front-1">
+    <h4>什麼是 flip-card？</h4>
+    <p>一個具有 3D 翻轉效果的雙面卡片元件。<strong>正面</strong>顯示問題或標題，翻轉後顯示答案或詳細說明。</p>
+    <small>點擊卡片翻轉 →</small>
+  </div>
+  <div id="fc-back-1">
+    <h4>flip-card 特性</h4>
+    <p>透過 CSS <em>transform-style: preserve-3d</em> 實現原生 3D 翻轉，零依賴，支援巢狀 word-flip 元件。</p>
+    <small>再次點擊返回正面</small>
+  </div>
+
+  <div id="fc-front-2">
+    <h4>InfoRegion 的用途？</h4>
+    <p>用於逐步揭示內容的動畫區塊元件，可設定自動鏈結、倒數進度條與全體進度追蹤。</p>
+  </div>
+  <div id="fc-back-2">
+    <h4>典型使用情境</h4>
+    <ul>
+      <li>教學步驟演示</li>
+      <li>引導式表單填寫</li>
+      <li>分段展示的簡報</li>
+    </ul>
+    <small>支援水平與垂直兩種佈局模式</small>
+  </div>
+
+</div>
+<!-- ═══════════════════════════════════════════════ -->
+
+
+<div class="page-wrap">
+
+  <!-- ── 頁首 ──────────────────────────────────── -->
+  <header class="site-header">
+    <div class="logo-block">
+      <div class="logo-kicker">Component Library</div>
+      <h1 class="logo-title">bp<span>-tools</span>.js</h1>
+    </div>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">
+      <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+      <span id="themeLabel">切換亮色</span>
+    </button>
+  </header>
+
+
+  <!-- ══════════ SECTION 1：DualCell ══════════ -->
+  <div class="demo-block">
+    <div class="section-tag">01 / DualCell</div>
+    <h2 class="section-title">多欄格狀佈局元件</h2>
+    <p class="section-desc">以宣告式 HTML 標籤定義多欄資料表，支援選單操作（push / copy / toggle / show-next）、群組折疊、垂直輪播與遮罩揭示。</p>
+
+    <!-- 示範 A：基本雙欄 + push -->
+    <p class="step-note mb-2">▸ 點擊 ▶ 按鈕，將左欄內容推送到下方目標區</p>
+    <div id="dc-basic" data-dual-cell
+      data-theme="sky"
+      data-cols="2"
+      data-border-follow-theme="true"
+      data-menu-button-icon-push="bi-arrow-down-circle"
+      data-menu-button-icon-copy="bi-clipboard"
+      data-menu-button-icon-toggle="bi-chevron-down"
+      data-menu-button-icon-toggle-expanded="bi-chevron-up"
+      data-target-id="dc-push-target">
+
+      <dual-row>
+        <dual-col menu-action="push">
+          <strong>框架選型</strong><br>
+          React / Vue / Svelte 各有優劣，選擇時應優先考量團隊熟悉度而非技術流行度。
+        </dual-col>
+        <dual-col menu-action="copy">
+          <strong>效能指標</strong><br>
+          Core Web Vitals：LCP、FID、CLS 是 Google 搜尋排名的重要參數。
+        </dual-col>
+      </dual-row>
+
+      <dual-row>
+        <dual-col menu-action="toggle" span="all">
+          <i class="bi bi-info-circle me-2" style="color:var(--color-sky)"></i>
+          點擊 ▾ 展開補充說明（toggle slot 示範）
+          <dual-slot>
+            <p style="margin:0;font-size:.88rem;opacity:.85">
+              Toggle 動作會在列下方插入一個滑動展開的區塊，可以放置任意 HTML 內容。
+              再次點擊同一按鈕即可收合。
+            </p>
+          </dual-slot>
+        </dual-col>
+      </dual-row>
+
+      <!-- 群組折疊 -->
+      <dual-group title="進階主題" title-icon="bi-layers" collapsed="true"
+        group-collapsed-icon="bi-chevron-right"
+        group-expanded-icon="bi-chevron-down">
+        <dual-col>Web Components 是瀏覽器原生的元件系統，無框架依賴。</dual-col>
+        <dual-col>Shadow DOM 提供樣式隔離，但與全域 CSS 的整合需要額外設計。</dual-col>
+        <dual-col>Custom Elements 的生命週期回呼：connectedCallback / disconnectedCallback / attributeChangedCallback。</dual-col>
+        <dual-col>HTML Template 元素允許定義惰性 DOM 片段，搭配 slot 實現靈活的內容分發。</dual-col>
+      </dual-group>
+
+    </div>
+
+    <div id="dc-push-target">（push 目標：點擊上方欄位的 ▶ 後內容會顯示在這裡）</div>
+  </div>
+
+  <!-- 示範 B：輪播 + show-next -->
+  <div class="demo-block">
+    <p class="section-tag">01 / DualCell — 輪播 &amp; 逐步展開</p>
+    <p class="step-note mb-2">▸ 左欄自動輪播；右欄點擊 ▸ 按鈕逐步展開隱藏列</p>
+
+    <div id="dc-carousel" data-dual-cell
+      data-theme="lavender"
+      data-cols="2"
+      data-col-widths="1:1"
+      data-border-follow-theme="true"
+      data-menu-button-icon-show-next="bi-chevron-bar-down">
+
+      <dual-row>
+        <!-- 輪播欄 -->
+        <dual-col show-menu="false" carousel-interval="2800" carousel-indicator-color="var(--color-lavender)" carousel-indicator-height="3px">
+          <dual-item><strong>第 1 項</strong><br>輪播內容可以包含任意 HTML，支援 per-col 獨立設定切換速度。</dual-item>
+          <dual-item><strong>第 2 項</strong><br>進度條顯示距離下次切換的剩餘時間，顏色跟隨主題。</dual-item>
+          <dual-item><strong>第 3 項</strong><br>輪播採用 setTimeout 遞迴，避免 setInterval 累積誤差。</dual-item>
+        </dual-col>
+        <!-- show-next 欄 -->
+        <dual-col menu-action="show-next">
+          點擊右側 ▸ 按鈕展開下一列（show-next 模式）
+        </dual-col>
+      </dual-row>
+
+      <dual-row hidden>
+        <dual-col show-menu="false" span="all" style="color:var(--color-lavender)">
+          <i class="bi bi-check2-circle me-2"></i>第一列已展開！再按一次繼續展開下一列。
+        </dual-col>
+      </dual-row>
+
+      <dual-row hidden>
+        <dual-col show-menu="false" span="all" style="color:var(--color-safe)">
+          <i class="bi bi-check2-all me-2"></i>全部展開完畢。這是最後一列。
+        </dual-col>
+      </dual-row>
+
+    </div>
+  </div>
+
+  <!-- ══════════ NEW-BAR：側邊條 ══════════ -->
+  <div class="demo-block">
+    <p class="section-tag">01 / DualCell — 新功能</p>
+    <h2 class="section-title">側邊條、懸停 Tooltip、圖示說明</h2>
+    <p class="section-desc">
+      三項新增功能：<code>bar-side</code>（格子側邊條）、<code>hover-tip-src</code>（懸停整格浮現 tooltip）、<code>info</code> / <code>info-src</code>（右上角圖示懸停說明）。
+    </p>
+
+    <!-- 側邊條示範 -->
+    <p class="step-note mb-2">▸ 側邊條：<code>bar-side="left|right"</code>，<code>bar-width</code>，<code>bar-color</code></p>
+    <div id="dc-bars" data-dual-cell
+      data-theme="sky"
+      data-cols="3"
+      data-border-follow-theme="true"
+      data-show-menu-button="false"
+      data-cell-padding="18px">
+
+      <dual-col bar-side="left" bar-width="12" bar-color="shell">
+        <div>
+          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar-side="left" bar-color="lavender"</div>
+          左側邊條，粗細 5px，顏色使用品牌色名稱 <code>lavender</code>。
+        </div>
+      </dual-col>
+
+      <dual-col bar-side="right" bar-width="6" bar-color="special">
+        <div>
+          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar-side="right" bar-color="special"</div>
+          右側邊條，粗細 6px，顏色 <code>special</code>（黃綠）。
+        </div>
+      </dual-col>
+
+      <dual-col bar-side="left" bar-width="8" bar-color="warning">
+        <div>
+          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar-side="left" bar-width="8" bar-color="warning"</div>
+          粗側邊條 8px，顏色 <code>warning</code>。邊條以 <code>::before</code> 偽元素實作，不影響既有 border 結構。
+        </div>
+      </dual-col>
+
+    </div>
+
+    <!-- 懸停整格 tooltip + info 圖示 -->
+    <p class="step-note mt-4 mb-2">▸ 懸停整格顯示 tooltip（<code>hover-tip-src</code>）+ 右上角圖示說明（<code>info-src</code>）</p>
+    <div id="dc-tips" data-dual-cell
+      data-theme="orange"
+      data-cols="2"
+      data-border-follow-theme="true"
+      data-show-menu-button="false"
+      data-cell-padding="14px 18px"
+      data-cell-min-height="64px">
+
+      <!-- hover-tip-src：懸停整個格子浮出 tooltip -->
+      <dual-col
+        hover-tip-src="#tip-hovertip"
+        bar-side="left" bar-width="4" bar-color="orange">
+        <div>
+          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">hover-tip-src="#tip-hovertip"</div>
+          <i class="bi bi-cursor-fill" style="color:var(--color-orange);margin-right:6px"></i>
+          將滑鼠移入此格，tooltip 從下方浮現，移出後自動消失。
+        </div>
+      </dual-col>
+
+      <!-- info-src：右上角圖示，hover 圖示顯示說明 -->
+      <dual-col
+        info-src="#tip-infosrc"
+        info-color="orange"
+        info-icon="question-circle-fill"
+        bar-side="left" bar-width="4" bar-color="attention">
+        <div>
+          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">info-src="#tip-infosrc" info-icon="question-circle-fill"</div>
+          <i class="bi bi-question-circle" style="color:var(--color-attention);margin-right:6px"></i>
+          將滑鼠移到右上角的 <i class="bi bi-question-circle-fill" style="font-size:.9em"></i> 圖示，浮出說明，移離圖示後消失。
+        </div>
+      </dual-col>
+
+      <!-- 兩種組合 -->
+      <dual-col
+        hover-tip="這個格子同時使用 hover-tip 與 info，滑鼠位置決定顯示哪一個說明。"
+        info="這是透過 info 屬性直接寫入的純文字說明，不需要隱藏範本元素。"
+        info-color="safe"
+        info-icon="lightbulb-fill"
+        bar-side="right" bar-width="5" bar-color="safe">
+        <div>
+          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">hover-tip="…" info="…"（兩者並用）</div>
+          <i class="bi bi-layers" style="color:var(--color-safe);margin-right:6px"></i>
+          懸停整格→顯示 <code>hover-tip</code>，懸停右上角圖示→顯示 <code>info</code>。
+        </div>
+      </dual-col>
+
+      <!-- bar + word-flip 組合 -->
+      <dual-col
+        bar-side="left" bar-width="5" bar-color="pink"
+        info="這個格子示範側邊條與 word-flip 的組合使用。">
+        <div>
+          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar + word-flip + info 三合一</div>
+          側邊條搭配行內
+          <word-flip data-color="pink" mode="popover" data-content="#tpl-pwa" title="PWA 說明">PWA</word-flip>
+          詞彙翻轉，右上角仍有圖示說明。
+        </div>
+      </dual-col>
+
+    </div>
+
+    <!-- 隱藏範本 -->
+    <div style="display:none">
+      <div id="tip-hovertip">
+        <strong>hover-tip-src 模式</strong><br>
+        懸停整個格子時浮現此 tooltip，取得 HTML 內容自指定元素。<br>
+        適合顯示欄位說明、資料來源標注等輔助資訊。
+      </div>
+      <div id="tip-infosrc">
+        <strong>info-src 圖示說明</strong><br>
+        只有 hover 到右上角的圖示時才顯示，不干擾格子的主要互動行為。<br>
+        可與 <code>bar-side</code>、<code>hover-tip</code>、<code>word-flip</code> 自由組合。
+      </div>
+    </div>
+
+  </div><!-- /NEW-BAR -->
+
+  <!-- ══════════ NEW A：DualCell + word-flip ══════════ -->
+  <div class="demo-block">
+    <p class="section-tag">01 / DualCell — 格子內嵌 word-flip</p>
+    <h2 class="section-title">在格子裡使用 word-flip</h2>
+    <p class="section-desc">
+      將 <code>&lt;word-flip&gt;</code> 直接寫在 <code>&lt;dual-col&gt;</code> 內即可。
+      DualCell 重新注入 innerHTML 時，Custom Element 會自動觸發
+      <code>connectedCallback</code>，word-flip 完整初始化。
+      <br>注意：word-flip <strong>不要設 id</strong>，讓 <code>data-content</code> 指向頁面上的隱藏範本元素。
+    </p>
+
+    <div id="dc-wf" data-dual-cell
+      data-theme="brown"
+      data-cols="2"
+      data-border-follow-theme="true"
+      data-show-menu-button="false"
+      data-cell-padding="14px 18px">
+
+      <dual-row>
+        <dual-col>
+          <div>
+            <div style="font-size:.75rem;opacity:.6;margin-bottom:4px;font-family:'JetBrains Mono',monospace">架構模式</div>
+            常見的 Web 架構包含
+            <word-flip data-color="special" mode="popover" data-content="#tpl-mvc" title="MVC 架構">MVC</word-flip>、
+            <word-flip data-color="sky" mode="popover" data-content="#tpl-spa" title="SPA 說明">SPA</word-flip>、
+            以及近年流行的
+            <word-flip data-color="lavender" mode="popover" data-content="#tpl-ssr" title="SSR 說明">SSR</word-flip>
+            模式，各有適用情境。
+          </div>
+        </dual-col>
+        <dual-col>
+          <div>
+            <div style="font-size:.75rem;opacity:.6;margin-bottom:4px;font-family:'JetBrains Mono',monospace">部署技術</div>
+            靜態資源通常透過
+            <word-flip data-color="orange" mode="popover" data-content="#tpl-cdn" title="CDN 說明">CDN</word-flip>
+            分發，而
+            <word-flip data-color="info" mode="popover" data-content="#tpl-wasm" title="WebAssembly">WebAssembly</word-flip>
+            與
+            <word-flip data-color="pink" mode="popover" data-content="#tpl-pwa" title="PWA 說明">PWA</word-flip>
+            正在重新定義瀏覽器的能力邊界。
+          </div>
+        </dual-col>
+      </dual-row>
+
+    </div>
+    <p class="step-note mt-2">▸ 點擊段落中帶底線的詞彙可查看 Popover 說明</p>
+  </div>
+
+  <!-- ══════════ NEW B：三欄以上 ══════════ -->
+  <div class="demo-block">
+    <p class="section-tag">01 / DualCell — 三欄以上</p>
+    <h2 class="section-title">任意欄數與比例設定</h2>
+    <p class="section-desc">
+      <code>data-cols</code> 可設任意整數；<code>data-col-widths</code> 用冒號分隔的比例值設定各欄寬度，例如 <code>1:2:1</code> 表示中欄佔兩倍寬。
+    </p>
+
+    <!-- 三欄 1:2:1 -->
+    <p class="step-note mb-2">▸ 三欄，比例 1 : 2 : 1</p>
+    <div id="dc-3col" data-dual-cell
+      data-theme="info"
+      data-cols="3"
+      data-col-widths="1:2:1"
+      data-border-follow-theme="true"
+      data-show-menu-button="false">
+
+      <dual-col>
+        <div style="text-align:center;width:100%">
+          <i class="bi bi-layout-sidebar" style="font-size:1.4rem;color:var(--color-info);display:block;margin-bottom:4px"></i>
+          <strong>左側欄</strong><br>
+          <span style="font-size:.8rem;opacity:.7">flex: 1</span>
+        </div>
+      </dual-col>
+      <dual-col>
+        <div style="text-align:center;width:100%">
+          <i class="bi bi-layout-text-window-reverse" style="font-size:1.4rem;color:var(--color-info);display:block;margin-bottom:4px"></i>
+          <strong>主要內容欄（較寬）</strong><br>
+          <span style="font-size:.8rem;opacity:.7">flex: 2 — 此欄佔整體兩倍寬，適合放置主要資訊或說明文字</span>
+        </div>
+      </dual-col>
+      <dual-col>
+        <div style="text-align:center;width:100%">
+          <i class="bi bi-layout-sidebar-reverse" style="font-size:1.4rem;color:var(--color-info);display:block;margin-bottom:4px"></i>
+          <strong>右側欄</strong><br>
+          <span style="font-size:.8rem;opacity:.7">flex: 1</span>
+        </div>
+      </dual-col>
+
+    </div>
+
+    <!-- 四欄等寬 -->
+    <p class="step-note mt-4 mb-2">▸ 四欄等寬，搭配群組標題</p>
+    <div id="dc-4col" data-dual-cell
+      data-theme="attention"
+      data-cols="4"
+      data-border-follow-theme="true"
+      data-show-menu-button="false"
+      data-cell-padding="10px 14px">
+
+      <dual-group title="四欄等寬示範" title-icon="bi-grid-3x2-gap-fill">
+        <dual-col>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-1-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
+            欄位 A
+          </div>
+        </dual-col>
+        <dual-col>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-2-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
+            欄位 B
+          </div>
+        </dual-col>
+        <dual-col>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-3-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
+            欄位 C
+          </div>
+        </dual-col>
+        <dual-col>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-4-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
+            欄位 D
+          </div>
+        </dual-col>
+        <dual-col>Q1 季度目標</dual-col>
+        <dual-col>Q2 季度目標</dual-col>
+        <dual-col>Q3 季度目標</dual-col>
+        <dual-col>Q4 季度目標</dual-col>
+      </dual-group>
+
+    </div>
+  </div>
+
+  <!-- ══════════ NEW C：單一格子輪播 ══════════ -->
+  <div class="demo-block">
+    <p class="section-tag">01 / DualCell — 單一格子輪播</p>
+    <h2 class="section-title">同列混合靜態與輪播格子</h2>
+    <p class="section-desc">
+      每個 <code>&lt;dual-col&gt;</code> 獨立控制是否啟用輪播。只要放入兩個以上的
+      <code>&lt;dual-item&gt;</code> 子元素，該格子就會自動啟動；旁邊的靜態格子完全不受影響。
+      不同格子可以設定不同的切換速度與進度條顏色。
+    </p>
+
+    <div id="dc-percol" data-dual-cell
+      data-theme="pink"
+      data-cols="3"
+      data-col-widths="1:1:1"
+      data-border-follow-theme="true"
+      data-show-menu-button="false"
+      data-cell-min-height="90px"
+      data-vertical-alignment="middle">
+
+      <!-- 欄 1：靜態 -->
+      <dual-col>
+        <div style="text-align:center;width:100%">
+          <i class="bi bi-pin-angle" style="font-size:1.1rem;color:var(--color-pink);margin-bottom:4px;display:block"></i>
+          <strong>靜態格子</strong><br>
+          <span style="font-size:.8rem;opacity:.7">無 dual-item，不啟動輪播</span>
+        </div>
+      </dual-col>
+
+      <!-- 欄 2：快速輪播 2s -->
+      <dual-col
+        carousel-interval="2000"
+        carousel-indicator-color="var(--color-pink)"
+        carousel-indicator-height="3px">
+        <dual-item>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-1-circle-fill" style="color:var(--color-pink);font-size:1.1rem;margin-bottom:4px;display:block"></i>
+            <strong>輪播 A-1</strong><br>
+            <span style="font-size:.78rem;opacity:.75">每 2 秒切換</span>
+          </div>
+        </dual-item>
+        <dual-item>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-2-circle-fill" style="color:var(--color-pink);font-size:1.1rem;margin-bottom:4px;display:block"></i>
+            <strong>輪播 A-2</strong><br>
+            <span style="font-size:.78rem;opacity:.75">底部進度條倒數</span>
+          </div>
+        </dual-item>
+        <dual-item>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-3-circle-fill" style="color:var(--color-pink);font-size:1.1rem;margin-bottom:4px;display:block"></i>
+            <strong>輪播 A-3</strong><br>
+            <span style="font-size:.78rem;opacity:.75">支援任意 HTML</span>
+          </div>
+        </dual-item>
+      </dual-col>
+
+      <!-- 欄 3：慢速輪播 4.5s，關閉進度條 -->
+      <dual-col
+        carousel-interval="4500"
+        carousel-indicator="false">
+        <dual-item>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-hourglass-split" style="color:var(--color-salmon);font-size:1.1rem;margin-bottom:4px;display:block"></i>
+            <strong>輪播 B-1</strong><br>
+            <span style="font-size:.78rem;opacity:.75">每 4.5 秒切換<br>進度條已關閉</span>
+          </div>
+        </dual-item>
+        <dual-item>
+          <div style="text-align:center;width:100%">
+            <i class="bi bi-hourglass-bottom" style="color:var(--color-salmon);font-size:1.1rem;margin-bottom:4px;display:block"></i>
+            <strong>輪播 B-2</strong><br>
+            <span style="font-size:.78rem;opacity:.75">與左欄速度不同步<br>各自獨立計時</span>
+          </div>
+        </dual-item>
+      </dual-col>
+
+    </div>
+    <p class="step-note mt-2">▸ 中欄每 2 秒、右欄每 4.5 秒各自獨立切換，互不干擾</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════ SECTION 2：InfoRegion ══════════ -->
+  <div class="demo-block">
+    <div class="section-tag">02 / InfoRegion</div>
+    <h2 class="section-title">逐步揭示資訊區塊</h2>
+    <p class="section-desc">以鏈結驅動的動畫展示元件，支援倒數進度條、手動觸發、全體進度追蹤與水平佈局。</p>
+
+    <info-region-group
+      start-label="▶ 開始演示"
+      reset-label="↺ 重設"
+      start-color="sky"
+      reset-color="warning"
+      global-progress
+      show-percent
+      progress-color="sky"
+      progress-position="bottom">
+
+      <info-region id="ir-1" color="sky" next="ir-2" countdown="2200" countdown-color="sky">
+        <strong>第一步：載入 bp-tools.js</strong>
+        <p style="margin-top:6px;font-size:.9rem">透過 jsDelivr CDN 直接引用，無需安裝任何套件。頁面載入後自動注入所需 CSS 並初始化元件。</p>
+      </info-region>
+
+      <info-region id="ir-2" color="lavender" next="ir-3" countdown="2000" countdown-color="lavender">
+        <strong>第二步：宣告 HTML 標籤</strong>
+        <p style="margin-top:6px;font-size:.9rem">所有元件均採用自訂 HTML 標籤（Custom Elements），語意清晰，不需寫任何 JavaScript 即可運作基本功能。</p>
+      </info-region>
+
+      <info-region id="ir-3" color="special" next="ir-4" countdown="2000" countdown-color="special">
+        <strong>第三步：設定主題</strong>
+        <p style="margin-top:6px;font-size:.9rem">呼叫 <code>BrandColors.applyTheme('light')</code> 即可切換深淺色主題，CSS 變數即時更新，所有元件同步反映。</p>
+      </info-region>
+
+      <info-region id="ir-4" color="safe" manual manual-label="完成 →" manual-color="safe">
+        <strong>第四步：部署上線</strong>
+        <p style="margin-top:6px;font-size:.9rem">將 <code>bp-tools.js</code> 推送到 GitHub，透過 jsDelivr CDN 在任何網頁中引用即可。支援版本號鎖定（<code>@v1.0.0</code>）。</p>
+      </info-region>
+
+    </info-region-group>
+  </div>
+
+  <!-- 水平佈局示範 -->
+  <div class="demo-block">
+    <p class="section-tag">02 / InfoRegion — 水平佈局</p>
+    <p class="section-desc">設定 <code>layout="horizontal"</code> 後，所有區塊並排顯示，同時啟動。</p>
+
+    <info-region-group
+      layout="horizontal"
+      auto-start
+      cascade-interval="300"
+      show-controls="false">
+
+      <info-region color="lavender">
+        <i class="bi bi-palette2" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
+        <strong>BrandColors</strong><br>
+        <span style="font-size:.85rem">深色 / 淺色雙主題，CSS 變數驅動，一行切換。</span>
+      </info-region>
+
+      <info-region color="sky">
+        <i class="bi bi-grid-3x2-gap" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
+        <strong>DualCell</strong><br>
+        <span style="font-size:.85rem">多欄格狀佈局，宣告式標籤，支援群組與輪播。</span>
+      </info-region>
+
+      <info-region color="special">
+        <i class="bi bi-arrow-right-square" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
+        <strong>InfoRegion</strong><br>
+        <span style="font-size:.85rem">逐步揭示，倒數進度條，鏈結驅動的展示流程。</span>
+      </info-region>
+
+      <info-region color="orange">
+        <i class="bi bi-type-bold" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
+        <strong>WordFlip</strong><br>
+        <span style="font-size:.85rem">行內詞彙翻轉，四種浮動面板，九種觸發樣式。</span>
+      </info-region>
+
+    </info-region-group>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════ SECTION 3：WordFlip ══════════ -->
+  <div class="demo-block">
+    <div class="section-tag">03 / WordFlip — 行內 &amp; 浮動模式</div>
+    <h2 class="section-title">詞彙翻轉與浮動說明</h2>
+    <p class="section-desc">點擊以下段落中的標示詞彙，觀察四種不同的顯示模式。</p>
+
+    <p class="wf-paragraph">
+      現代前端開發中，
+      <word-flip data-color="lavender" data-content="#tpl-inline">行內翻轉（inline）</word-flip>
+      適合在文章中就地補充說明，而
+      <word-flip data-color="sky" mode="tooltip" data-content="#tpl-tooltip" hover>懸停提示（hover tooltip）</word-flip>
+      則更適合快速查閱詞義。當說明內容較長時，
+      <word-flip data-color="special" mode="popover" data-content="#tpl-popover" title="Popover 說明">Popover 面板</word-flip>
+      能提供結構化的浮動區塊，而
+      <word-flip data-color="info" mode="modal" data-content="#tpl-modal" title="Modal 示範" icon="window-fullscreen">Modal 對話框</word-flip>
+      則適合篇幅更長的參考資料。
+    </p>
+
+    <p class="wf-paragraph">
+      需要在查閱資料的同時保留頁面脈絡時，
+      <word-flip data-color="orange" mode="drawer" data-content="#tpl-drawer" title="Drawer 側欄">Drawer 側欄</word-flip>
+      是最佳選擇——它從右側滑入，不遮蓋整個頁面。
+    </p>
+  </div>
+
+  <!-- Trigger Styles 示範 -->
+  <div class="demo-block">
+    <p class="section-tag">03 / WordFlip — 觸發樣式</p>
+    <p class="section-desc">九種觸發樣式（<code>trigger-style</code>）可以改變詞彙的外觀呈現，點擊後效果相同。</p>
+
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;line-height:2.5">
+      <word-flip trigger-style="underline" data-color="lavender" data-content="#tpl-badge">underline</word-flip>
+      <word-flip trigger-style="highlight" data-color="sky" data-content="#tpl-badge">highlight</word-flip>
+      <word-flip trigger-style="badge" data-color="special" data-content="#tpl-badge">badge</word-flip>
+      <word-flip trigger-style="tag" data-color="warning" data-content="#tpl-badge">tag</word-flip>
+      <word-flip trigger-style="button" data-color="safe" data-content="#tpl-button">button</word-flip>
+      <word-flip trigger-style="pill" data-color="pink" data-content="#tpl-badge">pill</word-flip>
+      <word-flip trigger-style="dotted" data-color="brown" data-content="#tpl-badge">dotted</word-flip>
+      <word-flip trigger-style="icon" data-color="info" icon="info-circle" data-content="#tpl-badge">icon 模式</word-flip>
+    </div>
+  </div>
+
+  <!-- flip-card 示範 -->
+  <div class="demo-block">
+    <p class="section-tag">03 / WordFlip — flip-card</p>
+    <p class="section-desc">具有 3D 翻轉效果的雙面卡片，正面與背面可放置任意 HTML。</p>
+
+    <flip-cards>
+      <flip-card data-color="lavender" data-click-to-flip data-bar-width="5">
+        <card-front>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <i class="bi bi-question-circle" style="font-size:1.3rem;color:var(--color-lavender)"></i>
+            <strong>什麼是 flip-card？</strong>
+          </div>
+          <p style="font-size:.9rem;opacity:.85;margin:0">點擊此卡片翻轉查看說明 →</p>
+        </card-front>
+        <card-back>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <i class="bi bi-check-circle" style="font-size:1.3rem;color:var(--color-lavender)"></i>
+            <strong>flip-card 特性</strong>
+          </div>
+          <p style="font-size:.9rem;margin:0">透過 CSS <em>preserve-3d</em> 實現原生 3D 翻轉，零依賴，支援巢狀 word-flip 元件。再次點擊返回正面。</p>
+        </card-back>
+      </flip-card>
+
+      <flip-card data-color="sky" data-click-to-flip data-bar-width="5">
+        <card-front>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <i class="bi bi-layers" style="font-size:1.3rem;color:var(--color-sky)"></i>
+            <strong>InfoRegion 的用途？</strong>
+          </div>
+          <p style="font-size:.9rem;opacity:.85;margin:0">用於逐步揭示內容的動畫區塊元件。點擊查看使用情境 →</p>
+        </card-front>
+        <card-back>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <i class="bi bi-list-check" style="font-size:1.3rem;color:var(--color-sky)"></i>
+            <strong>典型使用情境</strong>
+          </div>
+          <ul style="font-size:.9rem;padding-left:18px;margin:0">
+            <li>教學步驟演示</li>
+            <li>引導式表單填寫</li>
+            <li>分段展示的簡報內容</li>
+          </ul>
+        </card-back>
+      </flip-card>
+    </flip-cards>
+  </div>
+
+
+</div><!-- /page-wrap -->
+
+<script src="https://cdn.jsdelivr.net/gh/Netizen-Nelson/web-dev/bp-tools.js"></script>
+<script>
+  /* ── 主題切換 ──────────────────────────────────── */
+  let isDark = true;
+
+  function toggleTheme() {
+    isDark = !isDark;
+    const theme = isDark ? 'dark' : 'light';
+    BrandColors.applyTheme(theme);
+
+    const icon  = document.getElementById('themeIcon');
+    const label = document.getElementById('themeLabel');
+    icon.className  = isDark ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+    label.textContent = isDark ? '切換亮色' : '切換暗色';
+  }
+</script>
+</body>
+</html>
