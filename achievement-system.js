@@ -45,6 +45,7 @@
     legendary: { label:'傳說', color:'#C8DD5A', glow:'rgba(200,221,90,.36)'  },
   };
 
+  // ── Defaults ──────────────────────────────────────────────────────
   var _D = {
     showList: true,
     panelSide: 'right',
@@ -71,6 +72,9 @@
     },
   };
 
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  AchievementSystem                                    ║
+  // ╚═══════════════════════════════════════════════════════╝
   function AchievementSystem(options) {
     options = options || {};
     var name      = options.themeName || (G.AchievementConfig&&G.AchievementConfig.themeName) || 'default';
@@ -94,6 +98,7 @@
   AchievementSystem.themes = _THEMES;
   AchievementSystem.registerTheme = function(name,cfg) { AchievementSystem.themes[name]=cfg; };
 
+  // ── API ────────────────────────────────────────────────────────────
   AchievementSystem.prototype.check = function(ctx) {
     var newly=[], self=this;
     this._achievements.forEach(function(a){
@@ -139,6 +144,21 @@
   AchievementSystem.prototype.setScale = function(s) { this.cfg.scale=s; this._refreshPanel(); };
   AchievementSystem.prototype.setTypography = function(t) { deepMerge(this.cfg.typography,t); this._refreshPanel(); };
 
+  /**
+   * Export all achievement states as a plain object (JSON-serialisable).
+   * Shape:
+   *   {
+   *     version:      1,
+   *     exportedAt:  "2026-03-14T10:00:00.000Z",
+   *     themeName:   "ocean",
+   *     achievements: [
+   *       { id, title, rarity, unlocked, unlockedAt }
+   *     ]
+   *   }
+   * Usage:
+   *   var json = JSON.stringify(ach.exportState());
+   *   // POST to PHP: fetch('/save.php', { method:'POST', body: json })
+   */
   AchievementSystem.prototype.exportState = function() {
     return {
       version:      1,
@@ -156,6 +176,11 @@
     };
   };
 
+  /**
+   * Restore a previously exported state.
+   * Silently restores unlocked/unlockedAt without re-triggering toasts or onUnlock.
+   * @param {Object} state  — output of exportState() or parsed PHP response
+   */
   AchievementSystem.prototype.importState = function(state) {
     if (!state || !Array.isArray(state.achievements)) return;
     var self = this;
@@ -174,11 +199,13 @@
     if(this._toastEl)this._toastEl.remove();
   };
 
+  // ── Helpers ────────────────────────────────────────────────────────
   AchievementSystem.prototype._fs = function(key) {
     var v=this.cfg.typography&&this.cfg.typography[key]||_D.typography[key];
     return scaleRem(v, this.cfg.scale||1);
   };
 
+  // Rarity helper: merges static colour/glow with configurable label
   AchievementSystem.prototype._r = function(rarityKey) {
     var base   = RARITIES[rarityKey] || RARITIES.common;
     var labels = (this.cfg.rarityLabels) || _D.rarityLabels;
@@ -197,7 +224,8 @@
     if (this.cfg.onUnlock) this.cfg.onUnlock(Object.assign({},a), ctx);
   };
 
-    AchievementSystem.prototype._buildTrigger = function() {
+  // ── Trigger ────────────────────────────────────────────────────────
+  AchievementSystem.prototype._buildTrigger = function() {
     var pos  = this.cfg.triggerPos  || 'bottom-left';
     var size = (this.cfg.triggerSize || 46) + 'px';
     var el   = document.createElement('button');
@@ -216,6 +244,7 @@
     this._triggerEl = el;
   };
 
+  // ── Panel ──────────────────────────────────────────────────────────
   AchievementSystem.prototype._buildPanel = function() {
     var side  = this.cfg.panelSide === 'left' ? 'left' : 'right';
     var width = (this.cfg.panelWidth || 280) + 'px';
@@ -468,6 +497,38 @@
 
   G.AchievementSystem = AchievementSystem;
 
+  // ╔═══════════════════════════════════════════════════════════════════╗
+  // ║  Declarative HTML API                                             ║
+  // ║                                                                   ║
+  // ║  <ach-system                                                      ║
+  // ║    theme="ocean"                                                  ║
+  // ║    show-list                          (boolean attr, presence=true)║
+  // ║    hide-list                          (boolean attr)              ║
+  // ║    trigger-pos="bottom-left"                                      ║
+  // ║    panel-side="right"                                             ║
+  // ║    scale="1.1"                                                    ║
+  // ║    var="ach">                         (global var name, default "ach")
+  // ║                                                                   ║
+  // ║    <ach-item                                                      ║
+  // ║      id="my-ach"                                                  ║
+  // ║      icon="bi-star-fill"                                          ║
+  // ║      title="成就名稱"                                              ║
+  // ║      rarity="rare"                                                ║
+  // ║      reward="+ 1 點"                                              ║
+  // ║      spoiler                          (boolean attr)              ║
+  // ║      secret>                          (boolean attr)              ║
+  // ║      成就描述文字放在內容裡。                                        ║
+  // ║    </ach-item>                                                    ║
+  // ║                                                                   ║
+  // ║  </ach-system>                                                    ║
+  // ║                                                                   ║
+  // ║  Unlock from any element:                                         ║
+  // ║    <button data-ach-unlock="my-ach">完成</button>                 ║
+  // ║    <button data-ach-unlock="a1,a2,a3">批次解鎖</button>           ║
+  // ║                                                                   ║
+  // ║  Or from JS (the instance is stored in the var you specify):      ║
+  // ║    ach.unlock('my-ach');                                          ║
+  // ╚═══════════════════════════════════════════════════════════════════╝
   function _parseBool(el, attr) {
     return el.hasAttribute(attr);
   }
@@ -574,6 +635,8 @@
 
     // Init ach-quiz elements
     _initQuiz();
+    // Init ach-choice elements
+    _initChoice();
   }
 
   // ── ach-quiz CSS (injected once) ──────────────────────────────────
@@ -760,6 +823,335 @@
 
     // Replace the original tag in DOM
     el.parentNode.replaceChild(wrap, el);
+  }
+
+  // ── Init all ach-quiz elements ────────────────────────────────────
+  function _initQuiz() {
+    _injectQuizCSS();
+    // Collect first (replaceChild invalidates live NodeList)
+    var quizEls = Array.prototype.slice.call(document.querySelectorAll('ach-quiz'));
+    quizEls.forEach(function(el) { _buildQuiz(el); });
+  }
+
+  // ╔═══════════════════════════════════════════════════════════════════╗
+  // ║  ach-choice  ——  單選 / 多選題元件                                 ║
+  // ║                                                                   ║
+  // ║  <ach-choice                                                      ║
+  // ║    question="題目文字"                                             ║
+  // ║    type="single"          single（預設）或 multi                   ║
+  // ║    ach-id="achievement-id"                                        ║
+  // ║    hint="提示文字"                                                 ║
+  // ║    btn-text="確認"                                                 ║
+  // ║    var="ach">             覆蓋成就系統實例的全域變數名稱             ║
+  // ║                                                                   ║
+  // ║    <ach-option correct>正確選項文字</ach-option>                   ║
+  // ║    <ach-option>錯誤選項文字</ach-option>                           ║
+  // ║  </ach-choice>                                                    ║
+  // ╚═══════════════════════════════════════════════════════════════════╝
+
+  function _injectChoiceCSS() {
+    if (document.getElementById('ach-choice-css')) return;
+    var s = document.createElement('style');
+    s.id = 'ach-choice-css';
+    s.textContent = ''
+      + '.ach-choice{'
+        + 'display:flex;flex-direction:column;gap:10px;'
+        + 'padding:16px 18px;border-radius:10px;border:1px solid;margin:8px 0;}'
+      + '.ach-choice-question{'
+        + 'font-size:.85rem;line-height:1.55;font-family:\'Exo 2\',sans-serif;}'
+      + '.ach-choice-hint{'
+        + 'font-size:.7rem;font-family:\'Share Tech Mono\',monospace;'
+        + 'opacity:.7;margin-top:-4px;}'
+      + '.ach-choice-type{'
+        + 'font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;'
+        + 'font-family:\'Share Tech Mono\',monospace;opacity:.5;margin-top:-6px;}'
+      + '.ach-choice-options{'
+        + 'display:flex;flex-direction:column;gap:7px;}'
+      + '.ach-choice-option{'
+        + 'display:flex;align-items:center;gap:10px;'
+        + 'padding:9px 13px;border-radius:7px;border:1.5px solid;'
+        + 'cursor:pointer;transition:background .15s,border-color .15s,color .15s;'
+        + 'font-size:.84rem;line-height:1.45;'
+        + 'font-family:\'Exo 2\',sans-serif;user-select:none;}'
+      + '.ach-choice-option:hover:not(.is-disabled){'
+        + 'filter:brightness(1.18);}'
+      + '.ach-choice-option.is-selected{'
+        + 'border-width:2px;}'
+      + '.ach-choice-option.is-disabled{cursor:default;}'
+      + '.ach-choice-marker{'
+        + 'width:18px;height:18px;border-radius:50%;border:1.5px solid;'
+        + 'flex-shrink:0;display:flex;align-items:center;justify-content:center;'
+        + 'font-size:.65rem;transition:background .15s,border-color .15s;}'
+      + '.ach-choice-option.is-multi .ach-choice-marker{'
+        + 'border-radius:4px;}'
+      + '.ach-choice-marker-inner{'
+        + 'width:8px;height:8px;border-radius:50%;'
+        + 'transform:scale(0);transition:transform .15s;}'
+      + '.ach-choice-option.is-multi .ach-choice-marker-inner{'
+        + 'border-radius:2px;}'
+      + '.ach-choice-option.is-selected .ach-choice-marker-inner{'
+        + 'transform:scale(1);}'
+      + '.ach-choice-option-text{flex:1;}'
+      + '.ach-choice-option.reveal-correct{'
+        + 'border-color:#81E6D9 !important;color:#81E6D9 !important;}'
+      + '.ach-choice-option.reveal-correct .ach-choice-marker{'
+        + 'border-color:#81E6D9;background:rgba(129,230,217,.15);}'
+      + '.ach-choice-option.reveal-correct .ach-choice-marker-inner{'
+        + 'background:#81E6D9;transform:scale(1);}'
+      + '.ach-choice-option.reveal-wrong{'
+        + 'border-color:#F08080 !important;color:#F08080 !important;'
+        + 'opacity:.6;}'
+      + '.ach-choice-option.reveal-wrong .ach-choice-marker{'
+        + 'border-color:#F08080;}'
+      + '.ach-choice-footer{'
+        + 'display:flex;align-items:center;gap:10px;margin-top:2px;}'
+      + '.ach-choice-btn{'
+        + 'display:inline-flex;align-items:center;gap:6px;'
+        + 'padding:7px 16px;border-radius:6px;border:1.5px solid;'
+        + 'font-size:.8rem;font-weight:700;font-family:\'Exo 2\',sans-serif;'
+        + 'cursor:pointer;transition:filter .15s,transform .1s;white-space:nowrap;'
+        + 'background:#0c0d0c;}'
+      + '.ach-choice-btn:hover:not(:disabled){filter:brightness(1.25);}'
+      + '.ach-choice-btn:active:not(:disabled){transform:scale(.96);}'
+      + '.ach-choice-btn:disabled{opacity:.4;cursor:not-allowed;}'
+      + '.ach-choice-feedback{'
+        + 'font-size:.75rem;font-family:\'Share Tech Mono\',monospace;'
+        + 'display:flex;align-items:center;gap:5px;min-height:1.2em;'
+        + 'transition:opacity .2s;flex:1;}'
+      + '.ach-choice--done .ach-choice-option{pointer-events:none;}';
+    document.head.appendChild(s);
+  }
+
+  function _buildChoice(el) {
+    var question  = el.getAttribute('question') || el.querySelector('ach-option') && '' || el.textContent.trim();
+    var type      = el.getAttribute('type') === 'multi' ? 'multi' : 'single';
+    var achId     = el.getAttribute('ach-id')     || '';
+    var hint      = el.getAttribute('hint')       || '';
+    var btnText   = el.getAttribute('btn-text')   || '確認';
+    var isMulti   = type === 'multi';
+
+    // Parse options
+    var optEls = Array.prototype.slice.call(el.querySelectorAll('ach-option'));
+    var options = optEls.map(function(o) {
+      return {
+        text:    o.textContent.trim(),
+        correct: o.hasAttribute('correct'),
+      };
+    });
+
+    // Resolve instance and theme
+    var instance = _resolveInstance(el);
+    var th = (instance && instance._theme) ? instance._theme : _THEMES['default'];
+    var accent      = th.accent      || '#C8DD5A';
+    var panelBorder = th.panelBorder || '#1e1f1e';
+    var panelBg     = th.panelBg     || '#0e0f0e';
+    var headerColor = th.headerColor || '#c6c7bd';
+
+    // Build wrapper
+    var wrap = document.createElement('div');
+    wrap.className = 'ach-choice';
+    wrap.style.cssText = 'background:' + panelBg + ';border-color:' + panelBorder + ';';
+
+    // Question
+    var qEl = document.createElement('p');
+    qEl.className = 'ach-choice-question';
+    qEl.style.color = headerColor;
+    qEl.textContent = question;
+    wrap.appendChild(qEl);
+
+    // Type badge
+    var typeEl = document.createElement('p');
+    typeEl.className = 'ach-choice-type';
+    typeEl.style.color = accent;
+    typeEl.textContent = isMulti ? '多選題　可選多個選項' : '單選題　選出一個答案';
+    wrap.appendChild(typeEl);
+
+    // Hint
+    if (hint) {
+      var hEl = document.createElement('p');
+      hEl.className = 'ach-choice-hint';
+      hEl.style.color = accent;
+      hEl.textContent = hint;
+      wrap.appendChild(hEl);
+    }
+
+    // Options
+    var optionsWrap = document.createElement('div');
+    optionsWrap.className = 'ach-choice-options';
+
+    var selectedSet = {};   // index => true
+
+    var optDivs = options.map(function(opt, idx) {
+      var div = document.createElement('div');
+      div.className = 'ach-choice-option' + (isMulti ? ' is-multi' : '');
+      div.style.cssText = 'border-color:' + panelBorder + ';color:#8a8b88;background:' + panelBg + ';';
+
+      // Marker (circle or square)
+      var marker = document.createElement('div');
+      marker.className = 'ach-choice-marker';
+      marker.style.cssText = 'border-color:' + panelBorder + ';';
+      var inner = document.createElement('div');
+      inner.className = 'ach-choice-marker-inner';
+      inner.style.background = accent;
+      marker.appendChild(inner);
+      div.appendChild(marker);
+
+      // Text
+      var txt = document.createElement('span');
+      txt.className = 'ach-choice-option-text';
+      txt.textContent = opt.text;
+      div.appendChild(txt);
+
+      div.addEventListener('click', function() {
+        if (div.classList.contains('is-disabled')) return;
+
+        if (isMulti) {
+          if (selectedSet[idx]) {
+            delete selectedSet[idx];
+            div.classList.remove('is-selected');
+            div.style.borderColor = panelBorder;
+            div.style.color = '#8a8b88';
+            marker.style.borderColor = panelBorder;
+          } else {
+            selectedSet[idx] = true;
+            div.classList.add('is-selected');
+            div.style.borderColor = accent;
+            div.style.color = headerColor;
+            marker.style.borderColor = accent;
+          }
+        } else {
+          // Single: deselect all others
+          optDivs.forEach(function(d, i) {
+            delete selectedSet[i];
+            d.classList.remove('is-selected');
+            d.style.borderColor = panelBorder;
+            d.style.color = '#8a8b88';
+            d.querySelector('.ach-choice-marker').style.borderColor = panelBorder;
+          });
+          selectedSet[idx] = true;
+          div.classList.add('is-selected');
+          div.style.borderColor = accent;
+          div.style.color = headerColor;
+          marker.style.borderColor = accent;
+        }
+
+        // Enable confirm button when at least one selected
+        if (Object.keys(selectedSet).length > 0) {
+          confirmBtn.disabled = false;
+        }
+      });
+
+      optionsWrap.appendChild(div);
+      return div;
+    });
+
+    wrap.appendChild(optionsWrap);
+
+    // Footer: button + feedback
+    var footer = document.createElement('div');
+    footer.className = 'ach-choice-footer';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.className = 'ach-choice-btn';
+    confirmBtn.style.cssText = 'color:' + accent + ';border-color:' + accent + ';';
+    confirmBtn.innerHTML = '<i class="bi bi-check2"></i>' + btnText;
+    confirmBtn.disabled = true;
+
+    var fb = document.createElement('div');
+    fb.className = 'ach-choice-feedback';
+
+    footer.appendChild(confirmBtn);
+    footer.appendChild(fb);
+    wrap.appendChild(footer);
+
+    // Confirm logic
+    confirmBtn.addEventListener('click', function() {
+      if (confirmBtn.disabled) return;
+
+      var correctIndices = {};
+      options.forEach(function(opt, i) { if (opt.correct) correctIndices[i] = true; });
+
+      var selectedKeys   = Object.keys(selectedSet).map(Number);
+      var correctKeys    = Object.keys(correctIndices).map(Number);
+
+      // Check: selected set must exactly match correct set
+      var isCorrect =
+        selectedKeys.length === correctKeys.length &&
+        selectedKeys.every(function(k) { return correctIndices[k]; });
+
+      // Lock all options
+      optDivs.forEach(function(d) { d.classList.add('is-disabled'); });
+      confirmBtn.disabled = true;
+      wrap.classList.add('ach-choice--done');
+
+      if (isCorrect) {
+        // Reveal correct options in green
+        optDivs.forEach(function(d, i) {
+          if (correctIndices[i]) {
+            d.classList.remove('is-selected');
+            d.classList.add('reveal-correct');
+            d.style.cssText = '';
+          } else {
+            d.style.opacity = '.3';
+          }
+        });
+        fb.innerHTML = '<i class="bi bi-check-circle-fill" style="color:' + accent + '"></i>'
+          + '<span style="color:' + accent + '">正確！</span>';
+        wrap.style.borderColor = accent;
+        if (instance && achId) instance.unlock(achId);
+        document.dispatchEvent(new CustomEvent('ach:choice-correct', {
+          detail: { achId: achId, selected: selectedKeys, element: wrap }
+        }));
+      } else {
+        // Show which were right/wrong
+        optDivs.forEach(function(d, i) {
+          if (correctIndices[i]) {
+            d.classList.remove('is-selected');
+            d.classList.add('reveal-correct');
+            d.style.cssText = '';
+          } else if (selectedSet[i]) {
+            d.classList.remove('is-selected');
+            d.classList.add('reveal-wrong');
+            d.style.cssText = '';
+          } else {
+            d.style.opacity = '.3';
+          }
+        });
+        fb.innerHTML = '<i class="bi bi-x-circle-fill" style="color:#F08080"></i>'
+          + '<span style="color:#F08080">再試試看，綠色是正確答案</span>';
+        wrap.style.borderColor = '#F08080';
+        // Unlock and re-enable after a pause so user can review
+        setTimeout(function() {
+          wrap.classList.remove('ach-choice--done');
+          wrap.style.borderColor = panelBorder;
+          fb.innerHTML = '';
+          optDivs.forEach(function(d, i) {
+            d.classList.remove('is-disabled', 'reveal-correct', 'reveal-wrong');
+            d.style.cssText = 'border-color:' + panelBorder + ';color:#8a8b88;background:' + panelBg + ';';
+            if (selectedSet[i]) {
+              d.classList.add('is-selected');
+              d.style.borderColor = accent;
+              d.style.color = headerColor;
+              d.querySelector('.ach-choice-marker').style.borderColor = accent;
+            } else {
+              d.querySelector('.ach-choice-marker').style.borderColor = panelBorder;
+            }
+          });
+          confirmBtn.disabled = false;
+        }, 2000);
+        document.dispatchEvent(new CustomEvent('ach:choice-wrong', {
+          detail: { achId: achId, selected: selectedKeys, element: wrap }
+        }));
+      }
+    });
+
+    el.parentNode.replaceChild(wrap, el);
+  }
+
+  function _initChoice() {
+    _injectChoiceCSS();
+    var choiceEls = Array.prototype.slice.call(document.querySelectorAll('ach-choice'));
+    choiceEls.forEach(function(el) { _buildChoice(el); });
   }
 
   // ── Init all ach-quiz elements ────────────────────────────────────
