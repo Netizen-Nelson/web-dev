@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成就系統 — 程式碼產生器</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{ font-size:1rem; }   /* root = 16px; all text >= 1rem */
+
+:root{
+  --bg:#0c0d0c;  --surface:#111211;  --surface2:#181918;
+  --border:#2a2b28; --border2:#1e1f1e;
+  --text:#c6c7bd;   --text-sec:#8a8b88;
+  --special:#C8DD5A;  --info:#90CDF4;   --attention:#E5E5A6;
+  --warning:#F08080;  --safe:#81E6D9;   --lavender:#C3A5E5;
+  --orange:#f69653;   --pink:#FFB3D9;
+}
+
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Exo 2','Segoe UI',system-ui,sans-serif;
+  font-size:1rem; min-height:100vh;
+  display:flex; flex-direction:column;
+}
+
+/* ── App Header ───────────────────────────────────────────────── */
+.app-hdr{
+  background:var(--surface); border-bottom:1px solid var(--border2);
+  padding:12px 22px; display:flex; align-items:center;
+  justify-content:space-between; gap:14px; flex-shrink:0; flex-wrap:wrap;
+}
+.app-hdr-brand{ display:flex; align-items:center; gap:9px; }
+.app-hdr-brand i{ color:var(--special); font-size:1.15rem; }
+.app-hdr-title{
+  font-size:1.1rem; font-weight:800; color:var(--text); letter-spacing:-.01em;
+  display:flex; align-items:center; gap:8px;
+}
+.saved-dot{
+  width:7px; height:7px; border-radius:50%;
+  background:var(--safe); display:inline-block;
+  opacity:0; transition:opacity .3s;
+}
+.saved-dot.show{ opacity:1; }
+.app-hdr-sub{
+  font-size:1rem; font-family:'Share Tech Mono',monospace;
+  color:var(--text-sec);
+}
+.hdr-btns{ display:flex; gap:7px; flex-wrap:wrap; }
+
+/* ── App Body ─────────────────────────────────────────────────── */
+.app-body{
+  display:flex; flex:1; overflow:hidden; min-height:0;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────── */
+.app-sidebar{
+  width:420px; flex-shrink:0;
+  background:var(--surface); border-right:1px solid var(--border2);
+  display:flex; flex-direction:column;
+  overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+
+/* ── Main ─────────────────────────────────────────────────────── */
+.app-main{
+  flex:1; display:flex; flex-direction:column;
+  overflow:hidden; min-height:0;
+}
+.code-area{
+  flex:1; display:flex; flex-direction:column;
+  overflow:hidden; border-bottom:1px solid var(--border2);
+}
+.test-area{
+  height:240px; flex-shrink:0;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+
+/* ── Section ──────────────────────────────────────────────────── */
+.section{ border-bottom:1px solid var(--border2); padding:16px 18px; }
+.section-title{
+  font-size:1rem; font-weight:700; color:var(--special);
+  text-transform:uppercase; letter-spacing:.1em;
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+.section-title-left{ display:flex; align-items:center; gap:7px; }
+
+/* ── Form ─────────────────────────────────────────────────────── */
+label{
+  font-size:1rem; color:var(--text-sec);
+  display:block; margin-bottom:4px;
+}
+input[type=text], input[type=number], select, textarea{
+  width:100%; background:var(--bg); border:1.5px solid var(--border);
+  border-radius:6px; padding:8px 11px; font-size:1rem;
+  font-family:'Exo 2',sans-serif; color:var(--text); outline:none;
+  transition:border-color .15s;
+}
+input[type=text]:focus, input[type=number]:focus,
+select:focus, textarea:focus{ border-color:var(--info); }
+select option{ background:var(--surface); }
+textarea{ resize:vertical; font-family:'Exo 2',sans-serif; }
+.form-row{ display:grid; gap:10px; margin-bottom:10px; }
+.g2{ grid-template-columns:1fr 1fr; }
+.g3{ grid-template-columns:1fr 1fr 1fr; }
+.g4{ grid-template-columns:1fr 1fr 1fr 1fr; }
+.form-group{ display:flex; flex-direction:column; gap:4px; }
+.check-row{
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  font-size:1rem; color:var(--text); user-select:none;
+}
+.check-row input[type=checkbox]{
+  width:16px; height:16px; cursor:pointer; accent-color:var(--info);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 14px; border-radius:6px;
+  border:1.5px solid var(--border); background:var(--surface2);
+  color:var(--text-sec); font-size:1rem;
+  font-family:'Exo 2',sans-serif; font-weight:600;
+  cursor:pointer; transition:all .15s; white-space:nowrap;
+}
+.btn:hover{ border-color:var(--info); color:var(--info); }
+.btn-primary{
+  background:var(--info); border-color:var(--info);
+  color:#0c0d0c; font-weight:700;
+}
+.btn-primary:hover{ filter:brightness(1.1); color:#0c0d0c; }
+.btn-danger:hover{ border-color:var(--warning); color:var(--warning); }
+.btn-dl:hover{ border-color:var(--safe); color:var(--safe); }
+.btn-sm{ padding:5px 10px; }
+
+/* ── Theme Swatches ───────────────────────────────────────────── */
+.theme-grid{ display:flex; gap:10px; flex-wrap:wrap; }
+.theme-swatch-wrap{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+.theme-swatch{
+  width:38px; height:38px; border-radius:9px;
+  border:2.5px solid transparent; cursor:pointer;
+  transition:transform .15s, border-color .15s; padding:0;
+}
+.theme-swatch:hover{ transform:scale(1.12); }
+.theme-swatch.active{ border-color:#fff; }
+.theme-swatch-label{
+  font-size:1rem; color:var(--text-sec);
+  font-family:'Share Tech Mono',monospace; text-align:center;
+}
+
+/* ── Rarity label inputs ──────────────────────────────────────── */
+.rl-label{ display:flex; align-items:center; gap:5px; margin-bottom:4px; font-size:1rem; }
+
+/* ── Achievement Cards ────────────────────────────────────────── */
+.ach-list{ display:flex; flex-direction:column; gap:8px; }
+.ach-card{
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:8px; padding:10px 12px;
+  display:flex; align-items:center; gap:10px;
+  cursor:grab;
+}
+.ach-card:hover{ border-color:var(--border2); background:var(--surface2); }
+.ach-card.drag-over{ border-color:var(--info); background:#0e1420; }
+.ach-icon{
+  width:38px; height:38px; border-radius:7px;
+  border:1.5px solid; display:flex; align-items:center;
+  justify-content:center; font-size:1.05rem; flex-shrink:0;
+  background:#0c0d0c;
+}
+.ach-body{ flex:1; min-width:0; }
+.ach-name{
+  font-size:1rem; font-weight:700; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.ach-meta{ display:flex; gap:5px; align-items:center; margin-top:3px; flex-wrap:wrap; }
+.badge{
+  font-size:1rem; padding:1px 7px; border-radius:4px;
+  font-family:'Share Tech Mono',monospace; border:1px solid;
+}
+.ach-actions{ display:flex; gap:4px; flex-shrink:0; }
+
+/* ── Code Panel ───────────────────────────────────────────────── */
+.panel-hdr{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 16px; border-bottom:1px solid var(--border2);
+  background:var(--surface); flex-shrink:0;
+}
+.panel-hdr-title{
+  font-size:1rem; font-weight:700; color:var(--text);
+  display:flex; align-items:center; gap:7px;
+}
+.panel-hdr-title i{ color:var(--info); }
+.code-body{
+  flex:1; overflow-y:auto; padding:16px 18px;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+pre.code-block{
+  font-family:'Share Tech Mono',monospace; font-size:1rem;
+  line-height:1.65; color:var(--text-sec); white-space:pre; margin:0;
+}
+.ct{ color:var(--info); }
+.ca{ color:var(--attention); }
+.cv{ color:var(--safe); }
+.cc{ color:#3a3b38; font-style:italic; }
+.copy-ok{ font-size:1rem; color:var(--safe); opacity:0; transition:opacity .3s; }
+.copy-ok.show{ opacity:1; }
+
+/* ── Test Panel ───────────────────────────────────────────────── */
+.test-body{
+  padding:12px 16px; overflow-y:auto; flex:1;
+  display:flex; flex-direction:column; gap:10px;
+}
+.test-grid{ display:flex; flex-wrap:wrap; gap:7px; }
+.test-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 12px; border-radius:6px;
+  border:1.5px solid var(--border); background:var(--surface2);
+  color:var(--text-sec); font-size:1rem;
+  font-family:'Exo 2',sans-serif; cursor:pointer; transition:all .15s;
+}
+.test-btn:hover:not(:disabled){ border-color:var(--special); color:var(--special); }
+.test-btn:disabled{ opacity:.45; cursor:not-allowed; border-color:var(--attention); color:var(--attention); }
+.log-box{
+  display:flex; flex-direction:column; gap:1px;
+  max-height:64px; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+.log-entry{
+  font-size:1rem; font-family:'Share Tech Mono',monospace;
+  color:var(--safe); padding:1px 0;
+}
+
+/* ── Modal ────────────────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.72);
+  z-index:9995; display:none; align-items:center;
+  justify-content:center; padding:20px;
+}
+.modal-overlay.open{ display:flex; }
+.modal{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:24px; width:100%; max-width:560px;
+  max-height:90vh; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+.modal-title{
+  font-size:1.1rem; font-weight:800; color:var(--text);
+  display:flex; align-items:center; gap:8px; margin-bottom:20px;
+}
+.modal-title i{ color:var(--special); }
+.modal-footer{
+  display:flex; justify-content:flex-end; gap:8px;
+  margin-top:20px; padding-top:16px; border-top:1px solid var(--border2);
+}
+.icon-preview{
+  display:flex; align-items:center; gap:9px;
+}
+.icon-preview-box{
+  width:40px; height:40px; border-radius:8px;
+  background:var(--bg); border:1.5px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; flex-shrink:0; transition:border-color .2s;
+}
+.empty-hint{
+  font-size:1rem; color:var(--text-sec); text-align:center;
+  padding:20px 0; font-family:'Share Tech Mono',monospace;
+}
+.divider{ height:1px; background:var(--border2); margin:12px 0; }
+.err-msg{ font-size:1rem; color:var(--warning); margin-top:4px; display:none; }
+.err-msg.show{ display:block; }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="app-hdr">
+  <div class="app-hdr-brand">
+    <i class="bi bi-award-fill"></i>
+    <div>
+      <div class="app-hdr-title">
+        成就系統 — 程式碼產生器
+        <span class="saved-dot" id="saved-dot"></span>
+      </div>
+      <div class="app-hdr-sub">achievement-system.js  ·  宣告式 HTML  ·  localStorage 暫存</div>
+    </div>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn btn-dl" onclick="downloadHTML()"><i class="bi bi-download"></i> 下載完整 HTML</button>
+    <button class="btn btn-danger" onclick="resetAll()"><i class="bi bi-trash3"></i> 清除重置</button>
+  </div>
+</header>
+
+<!-- ── Body ── -->
+<div class="app-body">
+
+  <!-- ════════ SIDEBAR ════════ -->
+  <aside class="app-sidebar">
+
+    <!-- System Settings -->
+    <div class="section">
+      <div class="section-title">
+        <span class="section-title-left"><i class="bi bi-gear-fill"></i> 系統設定</span>
+      </div>
+
+      <div class="form-group" style="margin-bottom:14px">
+        <label>主題</label>
+        <div class="theme-grid" id="theme-grid"></div>
+      </div>
+
+      <div class="form-row g2">
+        <div class="form-group">
+          <label>觸發按鈕位置</label>
+          <select id="s-triggerPos" onchange="onSettingChange()">
+            <option value="bottom-right">右下角</option>
+            <option value="bottom-left">左下角</option>
+            <option value="top-left">左上角</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>觸發按鈕大小 (px)</label>
+          <input type="number" id="s-triggerSize" min="32" max="96" oninput="onSettingChange()">
+        </div>
+      </div>
+
+      <div class="form-row g2">
+        <div class="form-group">
+          <label>面板方向</label>
+          <select id="s-panelSide" onchange="onSettingChange()">
+            <option value="right">右側滑出</option>
+            <option value="left">左側滑出</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>面板寬度 (px)</label>
+          <input type="number" id="s-panelWidth" min="180" max="700" oninput="onSettingChange()">
+        </div>
+      </div>
+
+      <div class="form-row g2">
+        <div class="form-group">
+          <label>Toast 位置</label>
+          <select id="s-toastPosition" onchange="onSettingChange()">
+            <option value="top-right">右上</option>
+            <option value="top-left">左上</option>
+            <option value="bottom-right">右下</option>
+            <option value="bottom-left">左下</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Toast 寬度 (px)</label>
+          <input type="number" id="s-toastWidth" min="160" max="500" oninput="onSettingChange()">
+        </div>
+      </div>
+
+      <div class="form-row g2">
+        <div class="form-group">
+          <label>Toast 時長 (ms)</label>
+          <input type="number" id="s-toastDuration" min="500" max="12000" step="100" oninput="onSettingChange()">
+        </div>
+        <div class="form-group">
+          <label>傳說 Toast 時長 (ms)</label>
+          <input type="number" id="s-toastDurationLeg" min="500" max="15000" step="100" oninput="onSettingChange()">
+        </div>
+      </div>
+
+      <div class="form-row g2" style="margin-bottom:14px">
+        <div class="form-group">
+          <label>整體縮放</label>
+          <input type="number" id="s-scale" min="0.5" max="2" step="0.05" oninput="onSettingChange()">
+        </div>
+        <div class="form-group" style="justify-content:flex-end; padding-bottom:4px">
+          <label class="check-row" style="margin-top:auto">
+            <input type="checkbox" id="s-showList" onchange="onSettingChange()">
+            顯示成就清單
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="margin-bottom:8px">稀有度標籤文字</label>
+        <div class="form-row g4">
+          <div class="form-group">
+            <div class="rl-label" style="color:#c6c7bd">
+              <span style="width:8px;height:8px;border-radius:50%;background:#c6c7bd;display:inline-block"></span>普通
+            </div>
+            <input type="text" id="rl-common" oninput="onSettingChange()">
+          </div>
+          <div class="form-group">
+            <div class="rl-label" style="color:#90CDF4">
+              <span style="width:8px;height:8px;border-radius:50%;background:#90CDF4;display:inline-block"></span>稀有
+            </div>
+            <input type="text" id="rl-rare" oninput="onSettingChange()">
+          </div>
+          <div class="form-group">
+            <div class="rl-label" style="color:#C3A5E5">
+              <span style="width:8px;height:8px;border-radius:50%;background:#C3A5E5;display:inline-block"></span>史詩
+            </div>
+            <input type="text" id="rl-epic" oninput="onSettingChange()">
+          </div>
+          <div class="form-group">
+            <div class="rl-label" style="color:#C8DD5A">
+              <span style="width:8px;height:8px;border-radius:50%;background:#C8DD5A;display:inline-block"></span>傳說
+            </div>
+            <input type="text" id="rl-legendary" oninput="onSettingChange()">
+          </div>
+        </div>
+      </div>
+    </div><!-- /section -->
+
+    <!-- Achievement List -->
+    <div class="section" style="flex:1">
+      <div class="section-title">
+        <span class="section-title-left">
+          <i class="bi bi-list-check"></i> 成就清單
+          <span id="ach-count" style="font-size:1rem;color:var(--text-sec);font-family:'Share Tech Mono',monospace">(0)</span>
+        </span>
+        <button class="btn btn-primary btn-sm" onclick="openModal(null)">
+          <i class="bi bi-plus-lg"></i> 新增成就
+        </button>
+      </div>
+      <div class="ach-list" id="ach-list">
+        <div class="empty-hint">尚無成就 — 點擊「新增成就」開始</div>
+      </div>
+    </div>
+
+  </aside><!-- /sidebar -->
+
+  <!-- ════════ MAIN ════════ -->
+  <main class="app-main">
+
+    <!-- Code Output -->
+    <div class="code-area">
+      <div class="panel-hdr">
+        <div class="panel-hdr-title"><i class="bi bi-code-slash"></i> 生成程式碼</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="copy-ok" id="copy-ok"><i class="bi bi-check-circle-fill"></i> 已複製</span>
+          <button class="btn btn-sm" onclick="copyCode()"><i class="bi bi-clipboard"></i> 複製</button>
+        </div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block" id="code-block"><span style="color:var(--text-sec);font-family:'Share Tech Mono',monospace">新增成就後程式碼將自動產生…</span></pre>
+      </div>
+    </div>
+
+    <!-- Live Test -->
+    <div class="test-area">
+      <div class="panel-hdr">
+        <div class="panel-hdr-title"><i class="bi bi-play-circle-fill"></i> 即時測試</div>
+        <button class="btn btn-sm" onclick="resetPreview()"><i class="bi bi-arrow-counterclockwise"></i> 重置</button>
+      </div>
+      <div class="test-body">
+        <div class="test-grid" id="test-grid">
+          <span style="font-size:1rem;color:var(--text-sec);font-family:'Share Tech Mono',monospace">新增成就後可點擊此處觸發測試</span>
+        </div>
+        <div class="log-box" id="log-box"></div>
+      </div>
+    </div>
+
+  </main>
+
+</div><!-- /app-body -->
+
+<!-- ── Modal ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="onOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <i class="bi bi-award-fill"></i>
+      <span id="modal-title-text">新增成就</span>
+    </div>
+
+    <div class="form-row g2">
+      <div class="form-group">
+        <label>ID（唯一識別碼）</label>
+        <input type="text" id="m-id" placeholder="my-achievement" oninput="clearErr()">
+        <span class="err-msg" id="err-id">ID 不可為空或重複</span>
+      </div>
+      <div class="form-group">
+        <label>稀有度</label>
+        <select id="m-rarity" onchange="updateIconPreview()">
+          <option value="common">普通 common</option>
+          <option value="rare">稀有 rare</option>
+          <option value="epic">史詩 epic</option>
+          <option value="legendary">傳說 legendary</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:10px">
+      <label>Bootstrap Icons class（圖示）</label>
+      <div class="icon-preview">
+        <div class="icon-preview-box" id="icon-preview-box">
+          <i class="bi bi-award-fill" id="icon-preview-i"></i>
+        </div>
+        <input type="text" id="m-icon" placeholder="bi-award-fill"
+          oninput="updateIconPreview()" style="flex:1">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:10px">
+      <label>成就名稱</label>
+      <input type="text" id="m-title" placeholder="成就名稱" oninput="clearErr()">
+      <span class="err-msg" id="err-title">名稱不可為空</span>
+    </div>
+
+    <div class="form-group" style="margin-bottom:10px">
+      <label>描述</label>
+      <textarea id="m-desc" rows="3" placeholder="成就描述文字"></textarea>
+    </div>
+
+    <div class="form-row g2">
+      <div class="form-group">
+        <label>獎勵文字（選填）</label>
+        <input type="text" id="m-reward" placeholder="例：+ 1 點">
+      </div>
+      <div class="form-group">
+        <label style="visibility:hidden">.</label>
+        <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px">
+          <label class="check-row">
+            <input type="checkbox" id="m-spoiler"> spoiler（未解鎖顯示「???」）
+          </label>
+          <label class="check-row">
+            <input type="checkbox" id="m-secret"> secret（面板完全隱藏）
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveAchievement()">
+        <i class="bi bi-check-lg"></i> 儲存
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── achievement-system.js (inlined) ── -->
+<script>(function (G) {
+  'use strict';
+
+  function deepMerge(target) {
+    for (var i=1;i<arguments.length;i++) {
+      var src=arguments[i];
+      if (!src||typeof src!=='object') continue;
+      Object.keys(src).forEach(function(k){
+        if (src[k]!==null&&!Array.isArray(src[k])&&typeof src[k]==='object') {
+          if (typeof target[k]!=='object'||target[k]===null) target[k]={};
+          deepMerge(target[k],src[k]);
+        } else if (src[k]!==undefined) target[k]=src[k];
+      });
+    }
+    return target;
+  }
+
+  function scaleRem(val,factor) {
+    var m=String(val).match(/^([\d.]+)(rem|em|px)$/);
+    if (!m||factor===1) return val;
+    return (parseFloat(m[1])*factor).toFixed(3)+m[2];
+  }
+
+  // ── Built-in themes ────────────────────────────────────────────────
+  var _THEMES = {
+    default: { accent:'#C8DD5A', accentText:'#0c0d0c', progressBg:'#C8DD5A', triggerColor:'#C8DD5A',
+               panelBg:'#0e0f0e', panelBorder:'#1e1f1e', headerColor:'#c6c7bd', toastBorder:'#1e1f1e' },
+    ocean:   { accent:'#04b5a3', accentText:'#0c0d0c', progressBg:'#81E6D9', triggerColor:'#04b5a3',
+               panelBg:'#080f0e', panelBorder:'#0e2020', headerColor:'#81E6D9', toastBorder:'#0e2020' },
+    ember:   { accent:'#f69653', accentText:'#0c0d0c', progressBg:'#d9b375', triggerColor:'#f69653',
+               panelBg:'#0f0a06', panelBorder:'#2a1808', headerColor:'#d9b375', toastBorder:'#2a1808' },
+    violet:  { accent:'#C3A5E5', accentText:'#0c0d0c', progressBg:'#FFB3D9', triggerColor:'#C3A5E5',
+               panelBg:'#0c0810', panelBorder:'#1e1430', headerColor:'#FFB3D9', toastBorder:'#1e1430' },
+    nature:  { accent:'#C8DD5A', accentText:'#0c0d0c', progressBg:'#81E6D9', triggerColor:'#81E6D9',
+               panelBg:'#080e08', panelBorder:'#0e2010', headerColor:'#C8DD5A', toastBorder:'#0e2010' },
+    blood:   { accent:'#F08080', accentText:'#0c0d0c', progressBg:'#E5C3B3', triggerColor:'#F08080',
+               panelBg:'#0f0808', panelBorder:'#2a1010', headerColor:'#E5C3B3', toastBorder:'#2a1010' },
+  };
+
+  // ── Rarity config ─────────────────────────────────────────────────
+  var RARITIES = {
+    common:    { label:'普通', color:'#c6c7bd', glow:'rgba(198,199,189,.22)' },
+    rare:      { label:'稀有', color:'#90CDF4', glow:'rgba(144,205,244,.30)' },
+    epic:      { label:'史詩', color:'#C3A5E5', glow:'rgba(195,165,229,.30)' },
+    legendary: { label:'傳說', color:'#C8DD5A', glow:'rgba(200,221,90,.36)'  },
+  };
+
+  // ── Defaults ──────────────────────────────────────────────────────
+  var _D = {
+    showList: true,
+    panelSide: 'right',
+    panelWidth: 280,
+    triggerPos: 'bottom-left',
+    triggerSize: 46,
+    toastWidth: 270,
+    toastPosition: 'top-right',
+    toastDuration: { common: 3200, rare: 3200, epic: 3200, legendary: 4500 },
+    rarityLabels: { common:'普通', rare:'稀有', epic:'史詩', legendary:'傳說' },
+    achievements: [],
+    onUnlock: null,
+    themeName: 'default',
+    scale: 1,
+    typography: {
+      panelTitle:  '0.86rem',
+      panelItem:   '0.80rem',
+      panelDesc:   '0.70rem',
+      panelMeta:   '0.63rem',
+      toastTitle:  '0.86rem',
+      toastDesc:   '0.70rem',
+      toastEyebrow:'0.62rem',
+      progressLabel:'0.66rem',
+    },
+  };
+
+  // ╔═══════════════════════════════════════════════════════╗
+  // ║  AchievementSystem                                    ║
+  // ╚═══════════════════════════════════════════════════════╝
+  function AchievementSystem(options) {
+    options = options || {};
+    var name      = options.themeName || (G.AchievementConfig&&G.AchievementConfig.themeName) || 'default';
+    var themeData = AchievementSystem.themes[name] || AchievementSystem.themes['default'];
+
+    this.cfg = deepMerge({}, _D, themeData ? { _themeData: themeData } : {}, G.AchievementConfig||{}, options);
+    this._theme = deepMerge({}, _THEMES['default'], themeData||{});
+    this.cfg.themeName = name;
+
+    this._achievements = (options.achievements||[]).map(function(a){ return Object.assign({},a,{_unlocked:false,_unlockedAt:null}); });
+    this._map = {};
+    this._achievements.forEach(function(a){ this._map[a.id]=a; }, this);
+    this._panelOpen = false;
+
+    AchievementSystem._injectCSS();
+    var self = this;
+    if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ self._mount(); });
+    else this._mount();
+  }
+
+  AchievementSystem.themes = _THEMES;
+  AchievementSystem.registerTheme = function(name,cfg) { AchievementSystem.themes[name]=cfg; };
+
+  // ── API ────────────────────────────────────────────────────────────
+  AchievementSystem.prototype.check = function(ctx) {
+    var newly=[], self=this;
+    this._achievements.forEach(function(a){
+      if (a._unlocked) return;
+      var met=false;
+      try { if (typeof a.condition==='function') met=!!a.condition(ctx); } catch(_){}
+      if (met) { self._doUnlock(a,ctx); newly.push(a.id); }
+    });
+    if (newly.length) this._refreshPanel();
+    return newly;
+  };
+
+  AchievementSystem.prototype.unlock = function(id) {
+    var a=this._map[id]; if(a&&!a._unlocked){ this._doUnlock(a,{}); this._refreshPanel(); }
+  };
+
+  AchievementSystem.prototype.isUnlocked  = function(id) { return !!(this._map[id]&&this._map[id]._unlocked); };
+  AchievementSystem.prototype.getAll      = function()   { return this._achievements.map(function(a){return Object.assign({},a);}); };
+  AchievementSystem.prototype.getUnlocked = function()   { return this._achievements.filter(function(a){return a._unlocked;}).map(function(a){return Object.assign({},a);}); };
+  AchievementSystem.prototype.showPanel   = function()   { this._panelOpen=true;  this._syncPanel(); };
+  AchievementSystem.prototype.hidePanel   = function()   { this._panelOpen=false; this._syncPanel(); };
+  AchievementSystem.prototype.togglePanel = function()   { this._panelOpen=!this._panelOpen; this._syncPanel(); };
+
+  AchievementSystem.prototype.setShowList = function(v) { this.cfg.showList=!!v; this._refreshPanel(); };
+
+  AchievementSystem.prototype.setPanelWidth = function(px) {
+    this.cfg.panelWidth = px;
+    if (this._panelEl) this._panelEl.style.width = px + 'px';
+  };
+
+  AchievementSystem.prototype.setTheme = function(name) {
+    var t=AchievementSystem.themes[name];
+    if (!t) { console.warn('AchievementSystem: unknown theme "'+name+'"'); return; }
+    this._theme = deepMerge({}, _THEMES['default'], t);
+    this.cfg.themeName=name;
+    this._refreshPanel();
+    if (this._triggerEl) {
+      this._triggerEl.style.color=this._theme.triggerColor;
+      this._triggerEl.style.borderColor=this._theme.panelBorder;
+    }
+  };
+
+  AchievementSystem.prototype.setScale = function(s) { this.cfg.scale=s; this._refreshPanel(); };
+  AchievementSystem.prototype.setTypography = function(t) { deepMerge(this.cfg.typography,t); this._refreshPanel(); };
+
+  /**
+   * Export all achievement states as a plain object (JSON-serialisable).
+   * Shape:
+   *   {
+   *     version:      1,
+   *     exportedAt:  "2026-03-14T10:00:00.000Z",
+   *     themeName:   "ocean",
+   *     achievements: [
+   *       { id, title, rarity, unlocked, unlockedAt }
+   *     ]
+   *   }
+   * Usage:
+   *   var json = JSON.stringify(ach.exportState());
+   *   // POST to PHP: fetch('/save.php', { method:'POST', body: json })
+   */
+  AchievementSystem.prototype.exportState = function() {
+    return {
+      version:      1,
+      exportedAt:   new Date().toISOString(),
+      themeName:    this.cfg.themeName,
+      achievements: this._achievements.map(function(a) {
+        return {
+          id:         a.id,
+          title:      a.title,
+          rarity:     a.rarity || 'common',
+          unlocked:   !!a._unlocked,
+          unlockedAt: a._unlockedAt ? a._unlockedAt.toISOString() : null,
+        };
+      }),
+    };
+  };
+
+  /**
+   * Restore a previously exported state.
+   * Silently restores unlocked/unlockedAt without re-triggering toasts or onUnlock.
+   * @param {Object} state  — output of exportState() or parsed PHP response
+   */
+  AchievementSystem.prototype.importState = function(state) {
+    if (!state || !Array.isArray(state.achievements)) return;
+    var self = this;
+    state.achievements.forEach(function(saved) {
+      var a = self._map[saved.id];
+      if (!a) return;
+      a._unlocked   = !!saved.unlocked;
+      a._unlockedAt = saved.unlockedAt ? new Date(saved.unlockedAt) : null;
+    });
+    this._refreshPanel();
+  };
+
+  AchievementSystem.prototype.destroy = function() {
+    if(this._triggerEl)this._triggerEl.remove();
+    if(this._panelEl)this._panelEl.remove();
+    if(this._toastEl)this._toastEl.remove();
+  };
+
+  // ── Helpers ────────────────────────────────────────────────────────
+  AchievementSystem.prototype._fs = function(key) {
+    var v=this.cfg.typography&&this.cfg.typography[key]||_D.typography[key];
+    return scaleRem(v, this.cfg.scale||1);
+  };
+
+  // Rarity helper: merges static colour/glow with configurable label
+  AchievementSystem.prototype._r = function(rarityKey) {
+    var base   = RARITIES[rarityKey] || RARITIES.common;
+    var labels = (this.cfg.rarityLabels) || _D.rarityLabels;
+    return { label: labels[rarityKey] || base.label, color: base.color, glow: base.glow };
+  };
+
+  AchievementSystem.prototype._mount = function() {
+    this._buildToasts();
+    this._buildTrigger();
+    this._buildPanel();
+  };
+
+  AchievementSystem.prototype._doUnlock = function(a, ctx) {
+    a._unlocked=true; a._unlockedAt=new Date();
+    this._showToast(a);
+    if (this.cfg.onUnlock) this.cfg.onUnlock(Object.assign({},a), ctx);
+  };
+
+  // ── Trigger ────────────────────────────────────────────────────────
+  AchievementSystem.prototype._buildTrigger = function() {
+    var pos  = this.cfg.triggerPos  || 'bottom-left';
+    var size = (this.cfg.triggerSize || 46) + 'px';
+    var el   = document.createElement('button');
+    el.id = 'ach-trigger';
+    el.className = 'ach-trigger ach-trigger--' + pos;
+    el.setAttribute('aria-label','成就系統');
+    el.setAttribute('title','成就');
+    el.style.color  = this._theme.triggerColor;
+    el.style.width  = size;
+    el.style.height = size;
+    el.innerHTML = '<i class="bi bi-award-fill ach-trigger-icon"></i>'
+      + '<span class="ach-trigger-badge" id="ach-badge" style="background:'+this._theme.accent+';color:'+this._theme.accentText+'">0</span>';
+    var self = this;
+    el.addEventListener('click', function(){ self.togglePanel(); });
+    document.body.appendChild(el);
+    this._triggerEl = el;
+  };
+
+  // ── Panel ──────────────────────────────────────────────────────────
+  AchievementSystem.prototype._buildPanel = function() {
+    var side  = this.cfg.panelSide === 'left' ? 'left' : 'right';
+    var width = (this.cfg.panelWidth || 280) + 'px';
+    var el    = document.createElement('aside');
+    el.id = 'ach-panel';
+    el.className = 'ach-panel ach-panel--' + side;
+    el.style.width = width;
+    el.setAttribute('role','dialog'); el.setAttribute('aria-modal','false'); el.setAttribute('aria-label','成就清單');
+    var self=this;
+    document.addEventListener('click',function(e){
+      if (self._panelOpen&&self._panelEl&&!self._panelEl.contains(e.target)&&!(self._triggerEl&&self._triggerEl.contains(e.target)))
+        self.hidePanel();
+    });
+    document.body.appendChild(el);
+    this._panelEl=el;
+    this._refreshPanel();
+  };
+
+  AchievementSystem.prototype._refreshPanel = function() {
+    if (!this._panelEl) return;
+    var th=this._theme;
+    var total=this._achievements.length;
+    var ul=this._achievements.filter(function(a){return a._unlocked;}).length;
+    var pct=total?Math.round(ul/total*100):0;
+
+    var badge=document.getElementById('ach-badge');
+    if (badge) { badge.textContent=ul; badge.style.background=th.accent; badge.style.color=th.accentText; }
+    if (this._triggerEl) { if(ul>0)this._triggerEl.classList.add('has-items'); }
+
+    this._panelEl.style.background = th.panelBg;
+    this._panelEl.style.borderColor = th.panelBorder;
+
+    var self=this;
+    this._panelEl.innerHTML=''
+      +'<header class="ach-panel-hdr" style="border-color:'+th.panelBorder+'">'
+        +'<span class="ach-panel-title" style="color:'+th.headerColor+';font-size:'+this._fs('panelTitle')+'">'
+          +'<i class="bi bi-award-fill" style="color:'+th.accent+'"></i> 成就</span>'
+        +'<div class="ach-panel-controls">'
+          +'<button class="ach-icon-btn" id="ach-toggle-list" title="'+(this.cfg.showList?'隱藏清單':'顯示清單')+'">'
+            +'<i class="bi '+(this.cfg.showList?'bi-eye':'bi-eye-slash')+'"></i></button>'
+          +'<button class="ach-icon-btn" id="ach-close-btn" title="關閉"><i class="bi bi-x-lg"></i></button>'
+        +'</div>'
+      +'</header>'
+      +'<div class="ach-progress-track" style="background:'+th.panelBorder+'">'
+        +'<div class="ach-progress-fill" style="width:'+pct+'%;background:'+th.progressBg+'"></div>'
+      +'</div>'
+      +'<div class="ach-prog-label" style="font-size:'+this._fs('progressLabel')+'">'
+        +'<span style="color:'+th.accent+'">'+ul+'</span>'
+        +'<span style="color:#5a5b58"> / '+total+'</span>'
+        +'<span class="ach-prog-pct" style="color:'+th.accent+'">'+pct+'%</span>'
+      +'</div>'
+      +(this.cfg.showList ? this._renderList() : '<div class="ach-hidden-msg"><i class="bi bi-eye-slash"></i><span>成就清單已隱藏</span></div>');
+
+    var closeBtn=document.getElementById('ach-close-btn');
+    if (closeBtn) closeBtn.addEventListener('click',function(){ self.hidePanel(); });
+    var toggleBtn=document.getElementById('ach-toggle-list');
+    if (toggleBtn) toggleBtn.addEventListener('click',function(){ self.setShowList(!self.cfg.showList); });
+  };
+
+  AchievementSystem.prototype._renderList = function() {
+    if (!this._achievements.length) return '<div class="ach-empty">尚無成就設定</div>';
+    var ul=this._achievements.filter(function(a){return  a._unlocked;});
+    var lk=this._achievements.filter(function(a){return !a._unlocked;});
+    var th=this._theme, self=this;
+    var html='<div class="ach-list-wrap">';
+    if (ul.length) {
+      html+='<div class="ach-group-hdr" style="font-size:'+this._fs('panelMeta')+'">'
+        +'<i class="bi bi-check-circle-fill" style="color:'+th.accent+'"></i> 已解鎖（'+ul.length+'）</div>';
+      ul.forEach(function(a){ html+=self._renderItem(a); });
+    }
+    if (lk.length) {
+      html+='<div class="ach-group-hdr" style="font-size:'+this._fs('panelMeta')+';margin-top:4px">'
+        +'<i class="bi bi-lock-fill" style="color:#5a5b58"></i> 未解鎖（'+lk.length+'）</div>';
+      lk.forEach(function(a){ html+=self._renderItem(a); });
+    }
+    return html+'</div>';
+  };
+
+  AchievementSystem.prototype._renderItem = function(a) {
+    var r=this._r(a.rarity||'common');
+    if (!a._unlocked&&a.secret)
+      return '<div class="ach-item ach-item--secret">'
+        +'<div class="ach-item-icon" style="border-color:#181918;color:#1e1f1e"><i class="bi bi-question-lg"></i></div>'
+        +'<div class="ach-item-body"><div class="ach-item-title" style="color:#4a4b48;font-size:'+this._fs('panelItem')+'">??? 隱藏成就</div></div>'
+        +'</div>';
+    var isSpoiler=!a._unlocked&&!!a.spoiler;
+    var icon  = isSpoiler?'bi-shield-lock-fill':(a.icon||'bi-award');
+    var title = isSpoiler?'???':(a.title||a.id);
+    var desc  = isSpoiler?'達成後揭曉…':(a.desc||'');
+    var lockIcon= !a._unlocked?'<i class="bi bi-lock-fill" style="font-size:.55rem;color:#5a5b58;margin-left:3px"></i>':'';
+    return '<div class="ach-item '+(a._unlocked?'ach-item--unlocked':'ach-item--locked')+'" data-id="'+a.id+'" role="listitem">'
+      +'<div class="ach-item-icon" style="border-color:'+(a._unlocked?r.color:'#242524')+';'
+        +'color:'+(a._unlocked?r.color:'#5a5b58')+';'
+        +'box-shadow:'+(a._unlocked?'0 0 12px '+r.glow:'none')+'"><i class="bi '+icon+'"></i></div>'
+      +'<div class="ach-item-body">'
+        +'<div class="ach-item-title" style="color:'+(a._unlocked?'#c6c7bd':'#7a7b78')+';font-size:'+this._fs('panelItem')+'">'+title+lockIcon+'</div>'
+        +(desc?'<div class="ach-item-desc" style="color:'+(a._unlocked?'#8a8b88':'#5a5b58')+';font-size:'+this._fs('panelDesc')+'">'+desc+'</div>':'')
+        +'<div class="ach-item-meta" style="font-size:'+this._fs('panelMeta')+'">'
+          +'<span class="ach-rarity" style="color:'+r.color+'">'+r.label+'</span>'
+          +(a._unlocked&&a._unlockedAt?'<span class="ach-time">'+this._fmtTime(a._unlockedAt)+'</span>':'')
+          +(a.reward&&a._unlocked?'<span class="ach-reward"><i class="bi bi-gift-fill"></i> '+a.reward+'</span>':'')
+        +'</div>'
+      +'</div>'
+      +'</div>';
+  };
+
+  // ── Toast ──────────────────────────────────────────────────────────
+  AchievementSystem.prototype._buildToasts = function() {
+    var el  = document.createElement('div');
+    el.id   = 'ach-toasts';
+    el.className = 'ach-toasts';
+    // Apply toastWidth and toastPosition via inline style
+    var w   = (this.cfg.toastWidth || 270) + 'px';
+    var pos = this.cfg.toastPosition || 'top-right';
+    el.style.width = w;
+    // Position mapping
+    var posMap = {
+      'top-right':    'top:60px;right:16px;bottom:auto;left:auto;',
+      'top-left':     'top:60px;left:16px;bottom:auto;right:auto;',
+      'bottom-right': 'bottom:80px;right:16px;top:auto;left:auto;',
+      'bottom-left':  'bottom:80px;left:16px;top:auto;right:auto;',
+    };
+    el.style.cssText += posMap[pos] || posMap['top-right'];
+    document.body.appendChild(el);
+    this._toastEl = el;
+  };
+
+  AchievementSystem.prototype._showToast = function(a) {
+    if (!this._toastEl) return;
+    var r  = this._r(a.rarity || 'common'), th = this._theme;
+    var toast = document.createElement('div');
+    toast.className = 'ach-toast';
+    toast.style.borderLeftColor = r.color;
+    toast.style.background      = th.panelBg;
+    toast.style.borderColor     = th.toastBorder;
+    toast.style.borderLeftColor = r.color;
+    toast.innerHTML = ''
+      + '<div class="ach-toast-icon" style="color:'+r.color+';border-color:'+r.color+'">'
+        + '<i class="bi '+(a.icon||'bi-award-fill')+'"></i></div>'
+      + '<div class="ach-toast-body">'
+        + '<div class="ach-toast-eyebrow" style="font-size:'+this._fs('toastEyebrow')+'">'
+          + '<span>成就解鎖</span><span class="ach-toast-rarity" style="color:'+r.color+'">'+r.label+'</span></div>'
+        + '<div class="ach-toast-title" style="color:'+r.color+';font-size:'+this._fs('toastTitle')+'">'+(a.title||a.id)+'</div>'
+        + (a.desc   ? '<div class="ach-toast-desc"   style="font-size:'+this._fs('toastDesc')+'">'+a.desc+'</div>'   : '')
+        + (a.reward ? '<div class="ach-toast-reward" style="font-size:'+this._fs('toastDesc')+'"><i class="bi bi-gift-fill"></i> '+a.reward+'</div>' : '')
+      + '</div>';
+    this._toastEl.appendChild(toast);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ toast.classList.add('ach-toast--show'); }); });
+    // toastDuration: per-rarity map or single number
+    var durCfg = this.cfg.toastDuration;
+    var dur;
+    if (typeof durCfg === 'number') {
+      dur = durCfg;
+    } else {
+      var map = deepMerge({}, _D.toastDuration, durCfg || {});
+      dur = map[a.rarity || 'common'] || 3200;
+    }
+    setTimeout(function(){
+      toast.classList.remove('ach-toast--show');
+      setTimeout(function(){ toast.remove(); }, 420);
+    }, dur);
+  };
+
+  AchievementSystem.prototype._syncPanel = function() {
+    if (!this._panelEl) return;
+    if (this._panelOpen) this._panelEl.classList.add('ach-panel--open');
+    else this._panelEl.classList.remove('ach-panel--open');
+    this._refreshPanel();
+  };
+
+  AchievementSystem.prototype._fmtTime = function(d) {
+    return d.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  };
+
+  // ── Static CSS ─────────────────────────────────────────────────────
+  AchievementSystem._injectCSS = function() {
+    if (document.getElementById('ach-core-css')) return;
+    var s=document.createElement('style'); s.id='ach-core-css';
+    s.textContent=''
+      +'.ach-trigger{position:fixed;z-index:900;width:46px;height:46px;border-radius:50%;'
+        +'background:#0e0f0e;border:1.5px solid #222322;font-size:1.2rem;'
+        +'display:flex;align-items:center;justify-content:center;cursor:pointer;'
+        +'box-shadow:0 4px 18px rgba(0,0,0,.7);transition:border-color .2s,box-shadow .2s;padding:0;}'
+      +'.ach-trigger:hover,.ach-trigger.has-items{border-color:currentColor;box-shadow:0 4px 22px rgba(200,221,90,.28);}'
+      +'.ach-trigger--bottom-left{bottom:24px;left:24px;}'
+      +'.ach-trigger--bottom-right{bottom:24px;right:24px;}'
+      +'.ach-trigger--top-left{top:64px;left:24px;}'
+      +'.ach-trigger-badge{position:absolute;top:-5px;right:-5px;'
+        +'font-size:.58rem;font-weight:800;min-width:16px;height:16px;padding:0 3px;'
+        +'border-radius:8px;display:flex;align-items:center;justify-content:center;'
+        +'font-family:\'Exo 2\',monospace;border:1.5px solid #0c0d0c;transition:transform .2s;}'
+      +'.ach-panel{position:fixed;top:0;bottom:0;width:280px;z-index:850;'
+        +'display:flex;flex-direction:column;overflow:hidden;'
+        +'transition:transform .3s cubic-bezier(.4,0,.2,1);}'
+      +'.ach-panel--right{right:0;border-left:1px solid;transform:translateX(100%);}'
+      +'.ach-panel--left{left:0;border-right:1px solid;transform:translateX(-100%);}'
+      +'.ach-panel--open{transform:translateX(0);box-shadow:-8px 0 40px rgba(0,0,0,.7);}'
+      +'.ach-panel--left.ach-panel--open{box-shadow:8px 0 40px rgba(0,0,0,.7);}'
+      +'.ach-panel-hdr{padding:13px 14px 10px;border-bottom:1px solid;'
+        +'display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}'
+      +'.ach-panel-title{font-weight:700;font-family:\'Exo 2\',sans-serif;display:flex;align-items:center;gap:7px;}'
+      +'.ach-panel-controls{display:flex;align-items:center;gap:4px;}'
+      +'.ach-icon-btn{background:none;border:none;color:#3a3b38;cursor:pointer;font-size:.82rem;'
+        +'padding:3px 6px;border-radius:4px;transition:color .15s,background .15s;display:flex;align-items:center;}'
+      +'.ach-icon-btn:hover{color:#c6c7bd;background:#181918;}'
+      +'.ach-progress-track{height:2px;flex-shrink:0;}'
+      +'.ach-progress-fill{height:100%;transition:width .6s ease;border-radius:0 1px 1px 0;}'
+      +'.ach-prog-label{padding:5px 14px 6px;font-family:\'Share Tech Mono\',monospace;'
+        +'display:flex;align-items:center;gap:6px;flex-shrink:0;}'
+      +'.ach-prog-pct{margin-left:auto;font-weight:700;}'
+      +'.ach-group-hdr{padding:7px 14px 4px;color:#6a6b68;text-transform:uppercase;letter-spacing:.1em;'
+        +'font-family:\'Share Tech Mono\',monospace;display:flex;align-items:center;gap:6px;'
+        +'border-top:1px solid #131413;flex-shrink:0;}'
+      +'.ach-list-wrap{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1b1a transparent;padding-bottom:16px;}'
+      +'.ach-item{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-bottom:1px solid #111211;transition:background .15s;}'
+      +'.ach-item:hover{background:#111211;}'
+      +'.ach-item--locked{opacity:.44;}.ach-item--secret{opacity:.15;}.ach-item--unlocked{opacity:1;}'
+      +'.ach-item-icon{width:34px;height:34px;border-radius:7px;border:1.5px solid;flex-shrink:0;'
+        +'display:flex;align-items:center;justify-content:center;font-size:.95rem;'
+        +'background:#0c0d0c;transition:box-shadow .25s;}'
+      +'.ach-item-body{flex:1;min-width:0;}'
+      +'.ach-item-title{font-weight:700;font-family:\'Exo 2\',sans-serif;'
+        +'display:flex;align-items:center;gap:4px;margin-bottom:2px;line-height:1.3;}'
+      +'.ach-item-desc{line-height:1.4;font-family:\'Share Tech Mono\',monospace;margin-bottom:4px;}'
+      +'.ach-item-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}'
+      +'.ach-rarity{font-family:\'Share Tech Mono\',monospace;text-transform:uppercase;letter-spacing:.08em;}'
+      +'.ach-time{color:#5a5b58;font-family:\'Share Tech Mono\',monospace;}'
+      +'.ach-reward{color:#C8DD5A;display:flex;align-items:center;gap:3px;font-family:\'Exo 2\',sans-serif;}'
+      +'.ach-hidden-msg{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;'
+        +'color:#4a4b48;font-family:\'Share Tech Mono\',monospace;flex-direction:column;padding:32px 16px;}'
+      +'.ach-empty{padding:28px 16px;color:#4a4b48;text-align:center;font-family:\'Share Tech Mono\',monospace;}'
+      +'.ach-toasts{position:fixed;top:60px;right:16px;z-index:9990;'
+        +'display:flex;flex-direction:column;gap:8px;pointer-events:none;width:270px;}'
+      +'.ach-toast{border:1px solid;border-left:3px solid;padding:10px 12px;'
+        +'border-radius:0 8px 8px 0;display:flex;align-items:flex-start;gap:10px;'
+        +'box-shadow:0 8px 36px rgba(0,0,0,.85);'
+        +'opacity:0;transform:translateX(16px);transition:opacity .35s ease,transform .35s ease;pointer-events:auto;}'
+      +'.ach-toast.ach-toast--show{opacity:1;transform:translateX(0);}'
+      +'.ach-toast-icon{width:34px;height:34px;border-radius:7px;border:1.5px solid;'
+        +'display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;background:#0c0d0c;}'
+      +'.ach-toast-body{flex:1;min-width:0;}'
+      +'.ach-toast-eyebrow{display:flex;align-items:center;justify-content:space-between;'
+        +'color:#6a6b68;text-transform:uppercase;letter-spacing:.1em;font-family:\'Share Tech Mono\',monospace;margin-bottom:2px;}'
+      +'.ach-toast-rarity{font-weight:700;}'
+      +'.ach-toast-title{font-weight:700;font-family:\'Exo 2\',sans-serif;line-height:1.2;}'
+      +'.ach-toast-desc{color:#8a8b88;margin-top:2px;line-height:1.3;font-family:\'Share Tech Mono\',monospace;}'
+      +'.ach-toast-reward{color:#C8DD5A;margin-top:4px;display:flex;align-items:center;gap:4px;font-family:\'Exo 2\',sans-serif;}';
+    document.head.appendChild(s);
+  };
+
+  G.AchievementSystem = AchievementSystem;
+
+  // ╔═══════════════════════════════════════════════════════════════════╗
+  // ║  Declarative HTML API                                             ║
+  // ║                                                                   ║
+  // ║  <ach-system                                                      ║
+  // ║    theme="ocean"                                                  ║
+  // ║    show-list                          (boolean attr, presence=true)║
+  // ║    hide-list                          (boolean attr)              ║
+  // ║    trigger-pos="bottom-left"                                      ║
+  // ║    panel-side="right"                                             ║
+  // ║    scale="1.1"                                                    ║
+  // ║    var="ach">                         (global var name, default "ach")
+  // ║                                                                   ║
+  // ║    <ach-item                                                      ║
+  // ║      id="my-ach"                                                  ║
+  // ║      icon="bi-star-fill"                                          ║
+  // ║      title="成就名稱"                                              ║
+  // ║      rarity="rare"                                                ║
+  // ║      reward="+ 1 點"                                              ║
+  // ║      spoiler                          (boolean attr)              ║
+  // ║      secret>                          (boolean attr)              ║
+  // ║      成就描述文字放在內容裡。                                        ║
+  // ║    </ach-item>                                                    ║
+  // ║                                                                   ║
+  // ║  </ach-system>                                                    ║
+  // ║                                                                   ║
+  // ║  Unlock from any element:                                         ║
+  // ║    <button data-ach-unlock="my-ach">完成</button>                 ║
+  // ║    <button data-ach-unlock="a1,a2,a3">批次解鎖</button>           ║
+  // ║                                                                   ║
+  // ║  Or from JS (the instance is stored in the var you specify):      ║
+  // ║    ach.unlock('my-ach');                                          ║
+  // ╚═══════════════════════════════════════════════════════════════════╝
+  function _parseBool(el, attr) {
+    return el.hasAttribute(attr);
+  }
+
+  function _parseAchItems(container) {
+    var items = container.querySelectorAll('ach-item');
+    var result = [];
+    items.forEach(function(el) {
+      var a = {
+        id:      el.getAttribute('id')     || ('ach-' + Math.random().toString(36).slice(2,7)),
+        icon:    el.getAttribute('icon')   || 'bi-award-fill',
+        title:   el.getAttribute('title')  || '未命名成就',
+        rarity:  el.getAttribute('rarity') || 'common',
+        desc:    el.textContent.trim(),
+        reward:  el.getAttribute('reward') || undefined,
+        spoiler: _parseBool(el, 'spoiler'),
+        secret:  _parseBool(el, 'secret'),
+        // Manual achievements: condition always false, unlock via .unlock(id)
+        condition: function() { return false; },
+      };
+      // Pass reward flag for onUnlock handler convenience
+      if (a.reward) a._reward = true;
+      result.push(a);
+    });
+    return result;
+  }
+
+  function _initDeclarative() {
+    var containers = document.querySelectorAll('ach-system');
+    containers.forEach(function(el) {
+      // Hide the raw tag content
+      el.style.display = 'none';
+
+      // Parse options from attributes
+      var showList = !_parseBool(el, 'hide-list');
+
+      // toastDuration: accepts single number "3000" or per-rarity JSON '{"legendary":5000}'
+      var toastDurRaw = el.getAttribute('toast-duration');
+      var toastDur;
+      if (toastDurRaw) {
+        var parsed = parseFloat(toastDurRaw);
+        toastDur = isNaN(parsed) ? JSON.parse(toastDurRaw) : parsed;
+      }
+
+      // rarityLabels: JSON string '{"common":"C","rare":"R","epic":"E","legendary":"L"}'
+      var rarityRaw = el.getAttribute('rarity-labels');
+      var rarityLabels = rarityRaw ? JSON.parse(rarityRaw) : undefined;
+
+      var opts = {
+        themeName:     el.getAttribute('theme')          || 'default',
+        showList:      showList,
+        triggerPos:    el.getAttribute('trigger-pos')    || 'bottom-left',
+        panelSide:     el.getAttribute('panel-side')     || 'right',
+        panelWidth:    parseInt(el.getAttribute('panel-width'))    || 280,
+        triggerSize:   parseInt(el.getAttribute('trigger-size'))   || 46,
+        toastWidth:    parseInt(el.getAttribute('toast-width'))    || 270,
+        toastPosition: el.getAttribute('toast-position') || 'top-right',
+        scale:         parseFloat(el.getAttribute('scale'))        || 1,
+        achievements:  _parseAchItems(el),
+      };
+      if (toastDur    !== undefined) opts.toastDuration  = toastDur;
+      if (rarityLabels !== undefined) opts.rarityLabels  = rarityLabels;
+
+      // onUnlock: reward handling built-in
+      opts.onUnlock = function(a) {
+        if (a._reward && a.reward) {
+          var bonus = parseInt(a.reward);
+          if (!isNaN(bonus) && bonus > 0) {
+            // Dispatch a custom event so host page can react
+            document.dispatchEvent(new CustomEvent('ach:reward', {
+              detail: { id: a.id, bonus: bonus, achievement: a }
+            }));
+          }
+        }
+        // Dispatch generic unlock event
+        document.dispatchEvent(new CustomEvent('ach:unlock', {
+          detail: { id: a.id, achievement: a }
+        }));
+      };
+
+      var instance = new AchievementSystem(opts);
+
+      // Expose instance as global var (default: "ach", customisable via var="myAch")
+      var varName = el.getAttribute('var') || 'ach';
+      G[varName] = instance;
+
+      // Expose on element itself too
+      el._achInstance = instance;
+    });
+
+    // Wire up data-ach-unlock triggers (works for dynamically added ones too via delegation)
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-ach-unlock]');
+      if (!btn) return;
+      var ids = btn.getAttribute('data-ach-unlock')
+        .split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      var containers = document.querySelectorAll('ach-system');
+      ids.forEach(function(id) {
+        containers.forEach(function(el) {
+          if (el._achInstance) el._achInstance.unlock(id);
+        });
+      });
+    });
+
+    // Init ach-quiz elements
+    _initQuiz();
+  }
+
+  // ── ach-quiz CSS (injected once) ──────────────────────────────────
+  function _injectQuizCSS() {
+    if (document.getElementById('ach-quiz-css')) return;
+    var s = document.createElement('style');
+    s.id = 'ach-quiz-css';
+    s.textContent = ''
+      +'.ach-quiz{display:flex;flex-direction:column;gap:8px;padding:16px 18px;'
+        +'border-radius:10px;border:1px solid;margin:8px 0;}'
+      +'.ach-quiz--done .ach-quiz-input{opacity:.5;}'
+      +'.ach-quiz-question{font-size:.85rem;line-height:1.55;font-family:\'Exo 2\',sans-serif;}'
+      +'.ach-quiz-hint{font-size:.7rem;font-family:\'Share Tech Mono\',monospace;'
+        +'opacity:.7;margin-top:-4px;}'
+      +'.ach-quiz-row{display:flex;gap:8px;align-items:center;}'
+      +'.ach-quiz-input{'
+        +'flex:1;background:#0c0d0c;border:1.5px solid;border-radius:6px;'
+        +'padding:7px 11px;font-size:.82rem;font-family:\'Exo 2\',sans-serif;'
+        +'color:#c6c7bd;outline:none;transition:border-color .18s,box-shadow .18s;}'
+      +'.ach-quiz-input:focus{box-shadow:0 0 0 2px;}'
+      +'.ach-quiz-input:disabled{cursor:not-allowed;}'
+      +'.ach-quiz-btn{'
+        +'display:inline-flex;align-items:center;gap:6px;'
+        +'padding:7px 14px;border-radius:6px;border:1.5px solid;'
+        +'font-size:.8rem;font-weight:700;font-family:\'Exo 2\',sans-serif;'
+        +'cursor:pointer;transition:filter .15s,transform .1s;white-space:nowrap;'
+        +'background:#0c0d0c;}'
+      +'.ach-quiz-btn:hover:not(:disabled){filter:brightness(1.25);}'
+      +'.ach-quiz-btn:active:not(:disabled){transform:scale(.96);}'
+      +'.ach-quiz-btn:disabled{opacity:.4;cursor:not-allowed;}'
+      +'.ach-quiz-feedback{'
+        +'font-size:.75rem;font-family:\'Share Tech Mono\',monospace;'
+        +'display:flex;align-items:center;gap:5px;min-height:1.2em;'
+        +'transition:opacity .2s;}'
+      +'.ach-quiz-feedback i{font-size:.8rem;}';
+    document.head.appendChild(s);
+  }
+
+  // ── Resolve ach instance for a quiz element ───────────────────────
+  // Priority: var attr on quiz → var attr on nearest ach-system → 'ach'
+  function _resolveInstance(quizEl) {
+    var varName = quizEl.getAttribute('var');
+    if (varName && G[varName]) return G[varName];
+    var sys = quizEl.closest('ach-system');
+    if (sys && sys._achInstance) return sys._achInstance;
+    // Walk up DOM to find any ach-system ancestor
+    var parent = quizEl.parentElement;
+    while (parent) {
+      if (parent.tagName && parent.tagName.toLowerCase() === 'ach-system' && parent._achInstance)
+        return parent._achInstance;
+      parent = parent.parentElement;
+    }
+    // Fall back to default global 'ach'
+    return G['ach'] || null;
+  }
+
+  // ── Build one quiz element ────────────────────────────────────────
+  function _buildQuiz(el) {
+    /*
+     * Attributes:
+     *   question      the question text (or use element text content)
+     *   answer        single correct answer
+     *   answers       comma-separated list of accepted answers
+     *   ach-id        achievement id to unlock on correct answer
+     *   placeholder   input placeholder  (default '輸入答案')
+     *   btn-text      button label       (default '核對')
+     *   hint          hint shown below question
+     *   case-sensitive  boolean attr, default false
+     *   var           override ach instance global var name
+     */
+    var question      = el.getAttribute('question')    || el.textContent.trim();
+    var achId         = el.getAttribute('ach-id')      || '';
+    var placeholder   = el.getAttribute('placeholder') || '輸入答案';
+    var btnText       = el.getAttribute('btn-text')    || '核對';
+    var hint          = el.getAttribute('hint')        || '';
+    var caseSensitive = _parseBool(el, 'case-sensitive');
+
+    // Build accepted answers list
+    var raw = el.getAttribute('answers') || el.getAttribute('answer') || '';
+    var accepted = raw.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+
+    // Get theme colours from linked instance
+    var instance = _resolveInstance(el);
+    var th = (instance && instance._theme) ? instance._theme : _THEMES['default'];
+    var accent      = th.accent      || '#C8DD5A';
+    var panelBorder = th.panelBorder || '#1e1f1e';
+    var panelBg     = th.panelBg     || '#0e0f0e';
+    var headerColor = th.headerColor || '#c6c7bd';
+
+    // Build wrapper div that replaces the tag
+    var wrap = document.createElement('div');
+    wrap.className = 'ach-quiz';
+    wrap.style.cssText = 'background:'+panelBg+';border-color:'+panelBorder+';';
+
+    // Question
+    var qEl = document.createElement('p');
+    qEl.className = 'ach-quiz-question';
+    qEl.style.color = headerColor;
+    qEl.textContent = question;
+    wrap.appendChild(qEl);
+
+    // Hint
+    if (hint) {
+      var hEl = document.createElement('p');
+      hEl.className = 'ach-quiz-hint';
+      hEl.style.color = accent;
+      hEl.textContent = hint;
+      wrap.appendChild(hEl);
+    }
+
+    // Input + button row
+    var row = document.createElement('div');
+    row.className = 'ach-quiz-row';
+
+    var input = document.createElement('input');
+    input.className = 'ach-quiz-input';
+    input.type = 'text';
+    input.placeholder = placeholder;
+    input.setAttribute('autocomplete', 'off');
+    input.style.borderColor = panelBorder;
+    input.style.setProperty('--focus-color', accent + '55');
+    // Focus glow using inline style trick
+    input.addEventListener('focus',  function(){ this.style.borderColor=accent; this.style.boxShadow='0 0 0 2px '+accent+'33'; });
+    input.addEventListener('blur',   function(){ this.style.borderColor=panelBorder; this.style.boxShadow=''; });
+
+    var btn = document.createElement('button');
+    btn.className = 'ach-quiz-btn';
+    btn.style.cssText = 'color:'+accent+';border-color:'+accent+';';
+    btn.innerHTML = '<i class="bi bi-check2"></i>' + btnText;
+
+    row.appendChild(input);
+    row.appendChild(btn);
+    wrap.appendChild(row);
+
+    // Feedback line
+    var fb = document.createElement('div');
+    fb.className = 'ach-quiz-feedback';
+    wrap.appendChild(fb);
+
+    // Check logic
+    function doCheck() {
+      if (btn.disabled) return;
+      var val = input.value.trim();
+      if (!val) return;
+
+      var compare = caseSensitive
+        ? function(a, b){ return a === b; }
+        : function(a, b){ return a.toLowerCase() === b.toLowerCase(); };
+
+      var correct = accepted.some(function(ans){ return compare(val, ans); });
+
+      if (correct) {
+        // Success state
+        fb.innerHTML = '<i class="bi bi-check-circle-fill" style="color:'+accent+'"></i>'
+          + '<span style="color:'+accent+'">正確！</span>';
+        input.disabled = true;
+        btn.disabled   = true;
+        wrap.classList.add('ach-quiz--done');
+        wrap.style.borderColor = accent;
+        if (instance && achId) instance.unlock(achId);
+        // Dispatch event
+        document.dispatchEvent(new CustomEvent('ach:quiz-correct', {
+          detail: { achId: achId, value: val, element: wrap }
+        }));
+      } else {
+        // Wrong state
+        fb.innerHTML = '<i class="bi bi-x-circle-fill" style="color:#F08080"></i>'
+          + '<span style="color:#F08080">再試試看</span>';
+        input.style.borderColor = '#F08080';
+        setTimeout(function(){
+          input.style.borderColor = panelBorder;
+          fb.innerHTML = '';
+        }, 1400);
+        document.dispatchEvent(new CustomEvent('ach:quiz-wrong', {
+          detail: { achId: achId, value: val, element: wrap }
+        }));
+      }
+    }
+
+    btn.addEventListener('click', doCheck);
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') doCheck();
+    });
+
+    // Replace the original tag in DOM
+    el.parentNode.replaceChild(wrap, el);
+  }
+
+  // ── Init all ach-quiz elements ────────────────────────────────────
+  function _initQuiz() {
+    _injectQuizCSS();
+    // Collect first (replaceChild invalidates live NodeList)
+    var quizEls = Array.prototype.slice.call(document.querySelectorAll('ach-quiz'));
+    quizEls.forEach(function(el) { _buildQuiz(el); });
+  }
+
+  // Auto-init
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initDeclarative);
+  } else {
+    _initDeclarative();
+  }
+
+})(window);
+</script>
+
+<!-- ── Raw JS for download (base64) ── -->
+<script>var _ACH_B64="KGZ1bmN0aW9uIChHKSB7CiAgJ3VzZSBzdHJpY3QnOwoKICBmdW5jdGlvbiBkZWVwTWVyZ2UodGFyZ2V0KSB7CiAgICBmb3IgKHZhciBpPTE7aTxhcmd1bWVudHMubGVuZ3RoO2krKykgewogICAgICB2YXIgc3JjPWFyZ3VtZW50c1tpXTsKICAgICAgaWYgKCFzcmN8fHR5cGVvZiBzcmMhPT0nb2JqZWN0JykgY29udGludWU7CiAgICAgIE9iamVjdC5rZXlzKHNyYykuZm9yRWFjaChmdW5jdGlvbihrKXsKICAgICAgICBpZiAoc3JjW2tdIT09bnVsbCYmIUFycmF5LmlzQXJyYXkoc3JjW2tdKSYmdHlwZW9mIHNyY1trXT09PSdvYmplY3QnKSB7CiAgICAgICAgICBpZiAodHlwZW9mIHRhcmdldFtrXSE9PSdvYmplY3QnfHx0YXJnZXRba109PT1udWxsKSB0YXJnZXRba109e307CiAgICAgICAgICBkZWVwTWVyZ2UodGFyZ2V0W2tdLHNyY1trXSk7CiAgICAgICAgfSBlbHNlIGlmIChzcmNba10hPT11bmRlZmluZWQpIHRhcmdldFtrXT1zcmNba107CiAgICAgIH0pOwogICAgfQogICAgcmV0dXJuIHRhcmdldDsKICB9CgogIGZ1bmN0aW9uIHNjYWxlUmVtKHZhbCxmYWN0b3IpIHsKICAgIHZhciBtPVN0cmluZyh2YWwpLm1hdGNoKC9eKFtcZC5dKykocmVtfGVtfHB4KSQvKTsKICAgIGlmICghbXx8ZmFjdG9yPT09MSkgcmV0dXJuIHZhbDsKICAgIHJldHVybiAocGFyc2VGbG9hdChtWzFdKSpmYWN0b3IpLnRvRml4ZWQoMykrbVsyXTsKICB9CgogIC8vIOKUgOKUgCBCdWlsdC1pbiB0aGVtZXMg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSACiAgdmFyIF9USEVNRVMgPSB7CiAgICBkZWZhdWx0OiB7IGFjY2VudDonI0M4REQ1QScsIGFjY2VudFRleHQ6JyMwYzBkMGMnLCBwcm9ncmVzc0JnOicjQzhERDVBJywgdHJpZ2dlckNvbG9yOicjQzhERDVBJywKICAgICAgICAgICAgICAgcGFuZWxCZzonIzBlMGYwZScsIHBhbmVsQm9yZGVyOicjMWUxZjFlJywgaGVhZGVyQ29sb3I6JyNjNmM3YmQnLCB0b2FzdEJvcmRlcjonIzFlMWYxZScgfSwKICAgIG9jZWFuOiAgIHsgYWNjZW50OicjMDRiNWEzJywgYWNjZW50VGV4dDonIzBjMGQwYycsIHByb2dyZXNzQmc6JyM4MUU2RDknLCB0cmlnZ2VyQ29sb3I6JyMwNGI1YTMnLAogICAgICAgICAgICAgICBwYW5lbEJnOicjMDgwZjBlJywgcGFuZWxCb3JkZXI6JyMwZTIwMjAnLCBoZWFkZXJDb2xvcjonIzgxRTZEOScsIHRvYXN0Qm9yZGVyOicjMGUyMDIwJyB9LAogICAgZW1iZXI6ICAgeyBhY2NlbnQ6JyNmNjk2NTMnLCBhY2NlbnRUZXh0OicjMGMwZDBjJywgcHJvZ3Jlc3NCZzonI2Q5YjM3NScsIHRyaWdnZXJDb2xvcjonI2Y2OTY1MycsCiAgICAgICAgICAgICAgIHBhbmVsQmc6JyMwZjBhMDYnLCBwYW5lbEJvcmRlcjonIzJhMTgwOCcsIGhlYWRlckNvbG9yOicjZDliMzc1JywgdG9hc3RCb3JkZXI6JyMyYTE4MDgnIH0sCiAgICB2aW9sZXQ6ICB7IGFjY2VudDonI0MzQTVFNScsIGFjY2VudFRleHQ6JyMwYzBkMGMnLCBwcm9ncmVzc0JnOicjRkZCM0Q5JywgdHJpZ2dlckNvbG9yOicjQzNBNUU1JywKICAgICAgICAgICAgICAgcGFuZWxCZzonIzBjMDgxMCcsIHBhbmVsQm9yZGVyOicjMWUxNDMwJywgaGVhZGVyQ29sb3I6JyNGRkIzRDknLCB0b2FzdEJvcmRlcjonIzFlMTQzMCcgfSwKICAgIG5hdHVyZTogIHsgYWNjZW50OicjQzhERDVBJywgYWNjZW50VGV4dDonIzBjMGQwYycsIHByb2dyZXNzQmc6JyM4MUU2RDknLCB0cmlnZ2VyQ29sb3I6JyM4MUU2RDknLAogICAgICAgICAgICAgICBwYW5lbEJnOicjMDgwZTA4JywgcGFuZWxCb3JkZXI6JyMwZTIwMTAnLCBoZWFkZXJDb2xvcjonI0M4REQ1QScsIHRvYXN0Qm9yZGVyOicjMGUyMDEwJyB9LAogICAgYmxvb2Q6ICAgeyBhY2NlbnQ6JyNGMDgwODAnLCBhY2NlbnRUZXh0OicjMGMwZDBjJywgcHJvZ3Jlc3NCZzonI0U1QzNCMycsIHRyaWdnZXJDb2xvcjonI0YwODA4MCcsCiAgICAgICAgICAgICAgIHBhbmVsQmc6JyMwZjA4MDgnLCBwYW5lbEJvcmRlcjonIzJhMTAxMCcsIGhlYWRlckNvbG9yOicjRTVDM0IzJywgdG9hc3RCb3JkZXI6JyMyYTEwMTAnIH0sCiAgfTsKCiAgLy8g4pSA4pSAIFJhcml0eSBjb25maWcg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSACiAgdmFyIFJBUklUSUVTID0gewogICAgY29tbW9uOiAgICB7IGxhYmVsOifmma7pgJonLCBjb2xvcjonI2M2YzdiZCcsIGdsb3c6J3JnYmEoMTk4LDE5OSwxODksLjIyKScgfSwKICAgIHJhcmU6ICAgICAgeyBsYWJlbDon56iA5pyJJywgY29sb3I6JyM5MENERjQnLCBnbG93OidyZ2JhKDE0NCwyMDUsMjQ0LC4zMCknIH0sCiAgICBlcGljOiAgICAgIHsgbGFiZWw6J+WPsuipqScsIGNvbG9yOicjQzNBNUU1JywgZ2xvdzoncmdiYSgxOTUsMTY1LDIyOSwuMzApJyB9LAogICAgbGVnZW5kYXJ5OiB7IGxhYmVsOiflgrPoqqonLCBjb2xvcjonI0M4REQ1QScsIGdsb3c6J3JnYmEoMjAwLDIyMSw5MCwuMzYpJyAgfSwKICB9OwoKICAvLyDilIDilIAgRGVmYXVsdHMg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSACiAgdmFyIF9EID0gewogICAgc2hvd0xpc3Q6IHRydWUsCiAgICBwYW5lbFNpZGU6ICdyaWdodCcsCiAgICBwYW5lbFdpZHRoOiAyODAsCiAgICB0cmlnZ2VyUG9zOiAnYm90dG9tLWxlZnQnLAogICAgdHJpZ2dlclNpemU6IDQ2LAogICAgdG9hc3RXaWR0aDogMjcwLAogICAgdG9hc3RQb3NpdGlvbjogJ3RvcC1yaWdodCcsCiAgICB0b2FzdER1cmF0aW9uOiB7IGNvbW1vbjogMzIwMCwgcmFyZTogMzIwMCwgZXBpYzogMzIwMCwgbGVnZW5kYXJ5OiA0NTAwIH0sCiAgICByYXJpdHlMYWJlbHM6IHsgY29tbW9uOifmma7pgJonLCByYXJlOifnqIDmnIknLCBlcGljOiflj7LoqaknLCBsZWdlbmRhcnk6J+WCs+iqqicgfSwKICAgIGFjaGlldmVtZW50czogW10sCiAgICBvblVubG9jazogbnVsbCwKICAgIHRoZW1lTmFtZTogJ2RlZmF1bHQnLAogICAgc2NhbGU6IDEsCiAgICB0eXBvZ3JhcGh5OiB7CiAgICAgIHBhbmVsVGl0bGU6ICAnMC44NnJlbScsCiAgICAgIHBhbmVsSXRlbTogICAnMC44MHJlbScsCiAgICAgIHBhbmVsRGVzYzogICAnMC43MHJlbScsCiAgICAgIHBhbmVsTWV0YTogICAnMC42M3JlbScsCiAgICAgIHRvYXN0VGl0bGU6ICAnMC44NnJlbScsCiAgICAgIHRvYXN0RGVzYzogICAnMC43MHJlbScsCiAgICAgIHRvYXN0RXllYnJvdzonMC42MnJlbScsCiAgICAgIHByb2dyZXNzTGFiZWw6JzAuNjZyZW0nLAogICAgfSwKICB9OwoKICAvLyDilZTilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZcKICAvLyDilZEgIEFjaGlldmVtZW50U3lzdGVtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWa4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWdCiAgZnVuY3Rpb24gQWNoaWV2ZW1lbnRTeXN0ZW0ob3B0aW9ucykgewogICAgb3B0aW9ucyA9IG9wdGlvbnMgfHwge307CiAgICB2YXIgbmFtZSAgICAgID0gb3B0aW9ucy50aGVtZU5hbWUgfHwgKEcuQWNoaWV2ZW1lbnRDb25maWcmJkcuQWNoaWV2ZW1lbnRDb25maWcudGhlbWVOYW1lKSB8fCAnZGVmYXVsdCc7CiAgICB2YXIgdGhlbWVEYXRhID0gQWNoaWV2ZW1lbnRTeXN0ZW0udGhlbWVzW25hbWVdIHx8IEFjaGlldmVtZW50U3lzdGVtLnRoZW1lc1snZGVmYXVsdCddOwoKICAgIHRoaXMuY2ZnID0gZGVlcE1lcmdlKHt9LCBfRCwgdGhlbWVEYXRhID8geyBfdGhlbWVEYXRhOiB0aGVtZURhdGEgfSA6IHt9LCBHLkFjaGlldmVtZW50Q29uZmlnfHx7fSwgb3B0aW9ucyk7CiAgICB0aGlzLl90aGVtZSA9IGRlZXBNZXJnZSh7fSwgX1RIRU1FU1snZGVmYXVsdCddLCB0aGVtZURhdGF8fHt9KTsKICAgIHRoaXMuY2ZnLnRoZW1lTmFtZSA9IG5hbWU7CgogICAgdGhpcy5fYWNoaWV2ZW1lbnRzID0gKG9wdGlvbnMuYWNoaWV2ZW1lbnRzfHxbXSkubWFwKGZ1bmN0aW9uKGEpeyByZXR1cm4gT2JqZWN0LmFzc2lnbih7fSxhLHtfdW5sb2NrZWQ6ZmFsc2UsX3VubG9ja2VkQXQ6bnVsbH0pOyB9KTsKICAgIHRoaXMuX21hcCA9IHt9OwogICAgdGhpcy5fYWNoaWV2ZW1lbnRzLmZvckVhY2goZnVuY3Rpb24oYSl7IHRoaXMuX21hcFthLmlkXT1hOyB9LCB0aGlzKTsKICAgIHRoaXMuX3BhbmVsT3BlbiA9IGZhbHNlOwoKICAgIEFjaGlldmVtZW50U3lzdGVtLl9pbmplY3RDU1MoKTsKICAgIHZhciBzZWxmID0gdGhpczsKICAgIGlmIChkb2N1bWVudC5yZWFkeVN0YXRlPT09J2xvYWRpbmcnKSBkb2N1bWVudC5hZGRFdmVudExpc3RlbmVyKCdET01Db250ZW50TG9hZGVkJyxmdW5jdGlvbigpeyBzZWxmLl9tb3VudCgpOyB9KTsKICAgIGVsc2UgdGhpcy5fbW91bnQoKTsKICB9CgogIEFjaGlldmVtZW50U3lzdGVtLnRoZW1lcyA9IF9USEVNRVM7CiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucmVnaXN0ZXJUaGVtZSA9IGZ1bmN0aW9uKG5hbWUsY2ZnKSB7IEFjaGlldmVtZW50U3lzdGVtLnRoZW1lc1tuYW1lXT1jZmc7IH07CgogIC8vIOKUgOKUgCBBUEkg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSACiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLmNoZWNrID0gZnVuY3Rpb24oY3R4KSB7CiAgICB2YXIgbmV3bHk9W10sIHNlbGY9dGhpczsKICAgIHRoaXMuX2FjaGlldmVtZW50cy5mb3JFYWNoKGZ1bmN0aW9uKGEpewogICAgICBpZiAoYS5fdW5sb2NrZWQpIHJldHVybjsKICAgICAgdmFyIG1ldD1mYWxzZTsKICAgICAgdHJ5IHsgaWYgKHR5cGVvZiBhLmNvbmRpdGlvbj09PSdmdW5jdGlvbicpIG1ldD0hIWEuY29uZGl0aW9uKGN0eCk7IH0gY2F0Y2goXyl7fQogICAgICBpZiAobWV0KSB7IHNlbGYuX2RvVW5sb2NrKGEsY3R4KTsgbmV3bHkucHVzaChhLmlkKTsgfQogICAgfSk7CiAgICBpZiAobmV3bHkubGVuZ3RoKSB0aGlzLl9yZWZyZXNoUGFuZWwoKTsKICAgIHJldHVybiBuZXdseTsKICB9OwoKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUudW5sb2NrID0gZnVuY3Rpb24oaWQpIHsKICAgIHZhciBhPXRoaXMuX21hcFtpZF07IGlmKGEmJiFhLl91bmxvY2tlZCl7IHRoaXMuX2RvVW5sb2NrKGEse30pOyB0aGlzLl9yZWZyZXNoUGFuZWwoKTsgfQogIH07CgogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5pc1VubG9ja2VkICA9IGZ1bmN0aW9uKGlkKSB7IHJldHVybiAhISh0aGlzLl9tYXBbaWRdJiZ0aGlzLl9tYXBbaWRdLl91bmxvY2tlZCk7IH07CiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLmdldEFsbCAgICAgID0gZnVuY3Rpb24oKSAgIHsgcmV0dXJuIHRoaXMuX2FjaGlldmVtZW50cy5tYXAoZnVuY3Rpb24oYSl7cmV0dXJuIE9iamVjdC5hc3NpZ24oe30sYSk7fSk7IH07CiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLmdldFVubG9ja2VkID0gZnVuY3Rpb24oKSAgIHsgcmV0dXJuIHRoaXMuX2FjaGlldmVtZW50cy5maWx0ZXIoZnVuY3Rpb24oYSl7cmV0dXJuIGEuX3VubG9ja2VkO30pLm1hcChmdW5jdGlvbihhKXtyZXR1cm4gT2JqZWN0LmFzc2lnbih7fSxhKTt9KTsgfTsKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuc2hvd1BhbmVsICAgPSBmdW5jdGlvbigpICAgeyB0aGlzLl9wYW5lbE9wZW49dHJ1ZTsgIHRoaXMuX3N5bmNQYW5lbCgpOyB9OwogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5oaWRlUGFuZWwgICA9IGZ1bmN0aW9uKCkgICB7IHRoaXMuX3BhbmVsT3Blbj1mYWxzZTsgdGhpcy5fc3luY1BhbmVsKCk7IH07CiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLnRvZ2dsZVBhbmVsID0gZnVuY3Rpb24oKSAgIHsgdGhpcy5fcGFuZWxPcGVuPSF0aGlzLl9wYW5lbE9wZW47IHRoaXMuX3N5bmNQYW5lbCgpOyB9OwoKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuc2V0U2hvd0xpc3QgPSBmdW5jdGlvbih2KSB7IHRoaXMuY2ZnLnNob3dMaXN0PSEhdjsgdGhpcy5fcmVmcmVzaFBhbmVsKCk7IH07CgogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5zZXRQYW5lbFdpZHRoID0gZnVuY3Rpb24ocHgpIHsKICAgIHRoaXMuY2ZnLnBhbmVsV2lkdGggPSBweDsKICAgIGlmICh0aGlzLl9wYW5lbEVsKSB0aGlzLl9wYW5lbEVsLnN0eWxlLndpZHRoID0gcHggKyAncHgnOwogIH07CgogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5zZXRUaGVtZSA9IGZ1bmN0aW9uKG5hbWUpIHsKICAgIHZhciB0PUFjaGlldmVtZW50U3lzdGVtLnRoZW1lc1tuYW1lXTsKICAgIGlmICghdCkgeyBjb25zb2xlLndhcm4oJ0FjaGlldmVtZW50U3lzdGVtOiB1bmtub3duIHRoZW1lICInK25hbWUrJyInKTsgcmV0dXJuOyB9CiAgICB0aGlzLl90aGVtZSA9IGRlZXBNZXJnZSh7fSwgX1RIRU1FU1snZGVmYXVsdCddLCB0KTsKICAgIHRoaXMuY2ZnLnRoZW1lTmFtZT1uYW1lOwogICAgdGhpcy5fcmVmcmVzaFBhbmVsKCk7CiAgICBpZiAodGhpcy5fdHJpZ2dlckVsKSB7CiAgICAgIHRoaXMuX3RyaWdnZXJFbC5zdHlsZS5jb2xvcj10aGlzLl90aGVtZS50cmlnZ2VyQ29sb3I7CiAgICAgIHRoaXMuX3RyaWdnZXJFbC5zdHlsZS5ib3JkZXJDb2xvcj10aGlzLl90aGVtZS5wYW5lbEJvcmRlcjsKICAgIH0KICB9OwoKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuc2V0U2NhbGUgPSBmdW5jdGlvbihzKSB7IHRoaXMuY2ZnLnNjYWxlPXM7IHRoaXMuX3JlZnJlc2hQYW5lbCgpOyB9OwogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5zZXRUeXBvZ3JhcGh5ID0gZnVuY3Rpb24odCkgeyBkZWVwTWVyZ2UodGhpcy5jZmcudHlwb2dyYXBoeSx0KTsgdGhpcy5fcmVmcmVzaFBhbmVsKCk7IH07CgogIC8qKgogICAqIEV4cG9ydCBhbGwgYWNoaWV2ZW1lbnQgc3RhdGVzIGFzIGEgcGxhaW4gb2JqZWN0IChKU09OLXNlcmlhbGlzYWJsZSkuCiAgICogU2hhcGU6CiAgICogICB7CiAgICogICAgIHZlcnNpb246ICAgICAgMSwKICAgKiAgICAgZXhwb3J0ZWRBdDogICIyMDI2LTAzLTE0VDEwOjAwOjAwLjAwMFoiLAogICAqICAgICB0aGVtZU5hbWU6ICAgIm9jZWFuIiwKICAgKiAgICAgYWNoaWV2ZW1lbnRzOiBbCiAgICogICAgICAgeyBpZCwgdGl0bGUsIHJhcml0eSwgdW5sb2NrZWQsIHVubG9ja2VkQXQgfQogICAqICAgICBdCiAgICogICB9CiAgICogVXNhZ2U6CiAgICogICB2YXIganNvbiA9IEpTT04uc3RyaW5naWZ5KGFjaC5leHBvcnRTdGF0ZSgpKTsKICAgKiAgIC8vIFBPU1QgdG8gUEhQOiBmZXRjaCgnL3NhdmUucGhwJywgeyBtZXRob2Q6J1BPU1QnLCBib2R5OiBqc29uIH0pCiAgICovCiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLmV4cG9ydFN0YXRlID0gZnVuY3Rpb24oKSB7CiAgICByZXR1cm4gewogICAgICB2ZXJzaW9uOiAgICAgIDEsCiAgICAgIGV4cG9ydGVkQXQ6ICAgbmV3IERhdGUoKS50b0lTT1N0cmluZygpLAogICAgICB0aGVtZU5hbWU6ICAgIHRoaXMuY2ZnLnRoZW1lTmFtZSwKICAgICAgYWNoaWV2ZW1lbnRzOiB0aGlzLl9hY2hpZXZlbWVudHMubWFwKGZ1bmN0aW9uKGEpIHsKICAgICAgICByZXR1cm4gewogICAgICAgICAgaWQ6ICAgICAgICAgYS5pZCwKICAgICAgICAgIHRpdGxlOiAgICAgIGEudGl0bGUsCiAgICAgICAgICByYXJpdHk6ICAgICBhLnJhcml0eSB8fCAnY29tbW9uJywKICAgICAgICAgIHVubG9ja2VkOiAgICEhYS5fdW5sb2NrZWQsCiAgICAgICAgICB1bmxvY2tlZEF0OiBhLl91bmxvY2tlZEF0ID8gYS5fdW5sb2NrZWRBdC50b0lTT1N0cmluZygpIDogbnVsbCwKICAgICAgICB9OwogICAgICB9KSwKICAgIH07CiAgfTsKCiAgLyoqCiAgICogUmVzdG9yZSBhIHByZXZpb3VzbHkgZXhwb3J0ZWQgc3RhdGUuCiAgICogU2lsZW50bHkgcmVzdG9yZXMgdW5sb2NrZWQvdW5sb2NrZWRBdCB3aXRob3V0IHJlLXRyaWdnZXJpbmcgdG9hc3RzIG9yIG9uVW5sb2NrLgogICAqIEBwYXJhbSB7T2JqZWN0fSBzdGF0ZSAg4oCUIG91dHB1dCBvZiBleHBvcnRTdGF0ZSgpIG9yIHBhcnNlZCBQSFAgcmVzcG9uc2UKICAgKi8KICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuaW1wb3J0U3RhdGUgPSBmdW5jdGlvbihzdGF0ZSkgewogICAgaWYgKCFzdGF0ZSB8fCAhQXJyYXkuaXNBcnJheShzdGF0ZS5hY2hpZXZlbWVudHMpKSByZXR1cm47CiAgICB2YXIgc2VsZiA9IHRoaXM7CiAgICBzdGF0ZS5hY2hpZXZlbWVudHMuZm9yRWFjaChmdW5jdGlvbihzYXZlZCkgewogICAgICB2YXIgYSA9IHNlbGYuX21hcFtzYXZlZC5pZF07CiAgICAgIGlmICghYSkgcmV0dXJuOwogICAgICBhLl91bmxvY2tlZCAgID0gISFzYXZlZC51bmxvY2tlZDsKICAgICAgYS5fdW5sb2NrZWRBdCA9IHNhdmVkLnVubG9ja2VkQXQgPyBuZXcgRGF0ZShzYXZlZC51bmxvY2tlZEF0KSA6IG51bGw7CiAgICB9KTsKICAgIHRoaXMuX3JlZnJlc2hQYW5lbCgpOwogIH07CgogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5kZXN0cm95ID0gZnVuY3Rpb24oKSB7CiAgICBpZih0aGlzLl90cmlnZ2VyRWwpdGhpcy5fdHJpZ2dlckVsLnJlbW92ZSgpOwogICAgaWYodGhpcy5fcGFuZWxFbCl0aGlzLl9wYW5lbEVsLnJlbW92ZSgpOwogICAgaWYodGhpcy5fdG9hc3RFbCl0aGlzLl90b2FzdEVsLnJlbW92ZSgpOwogIH07CgogIC8vIOKUgOKUgCBIZWxwZXJzIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgAogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5fZnMgPSBmdW5jdGlvbihrZXkpIHsKICAgIHZhciB2PXRoaXMuY2ZnLnR5cG9ncmFwaHkmJnRoaXMuY2ZnLnR5cG9ncmFwaHlba2V5XXx8X0QudHlwb2dyYXBoeVtrZXldOwogICAgcmV0dXJuIHNjYWxlUmVtKHYsIHRoaXMuY2ZnLnNjYWxlfHwxKTsKICB9OwoKICAvLyBSYXJpdHkgaGVscGVyOiBtZXJnZXMgc3RhdGljIGNvbG91ci9nbG93IHdpdGggY29uZmlndXJhYmxlIGxhYmVsCiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLl9yID0gZnVuY3Rpb24ocmFyaXR5S2V5KSB7CiAgICB2YXIgYmFzZSAgID0gUkFSSVRJRVNbcmFyaXR5S2V5XSB8fCBSQVJJVElFUy5jb21tb247CiAgICB2YXIgbGFiZWxzID0gKHRoaXMuY2ZnLnJhcml0eUxhYmVscykgfHwgX0QucmFyaXR5TGFiZWxzOwogICAgcmV0dXJuIHsgbGFiZWw6IGxhYmVsc1tyYXJpdHlLZXldIHx8IGJhc2UubGFiZWwsIGNvbG9yOiBiYXNlLmNvbG9yLCBnbG93OiBiYXNlLmdsb3cgfTsKICB9OwoKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuX21vdW50ID0gZnVuY3Rpb24oKSB7CiAgICB0aGlzLl9idWlsZFRvYXN0cygpOwogICAgdGhpcy5fYnVpbGRUcmlnZ2VyKCk7CiAgICB0aGlzLl9idWlsZFBhbmVsKCk7CiAgfTsKCiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLl9kb1VubG9jayA9IGZ1bmN0aW9uKGEsIGN0eCkgewogICAgYS5fdW5sb2NrZWQ9dHJ1ZTsgYS5fdW5sb2NrZWRBdD1uZXcgRGF0ZSgpOwogICAgdGhpcy5fc2hvd1RvYXN0KGEpOwogICAgaWYgKHRoaXMuY2ZnLm9uVW5sb2NrKSB0aGlzLmNmZy5vblVubG9jayhPYmplY3QuYXNzaWduKHt9LGEpLCBjdHgpOwogIH07CgogIC8vIOKUgOKUgCBUcmlnZ2VyIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgAogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5fYnVpbGRUcmlnZ2VyID0gZnVuY3Rpb24oKSB7CiAgICB2YXIgcG9zICA9IHRoaXMuY2ZnLnRyaWdnZXJQb3MgIHx8ICdib3R0b20tbGVmdCc7CiAgICB2YXIgc2l6ZSA9ICh0aGlzLmNmZy50cmlnZ2VyU2l6ZSB8fCA0NikgKyAncHgnOwogICAgdmFyIGVsICAgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdidXR0b24nKTsKICAgIGVsLmlkID0gJ2FjaC10cmlnZ2VyJzsKICAgIGVsLmNsYXNzTmFtZSA9ICdhY2gtdHJpZ2dlciBhY2gtdHJpZ2dlci0tJyArIHBvczsKICAgIGVsLnNldEF0dHJpYnV0ZSgnYXJpYS1sYWJlbCcsJ+aIkOWwseezu+e1sScpOwogICAgZWwuc2V0QXR0cmlidXRlKCd0aXRsZScsJ+aIkOWwsScpOwogICAgZWwuc3R5bGUuY29sb3IgID0gdGhpcy5fdGhlbWUudHJpZ2dlckNvbG9yOwogICAgZWwuc3R5bGUud2lkdGggID0gc2l6ZTsKICAgIGVsLnN0eWxlLmhlaWdodCA9IHNpemU7CiAgICBlbC5pbm5lckhUTUwgPSAnPGkgY2xhc3M9ImJpIGJpLWF3YXJkLWZpbGwgYWNoLXRyaWdnZXItaWNvbiI+PC9pPicKICAgICAgKyAnPHNwYW4gY2xhc3M9ImFjaC10cmlnZ2VyLWJhZGdlIiBpZD0iYWNoLWJhZGdlIiBzdHlsZT0iYmFja2dyb3VuZDonK3RoaXMuX3RoZW1lLmFjY2VudCsnO2NvbG9yOicrdGhpcy5fdGhlbWUuYWNjZW50VGV4dCsnIj4wPC9zcGFuPic7CiAgICB2YXIgc2VsZiA9IHRoaXM7CiAgICBlbC5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsIGZ1bmN0aW9uKCl7IHNlbGYudG9nZ2xlUGFuZWwoKTsgfSk7CiAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKGVsKTsKICAgIHRoaXMuX3RyaWdnZXJFbCA9IGVsOwogIH07CgogIC8vIOKUgOKUgCBQYW5lbCDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuX2J1aWxkUGFuZWwgPSBmdW5jdGlvbigpIHsKICAgIHZhciBzaWRlICA9IHRoaXMuY2ZnLnBhbmVsU2lkZSA9PT0gJ2xlZnQnID8gJ2xlZnQnIDogJ3JpZ2h0JzsKICAgIHZhciB3aWR0aCA9ICh0aGlzLmNmZy5wYW5lbFdpZHRoIHx8IDI4MCkgKyAncHgnOwogICAgdmFyIGVsICAgID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnYXNpZGUnKTsKICAgIGVsLmlkID0gJ2FjaC1wYW5lbCc7CiAgICBlbC5jbGFzc05hbWUgPSAnYWNoLXBhbmVsIGFjaC1wYW5lbC0tJyArIHNpZGU7CiAgICBlbC5zdHlsZS53aWR0aCA9IHdpZHRoOwogICAgZWwuc2V0QXR0cmlidXRlKCdyb2xlJywnZGlhbG9nJyk7IGVsLnNldEF0dHJpYnV0ZSgnYXJpYS1tb2RhbCcsJ2ZhbHNlJyk7IGVsLnNldEF0dHJpYnV0ZSgnYXJpYS1sYWJlbCcsJ+aIkOWwsea4heWWricpOwogICAgdmFyIHNlbGY9dGhpczsKICAgIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxmdW5jdGlvbihlKXsKICAgICAgaWYgKHNlbGYuX3BhbmVsT3BlbiYmc2VsZi5fcGFuZWxFbCYmIXNlbGYuX3BhbmVsRWwuY29udGFpbnMoZS50YXJnZXQpJiYhKHNlbGYuX3RyaWdnZXJFbCYmc2VsZi5fdHJpZ2dlckVsLmNvbnRhaW5zKGUudGFyZ2V0KSkpCiAgICAgICAgc2VsZi5oaWRlUGFuZWwoKTsKICAgIH0pOwogICAgZG9jdW1lbnQuYm9keS5hcHBlbmRDaGlsZChlbCk7CiAgICB0aGlzLl9wYW5lbEVsPWVsOwogICAgdGhpcy5fcmVmcmVzaFBhbmVsKCk7CiAgfTsKCiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLl9yZWZyZXNoUGFuZWwgPSBmdW5jdGlvbigpIHsKICAgIGlmICghdGhpcy5fcGFuZWxFbCkgcmV0dXJuOwogICAgdmFyIHRoPXRoaXMuX3RoZW1lOwogICAgdmFyIHRvdGFsPXRoaXMuX2FjaGlldmVtZW50cy5sZW5ndGg7CiAgICB2YXIgdWw9dGhpcy5fYWNoaWV2ZW1lbnRzLmZpbHRlcihmdW5jdGlvbihhKXtyZXR1cm4gYS5fdW5sb2NrZWQ7fSkubGVuZ3RoOwogICAgdmFyIHBjdD10b3RhbD9NYXRoLnJvdW5kKHVsL3RvdGFsKjEwMCk6MDsKCiAgICB2YXIgYmFkZ2U9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2FjaC1iYWRnZScpOwogICAgaWYgKGJhZGdlKSB7IGJhZGdlLnRleHRDb250ZW50PXVsOyBiYWRnZS5zdHlsZS5iYWNrZ3JvdW5kPXRoLmFjY2VudDsgYmFkZ2Uuc3R5bGUuY29sb3I9dGguYWNjZW50VGV4dDsgfQogICAgaWYgKHRoaXMuX3RyaWdnZXJFbCkgeyBpZih1bD4wKXRoaXMuX3RyaWdnZXJFbC5jbGFzc0xpc3QuYWRkKCdoYXMtaXRlbXMnKTsgfQoKICAgIHRoaXMuX3BhbmVsRWwuc3R5bGUuYmFja2dyb3VuZCA9IHRoLnBhbmVsQmc7CiAgICB0aGlzLl9wYW5lbEVsLnN0eWxlLmJvcmRlckNvbG9yID0gdGgucGFuZWxCb3JkZXI7CgogICAgdmFyIHNlbGY9dGhpczsKICAgIHRoaXMuX3BhbmVsRWwuaW5uZXJIVE1MPScnCiAgICAgICsnPGhlYWRlciBjbGFzcz0iYWNoLXBhbmVsLWhkciIgc3R5bGU9ImJvcmRlci1jb2xvcjonK3RoLnBhbmVsQm9yZGVyKyciPicKICAgICAgICArJzxzcGFuIGNsYXNzPSJhY2gtcGFuZWwtdGl0bGUiIHN0eWxlPSJjb2xvcjonK3RoLmhlYWRlckNvbG9yKyc7Zm9udC1zaXplOicrdGhpcy5fZnMoJ3BhbmVsVGl0bGUnKSsnIj4nCiAgICAgICAgICArJzxpIGNsYXNzPSJiaSBiaS1hd2FyZC1maWxsIiBzdHlsZT0iY29sb3I6Jyt0aC5hY2NlbnQrJyI+PC9pPiDmiJDlsLE8L3NwYW4+JwogICAgICAgICsnPGRpdiBjbGFzcz0iYWNoLXBhbmVsLWNvbnRyb2xzIj4nCiAgICAgICAgICArJzxidXR0b24gY2xhc3M9ImFjaC1pY29uLWJ0biIgaWQ9ImFjaC10b2dnbGUtbGlzdCIgdGl0bGU9IicrKHRoaXMuY2ZnLnNob3dMaXN0PyfpmrHol4/muIXllq4nOifpoa/npLrmuIXllq4nKSsnIj4nCiAgICAgICAgICAgICsnPGkgY2xhc3M9ImJpICcrKHRoaXMuY2ZnLnNob3dMaXN0PydiaS1leWUnOidiaS1leWUtc2xhc2gnKSsnIj48L2k+PC9idXR0b24+JwogICAgICAgICAgKyc8YnV0dG9uIGNsYXNzPSJhY2gtaWNvbi1idG4iIGlkPSJhY2gtY2xvc2UtYnRuIiB0aXRsZT0i6Zec6ZaJIj48aSBjbGFzcz0iYmkgYmkteC1sZyI+PC9pPjwvYnV0dG9uPicKICAgICAgICArJzwvZGl2PicKICAgICAgKyc8L2hlYWRlcj4nCiAgICAgICsnPGRpdiBjbGFzcz0iYWNoLXByb2dyZXNzLXRyYWNrIiBzdHlsZT0iYmFja2dyb3VuZDonK3RoLnBhbmVsQm9yZGVyKyciPicKICAgICAgICArJzxkaXYgY2xhc3M9ImFjaC1wcm9ncmVzcy1maWxsIiBzdHlsZT0id2lkdGg6JytwY3QrJyU7YmFja2dyb3VuZDonK3RoLnByb2dyZXNzQmcrJyI+PC9kaXY+JwogICAgICArJzwvZGl2PicKICAgICAgKyc8ZGl2IGNsYXNzPSJhY2gtcHJvZy1sYWJlbCIgc3R5bGU9ImZvbnQtc2l6ZTonK3RoaXMuX2ZzKCdwcm9ncmVzc0xhYmVsJykrJyI+JwogICAgICAgICsnPHNwYW4gc3R5bGU9ImNvbG9yOicrdGguYWNjZW50KyciPicrdWwrJzwvc3Bhbj4nCiAgICAgICAgKyc8c3BhbiBzdHlsZT0iY29sb3I6IzVhNWI1OCI+IC8gJyt0b3RhbCsnPC9zcGFuPicKICAgICAgICArJzxzcGFuIGNsYXNzPSJhY2gtcHJvZy1wY3QiIHN0eWxlPSJjb2xvcjonK3RoLmFjY2VudCsnIj4nK3BjdCsnJTwvc3Bhbj4nCiAgICAgICsnPC9kaXY+JwogICAgICArKHRoaXMuY2ZnLnNob3dMaXN0ID8gdGhpcy5fcmVuZGVyTGlzdCgpIDogJzxkaXYgY2xhc3M9ImFjaC1oaWRkZW4tbXNnIj48aSBjbGFzcz0iYmkgYmktZXllLXNsYXNoIj48L2k+PHNwYW4+5oiQ5bCx5riF5Zau5bey6Zqx6JePPC9zcGFuPjwvZGl2PicpOwoKICAgIHZhciBjbG9zZUJ0bj1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYWNoLWNsb3NlLWJ0bicpOwogICAgaWYgKGNsb3NlQnRuKSBjbG9zZUJ0bi5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsZnVuY3Rpb24oKXsgc2VsZi5oaWRlUGFuZWwoKTsgfSk7CiAgICB2YXIgdG9nZ2xlQnRuPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdhY2gtdG9nZ2xlLWxpc3QnKTsKICAgIGlmICh0b2dnbGVCdG4pIHRvZ2dsZUJ0bi5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsZnVuY3Rpb24oKXsgc2VsZi5zZXRTaG93TGlzdCghc2VsZi5jZmcuc2hvd0xpc3QpOyB9KTsKICB9OwoKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuX3JlbmRlckxpc3QgPSBmdW5jdGlvbigpIHsKICAgIGlmICghdGhpcy5fYWNoaWV2ZW1lbnRzLmxlbmd0aCkgcmV0dXJuICc8ZGl2IGNsYXNzPSJhY2gtZW1wdHkiPuWwmueEoeaIkOWwseioreWumjwvZGl2Pic7CiAgICB2YXIgdWw9dGhpcy5fYWNoaWV2ZW1lbnRzLmZpbHRlcihmdW5jdGlvbihhKXtyZXR1cm4gIGEuX3VubG9ja2VkO30pOwogICAgdmFyIGxrPXRoaXMuX2FjaGlldmVtZW50cy5maWx0ZXIoZnVuY3Rpb24oYSl7cmV0dXJuICFhLl91bmxvY2tlZDt9KTsKICAgIHZhciB0aD10aGlzLl90aGVtZSwgc2VsZj10aGlzOwogICAgdmFyIGh0bWw9JzxkaXYgY2xhc3M9ImFjaC1saXN0LXdyYXAiPic7CiAgICBpZiAodWwubGVuZ3RoKSB7CiAgICAgIGh0bWwrPSc8ZGl2IGNsYXNzPSJhY2gtZ3JvdXAtaGRyIiBzdHlsZT0iZm9udC1zaXplOicrdGhpcy5fZnMoJ3BhbmVsTWV0YScpKyciPicKICAgICAgICArJzxpIGNsYXNzPSJiaSBiaS1jaGVjay1jaXJjbGUtZmlsbCIgc3R5bGU9ImNvbG9yOicrdGguYWNjZW50KyciPjwvaT4g5bey6Kej6Y6W77yIJyt1bC5sZW5ndGgrJ++8iTwvZGl2Pic7CiAgICAgIHVsLmZvckVhY2goZnVuY3Rpb24oYSl7IGh0bWwrPXNlbGYuX3JlbmRlckl0ZW0oYSk7IH0pOwogICAgfQogICAgaWYgKGxrLmxlbmd0aCkgewogICAgICBodG1sKz0nPGRpdiBjbGFzcz0iYWNoLWdyb3VwLWhkciIgc3R5bGU9ImZvbnQtc2l6ZTonK3RoaXMuX2ZzKCdwYW5lbE1ldGEnKSsnO21hcmdpbi10b3A6NHB4Ij4nCiAgICAgICAgKyc8aSBjbGFzcz0iYmkgYmktbG9jay1maWxsIiBzdHlsZT0iY29sb3I6IzVhNWI1OCI+PC9pPiDmnKrop6PpjpbvvIgnK2xrLmxlbmd0aCsn77yJPC9kaXY+JzsKICAgICAgbGsuZm9yRWFjaChmdW5jdGlvbihhKXsgaHRtbCs9c2VsZi5fcmVuZGVySXRlbShhKTsgfSk7CiAgICB9CiAgICByZXR1cm4gaHRtbCsnPC9kaXY+JzsKICB9OwoKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuX3JlbmRlckl0ZW0gPSBmdW5jdGlvbihhKSB7CiAgICB2YXIgcj10aGlzLl9yKGEucmFyaXR5fHwnY29tbW9uJyk7CiAgICBpZiAoIWEuX3VubG9ja2VkJiZhLnNlY3JldCkKICAgICAgcmV0dXJuICc8ZGl2IGNsYXNzPSJhY2gtaXRlbSBhY2gtaXRlbS0tc2VjcmV0Ij4nCiAgICAgICAgKyc8ZGl2IGNsYXNzPSJhY2gtaXRlbS1pY29uIiBzdHlsZT0iYm9yZGVyLWNvbG9yOiMxODE5MTg7Y29sb3I6IzFlMWYxZSI+PGkgY2xhc3M9ImJpIGJpLXF1ZXN0aW9uLWxnIj48L2k+PC9kaXY+JwogICAgICAgICsnPGRpdiBjbGFzcz0iYWNoLWl0ZW0tYm9keSI+PGRpdiBjbGFzcz0iYWNoLWl0ZW0tdGl0bGUiIHN0eWxlPSJjb2xvcjojNGE0YjQ4O2ZvbnQtc2l6ZTonK3RoaXMuX2ZzKCdwYW5lbEl0ZW0nKSsnIj4/Pz8g6Zqx6JeP5oiQ5bCxPC9kaXY+PC9kaXY+JwogICAgICAgICsnPC9kaXY+JzsKICAgIHZhciBpc1Nwb2lsZXI9IWEuX3VubG9ja2VkJiYhIWEuc3BvaWxlcjsKICAgIHZhciBpY29uICA9IGlzU3BvaWxlcj8nYmktc2hpZWxkLWxvY2stZmlsbCc6KGEuaWNvbnx8J2JpLWF3YXJkJyk7CiAgICB2YXIgdGl0bGUgPSBpc1Nwb2lsZXI/Jz8/Pyc6KGEudGl0bGV8fGEuaWQpOwogICAgdmFyIGRlc2MgID0gaXNTcG9pbGVyPyfpgZTmiJDlvozmj63mm4nigKYnOihhLmRlc2N8fCcnKTsKICAgIHZhciBsb2NrSWNvbj0gIWEuX3VubG9ja2VkPyc8aSBjbGFzcz0iYmkgYmktbG9jay1maWxsIiBzdHlsZT0iZm9udC1zaXplOi41NXJlbTtjb2xvcjojNWE1YjU4O21hcmdpbi1sZWZ0OjNweCI+PC9pPic6Jyc7CiAgICByZXR1cm4gJzxkaXYgY2xhc3M9ImFjaC1pdGVtICcrKGEuX3VubG9ja2VkPydhY2gtaXRlbS0tdW5sb2NrZWQnOidhY2gtaXRlbS0tbG9ja2VkJykrJyIgZGF0YS1pZD0iJythLmlkKyciIHJvbGU9Imxpc3RpdGVtIj4nCiAgICAgICsnPGRpdiBjbGFzcz0iYWNoLWl0ZW0taWNvbiIgc3R5bGU9ImJvcmRlci1jb2xvcjonKyhhLl91bmxvY2tlZD9yLmNvbG9yOicjMjQyNTI0JykrJzsnCiAgICAgICAgKydjb2xvcjonKyhhLl91bmxvY2tlZD9yLmNvbG9yOicjNWE1YjU4JykrJzsnCiAgICAgICAgKydib3gtc2hhZG93OicrKGEuX3VubG9ja2VkPycwIDAgMTJweCAnK3IuZ2xvdzonbm9uZScpKyciPjxpIGNsYXNzPSJiaSAnK2ljb24rJyI+PC9pPjwvZGl2PicKICAgICAgKyc8ZGl2IGNsYXNzPSJhY2gtaXRlbS1ib2R5Ij4nCiAgICAgICAgKyc8ZGl2IGNsYXNzPSJhY2gtaXRlbS10aXRsZSIgc3R5bGU9ImNvbG9yOicrKGEuX3VubG9ja2VkPycjYzZjN2JkJzonIzdhN2I3OCcpKyc7Zm9udC1zaXplOicrdGhpcy5fZnMoJ3BhbmVsSXRlbScpKyciPicrdGl0bGUrbG9ja0ljb24rJzwvZGl2PicKICAgICAgICArKGRlc2M/JzxkaXYgY2xhc3M9ImFjaC1pdGVtLWRlc2MiIHN0eWxlPSJjb2xvcjonKyhhLl91bmxvY2tlZD8nIzhhOGI4OCc6JyM1YTViNTgnKSsnO2ZvbnQtc2l6ZTonK3RoaXMuX2ZzKCdwYW5lbERlc2MnKSsnIj4nK2Rlc2MrJzwvZGl2Pic6JycpCiAgICAgICAgKyc8ZGl2IGNsYXNzPSJhY2gtaXRlbS1tZXRhIiBzdHlsZT0iZm9udC1zaXplOicrdGhpcy5fZnMoJ3BhbmVsTWV0YScpKyciPicKICAgICAgICAgICsnPHNwYW4gY2xhc3M9ImFjaC1yYXJpdHkiIHN0eWxlPSJjb2xvcjonK3IuY29sb3IrJyI+JytyLmxhYmVsKyc8L3NwYW4+JwogICAgICAgICAgKyhhLl91bmxvY2tlZCYmYS5fdW5sb2NrZWRBdD8nPHNwYW4gY2xhc3M9ImFjaC10aW1lIj4nK3RoaXMuX2ZtdFRpbWUoYS5fdW5sb2NrZWRBdCkrJzwvc3Bhbj4nOicnKQogICAgICAgICAgKyhhLnJld2FyZCYmYS5fdW5sb2NrZWQ/JzxzcGFuIGNsYXNzPSJhY2gtcmV3YXJkIj48aSBjbGFzcz0iYmkgYmktZ2lmdC1maWxsIj48L2k+ICcrYS5yZXdhcmQrJzwvc3Bhbj4nOicnKQogICAgICAgICsnPC9kaXY+JwogICAgICArJzwvZGl2PicKICAgICAgKyc8L2Rpdj4nOwogIH07CgogIC8vIOKUgOKUgCBUb2FzdCDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuX2J1aWxkVG9hc3RzID0gZnVuY3Rpb24oKSB7CiAgICB2YXIgZWwgID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnZGl2Jyk7CiAgICBlbC5pZCAgID0gJ2FjaC10b2FzdHMnOwogICAgZWwuY2xhc3NOYW1lID0gJ2FjaC10b2FzdHMnOwogICAgLy8gQXBwbHkgdG9hc3RXaWR0aCBhbmQgdG9hc3RQb3NpdGlvbiB2aWEgaW5saW5lIHN0eWxlCiAgICB2YXIgdyAgID0gKHRoaXMuY2ZnLnRvYXN0V2lkdGggfHwgMjcwKSArICdweCc7CiAgICB2YXIgcG9zID0gdGhpcy5jZmcudG9hc3RQb3NpdGlvbiB8fCAndG9wLXJpZ2h0JzsKICAgIGVsLnN0eWxlLndpZHRoID0gdzsKICAgIC8vIFBvc2l0aW9uIG1hcHBpbmcKICAgIHZhciBwb3NNYXAgPSB7CiAgICAgICd0b3AtcmlnaHQnOiAgICAndG9wOjYwcHg7cmlnaHQ6MTZweDtib3R0b206YXV0bztsZWZ0OmF1dG87JywKICAgICAgJ3RvcC1sZWZ0JzogICAgICd0b3A6NjBweDtsZWZ0OjE2cHg7Ym90dG9tOmF1dG87cmlnaHQ6YXV0bzsnLAogICAgICAnYm90dG9tLXJpZ2h0JzogJ2JvdHRvbTo4MHB4O3JpZ2h0OjE2cHg7dG9wOmF1dG87bGVmdDphdXRvOycsCiAgICAgICdib3R0b20tbGVmdCc6ICAnYm90dG9tOjgwcHg7bGVmdDoxNnB4O3RvcDphdXRvO3JpZ2h0OmF1dG87JywKICAgIH07CiAgICBlbC5zdHlsZS5jc3NUZXh0ICs9IHBvc01hcFtwb3NdIHx8IHBvc01hcFsndG9wLXJpZ2h0J107CiAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKGVsKTsKICAgIHRoaXMuX3RvYXN0RWwgPSBlbDsKICB9OwoKICBBY2hpZXZlbWVudFN5c3RlbS5wcm90b3R5cGUuX3Nob3dUb2FzdCA9IGZ1bmN0aW9uKGEpIHsKICAgIGlmICghdGhpcy5fdG9hc3RFbCkgcmV0dXJuOwogICAgdmFyIHIgID0gdGhpcy5fcihhLnJhcml0eSB8fCAnY29tbW9uJyksIHRoID0gdGhpcy5fdGhlbWU7CiAgICB2YXIgdG9hc3QgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdkaXYnKTsKICAgIHRvYXN0LmNsYXNzTmFtZSA9ICdhY2gtdG9hc3QnOwogICAgdG9hc3Quc3R5bGUuYm9yZGVyTGVmdENvbG9yID0gci5jb2xvcjsKICAgIHRvYXN0LnN0eWxlLmJhY2tncm91bmQgICAgICA9IHRoLnBhbmVsQmc7CiAgICB0b2FzdC5zdHlsZS5ib3JkZXJDb2xvciAgICAgPSB0aC50b2FzdEJvcmRlcjsKICAgIHRvYXN0LnN0eWxlLmJvcmRlckxlZnRDb2xvciA9IHIuY29sb3I7CiAgICB0b2FzdC5pbm5lckhUTUwgPSAnJwogICAgICArICc8ZGl2IGNsYXNzPSJhY2gtdG9hc3QtaWNvbiIgc3R5bGU9ImNvbG9yOicrci5jb2xvcisnO2JvcmRlci1jb2xvcjonK3IuY29sb3IrJyI+JwogICAgICAgICsgJzxpIGNsYXNzPSJiaSAnKyhhLmljb258fCdiaS1hd2FyZC1maWxsJykrJyI+PC9pPjwvZGl2PicKICAgICAgKyAnPGRpdiBjbGFzcz0iYWNoLXRvYXN0LWJvZHkiPicKICAgICAgICArICc8ZGl2IGNsYXNzPSJhY2gtdG9hc3QtZXllYnJvdyIgc3R5bGU9ImZvbnQtc2l6ZTonK3RoaXMuX2ZzKCd0b2FzdEV5ZWJyb3cnKSsnIj4nCiAgICAgICAgICArICc8c3Bhbj7miJDlsLHop6PpjpY8L3NwYW4+PHNwYW4gY2xhc3M9ImFjaC10b2FzdC1yYXJpdHkiIHN0eWxlPSJjb2xvcjonK3IuY29sb3IrJyI+JytyLmxhYmVsKyc8L3NwYW4+PC9kaXY+JwogICAgICAgICsgJzxkaXYgY2xhc3M9ImFjaC10b2FzdC10aXRsZSIgc3R5bGU9ImNvbG9yOicrci5jb2xvcisnO2ZvbnQtc2l6ZTonK3RoaXMuX2ZzKCd0b2FzdFRpdGxlJykrJyI+JysoYS50aXRsZXx8YS5pZCkrJzwvZGl2PicKICAgICAgICArIChhLmRlc2MgICA/ICc8ZGl2IGNsYXNzPSJhY2gtdG9hc3QtZGVzYyIgICBzdHlsZT0iZm9udC1zaXplOicrdGhpcy5fZnMoJ3RvYXN0RGVzYycpKyciPicrYS5kZXNjKyc8L2Rpdj4nICAgOiAnJykKICAgICAgICArIChhLnJld2FyZCA/ICc8ZGl2IGNsYXNzPSJhY2gtdG9hc3QtcmV3YXJkIiBzdHlsZT0iZm9udC1zaXplOicrdGhpcy5fZnMoJ3RvYXN0RGVzYycpKyciPjxpIGNsYXNzPSJiaSBiaS1naWZ0LWZpbGwiPjwvaT4gJythLnJld2FyZCsnPC9kaXY+JyA6ICcnKQogICAgICArICc8L2Rpdj4nOwogICAgdGhpcy5fdG9hc3RFbC5hcHBlbmRDaGlsZCh0b2FzdCk7CiAgICByZXF1ZXN0QW5pbWF0aW9uRnJhbWUoZnVuY3Rpb24oKXsgcmVxdWVzdEFuaW1hdGlvbkZyYW1lKGZ1bmN0aW9uKCl7IHRvYXN0LmNsYXNzTGlzdC5hZGQoJ2FjaC10b2FzdC0tc2hvdycpOyB9KTsgfSk7CiAgICAvLyB0b2FzdER1cmF0aW9uOiBwZXItcmFyaXR5IG1hcCBvciBzaW5nbGUgbnVtYmVyCiAgICB2YXIgZHVyQ2ZnID0gdGhpcy5jZmcudG9hc3REdXJhdGlvbjsKICAgIHZhciBkdXI7CiAgICBpZiAodHlwZW9mIGR1ckNmZyA9PT0gJ251bWJlcicpIHsKICAgICAgZHVyID0gZHVyQ2ZnOwogICAgfSBlbHNlIHsKICAgICAgdmFyIG1hcCA9IGRlZXBNZXJnZSh7fSwgX0QudG9hc3REdXJhdGlvbiwgZHVyQ2ZnIHx8IHt9KTsKICAgICAgZHVyID0gbWFwW2EucmFyaXR5IHx8ICdjb21tb24nXSB8fCAzMjAwOwogICAgfQogICAgc2V0VGltZW91dChmdW5jdGlvbigpewogICAgICB0b2FzdC5jbGFzc0xpc3QucmVtb3ZlKCdhY2gtdG9hc3QtLXNob3cnKTsKICAgICAgc2V0VGltZW91dChmdW5jdGlvbigpeyB0b2FzdC5yZW1vdmUoKTsgfSwgNDIwKTsKICAgIH0sIGR1cik7CiAgfTsKCiAgQWNoaWV2ZW1lbnRTeXN0ZW0ucHJvdG90eXBlLl9zeW5jUGFuZWwgPSBmdW5jdGlvbigpIHsKICAgIGlmICghdGhpcy5fcGFuZWxFbCkgcmV0dXJuOwogICAgaWYgKHRoaXMuX3BhbmVsT3BlbikgdGhpcy5fcGFuZWxFbC5jbGFzc0xpc3QuYWRkKCdhY2gtcGFuZWwtLW9wZW4nKTsKICAgIGVsc2UgdGhpcy5fcGFuZWxFbC5jbGFzc0xpc3QucmVtb3ZlKCdhY2gtcGFuZWwtLW9wZW4nKTsKICAgIHRoaXMuX3JlZnJlc2hQYW5lbCgpOwogIH07CgogIEFjaGlldmVtZW50U3lzdGVtLnByb3RvdHlwZS5fZm10VGltZSA9IGZ1bmN0aW9uKGQpIHsKICAgIHJldHVybiBkLnRvTG9jYWxlVGltZVN0cmluZygnemgtVFcnLHtob3VyOicyLWRpZ2l0JyxtaW51dGU6JzItZGlnaXQnLHNlY29uZDonMi1kaWdpdCd9KTsKICB9OwoKICAvLyDilIDilIAgU3RhdGljIENTUyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAKICBBY2hpZXZlbWVudFN5c3RlbS5faW5qZWN0Q1NTID0gZnVuY3Rpb24oKSB7CiAgICBpZiAoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2FjaC1jb3JlLWNzcycpKSByZXR1cm47CiAgICB2YXIgcz1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCdzdHlsZScpOyBzLmlkPSdhY2gtY29yZS1jc3MnOwogICAgcy50ZXh0Q29udGVudD0nJwogICAgICArJy5hY2gtdHJpZ2dlcntwb3NpdGlvbjpmaXhlZDt6LWluZGV4OjkwMDt3aWR0aDo0NnB4O2hlaWdodDo0NnB4O2JvcmRlci1yYWRpdXM6NTAlOycKICAgICAgICArJ2JhY2tncm91bmQ6IzBlMGYwZTtib3JkZXI6MS41cHggc29saWQgIzIyMjMyMjtmb250LXNpemU6MS4ycmVtOycKICAgICAgICArJ2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcjtjdXJzb3I6cG9pbnRlcjsnCiAgICAgICAgKydib3gtc2hhZG93OjAgNHB4IDE4cHggcmdiYSgwLDAsMCwuNyk7dHJhbnNpdGlvbjpib3JkZXItY29sb3IgLjJzLGJveC1zaGFkb3cgLjJzO3BhZGRpbmc6MDt9JwogICAgICArJy5hY2gtdHJpZ2dlcjpob3ZlciwuYWNoLXRyaWdnZXIuaGFzLWl0ZW1ze2JvcmRlci1jb2xvcjpjdXJyZW50Q29sb3I7Ym94LXNoYWRvdzowIDRweCAyMnB4IHJnYmEoMjAwLDIyMSw5MCwuMjgpO30nCiAgICAgICsnLmFjaC10cmlnZ2VyLS1ib3R0b20tbGVmdHtib3R0b206MjRweDtsZWZ0OjI0cHg7fScKICAgICAgKycuYWNoLXRyaWdnZXItLWJvdHRvbS1yaWdodHtib3R0b206MjRweDtyaWdodDoyNHB4O30nCiAgICAgICsnLmFjaC10cmlnZ2VyLS10b3AtbGVmdHt0b3A6NjRweDtsZWZ0OjI0cHg7fScKICAgICAgKycuYWNoLXRyaWdnZXItYmFkZ2V7cG9zaXRpb246YWJzb2x1dGU7dG9wOi01cHg7cmlnaHQ6LTVweDsnCiAgICAgICAgKydmb250LXNpemU6LjU4cmVtO2ZvbnQtd2VpZ2h0OjgwMDttaW4td2lkdGg6MTZweDtoZWlnaHQ6MTZweDtwYWRkaW5nOjAgM3B4OycKICAgICAgICArJ2JvcmRlci1yYWRpdXM6OHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcjsnCiAgICAgICAgKydmb250LWZhbWlseTpcJ0V4byAyXCcsbW9ub3NwYWNlO2JvcmRlcjoxLjVweCBzb2xpZCAjMGMwZDBjO3RyYW5zaXRpb246dHJhbnNmb3JtIC4yczt9JwogICAgICArJy5hY2gtcGFuZWx7cG9zaXRpb246Zml4ZWQ7dG9wOjA7Ym90dG9tOjA7d2lkdGg6MjgwcHg7ei1pbmRleDo4NTA7JwogICAgICAgICsnZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtvdmVyZmxvdzpoaWRkZW47JwogICAgICAgICsndHJhbnNpdGlvbjp0cmFuc2Zvcm0gLjNzIGN1YmljLWJlemllciguNCwwLC4yLDEpO30nCiAgICAgICsnLmFjaC1wYW5lbC0tcmlnaHR7cmlnaHQ6MDtib3JkZXItbGVmdDoxcHggc29saWQ7dHJhbnNmb3JtOnRyYW5zbGF0ZVgoMTAwJSk7fScKICAgICAgKycuYWNoLXBhbmVsLS1sZWZ0e2xlZnQ6MDtib3JkZXItcmlnaHQ6MXB4IHNvbGlkO3RyYW5zZm9ybTp0cmFuc2xhdGVYKC0xMDAlKTt9JwogICAgICArJy5hY2gtcGFuZWwtLW9wZW57dHJhbnNmb3JtOnRyYW5zbGF0ZVgoMCk7Ym94LXNoYWRvdzotOHB4IDAgNDBweCByZ2JhKDAsMCwwLC43KTt9JwogICAgICArJy5hY2gtcGFuZWwtLWxlZnQuYWNoLXBhbmVsLS1vcGVue2JveC1zaGFkb3c6OHB4IDAgNDBweCByZ2JhKDAsMCwwLC43KTt9JwogICAgICArJy5hY2gtcGFuZWwtaGRye3BhZGRpbmc6MTNweCAxNHB4IDEwcHg7Ym9yZGVyLWJvdHRvbToxcHggc29saWQ7JwogICAgICAgICsnZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtmbGV4LXNocmluazowO30nCiAgICAgICsnLmFjaC1wYW5lbC10aXRsZXtmb250LXdlaWdodDo3MDA7Zm9udC1mYW1pbHk6XCdFeG8gMlwnLHNhbnMtc2VyaWY7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6N3B4O30nCiAgICAgICsnLmFjaC1wYW5lbC1jb250cm9sc3tkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo0cHg7fScKICAgICAgKycuYWNoLWljb24tYnRue2JhY2tncm91bmQ6bm9uZTtib3JkZXI6bm9uZTtjb2xvcjojM2EzYjM4O2N1cnNvcjpwb2ludGVyO2ZvbnQtc2l6ZTouODJyZW07JwogICAgICAgICsncGFkZGluZzozcHggNnB4O2JvcmRlci1yYWRpdXM6NHB4O3RyYW5zaXRpb246Y29sb3IgLjE1cyxiYWNrZ3JvdW5kIC4xNXM7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjt9JwogICAgICArJy5hY2gtaWNvbi1idG46aG92ZXJ7Y29sb3I6I2M2YzdiZDtiYWNrZ3JvdW5kOiMxODE5MTg7fScKICAgICAgKycuYWNoLXByb2dyZXNzLXRyYWNre2hlaWdodDoycHg7ZmxleC1zaHJpbms6MDt9JwogICAgICArJy5hY2gtcHJvZ3Jlc3MtZmlsbHtoZWlnaHQ6MTAwJTt0cmFuc2l0aW9uOndpZHRoIC42cyBlYXNlO2JvcmRlci1yYWRpdXM6MCAxcHggMXB4IDA7fScKICAgICAgKycuYWNoLXByb2ctbGFiZWx7cGFkZGluZzo1cHggMTRweCA2cHg7Zm9udC1mYW1pbHk6XCdTaGFyZSBUZWNoIE1vbm9cJyxtb25vc3BhY2U7JwogICAgICAgICsnZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6NnB4O2ZsZXgtc2hyaW5rOjA7fScKICAgICAgKycuYWNoLXByb2ctcGN0e21hcmdpbi1sZWZ0OmF1dG87Zm9udC13ZWlnaHQ6NzAwO30nCiAgICAgICsnLmFjaC1ncm91cC1oZHJ7cGFkZGluZzo3cHggMTRweCA0cHg7Y29sb3I6IzZhNmI2ODt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjFlbTsnCiAgICAgICAgKydmb250LWZhbWlseTpcJ1NoYXJlIFRlY2ggTW9ub1wnLG1vbm9zcGFjZTtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo2cHg7JwogICAgICAgICsnYm9yZGVyLXRvcDoxcHggc29saWQgIzEzMTQxMztmbGV4LXNocmluazowO30nCiAgICAgICsnLmFjaC1saXN0LXdyYXB7ZmxleDoxO292ZXJmbG93LXk6YXV0bztzY3JvbGxiYXItd2lkdGg6dGhpbjtzY3JvbGxiYXItY29sb3I6IzFhMWIxYSB0cmFuc3BhcmVudDtwYWRkaW5nLWJvdHRvbToxNnB4O30nCiAgICAgICsnLmFjaC1pdGVte2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpmbGV4LXN0YXJ0O2dhcDoxMHB4O3BhZGRpbmc6OXB4IDE0cHg7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgIzExMTIxMTt0cmFuc2l0aW9uOmJhY2tncm91bmQgLjE1czt9JwogICAgICArJy5hY2gtaXRlbTpob3ZlcntiYWNrZ3JvdW5kOiMxMTEyMTE7fScKICAgICAgKycuYWNoLWl0ZW0tLWxvY2tlZHtvcGFjaXR5Oi40NDt9LmFjaC1pdGVtLS1zZWNyZXR7b3BhY2l0eTouMTU7fS5hY2gtaXRlbS0tdW5sb2NrZWR7b3BhY2l0eToxO30nCiAgICAgICsnLmFjaC1pdGVtLWljb257d2lkdGg6MzRweDtoZWlnaHQ6MzRweDtib3JkZXItcmFkaXVzOjdweDtib3JkZXI6MS41cHggc29saWQ7ZmxleC1zaHJpbms6MDsnCiAgICAgICAgKydkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Zm9udC1zaXplOi45NXJlbTsnCiAgICAgICAgKydiYWNrZ3JvdW5kOiMwYzBkMGM7dHJhbnNpdGlvbjpib3gtc2hhZG93IC4yNXM7fScKICAgICAgKycuYWNoLWl0ZW0tYm9keXtmbGV4OjE7bWluLXdpZHRoOjA7fScKICAgICAgKycuYWNoLWl0ZW0tdGl0bGV7Zm9udC13ZWlnaHQ6NzAwO2ZvbnQtZmFtaWx5OlwnRXhvIDJcJyxzYW5zLXNlcmlmOycKICAgICAgICArJ2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjRweDttYXJnaW4tYm90dG9tOjJweDtsaW5lLWhlaWdodDoxLjM7fScKICAgICAgKycuYWNoLWl0ZW0tZGVzY3tsaW5lLWhlaWdodDoxLjQ7Zm9udC1mYW1pbHk6XCdTaGFyZSBUZWNoIE1vbm9cJyxtb25vc3BhY2U7bWFyZ2luLWJvdHRvbTo0cHg7fScKICAgICAgKycuYWNoLWl0ZW0tbWV0YXtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo4cHg7ZmxleC13cmFwOndyYXA7fScKICAgICAgKycuYWNoLXJhcml0eXtmb250LWZhbWlseTpcJ1NoYXJlIFRlY2ggTW9ub1wnLG1vbm9zcGFjZTt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjA4ZW07fScKICAgICAgKycuYWNoLXRpbWV7Y29sb3I6IzVhNWI1ODtmb250LWZhbWlseTpcJ1NoYXJlIFRlY2ggTW9ub1wnLG1vbm9zcGFjZTt9JwogICAgICArJy5hY2gtcmV3YXJke2NvbG9yOiNDOERENUE7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6M3B4O2ZvbnQtZmFtaWx5OlwnRXhvIDJcJyxzYW5zLXNlcmlmO30nCiAgICAgICsnLmFjaC1oaWRkZW4tbXNne2ZsZXg6MTtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7Z2FwOjhweDsnCiAgICAgICAgKydjb2xvcjojNGE0YjQ4O2ZvbnQtZmFtaWx5OlwnU2hhcmUgVGVjaCBNb25vXCcsbW9ub3NwYWNlO2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtwYWRkaW5nOjMycHggMTZweDt9JwogICAgICArJy5hY2gtZW1wdHl7cGFkZGluZzoyOHB4IDE2cHg7Y29sb3I6IzRhNGI0ODt0ZXh0LWFsaWduOmNlbnRlcjtmb250LWZhbWlseTpcJ1NoYXJlIFRlY2ggTW9ub1wnLG1vbm9zcGFjZTt9JwogICAgICArJy5hY2gtdG9hc3Rze3Bvc2l0aW9uOmZpeGVkO3RvcDo2MHB4O3JpZ2h0OjE2cHg7ei1pbmRleDo5OTkwOycKICAgICAgICArJ2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjhweDtwb2ludGVyLWV2ZW50czpub25lO3dpZHRoOjI3MHB4O30nCiAgICAgICsnLmFjaC10b2FzdHtib3JkZXI6MXB4IHNvbGlkO2JvcmRlci1sZWZ0OjNweCBzb2xpZDtwYWRkaW5nOjEwcHggMTJweDsnCiAgICAgICAgKydib3JkZXItcmFkaXVzOjAgOHB4IDhweCAwO2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpmbGV4LXN0YXJ0O2dhcDoxMHB4OycKICAgICAgICArJ2JveC1zaGFkb3c6MCA4cHggMzZweCByZ2JhKDAsMCwwLC44NSk7JwogICAgICAgICsnb3BhY2l0eTowO3RyYW5zZm9ybTp0cmFuc2xhdGVYKDE2cHgpO3RyYW5zaXRpb246b3BhY2l0eSAuMzVzIGVhc2UsdHJhbnNmb3JtIC4zNXMgZWFzZTtwb2ludGVyLWV2ZW50czphdXRvO30nCiAgICAgICsnLmFjaC10b2FzdC5hY2gtdG9hc3QtLXNob3d7b3BhY2l0eToxO3RyYW5zZm9ybTp0cmFuc2xhdGVYKDApO30nCiAgICAgICsnLmFjaC10b2FzdC1pY29ue3dpZHRoOjM0cHg7aGVpZ2h0OjM0cHg7Ym9yZGVyLXJhZGl1czo3cHg7Ym9yZGVyOjEuNXB4IHNvbGlkOycKICAgICAgICArJ2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcjtmb250LXNpemU6Ljk1cmVtO2ZsZXgtc2hyaW5rOjA7YmFja2dyb3VuZDojMGMwZDBjO30nCiAgICAgICsnLmFjaC10b2FzdC1ib2R5e2ZsZXg6MTttaW4td2lkdGg6MDt9JwogICAgICArJy5hY2gtdG9hc3QtZXllYnJvd3tkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuOycKICAgICAgICArJ2NvbG9yOiM2YTZiNjg7dGV4dC10cmFuc2Zvcm06dXBwZXJjYXNlO2xldHRlci1zcGFjaW5nOi4xZW07Zm9udC1mYW1pbHk6XCdTaGFyZSBUZWNoIE1vbm9cJyxtb25vc3BhY2U7bWFyZ2luLWJvdHRvbToycHg7fScKICAgICAgKycuYWNoLXRvYXN0LXJhcml0eXtmb250LXdlaWdodDo3MDA7fScKICAgICAgKycuYWNoLXRvYXN0LXRpdGxle2ZvbnQtd2VpZ2h0OjcwMDtmb250LWZhbWlseTpcJ0V4byAyXCcsc2Fucy1zZXJpZjtsaW5lLWhlaWdodDoxLjI7fScKICAgICAgKycuYWNoLXRvYXN0LWRlc2N7Y29sb3I6IzhhOGI4ODttYXJnaW4tdG9wOjJweDtsaW5lLWhlaWdodDoxLjM7Zm9udC1mYW1pbHk6XCdTaGFyZSBUZWNoIE1vbm9cJyxtb25vc3BhY2U7fScKICAgICAgKycuYWNoLXRvYXN0LXJld2FyZHtjb2xvcjojQzhERDVBO21hcmdpbi10b3A6NHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjRweDtmb250LWZhbWlseTpcJ0V4byAyXCcsc2Fucy1zZXJpZjt9JzsKICAgIGRvY3VtZW50LmhlYWQuYXBwZW5kQ2hpbGQocyk7CiAgfTsKCiAgRy5BY2hpZXZlbWVudFN5c3RlbSA9IEFjaGlldmVtZW50U3lzdGVtOwoKICAvLyDilZTilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZcKICAvLyDilZEgIERlY2xhcmF0aXZlIEhUTUwgQVBJICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKVkQogIC8vIOKVkSAgPGFjaC1zeXN0ZW0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDilZEKICAvLyDilZEgICAgdGhlbWU9Im9jZWFuIiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgIHNob3ctbGlzdCAgICAgICAgICAgICAgICAgICAgICAgICAgKGJvb2xlYW4gYXR0ciwgcHJlc2VuY2U9dHJ1ZSnilZEKICAvLyDilZEgICAgaGlkZS1saXN0ICAgICAgICAgICAgICAgICAgICAgICAgICAoYm9vbGVhbiBhdHRyKSAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgIHRyaWdnZXItcG9zPSJib3R0b20tbGVmdCIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKVkQogIC8vIOKVkSAgICBwYW5lbC1zaWRlPSJyaWdodCIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDilZEKICAvLyDilZEgICAgc2NhbGU9IjEuMSIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgIHZhcj0iYWNoIj4gICAgICAgICAgICAgICAgICAgICAgICAgKGdsb2JhbCB2YXIgbmFtZSwgZGVmYXVsdCAiYWNoIikKICAvLyDilZEgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgIDxhY2gtaXRlbSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKVkQogIC8vIOKVkSAgICAgIGlkPSJteS1hY2giICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDilZEKICAvLyDilZEgICAgICBpY29uPSJiaS1zdGFyLWZpbGwiICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgICAgdGl0bGU9IuaIkOWwseWQjeeosSIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgICAgcmFyaXR5PSJyYXJlIiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKVkQogIC8vIOKVkSAgICAgIHJld2FyZD0iKyAxIOm7niIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgICAgc3BvaWxlciAgICAgICAgICAgICAgICAgICAgICAgICAgKGJvb2xlYW4gYXR0cikgICAgICAgICAgICAgIOKVkQogIC8vIOKVkSAgICAgIHNlY3JldD4gICAgICAgICAgICAgICAgICAgICAgICAgIChib29sZWFuIGF0dHIpICAgICAgICAgICAgICDilZEKICAvLyDilZEgICAgICDmiJDlsLHmj4/ov7DmloflrZfmlL7lnKjlhaflrrnoo6HjgIIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgIDwvYWNoLWl0ZW0+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKVkQogIC8vIOKVkSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDilZEKICAvLyDilZEgIDwvYWNoLXN5c3RlbT4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pWRCiAgLy8g4pWRICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKVkQogIC8vIOKVkSAgVW5sb2NrIGZyb20gYW55IGVsZW1lbnQ6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDilZEKICAvLyDilZEgICAgPGJ1dHRvbiBkYXRhLWFjaC11bmxvY2s9Im15LWFjaCI+5a6M5oiQPC9idXR0b24+ICAgICAgICAgICAgICAgICDilZEKICAvLyDilZEgICAgPGJ1dHRvbiBkYXRhLWFjaC11bmxvY2s9ImExLGEyLGEzIj7mibnmrKHop6PpjpY8L2J1dHRvbj4gICAgICAgICAgIOKVkQogIC8vIOKVkSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDilZEKICAvLyDilZEgIE9yIGZyb20gSlMgKHRoZSBpbnN0YW5jZSBpcyBzdG9yZWQgaW4gdGhlIHZhciB5b3Ugc3BlY2lmeSk6ICAgICAg4pWRCiAgLy8g4pWRICAgIGFjaC51bmxvY2soJ215LWFjaCcpOyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKVkQogIC8vIOKVmuKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVnQogIGZ1bmN0aW9uIF9wYXJzZUJvb2woZWwsIGF0dHIpIHsKICAgIHJldHVybiBlbC5oYXNBdHRyaWJ1dGUoYXR0cik7CiAgfQoKICBmdW5jdGlvbiBfcGFyc2VBY2hJdGVtcyhjb250YWluZXIpIHsKICAgIHZhciBpdGVtcyA9IGNvbnRhaW5lci5xdWVyeVNlbGVjdG9yQWxsKCdhY2gtaXRlbScpOwogICAgdmFyIHJlc3VsdCA9IFtdOwogICAgaXRlbXMuZm9yRWFjaChmdW5jdGlvbihlbCkgewogICAgICB2YXIgYSA9IHsKICAgICAgICBpZDogICAgICBlbC5nZXRBdHRyaWJ1dGUoJ2lkJykgICAgIHx8ICgnYWNoLScgKyBNYXRoLnJhbmRvbSgpLnRvU3RyaW5nKDM2KS5zbGljZSgyLDcpKSwKICAgICAgICBpY29uOiAgICBlbC5nZXRBdHRyaWJ1dGUoJ2ljb24nKSAgIHx8ICdiaS1hd2FyZC1maWxsJywKICAgICAgICB0aXRsZTogICBlbC5nZXRBdHRyaWJ1dGUoJ3RpdGxlJykgIHx8ICfmnKrlkb3lkI3miJDlsLEnLAogICAgICAgIHJhcml0eTogIGVsLmdldEF0dHJpYnV0ZSgncmFyaXR5JykgfHwgJ2NvbW1vbicsCiAgICAgICAgZGVzYzogICAgZWwudGV4dENvbnRlbnQudHJpbSgpLAogICAgICAgIHJld2FyZDogIGVsLmdldEF0dHJpYnV0ZSgncmV3YXJkJykgfHwgdW5kZWZpbmVkLAogICAgICAgIHNwb2lsZXI6IF9wYXJzZUJvb2woZWwsICdzcG9pbGVyJyksCiAgICAgICAgc2VjcmV0OiAgX3BhcnNlQm9vbChlbCwgJ3NlY3JldCcpLAogICAgICAgIC8vIE1hbnVhbCBhY2hpZXZlbWVudHM6IGNvbmRpdGlvbiBhbHdheXMgZmFsc2UsIHVubG9jayB2aWEgLnVubG9jayhpZCkKICAgICAgICBjb25kaXRpb246IGZ1bmN0aW9uKCkgeyByZXR1cm4gZmFsc2U7IH0sCiAgICAgIH07CiAgICAgIC8vIFBhc3MgcmV3YXJkIGZsYWcgZm9yIG9uVW5sb2NrIGhhbmRsZXIgY29udmVuaWVuY2UKICAgICAgaWYgKGEucmV3YXJkKSBhLl9yZXdhcmQgPSB0cnVlOwogICAgICByZXN1bHQucHVzaChhKTsKICAgIH0pOwogICAgcmV0dXJuIHJlc3VsdDsKICB9CgogIGZ1bmN0aW9uIF9pbml0RGVjbGFyYXRpdmUoKSB7CiAgICB2YXIgY29udGFpbmVycyA9IGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2FjaC1zeXN0ZW0nKTsKICAgIGNvbnRhaW5lcnMuZm9yRWFjaChmdW5jdGlvbihlbCkgewogICAgICAvLyBIaWRlIHRoZSByYXcgdGFnIGNvbnRlbnQKICAgICAgZWwuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKCiAgICAgIC8vIFBhcnNlIG9wdGlvbnMgZnJvbSBhdHRyaWJ1dGVzCiAgICAgIHZhciBzaG93TGlzdCA9ICFfcGFyc2VCb29sKGVsLCAnaGlkZS1saXN0Jyk7CgogICAgICAvLyB0b2FzdER1cmF0aW9uOiBhY2NlcHRzIHNpbmdsZSBudW1iZXIgIjMwMDAiIG9yIHBlci1yYXJpdHkgSlNPTiAneyJsZWdlbmRhcnkiOjUwMDB9JwogICAgICB2YXIgdG9hc3REdXJSYXcgPSBlbC5nZXRBdHRyaWJ1dGUoJ3RvYXN0LWR1cmF0aW9uJyk7CiAgICAgIHZhciB0b2FzdER1cjsKICAgICAgaWYgKHRvYXN0RHVyUmF3KSB7CiAgICAgICAgdmFyIHBhcnNlZCA9IHBhcnNlRmxvYXQodG9hc3REdXJSYXcpOwogICAgICAgIHRvYXN0RHVyID0gaXNOYU4ocGFyc2VkKSA/IEpTT04ucGFyc2UodG9hc3REdXJSYXcpIDogcGFyc2VkOwogICAgICB9CgogICAgICAvLyByYXJpdHlMYWJlbHM6IEpTT04gc3RyaW5nICd7ImNvbW1vbiI6IkMiLCJyYXJlIjoiUiIsImVwaWMiOiJFIiwibGVnZW5kYXJ5IjoiTCJ9JwogICAgICB2YXIgcmFyaXR5UmF3ID0gZWwuZ2V0QXR0cmlidXRlKCdyYXJpdHktbGFiZWxzJyk7CiAgICAgIHZhciByYXJpdHlMYWJlbHMgPSByYXJpdHlSYXcgPyBKU09OLnBhcnNlKHJhcml0eVJhdykgOiB1bmRlZmluZWQ7CgogICAgICB2YXIgb3B0cyA9IHsKICAgICAgICB0aGVtZU5hbWU6ICAgICBlbC5nZXRBdHRyaWJ1dGUoJ3RoZW1lJykgICAgICAgICAgfHwgJ2RlZmF1bHQnLAogICAgICAgIHNob3dMaXN0OiAgICAgIHNob3dMaXN0LAogICAgICAgIHRyaWdnZXJQb3M6ICAgIGVsLmdldEF0dHJpYnV0ZSgndHJpZ2dlci1wb3MnKSAgICB8fCAnYm90dG9tLWxlZnQnLAogICAgICAgIHBhbmVsU2lkZTogICAgIGVsLmdldEF0dHJpYnV0ZSgncGFuZWwtc2lkZScpICAgICB8fCAncmlnaHQnLAogICAgICAgIHBhbmVsV2lkdGg6ICAgIHBhcnNlSW50KGVsLmdldEF0dHJpYnV0ZSgncGFuZWwtd2lkdGgnKSkgICAgfHwgMjgwLAogICAgICAgIHRyaWdnZXJTaXplOiAgIHBhcnNlSW50KGVsLmdldEF0dHJpYnV0ZSgndHJpZ2dlci1zaXplJykpICAgfHwgNDYsCiAgICAgICAgdG9hc3RXaWR0aDogICAgcGFyc2VJbnQoZWwuZ2V0QXR0cmlidXRlKCd0b2FzdC13aWR0aCcpKSAgICB8fCAyNzAsCiAgICAgICAgdG9hc3RQb3NpdGlvbjogZWwuZ2V0QXR0cmlidXRlKCd0b2FzdC1wb3NpdGlvbicpIHx8ICd0b3AtcmlnaHQnLAogICAgICAgIHNjYWxlOiAgICAgICAgIHBhcnNlRmxvYXQoZWwuZ2V0QXR0cmlidXRlKCdzY2FsZScpKSAgICAgICAgfHwgMSwKICAgICAgICBhY2hpZXZlbWVudHM6ICBfcGFyc2VBY2hJdGVtcyhlbCksCiAgICAgIH07CiAgICAgIGlmICh0b2FzdER1ciAgICAhPT0gdW5kZWZpbmVkKSBvcHRzLnRvYXN0RHVyYXRpb24gID0gdG9hc3REdXI7CiAgICAgIGlmIChyYXJpdHlMYWJlbHMgIT09IHVuZGVmaW5lZCkgb3B0cy5yYXJpdHlMYWJlbHMgID0gcmFyaXR5TGFiZWxzOwoKICAgICAgLy8gb25VbmxvY2s6IHJld2FyZCBoYW5kbGluZyBidWlsdC1pbgogICAgICBvcHRzLm9uVW5sb2NrID0gZnVuY3Rpb24oYSkgewogICAgICAgIGlmIChhLl9yZXdhcmQgJiYgYS5yZXdhcmQpIHsKICAgICAgICAgIHZhciBib251cyA9IHBhcnNlSW50KGEucmV3YXJkKTsKICAgICAgICAgIGlmICghaXNOYU4oYm9udXMpICYmIGJvbnVzID4gMCkgewogICAgICAgICAgICAvLyBEaXNwYXRjaCBhIGN1c3RvbSBldmVudCBzbyBob3N0IHBhZ2UgY2FuIHJlYWN0CiAgICAgICAgICAgIGRvY3VtZW50LmRpc3BhdGNoRXZlbnQobmV3IEN1c3RvbUV2ZW50KCdhY2g6cmV3YXJkJywgewogICAgICAgICAgICAgIGRldGFpbDogeyBpZDogYS5pZCwgYm9udXM6IGJvbnVzLCBhY2hpZXZlbWVudDogYSB9CiAgICAgICAgICAgIH0pKTsKICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgLy8gRGlzcGF0Y2ggZ2VuZXJpYyB1bmxvY2sgZXZlbnQKICAgICAgICBkb2N1bWVudC5kaXNwYXRjaEV2ZW50KG5ldyBDdXN0b21FdmVudCgnYWNoOnVubG9jaycsIHsKICAgICAgICAgIGRldGFpbDogeyBpZDogYS5pZCwgYWNoaWV2ZW1lbnQ6IGEgfQogICAgICAgIH0pKTsKICAgICAgfTsKCiAgICAgIHZhciBpbnN0YW5jZSA9IG5ldyBBY2hpZXZlbWVudFN5c3RlbShvcHRzKTsKCiAgICAgIC8vIEV4cG9zZSBpbnN0YW5jZSBhcyBnbG9iYWwgdmFyIChkZWZhdWx0OiAiYWNoIiwgY3VzdG9taXNhYmxlIHZpYSB2YXI9Im15QWNoIikKICAgICAgdmFyIHZhck5hbWUgPSBlbC5nZXRBdHRyaWJ1dGUoJ3ZhcicpIHx8ICdhY2gnOwogICAgICBHW3Zhck5hbWVdID0gaW5zdGFuY2U7CgogICAgICAvLyBFeHBvc2Ugb24gZWxlbWVudCBpdHNlbGYgdG9vCiAgICAgIGVsLl9hY2hJbnN0YW5jZSA9IGluc3RhbmNlOwogICAgfSk7CgogICAgLy8gV2lyZSB1cCBkYXRhLWFjaC11bmxvY2sgdHJpZ2dlcnMgKHdvcmtzIGZvciBkeW5hbWljYWxseSBhZGRlZCBvbmVzIHRvbyB2aWEgZGVsZWdhdGlvbikKICAgIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJywgZnVuY3Rpb24oZSkgewogICAgICB2YXIgYnRuID0gZS50YXJnZXQuY2xvc2VzdCgnW2RhdGEtYWNoLXVubG9ja10nKTsKICAgICAgaWYgKCFidG4pIHJldHVybjsKICAgICAgdmFyIGlkcyA9IGJ0bi5nZXRBdHRyaWJ1dGUoJ2RhdGEtYWNoLXVubG9jaycpCiAgICAgICAgLnNwbGl0KCcsJykubWFwKGZ1bmN0aW9uKHMpeyByZXR1cm4gcy50cmltKCk7IH0pLmZpbHRlcihCb29sZWFuKTsKICAgICAgdmFyIGNvbnRhaW5lcnMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCdhY2gtc3lzdGVtJyk7CiAgICAgIGlkcy5mb3JFYWNoKGZ1bmN0aW9uKGlkKSB7CiAgICAgICAgY29udGFpbmVycy5mb3JFYWNoKGZ1bmN0aW9uKGVsKSB7CiAgICAgICAgICBpZiAoZWwuX2FjaEluc3RhbmNlKSBlbC5fYWNoSW5zdGFuY2UudW5sb2NrKGlkKTsKICAgICAgICB9KTsKICAgICAgfSk7CiAgICB9KTsKCiAgICAvLyBJbml0IGFjaC1xdWl6IGVsZW1lbnRzCiAgICBfaW5pdFF1aXooKTsKICB9CgogIC8vIOKUgOKUgCBhY2gtcXVpeiBDU1MgKGluamVjdGVkIG9uY2UpIOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgAogIGZ1bmN0aW9uIF9pbmplY3RRdWl6Q1NTKCkgewogICAgaWYgKGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdhY2gtcXVpei1jc3MnKSkgcmV0dXJuOwogICAgdmFyIHMgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdzdHlsZScpOwogICAgcy5pZCA9ICdhY2gtcXVpei1jc3MnOwogICAgcy50ZXh0Q29udGVudCA9ICcnCiAgICAgICsnLmFjaC1xdWl6e2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjhweDtwYWRkaW5nOjE2cHggMThweDsnCiAgICAgICAgKydib3JkZXItcmFkaXVzOjEwcHg7Ym9yZGVyOjFweCBzb2xpZDttYXJnaW46OHB4IDA7fScKICAgICAgKycuYWNoLXF1aXotLWRvbmUgLmFjaC1xdWl6LWlucHV0e29wYWNpdHk6LjU7fScKICAgICAgKycuYWNoLXF1aXotcXVlc3Rpb257Zm9udC1zaXplOi44NXJlbTtsaW5lLWhlaWdodDoxLjU1O2ZvbnQtZmFtaWx5OlwnRXhvIDJcJyxzYW5zLXNlcmlmO30nCiAgICAgICsnLmFjaC1xdWl6LWhpbnR7Zm9udC1zaXplOi43cmVtO2ZvbnQtZmFtaWx5OlwnU2hhcmUgVGVjaCBNb25vXCcsbW9ub3NwYWNlOycKICAgICAgICArJ29wYWNpdHk6Ljc7bWFyZ2luLXRvcDotNHB4O30nCiAgICAgICsnLmFjaC1xdWl6LXJvd3tkaXNwbGF5OmZsZXg7Z2FwOjhweDthbGlnbi1pdGVtczpjZW50ZXI7fScKICAgICAgKycuYWNoLXF1aXotaW5wdXR7JwogICAgICAgICsnZmxleDoxO2JhY2tncm91bmQ6IzBjMGQwYztib3JkZXI6MS41cHggc29saWQ7Ym9yZGVyLXJhZGl1czo2cHg7JwogICAgICAgICsncGFkZGluZzo3cHggMTFweDtmb250LXNpemU6LjgycmVtO2ZvbnQtZmFtaWx5OlwnRXhvIDJcJyxzYW5zLXNlcmlmOycKICAgICAgICArJ2NvbG9yOiNjNmM3YmQ7b3V0bGluZTpub25lO3RyYW5zaXRpb246Ym9yZGVyLWNvbG9yIC4xOHMsYm94LXNoYWRvdyAuMThzO30nCiAgICAgICsnLmFjaC1xdWl6LWlucHV0OmZvY3Vze2JveC1zaGFkb3c6MCAwIDAgMnB4O30nCiAgICAgICsnLmFjaC1xdWl6LWlucHV0OmRpc2FibGVke2N1cnNvcjpub3QtYWxsb3dlZDt9JwogICAgICArJy5hY2gtcXVpei1idG57JwogICAgICAgICsnZGlzcGxheTppbmxpbmUtZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjZweDsnCiAgICAgICAgKydwYWRkaW5nOjdweCAxNHB4O2JvcmRlci1yYWRpdXM6NnB4O2JvcmRlcjoxLjVweCBzb2xpZDsnCiAgICAgICAgKydmb250LXNpemU6LjhyZW07Zm9udC13ZWlnaHQ6NzAwO2ZvbnQtZmFtaWx5OlwnRXhvIDJcJyxzYW5zLXNlcmlmOycKICAgICAgICArJ2N1cnNvcjpwb2ludGVyO3RyYW5zaXRpb246ZmlsdGVyIC4xNXMsdHJhbnNmb3JtIC4xczt3aGl0ZS1zcGFjZTpub3dyYXA7JwogICAgICAgICsnYmFja2dyb3VuZDojMGMwZDBjO30nCiAgICAgICsnLmFjaC1xdWl6LWJ0bjpob3Zlcjpub3QoOmRpc2FibGVkKXtmaWx0ZXI6YnJpZ2h0bmVzcygxLjI1KTt9JwogICAgICArJy5hY2gtcXVpei1idG46YWN0aXZlOm5vdCg6ZGlzYWJsZWQpe3RyYW5zZm9ybTpzY2FsZSguOTYpO30nCiAgICAgICsnLmFjaC1xdWl6LWJ0bjpkaXNhYmxlZHtvcGFjaXR5Oi40O2N1cnNvcjpub3QtYWxsb3dlZDt9JwogICAgICArJy5hY2gtcXVpei1mZWVkYmFja3snCiAgICAgICAgKydmb250LXNpemU6Ljc1cmVtO2ZvbnQtZmFtaWx5OlwnU2hhcmUgVGVjaCBNb25vXCcsbW9ub3NwYWNlOycKICAgICAgICArJ2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjVweDttaW4taGVpZ2h0OjEuMmVtOycKICAgICAgICArJ3RyYW5zaXRpb246b3BhY2l0eSAuMnM7fScKICAgICAgKycuYWNoLXF1aXotZmVlZGJhY2sgaXtmb250LXNpemU6LjhyZW07fSc7CiAgICBkb2N1bWVudC5oZWFkLmFwcGVuZENoaWxkKHMpOwogIH0KCiAgLy8g4pSA4pSAIFJlc29sdmUgYWNoIGluc3RhbmNlIGZvciBhIHF1aXogZWxlbWVudCDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAKICAvLyBQcmlvcml0eTogdmFyIGF0dHIgb24gcXVpeiDihpIgdmFyIGF0dHIgb24gbmVhcmVzdCBhY2gtc3lzdGVtIOKGkiAnYWNoJwogIGZ1bmN0aW9uIF9yZXNvbHZlSW5zdGFuY2UocXVpekVsKSB7CiAgICB2YXIgdmFyTmFtZSA9IHF1aXpFbC5nZXRBdHRyaWJ1dGUoJ3ZhcicpOwogICAgaWYgKHZhck5hbWUgJiYgR1t2YXJOYW1lXSkgcmV0dXJuIEdbdmFyTmFtZV07CiAgICB2YXIgc3lzID0gcXVpekVsLmNsb3Nlc3QoJ2FjaC1zeXN0ZW0nKTsKICAgIGlmIChzeXMgJiYgc3lzLl9hY2hJbnN0YW5jZSkgcmV0dXJuIHN5cy5fYWNoSW5zdGFuY2U7CiAgICAvLyBXYWxrIHVwIERPTSB0byBmaW5kIGFueSBhY2gtc3lzdGVtIGFuY2VzdG9yCiAgICB2YXIgcGFyZW50ID0gcXVpekVsLnBhcmVudEVsZW1lbnQ7CiAgICB3aGlsZSAocGFyZW50KSB7CiAgICAgIGlmIChwYXJlbnQudGFnTmFtZSAmJiBwYXJlbnQudGFnTmFtZS50b0xvd2VyQ2FzZSgpID09PSAnYWNoLXN5c3RlbScgJiYgcGFyZW50Ll9hY2hJbnN0YW5jZSkKICAgICAgICByZXR1cm4gcGFyZW50Ll9hY2hJbnN0YW5jZTsKICAgICAgcGFyZW50ID0gcGFyZW50LnBhcmVudEVsZW1lbnQ7CiAgICB9CiAgICAvLyBGYWxsIGJhY2sgdG8gZGVmYXVsdCBnbG9iYWwgJ2FjaCcKICAgIHJldHVybiBHWydhY2gnXSB8fCBudWxsOwogIH0KCiAgLy8g4pSA4pSAIEJ1aWxkIG9uZSBxdWl6IGVsZW1lbnQg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSACiAgZnVuY3Rpb24gX2J1aWxkUXVpeihlbCkgewogICAgLyoKICAgICAqIEF0dHJpYnV0ZXM6CiAgICAgKiAgIHF1ZXN0aW9uICAgICAgdGhlIHF1ZXN0aW9uIHRleHQgKG9yIHVzZSBlbGVtZW50IHRleHQgY29udGVudCkKICAgICAqICAgYW5zd2VyICAgICAgICBzaW5nbGUgY29ycmVjdCBhbnN3ZXIKICAgICAqICAgYW5zd2VycyAgICAgICBjb21tYS1zZXBhcmF0ZWQgbGlzdCBvZiBhY2NlcHRlZCBhbnN3ZXJzCiAgICAgKiAgIGFjaC1pZCAgICAgICAgYWNoaWV2ZW1lbnQgaWQgdG8gdW5sb2NrIG9uIGNvcnJlY3QgYW5zd2VyCiAgICAgKiAgIHBsYWNlaG9sZGVyICAgaW5wdXQgcGxhY2Vob2xkZXIgIChkZWZhdWx0ICfovLjlhaXnrZTmoYgnKQogICAgICogICBidG4tdGV4dCAgICAgIGJ1dHRvbiBsYWJlbCAgICAgICAoZGVmYXVsdCAn5qC45bCNJykKICAgICAqICAgaGludCAgICAgICAgICBoaW50IHNob3duIGJlbG93IHF1ZXN0aW9uCiAgICAgKiAgIGNhc2Utc2Vuc2l0aXZlICBib29sZWFuIGF0dHIsIGRlZmF1bHQgZmFsc2UKICAgICAqICAgdmFyICAgICAgICAgICBvdmVycmlkZSBhY2ggaW5zdGFuY2UgZ2xvYmFsIHZhciBuYW1lCiAgICAgKi8KICAgIHZhciBxdWVzdGlvbiAgICAgID0gZWwuZ2V0QXR0cmlidXRlKCdxdWVzdGlvbicpICAgIHx8IGVsLnRleHRDb250ZW50LnRyaW0oKTsKICAgIHZhciBhY2hJZCAgICAgICAgID0gZWwuZ2V0QXR0cmlidXRlKCdhY2gtaWQnKSAgICAgIHx8ICcnOwogICAgdmFyIHBsYWNlaG9sZGVyICAgPSBlbC5nZXRBdHRyaWJ1dGUoJ3BsYWNlaG9sZGVyJykgfHwgJ+i8uOWFpeetlOahiCc7CiAgICB2YXIgYnRuVGV4dCAgICAgICA9IGVsLmdldEF0dHJpYnV0ZSgnYnRuLXRleHQnKSAgICB8fCAn5qC45bCNJzsKICAgIHZhciBoaW50ICAgICAgICAgID0gZWwuZ2V0QXR0cmlidXRlKCdoaW50JykgICAgICAgIHx8ICcnOwogICAgdmFyIGNhc2VTZW5zaXRpdmUgPSBfcGFyc2VCb29sKGVsLCAnY2FzZS1zZW5zaXRpdmUnKTsKCiAgICAvLyBCdWlsZCBhY2NlcHRlZCBhbnN3ZXJzIGxpc3QKICAgIHZhciByYXcgPSBlbC5nZXRBdHRyaWJ1dGUoJ2Fuc3dlcnMnKSB8fCBlbC5nZXRBdHRyaWJ1dGUoJ2Fuc3dlcicpIHx8ICcnOwogICAgdmFyIGFjY2VwdGVkID0gcmF3LnNwbGl0KCcsJykubWFwKGZ1bmN0aW9uKHMpeyByZXR1cm4gcy50cmltKCk7IH0pLmZpbHRlcihCb29sZWFuKTsKCiAgICAvLyBHZXQgdGhlbWUgY29sb3VycyBmcm9tIGxpbmtlZCBpbnN0YW5jZQogICAgdmFyIGluc3RhbmNlID0gX3Jlc29sdmVJbnN0YW5jZShlbCk7CiAgICB2YXIgdGggPSAoaW5zdGFuY2UgJiYgaW5zdGFuY2UuX3RoZW1lKSA/IGluc3RhbmNlLl90aGVtZSA6IF9USEVNRVNbJ2RlZmF1bHQnXTsKICAgIHZhciBhY2NlbnQgICAgICA9IHRoLmFjY2VudCAgICAgIHx8ICcjQzhERDVBJzsKICAgIHZhciBwYW5lbEJvcmRlciA9IHRoLnBhbmVsQm9yZGVyIHx8ICcjMWUxZjFlJzsKICAgIHZhciBwYW5lbEJnICAgICA9IHRoLnBhbmVsQmcgICAgIHx8ICcjMGUwZjBlJzsKICAgIHZhciBoZWFkZXJDb2xvciA9IHRoLmhlYWRlckNvbG9yIHx8ICcjYzZjN2JkJzsKCiAgICAvLyBCdWlsZCB3cmFwcGVyIGRpdiB0aGF0IHJlcGxhY2VzIHRoZSB0YWcKICAgIHZhciB3cmFwID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnZGl2Jyk7CiAgICB3cmFwLmNsYXNzTmFtZSA9ICdhY2gtcXVpeic7CiAgICB3cmFwLnN0eWxlLmNzc1RleHQgPSAnYmFja2dyb3VuZDonK3BhbmVsQmcrJztib3JkZXItY29sb3I6JytwYW5lbEJvcmRlcisnOyc7CgogICAgLy8gUXVlc3Rpb24KICAgIHZhciBxRWwgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdwJyk7CiAgICBxRWwuY2xhc3NOYW1lID0gJ2FjaC1xdWl6LXF1ZXN0aW9uJzsKICAgIHFFbC5zdHlsZS5jb2xvciA9IGhlYWRlckNvbG9yOwogICAgcUVsLnRleHRDb250ZW50ID0gcXVlc3Rpb247CiAgICB3cmFwLmFwcGVuZENoaWxkKHFFbCk7CgogICAgLy8gSGludAogICAgaWYgKGhpbnQpIHsKICAgICAgdmFyIGhFbCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ3AnKTsKICAgICAgaEVsLmNsYXNzTmFtZSA9ICdhY2gtcXVpei1oaW50JzsKICAgICAgaEVsLnN0eWxlLmNvbG9yID0gYWNjZW50OwogICAgICBoRWwudGV4dENvbnRlbnQgPSBoaW50OwogICAgICB3cmFwLmFwcGVuZENoaWxkKGhFbCk7CiAgICB9CgogICAgLy8gSW5wdXQgKyBidXR0b24gcm93CiAgICB2YXIgcm93ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnZGl2Jyk7CiAgICByb3cuY2xhc3NOYW1lID0gJ2FjaC1xdWl6LXJvdyc7CgogICAgdmFyIGlucHV0ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnaW5wdXQnKTsKICAgIGlucHV0LmNsYXNzTmFtZSA9ICdhY2gtcXVpei1pbnB1dCc7CiAgICBpbnB1dC50eXBlID0gJ3RleHQnOwogICAgaW5wdXQucGxhY2Vob2xkZXIgPSBwbGFjZWhvbGRlcjsKICAgIGlucHV0LnNldEF0dHJpYnV0ZSgnYXV0b2NvbXBsZXRlJywgJ29mZicpOwogICAgaW5wdXQuc3R5bGUuYm9yZGVyQ29sb3IgPSBwYW5lbEJvcmRlcjsKICAgIGlucHV0LnN0eWxlLnNldFByb3BlcnR5KCctLWZvY3VzLWNvbG9yJywgYWNjZW50ICsgJzU1Jyk7CiAgICAvLyBGb2N1cyBnbG93IHVzaW5nIGlubGluZSBzdHlsZSB0cmljawogICAgaW5wdXQuYWRkRXZlbnRMaXN0ZW5lcignZm9jdXMnLCAgZnVuY3Rpb24oKXsgdGhpcy5zdHlsZS5ib3JkZXJDb2xvcj1hY2NlbnQ7IHRoaXMuc3R5bGUuYm94U2hhZG93PScwIDAgMCAycHggJythY2NlbnQrJzMzJzsgfSk7CiAgICBpbnB1dC5hZGRFdmVudExpc3RlbmVyKCdibHVyJywgICBmdW5jdGlvbigpeyB0aGlzLnN0eWxlLmJvcmRlckNvbG9yPXBhbmVsQm9yZGVyOyB0aGlzLnN0eWxlLmJveFNoYWRvdz0nJzsgfSk7CgogICAgdmFyIGJ0biA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2J1dHRvbicpOwogICAgYnRuLmNsYXNzTmFtZSA9ICdhY2gtcXVpei1idG4nOwogICAgYnRuLnN0eWxlLmNzc1RleHQgPSAnY29sb3I6JythY2NlbnQrJztib3JkZXItY29sb3I6JythY2NlbnQrJzsnOwogICAgYnRuLmlubmVySFRNTCA9ICc8aSBjbGFzcz0iYmkgYmktY2hlY2syIj48L2k+JyArIGJ0blRleHQ7CgogICAgcm93LmFwcGVuZENoaWxkKGlucHV0KTsKICAgIHJvdy5hcHBlbmRDaGlsZChidG4pOwogICAgd3JhcC5hcHBlbmRDaGlsZChyb3cpOwoKICAgIC8vIEZlZWRiYWNrIGxpbmUKICAgIHZhciBmYiA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2RpdicpOwogICAgZmIuY2xhc3NOYW1lID0gJ2FjaC1xdWl6LWZlZWRiYWNrJzsKICAgIHdyYXAuYXBwZW5kQ2hpbGQoZmIpOwoKICAgIC8vIENoZWNrIGxvZ2ljCiAgICBmdW5jdGlvbiBkb0NoZWNrKCkgewogICAgICBpZiAoYnRuLmRpc2FibGVkKSByZXR1cm47CiAgICAgIHZhciB2YWwgPSBpbnB1dC52YWx1ZS50cmltKCk7CiAgICAgIGlmICghdmFsKSByZXR1cm47CgogICAgICB2YXIgY29tcGFyZSA9IGNhc2VTZW5zaXRpdmUKICAgICAgICA/IGZ1bmN0aW9uKGEsIGIpeyByZXR1cm4gYSA9PT0gYjsgfQogICAgICAgIDogZnVuY3Rpb24oYSwgYil7IHJldHVybiBhLnRvTG93ZXJDYXNlKCkgPT09IGIudG9Mb3dlckNhc2UoKTsgfTsKCiAgICAgIHZhciBjb3JyZWN0ID0gYWNjZXB0ZWQuc29tZShmdW5jdGlvbihhbnMpeyByZXR1cm4gY29tcGFyZSh2YWwsIGFucyk7IH0pOwoKICAgICAgaWYgKGNvcnJlY3QpIHsKICAgICAgICAvLyBTdWNjZXNzIHN0YXRlCiAgICAgICAgZmIuaW5uZXJIVE1MID0gJzxpIGNsYXNzPSJiaSBiaS1jaGVjay1jaXJjbGUtZmlsbCIgc3R5bGU9ImNvbG9yOicrYWNjZW50KyciPjwvaT4nCiAgICAgICAgICArICc8c3BhbiBzdHlsZT0iY29sb3I6JythY2NlbnQrJyI+5q2j56K677yBPC9zcGFuPic7CiAgICAgICAgaW5wdXQuZGlzYWJsZWQgPSB0cnVlOwogICAgICAgIGJ0bi5kaXNhYmxlZCAgID0gdHJ1ZTsKICAgICAgICB3cmFwLmNsYXNzTGlzdC5hZGQoJ2FjaC1xdWl6LS1kb25lJyk7CiAgICAgICAgd3JhcC5zdHlsZS5ib3JkZXJDb2xvciA9IGFjY2VudDsKICAgICAgICBpZiAoaW5zdGFuY2UgJiYgYWNoSWQpIGluc3RhbmNlLnVubG9jayhhY2hJZCk7CiAgICAgICAgLy8gRGlzcGF0Y2ggZXZlbnQKICAgICAgICBkb2N1bWVudC5kaXNwYXRjaEV2ZW50KG5ldyBDdXN0b21FdmVudCgnYWNoOnF1aXotY29ycmVjdCcsIHsKICAgICAgICAgIGRldGFpbDogeyBhY2hJZDogYWNoSWQsIHZhbHVlOiB2YWwsIGVsZW1lbnQ6IHdyYXAgfQogICAgICAgIH0pKTsKICAgICAgfSBlbHNlIHsKICAgICAgICAvLyBXcm9uZyBzdGF0ZQogICAgICAgIGZiLmlubmVySFRNTCA9ICc8aSBjbGFzcz0iYmkgYmkteC1jaXJjbGUtZmlsbCIgc3R5bGU9ImNvbG9yOiNGMDgwODAiPjwvaT4nCiAgICAgICAgICArICc8c3BhbiBzdHlsZT0iY29sb3I6I0YwODA4MCI+5YaN6Kmm6Kmm55yLPC9zcGFuPic7CiAgICAgICAgaW5wdXQuc3R5bGUuYm9yZGVyQ29sb3IgPSAnI0YwODA4MCc7CiAgICAgICAgc2V0VGltZW91dChmdW5jdGlvbigpewogICAgICAgICAgaW5wdXQuc3R5bGUuYm9yZGVyQ29sb3IgPSBwYW5lbEJvcmRlcjsKICAgICAgICAgIGZiLmlubmVySFRNTCA9ICcnOwogICAgICAgIH0sIDE0MDApOwogICAgICAgIGRvY3VtZW50LmRpc3BhdGNoRXZlbnQobmV3IEN1c3RvbUV2ZW50KCdhY2g6cXVpei13cm9uZycsIHsKICAgICAgICAgIGRldGFpbDogeyBhY2hJZDogYWNoSWQsIHZhbHVlOiB2YWwsIGVsZW1lbnQ6IHdyYXAgfQogICAgICAgIH0pKTsKICAgICAgfQogICAgfQoKICAgIGJ0bi5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsIGRvQ2hlY2spOwogICAgaW5wdXQuYWRkRXZlbnRMaXN0ZW5lcigna2V5ZG93bicsIGZ1bmN0aW9uKGUpewogICAgICBpZiAoZS5rZXkgPT09ICdFbnRlcicpIGRvQ2hlY2soKTsKICAgIH0pOwoKICAgIC8vIFJlcGxhY2UgdGhlIG9yaWdpbmFsIHRhZyBpbiBET00KICAgIGVsLnBhcmVudE5vZGUucmVwbGFjZUNoaWxkKHdyYXAsIGVsKTsKICB9CgogIC8vIOKUgOKUgCBJbml0IGFsbCBhY2gtcXVpeiBlbGVtZW50cyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAKICBmdW5jdGlvbiBfaW5pdFF1aXooKSB7CiAgICBfaW5qZWN0UXVpekNTUygpOwogICAgLy8gQ29sbGVjdCBmaXJzdCAocmVwbGFjZUNoaWxkIGludmFsaWRhdGVzIGxpdmUgTm9kZUxpc3QpCiAgICB2YXIgcXVpekVscyA9IEFycmF5LnByb3RvdHlwZS5zbGljZS5jYWxsKGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2FjaC1xdWl6JykpOwogICAgcXVpekVscy5mb3JFYWNoKGZ1bmN0aW9uKGVsKSB7IF9idWlsZFF1aXooZWwpOyB9KTsKICB9CgogIC8vIEF1dG8taW5pdAogIGlmIChkb2N1bWVudC5yZWFkeVN0YXRlID09PSAnbG9hZGluZycpIHsKICAgIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLCBfaW5pdERlY2xhcmF0aXZlKTsKICB9IGVsc2UgewogICAgX2luaXREZWNsYXJhdGl2ZSgpOwogIH0KCn0pKHdpbmRvdyk7Cg==";</script>
+
+<!-- ── App ── -->
+<script>
+'use strict';
+
+/* ─── Constants ─────────────────────────────────── */
+var LS_KEY = 'ach-gen-v1';
+
+var THEMES = {
+  default:{ a:'#90CDF4', b:'#E5E5A6', bg:'#1a1b1a', lbl:'預設' },
+  ocean:  { a:'#04b5a3', b:'#81E6D9', bg:'#0e1a1a', lbl:'海洋' },
+  ember:  { a:'#f69653', b:'#d9b375', bg:'#1a1208', lbl:'琥珀' },
+  violet: { a:'#C3A5E5', b:'#FFB3D9', bg:'#130f1c', lbl:'紫羅' },
+  nature: { a:'#81E6D9', b:'#C8DD5A', bg:'#0e180e', lbl:'自然' },
+  blood:  { a:'#F08080', b:'#E5C3B3', bg:'#180a0a', lbl:'血月' },
+};
+
+var RARITY_COLORS = {
+  common:'#c6c7bd', rare:'#90CDF4', epic:'#C3A5E5', legendary:'#C8DD5A',
+};
+
+var DEFAULT_STATE = {
+  system:{
+    theme:'default', triggerPos:'bottom-right', triggerSize:46,
+    panelSide:'right', panelWidth:280,
+    toastPosition:'top-right', toastWidth:270,
+    toastDuration:{ common:3200, rare:3200, epic:3200, legendary:4500 },
+    rarityLabels:{ common:'普通', rare:'稀有', epic:'史詩', legendary:'傳說' },
+    scale:1, showList:true,
+  },
+  achievements:[],
+};
+
+/* ─── State ─────────────────────────────────────── */
+var state;
+var achInstance  = null;
+var editingIndex = -1;
+var rebuildTimer = null;
+var unlocked     = {};
+
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+/* ─── Lifecycle ─────────────────────────────────── */
+function init(){
+  state = deepClone(DEFAULT_STATE);
+  var raw = localStorage.getItem(LS_KEY);
+  if(raw){ try{
+    var saved = JSON.parse(raw);
+    if(saved.system)       state.system       = Object.assign({}, state.system, saved.system);
+    if(saved.achievements) state.achievements = saved.achievements;
+  }catch(e){} }
+  buildThemeGrid();
+  populateForm();
+  renderAchList();
+  renderCode();
+  renderTestGrid();
+  rebuildPreview();
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    var dot = document.getElementById('saved-dot');
+    dot.classList.add('show');
+    clearTimeout(saveState._t);
+    saveState._t = setTimeout(function(){ dot.classList.remove('show'); }, 1200);
+  }catch(e){}
+}
+
+/* ─── Theme Grid ────────────────────────────────── */
+function buildThemeGrid(){
+  var grid = document.getElementById('theme-grid');
+  grid.innerHTML = '';
+  Object.keys(THEMES).forEach(function(name){
+    var t   = THEMES[name];
+    var wrap= document.createElement('div'); wrap.className='theme-swatch-wrap';
+    var sw  = document.createElement('button');
+    sw.className = 'theme-swatch'+(state.system.theme===name?' active':'');
+    sw.title     = t.lbl;
+    sw.setAttribute('data-theme', name);
+    sw.style.cssText = 'background:linear-gradient(135deg,'+t.a+','+t.b+');';
+    sw.onclick = function(){
+      state.system.theme = name;
+      document.querySelectorAll('.theme-swatch').forEach(function(s){ s.classList.remove('active'); });
+      sw.classList.add('active');
+      onSettingChange();
+    };
+    var lbl = document.createElement('div');
+    lbl.className = 'theme-swatch-label'; lbl.textContent = t.lbl;
+    wrap.appendChild(sw); wrap.appendChild(lbl);
+    grid.appendChild(wrap);
+  });
+}
+
+/* ─── Form ──────────────────────────────────────── */
+function populateForm(){
+  var s = state.system;
+  setv('s-triggerPos',   s.triggerPos);
+  setv('s-triggerSize',  s.triggerSize);
+  setv('s-panelSide',    s.panelSide);
+  setv('s-panelWidth',   s.panelWidth);
+  setv('s-toastPosition',s.toastPosition);
+  setv('s-toastWidth',   s.toastWidth);
+  setv('s-scale',        s.scale);
+  document.getElementById('s-showList').checked = s.showList;
+  var td = s.toastDuration;
+  setv('s-toastDuration',    typeof td==='number'?td:(td.common    ||3200));
+  setv('s-toastDurationLeg', typeof td==='number'?td:(td.legendary ||4500));
+  var rl = s.rarityLabels||{};
+  setv('rl-common',    rl.common    ||'普通');
+  setv('rl-rare',      rl.rare      ||'稀有');
+  setv('rl-epic',      rl.epic      ||'史詩');
+  setv('rl-legendary', rl.legendary ||'傳說');
+}
+
+function setv(id,v){ var el=document.getElementById(id); if(el) el.value=v; }
+function gv(id,fb){  var el=document.getElementById(id); return el?el.value:(fb||''); }
+function gi(id,fb){  return parseInt(gv(id))||fb; }
+function gf(id,fb){  return parseFloat(gv(id))||fb; }
+
+function readForm(){
+  var s = state.system;
+  s.triggerPos      = gv('s-triggerPos','bottom-right');
+  s.triggerSize     = gi('s-triggerSize',46);
+  s.panelSide       = gv('s-panelSide','right');
+  s.panelWidth      = gi('s-panelWidth',280);
+  s.toastPosition   = gv('s-toastPosition','top-right');
+  s.toastWidth      = gi('s-toastWidth',270);
+  s.scale           = gf('s-scale',1);
+  s.showList        = document.getElementById('s-showList').checked;
+  var dur    = gi('s-toastDuration',3200);
+  var durLeg = gi('s-toastDurationLeg',4500);
+  s.toastDuration   = { common:dur, rare:dur, epic:dur, legendary:durLeg };
+  s.rarityLabels    = {
+    common:   gv('rl-common',   '普通'),
+    rare:     gv('rl-rare',     '稀有'),
+    epic:     gv('rl-epic',     '史詩'),
+    legendary:gv('rl-legendary','傳說'),
+  };
+}
+
+function onSettingChange(){
+  readForm();
+  saveState();
+  renderCode();
+  clearTimeout(rebuildTimer);
+  rebuildTimer = setTimeout(rebuildPreview, 380);
+}
+
+/* ─── Achievement List ──────────────────────────── */
+function renderAchList(){
+  var list  = document.getElementById('ach-list');
+  var badge = document.getElementById('ach-count');
+  badge.textContent = '('+state.achievements.length+')';
+
+  if(!state.achievements.length){
+    list.innerHTML = '<div class="empty-hint">尚無成就 — 點擊「新增成就」開始</div>';
+    return;
+  }
+  list.innerHTML = '';
+
+  state.achievements.forEach(function(a, idx){
+    var rc    = RARITY_COLORS[a.rarity]||'#c6c7bd';
+    var rLabel= (state.system.rarityLabels||{})[a.rarity]||a.rarity;
+    var flags = '';
+    if(a.spoiler) flags += '<span class="badge" style="color:#C8DD5A;border-color:#C8DD5A55">spoiler</span>';
+    if(a.secret)  flags += '<span class="badge" style="color:#F08080;border-color:#F0808055">secret</span>';
+    if(a.reward)  flags += '<span class="badge" style="color:#81E6D9;border-color:#81E6D955">'+esc(a.reward)+'</span>';
+
+    var card = document.createElement('div');
+    card.className = 'ach-card';
+    card.setAttribute('draggable','true');
+    card.innerHTML  = '<div class="ach-icon" style="border-color:'+rc+';color:'+rc+'">'
+                    +   '<i class="bi '+(a.icon||'bi-award-fill')+'"></i></div>'
+                    + '<div class="ach-body">'
+                    +   '<div class="ach-name">'+esc(a.title||'未命名')+'</div>'
+                    +   '<div class="ach-meta">'
+                    +     '<span class="badge" style="color:'+rc+';border-color:'+rc+'55">'+esc(rLabel)+'</span>'
+                    +     flags
+                    +   '</div>'
+                    + '</div>'
+                    + '<div class="ach-actions">'
+                    +   '<button class="btn btn-sm" title="編輯" onclick="openModal('+idx+')">'
+                    +     '<i class="bi bi-pencil"></i></button>'
+                    +   '<button class="btn btn-sm btn-danger" title="刪除" onclick="deleteAch('+idx+')">'
+                    +     '<i class="bi bi-trash3"></i></button>'
+                    + '</div>';
+
+    // Drag-to-reorder
+    card.addEventListener('dragstart',function(e){ e.dataTransfer.setData('text/plain',idx); card.style.opacity='.35'; });
+    card.addEventListener('dragend',  function(){   card.style.opacity=''; card.classList.remove('drag-over'); });
+    card.addEventListener('dragover', function(e){ e.preventDefault(); card.classList.add('drag-over'); });
+    card.addEventListener('dragleave',function(){   card.classList.remove('drag-over'); });
+    card.addEventListener('drop',     function(e){
+      e.preventDefault(); card.classList.remove('drag-over');
+      var from = parseInt(e.dataTransfer.getData('text/plain')), to = idx;
+      if(from===to) return;
+      var item = state.achievements.splice(from,1)[0];
+      state.achievements.splice(to,0,item);
+      saveState(); renderAchList(); renderCode(); renderTestGrid(); clearTimeout(rebuildTimer); rebuildTimer=setTimeout(rebuildPreview,380);
+    });
+
+    list.appendChild(card);
+  });
+}
+
+/* ─── Modal ─────────────────────────────────────── */
+function openModal(idx){
+  editingIndex = (idx===null)?-1:idx;
+  var a = editingIndex>=0 ? state.achievements[editingIndex] : {};
+  document.getElementById('modal-title-text').textContent = editingIndex>=0?'編輯成就':'新增成就';
+  setv('m-id',     a.id    ||'');
+  setv('m-icon',   a.icon  ||'bi-award-fill');
+  setv('m-title',  a.title ||'');
+  setv('m-desc',   a.desc  ||'');
+  setv('m-rarity', a.rarity||'common');
+  setv('m-reward', a.reward||'');
+  document.getElementById('m-spoiler').checked = !!a.spoiler;
+  document.getElementById('m-secret').checked  = !!a.secret;
+  clearErr();
+  updateIconPreview();
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('m-id').focus(); }, 60);
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function onOverlayClick(e){
+  if(e.target===document.getElementById('modal-overlay')) closeModal();
+}
+
+function clearErr(){
+  document.getElementById('err-id').classList.remove('show');
+  document.getElementById('err-title').classList.remove('show');
+}
+
+function updateIconPreview(){
+  var icon   = (document.getElementById('m-icon').value.trim()||'bi-award-fill');
+  var rarity = document.getElementById('m-rarity').value;
+  var color  = RARITY_COLORS[rarity]||'#c6c7bd';
+  document.getElementById('icon-preview-box').style.borderColor = color+'66';
+  var ic = document.getElementById('icon-preview-i');
+  ic.className   = 'bi '+icon;
+  ic.style.color = color;
+}
+
+function saveAchievement(){
+  var id    = gv('m-id').trim();
+  var title = gv('m-title').trim();
+  var ok    = true;
+  if(!id){
+    document.getElementById('err-id').classList.add('show'); ok=false;
+  }
+  // Check duplicate id
+  var dup = state.achievements.some(function(a,i){ return a.id===id && i!==editingIndex; });
+  if(dup){
+    document.getElementById('err-id').textContent='ID 已存在，請換一個';
+    document.getElementById('err-id').classList.add('show'); ok=false;
+  }
+  if(!title){
+    document.getElementById('err-title').classList.add('show'); ok=false;
+  }
+  if(!ok) return;
+
+  var reward = gv('m-reward').trim();
+  var a = {
+    id:     id,
+    icon:   gv('m-icon').trim()||'bi-award-fill',
+    title:  title,
+    desc:   gv('m-desc').trim(),
+    rarity: gv('m-rarity','common'),
+    spoiler:document.getElementById('m-spoiler').checked,
+    secret: document.getElementById('m-secret').checked,
+  };
+  if(reward) a.reward = reward;
+  if(!a.desc)    delete a.desc;
+
+  if(editingIndex>=0) state.achievements[editingIndex]=a;
+  else                state.achievements.push(a);
+
+  closeModal();
+  saveState();
+  renderAchList();
+  renderCode();
+  renderTestGrid();
+  clearTimeout(rebuildTimer);
+  rebuildTimer = setTimeout(rebuildPreview, 380);
+}
+
+function deleteAch(idx){
+  state.achievements.splice(idx,1);
+  saveState();
+  renderAchList();
+  renderCode();
+  renderTestGrid();
+  clearTimeout(rebuildTimer);
+  rebuildTimer = setTimeout(rebuildPreview, 380);
+}
+
+/* ─── Code Generation ───────────────────────────── */
+function buildCode(highlight){
+  var s   = state.system;
+  var td  = s.toastDuration||{};
+  var dur = typeof td==='number'?td:(td.common||3200);
+  var leg = typeof td==='number'?td:(td.legendary||4500);
+  var rl  = s.rarityLabels||{};
+  var defRL = {common:'普通',rare:'稀有',epic:'史詩',legendary:'傳說'};
+  var rlChanged = Object.keys(defRL).some(function(k){ return (rl[k]||defRL[k])!==defRL[k]; });
+
+  function t(s){ return highlight?'<span class="ct">'+s+'</span>':s; }
+  function a(s){ return highlight?'<span class="ca">'+s+'</span>':s; }
+  function v(s){ return highlight?'<span class="cv">'+s+'</span>':s; }
+  function c(s){ return highlight?'<span class="cc">'+s+'</span>':s; }
+  function hesc(s){ return highlight?esc(s):s; }
+
+  var lines=[];
+  lines.push(t('<ach-system'));
+  lines.push('  '+a('theme')+'='+v('"'+s.theme+'"'));
+  lines.push('  '+(s.showList?a('show-list'):a('hide-list')));
+  lines.push('  '+a('trigger-pos')+'='+v('"'+s.triggerPos+'"'));
+  if(s.triggerSize!==46)  lines.push('  '+a('trigger-size')+'='+v('"'+s.triggerSize+'"'));
+  lines.push('  '+a('panel-side')+'='+v('"'+s.panelSide+'"'));
+  if(s.panelWidth!==280)  lines.push('  '+a('panel-width')+'='+v('"'+s.panelWidth+'"'));
+  lines.push('  '+a('toast-position')+'='+v('"'+s.toastPosition+'"'));
+  if(s.toastWidth!==270)  lines.push('  '+a('toast-width')+'='+v('"'+s.toastWidth+'"'));
+  if(dur!==3200||leg!==4500)
+    lines.push('  '+a('toast-duration')+'='+v("'"+JSON.stringify({common:dur,rare:dur,epic:dur,legendary:leg})+"'"));
+  if(s.scale!==1)         lines.push('  '+a('scale')+'='+v('"'+s.scale+'"'));
+  if(rlChanged)           lines.push('  '+a('rarity-labels')+'='+v("'"+JSON.stringify(rl)+"'"));
+  lines.push('  '+a('var')+'='+v('"ach"')+t('>'));
+  lines.push('');
+
+  state.achievements.forEach(function(ac){
+    var row = '  '+t('<ach-item');
+    row += ' '+a('id')+'='+v('"'+hesc(ac.id)+'"');
+    row += ' '+a('icon')+'='+v('"'+hesc(ac.icon||'bi-award-fill')+'"');
+    row += '\n    '+a('title')+'='+v('"'+hesc(ac.title||'')+'"');
+    row += ' '+a('rarity')+'='+v('"'+ac.rarity+'"');
+    if(ac.reward)  row += ' '+a('reward')+'='+v('"'+hesc(ac.reward)+'"');
+    if(ac.spoiler) row += ' '+a('spoiler');
+    if(ac.secret)  row += ' '+a('secret');
+    row += t('>');
+    if(ac.desc)    row += hesc(ac.desc);
+    row += t('</ach-item>');
+    lines.push(row);
+  });
+
+  lines.push('');
+  lines.push(t('</ach-system>'));
+
+  if(state.achievements.length){
+    lines.push('');
+    lines.push(c('<!-- 解鎖按鈕範例 -->'));
+    state.achievements.forEach(function(ac){
+      lines.push(t('<button')+' '+a('data-ach-unlock')+'='+v('"'+hesc(ac.id)+'"')+t('>'+hesc(ac.title||ac.id)+'</button>'));
+    });
+  }
+  return lines.join('\n');
+}
+
+function renderCode(){
+  var pre = document.getElementById('code-block');
+  if(!state.achievements.length){
+    pre.innerHTML = '<span style="color:var(--text-sec);font-family:\'Share Tech Mono\',monospace">新增成就後程式碼將自動產生…</span>';
+    return;
+  }
+  pre.innerHTML = buildCode(true);
+}
+
+function copyCode(){
+  var plain = buildCode(false);
+  navigator.clipboard.writeText(plain).then(function(){
+    var el = document.getElementById('copy-ok');
+    el.classList.add('show');
+    clearTimeout(copyCode._t);
+    copyCode._t = setTimeout(function(){ el.classList.remove('show'); }, 1600);
+  }).catch(function(){
+    var ta = document.createElement('textarea');
+    ta.value = plain;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+/* ─── Live Preview ──────────────────────────────── */
+function rebuildPreview(){
+  unlocked = {};
+  if(achInstance){ try{ achInstance.destroy(); }catch(e){} achInstance=null; }
+
+  var defs = state.achievements.map(function(a){
+    return Object.assign({},a,{ condition:function(){return false;}, _reward:false });
+  });
+  var s = state.system;
+  achInstance = new AchievementSystem({
+    themeName:    s.theme,
+    showList:     s.showList,
+    triggerPos:   s.triggerPos,
+    triggerSize:  s.triggerSize,
+    panelSide:    s.panelSide,
+    panelWidth:   s.panelWidth,
+    toastPosition:s.toastPosition,
+    toastWidth:   s.toastWidth,
+    toastDuration:s.toastDuration,
+    rarityLabels: s.rarityLabels,
+    scale:        s.scale,
+    achievements: defs,
+    onUnlock:function(a){
+      unlocked[a.id]=true;
+      addLog('🏆 '+( a.title||a.id));
+      renderTestGrid();
+    },
+  });
+  renderTestGrid();
+}
+
+function resetPreview(){ rebuildPreview(); }
+
+/* ─── Test Grid ─────────────────────────────────── */
+function renderTestGrid(){
+  var grid = document.getElementById('test-grid');
+  if(!state.achievements.length){
+    grid.innerHTML='<span style="font-size:1rem;color:var(--text-sec);font-family:\'Share Tech Mono\',monospace">新增成就後可點擊此處觸發測試</span>';
+    return;
+  }
+  grid.innerHTML='';
+  state.achievements.forEach(function(a){
+    var done = !!unlocked[a.id];
+    var btn  = document.createElement('button');
+    btn.className = 'test-btn'+(done?' unlocked':'');
+    btn.disabled  = done;
+    var rc = RARITY_COLORS[a.rarity]||'#c6c7bd';
+    btn.innerHTML = '<i class="bi '+(a.icon||'bi-award-fill')+'" style="color:'+rc+'"></i> '+esc(a.title||a.id);
+    if(!done) btn.onclick=function(){ if(achInstance) achInstance.unlock(a.id); };
+    grid.appendChild(btn);
+  });
+}
+
+/* ─── Log ───────────────────────────────────────── */
+function addLog(msg){
+  var box = document.getElementById('log-box');
+  var d = document.createElement('div'); d.className='log-entry'; d.textContent=msg;
+  box.insertBefore(d, box.firstChild);
+  while(box.children.length>6) box.lastChild.remove();
+}
+
+/* ─── Download ──────────────────────────────────── */
+function downloadHTML(){
+  var plain  = buildCode(false);
+  var achJS  = atob(_ACH_B64);
+  var html = [
+    '<!DOCTYPE html>',
+    '<html lang="zh-TW">',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<title>成就頁面</title>',
+    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">',
+    '<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700;800&display=swap" rel="stylesheet">',
+    '</head>',
+    '<body style="background:#0c0d0c;color:#c6c7bd;font-family:\'Exo 2\',sans-serif;padding:40px 32px;">',
+    '',
+    '<!-- 成就系統定義 -->',
+    plain,
+    '',
+    '<!-- achievement-system.js -->',
+    '<script>',
+    achJS,
+    '<\/script>',
+    '</body>',
+    '</html>',
+  ].join('\n');
+
+  var blob = new Blob([html],{type:'text/html'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href=url; a.download='achievement-page.html';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ─── Reset ─────────────────────────────────────── */
+function resetAll(){
+  // Use a two-click confirm pattern instead of window.confirm
+  var btn = event.currentTarget;
+  if(btn._confirmPending){
+    clearTimeout(btn._t);
+    btn._confirmPending = false;
+    btn.innerHTML = '<i class="bi bi-trash3"></i> 清除重置';
+    btn.style.borderColor=''; btn.style.color='';
+    localStorage.removeItem(LS_KEY);
+    state = deepClone(DEFAULT_STATE);
+    buildThemeGrid(); populateForm(); renderAchList();
+    renderCode(); renderTestGrid(); rebuildPreview();
+  } else {
+    btn._confirmPending = true;
+    btn.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> 確認清除？';
+    btn.style.borderColor='var(--warning)'; btn.style.color='var(--warning)';
+    btn._t = setTimeout(function(){
+      btn._confirmPending=false;
+      btn.innerHTML='<i class="bi bi-trash3"></i> 清除重置';
+      btn.style.borderColor=''; btn.style.color='';
+    }, 3600);
+  }
+}
+
+function esc(s){
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+</body>
+</html>
