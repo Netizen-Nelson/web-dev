@@ -707,7 +707,10 @@
      *   case-sensitive  boolean attr, default false
      *   var           override ach instance global var name
      */
-    var question      = el.getAttribute('question')    || el.textContent.trim();
+    // <ach-question> 子元素優先（支援 HTML 題幹），次選 question 屬性
+    var qChildEl      = el.querySelector('ach-question');
+    var questionHTML  = qChildEl ? qChildEl.innerHTML : null;
+    var questionText  = el.getAttribute('question') || '';
     var achId         = el.getAttribute('ach-id')      || '';
     var placeholder   = el.getAttribute('placeholder') || '輸入答案';
     var btnText       = el.getAttribute('btn-text')    || '核對';
@@ -731,11 +734,12 @@
     wrap.className = 'ach-quiz';
     wrap.style.cssText = 'background:'+panelBg+';border-color:'+panelBorder+';';
 
-    // Question
-    var qEl = document.createElement('p');
+    // Question（HTML 題幹用 div+innerHTML，純文字用 p+textContent）
+    var qEl = document.createElement(questionHTML ? 'div' : 'p');
     qEl.className = 'ach-quiz-question';
     qEl.style.color = headerColor;
-    qEl.textContent = question;
+    if (questionHTML) qEl.innerHTML = questionHTML;
+    else              qEl.textContent = questionText;
     wrap.appendChild(qEl);
 
     // Hint
@@ -923,18 +927,21 @@
   }
 
   function _buildChoice(el) {
-    var question  = el.getAttribute('question') || el.querySelector('ach-option') && '' || el.textContent.trim();
+    // <ach-question> 子元素優先（支援 HTML 題幹），次選 question 屬性
+    var qChildEl      = el.querySelector('ach-question');
+    var questionHTML  = qChildEl ? qChildEl.innerHTML : null;
+    var questionText  = el.getAttribute('question') || '';
     var type      = el.getAttribute('type') === 'multi' ? 'multi' : 'single';
     var achId     = el.getAttribute('ach-id')     || '';
     var hint      = el.getAttribute('hint')       || '';
     var btnText   = el.getAttribute('btn-text')   || '確認';
     var isMulti   = type === 'multi';
 
-    // Parse options
+    // Parse options（ach-option 的 innerHTML 保留 HTML 格式）
     var optEls = Array.prototype.slice.call(el.querySelectorAll('ach-option'));
     var options = optEls.map(function(o) {
       return {
-        text:    o.textContent.trim(),
+        html:    o.innerHTML,
         correct: o.hasAttribute('correct'),
       };
     });
@@ -952,11 +959,12 @@
     wrap.className = 'ach-choice';
     wrap.style.cssText = 'background:' + panelBg + ';border-color:' + panelBorder + ';';
 
-    // Question
-    var qEl = document.createElement('p');
+    // Question（HTML 題幹用 div+innerHTML，純文字用 p+textContent）
+    var qEl = document.createElement(questionHTML ? 'div' : 'p');
     qEl.className = 'ach-choice-question';
     qEl.style.color = headerColor;
-    qEl.textContent = question;
+    if (questionHTML) qEl.innerHTML = questionHTML;
+    else              qEl.textContent = questionText;
     wrap.appendChild(qEl);
 
     // Type badge
@@ -999,7 +1007,7 @@
       // Text
       var txt = document.createElement('span');
       txt.className = 'ach-choice-option-text';
-      txt.textContent = opt.text;
+      txt.innerHTML = opt.html;
       div.appendChild(txt);
 
       div.addEventListener('click', function() {
