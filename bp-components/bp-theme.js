@@ -34,7 +34,8 @@
             nav    : ['accent', 'activeText'],
             invite : ['accent', 'submitBg'],
             notice : ['accent', 'ctaBg'],
-            rich   : null,   // rich-input 用 --lavender CSS 變數，不需要 JS 映射
+            thread : ['accent', 'submitBg', 'teacherBorder', 'teacherTag'],
+            rich   : null,
         },
         // 次要強調色（hover 底線、focus 狀態）
         accentHover: {
@@ -49,6 +50,7 @@
             invite : ['correct'],
             notice : ['correct'],
             nav    : null,
+            thread : null,
         },
         // 答錯 / 錯誤色
         wrong: {
@@ -58,6 +60,7 @@
             invite : ['wrong'],
             notice : ['wrong'],
             nav    : null,
+            thread : null,
         },
         // 提示文字左邊框
         hint: {
@@ -204,6 +207,11 @@
                     G.BpNotice.config.theme[k] = val;
                 });
             }
+            if (targets.thread && G.BpThread) {
+                targets.thread.forEach(function (k) {
+                    G.BpThread.config.theme[k] = val;
+                });
+            }
         });
     }
 
@@ -215,6 +223,7 @@
         if (G.BpNav    && typeof G.BpNav._reCSS    === 'function') G.BpNav._reCSS();
         if (G.BpInvite && typeof G.BpInvite._reCSS === 'function') G.BpInvite._reCSS();
         if (G.BpNotice && typeof G.BpNotice._reCSS === 'function') G.BpNotice._reCSS();
+        if (G.BpThread && typeof G.BpThread._reCSS === 'function') G.BpThread._reCSS();
     }
 
     // ── 全域 API ─────────────────────────────────────────────────
