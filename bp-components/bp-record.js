@@ -1,42 +1,5 @@
-// ================================================================
-// bp-record.js — 錄音檔案上傳練習元件
-//
-// 掛載方式：
-//   <div data-bp="record" data-payload='{"question":"請錄音朗讀以下句子…"}'></div>
-//
-// payload 欄位：
-//   question    {string}  題目說明（純文字或 HTML）
-//   hint        {string}  可選提示文字
-//   submitText  {string}  上傳按鈕文字（預設「上傳錄音」）
-//   retryText   {string}  重新上傳文字（預設「↺ 重新上傳」）
-//   btnSize     {string}  sm / lg
-//   btnPadding  {string}  CSS padding
-//   btnFontSize {string}  CSS font-size
-//
-// data-* 屬性：
-//   data-upload-url     — 上傳端點（預設 upload_audio.php）
-//   data-api-url        — 送出作答端點（預設 practice_api.php）
-//   data-practice-id    — 對應後端 practice id（有值才送 API）
-//   data-unit-id        — 單元 id
-//   data-section-id     — 段落 id
-//   data-max-mb         — 檔案大小上限 MB（預設 35）
-//   data-submit-text / data-retry-text
-//   data-btn-size / data-btn-padding / data-btn-font-size
-//
-// 全域設定：
-//   BpRecord.config.uploadUrl  = 'upload_audio.php';
-//   BpRecord.config.apiUrl     = 'practice_api.php';
-//   BpRecord.config.maxMb      = 35;
-//   BpRecord.config.autoInit   = true;
-//
-// 獨立使用：不依賴任何外部 JS
-// 若頁面已引入 rich-input.js，題目文字會自動套用 RichInput.render()
-// ================================================================
-
 (function (G) {
     'use strict';
-
-    // ── 全域設定 ─────────────────────────────────────────────────
     var Config = {
         uploadUrl : 'upload_audio.php',
         apiUrl    : 'practice_api.php',
@@ -44,7 +7,7 @@
         autoInit  : true,
         // ── 色彩主題 ─────────────────────────────────────────────
         theme: {
-            accent  : 'var(--lavender,#C3A5E5)',   // 主色（邊框、按鈕）
+            accent  : 'var(--lavender,#C3A5E5)', 
             correct : 'var(--safe,#81E6D9)',        // 上傳成功色
             wrong   : 'var(--warning,#F08080)',     // 錯誤色
             hint    : 'var(--attention,#E5E5A6)',   // 提示左邊框
