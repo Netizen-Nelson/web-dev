@@ -1,31 +1,3 @@
-// ================================================================
-// bp-nav.js — 導覽選單元件
-//
-// 掛載方式：
-//   <bp-nav layout="horizontal|vertical" id="myNav">
-//     <a href="/dashboard" active>儀表板</a>
-//     <a data-group="課程管理">          ← 第一層群組（不跳頁，只展開）
-//       <a href="/courses">所有課程</a>
-//       <a href="/units">單元管理</a>
-//     </a>
-//     <a href="/messages">訊息</a>
-//   </bp-nav>
-//
-// 收合按鈕：
-//   <button onclick="BpNav.toggle('myNav')">選單</button>
-//   或設定 data-toggle="myNav" 自動綁定
-//
-// 屬性：
-//   layout        horizontal | vertical（預設 horizontal）
-//   collapsed     有此屬性則初始收合
-//   storage-key   sessionStorage 的 key（預設 bp-nav-{id}）
-//
-// 全域設定：
-//   BpNav.config.theme.accent = '#C3A5E5';
-//
-// 無 Shadow DOM，CSS 注入 <head>
-// ================================================================
-
 (function (G) {
     'use strict';
 
@@ -439,5 +411,4 @@
             initAll();
         }
     }
-
 })(window);
