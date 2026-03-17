@@ -1,5 +1,4 @@
 class BrandColors {
-
   static dark = {
     name:         'dark',
     bg:           '#0c0d0c',
@@ -845,7 +844,6 @@ class DualCell {
         return;
       }
 
-      // hover-tip 整格懸停 tooltip
       if (cell.classList.contains('has-hover-tip')) {
         if (_tipTarget === cell) return;
         const text  = cell.dataset.hoverTip;
@@ -1529,12 +1527,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 })();
 
-
-// ════════════════════════════════════════════════════════════════
-// WordFlip
-// ════════════════════════════════════════════════════════════════
-
-// ── 色彩工具（委派給 BrandColors）───────────────────────────────
 function wfResolveColor(val) {
   if (!val) return null;
   return BrandColors.resolve(val) ?? val;
@@ -1571,7 +1563,6 @@ function wfRenderFix(val) {
   if (document.getElementById('word-flip-styles')) return;
 
   const css = `
-/* ── Word Flip 私有變數（引用 BrandColors CSS 變數）── */
 :root {
   --wf-bg-base:         var(--color-bg,        #0c0d0c);
   --wf-bg-fill:         var(--color-surface,   #333333);
@@ -1589,7 +1580,6 @@ function wfRenderFix(val) {
   --wf-color-orange:    var(--color-orange,    #f69653);
 }
 
-/* ════ word-flip 預設外觀 ════ */
 word-flip {
   display: inline-block; position: relative; cursor: pointer;
   border-bottom: 2px dotted var(--wf-accent, var(--wf-color-lavender));
@@ -1609,7 +1599,6 @@ word-flip.wf-flipped {
 word-flip.wf-animating { pointer-events: none; }
 word-flip.wf-has-style { border-bottom: none; padding-bottom: 0; }
 
-/* ════ Trigger Styles ════ */
 word-flip.wf-style-underline { text-decoration: underline; text-decoration-style: dotted; text-decoration-thickness: 2px; text-underline-offset: 4px; }
 word-flip.wf-style-underline:hover { text-decoration-style: solid; }
 word-flip.wf-style-highlight { border-radius: 3px; padding: 1px 4px; }
@@ -1643,7 +1632,6 @@ word-flip.wf-read[data-read-mark="star"]::after  { content: '★'; background: n
 word-flip.wf-read[data-read-mark="icon"]::after  { content: ''; background: none; width: auto; height: auto; font-family: 'bootstrap-icons'; color: var(--wf-read-color, var(--wf-color-safe)); font-size: calc(var(--wf-read-size, 6px) * 2); line-height: 1; }
 word-flip.wf-read[data-read-mark="icon"][data-read-mark-icon]::after { content: attr(data-read-mark-icon-content); }
 
-/* ════ word-trigger ════ */
 word-trigger {
   display: inline; position: relative; cursor: pointer;
   border-bottom: 2px solid var(--wf-accent, var(--wf-color-special));
@@ -1823,7 +1811,6 @@ word-flip[data-read-mark-color="orange"]   ,word-trigger[data-read-mark-color="o
   document.head.appendChild(style);
 })();
 
-// ── 全域配置 ────────────────────────────────────────────────────
 const WF_DEFAULT_CONFIG = {
   defaultColor: 'lavender', defaultAnimation: 'flip', autoFlipBack: 0,
   focusMode: false, readMark: 'dot', readMarkColor: 'safe',
@@ -1835,10 +1822,8 @@ const WF_DEFAULT_CONFIG = {
 };
 
 let WF_CONFIG = { ...WF_DEFAULT_CONFIG, ...(window.WF_INITIAL_CONFIG || {}) };
-
 const wfActiveFloats = new Map();
 function wfCloseAll(exceptEl) { wfActiveFloats.forEach((closeFn, el) => { if (el !== exceptEl) closeFn(); }); }
-
 function wfPositionFloat(box, trigger, offset = 8) {
   const tr = trigger.getBoundingClientRect();
   const bw = box.offsetWidth || 300, bh = box.offsetHeight || 160;
@@ -2246,11 +2231,6 @@ class WordFlipConfig extends HTMLElement {
     }
   }
 }
-
-
-// ════════════════════════════════════════════════════════════════
-// 全部 Custom Elements 統一註冊
-// ════════════════════════════════════════════════════════════════
 
 [
   ['dual-cell',         DualCellElement],
