@@ -1,31 +1,3 @@
-/**
- * bp-tools-patch.js  v2.1
- * ─────────────────────────────────────────────────────────────
- * 【A】BPTools 全域事件匯流排（頂層宣告，任何時間都能安全使用）
- * 【B】InfoRegion 擴充：<ir-choice> 分支路徑 + link 發事件
- * 【C】DualCell 擴充：on-link 訂閱解鎖遮罩
- * 【D】WordFlip 擴充：link / answer-src / unlock-on / group
- * 【E】ir-challenge 輸入驗證元件
- * 【F】bp-slide 投影片元件（原 slider-show）
- *
- * 載入順序：
- *   <script src="bp-tools.js"></script>
- *   <script src="bp-tools-patch.js"></script>
- *
- * 頁面自訂訂閱寫法（避免 BPTools is not defined）：
- *   (function wait() {
- *     if (typeof BPTools === 'undefined') { setTimeout(wait, 50); return; }
- *     BPTools.on('my:event', () => { ... });
- *   })();
- *
- * changelog：
- *   v1.x  各項功能逐步新增
- *   v2.0  bp-slide 整合
- *   v2.1  BPTools 移至頂層；bp-slide connectedCallback 修正；
- *         word-flip 改用 data-content 屬性
- * ─────────────────────────────────────────────────────────────
- */
-
 /* ═══════════════════════════════════════════════════════════════
    A. BPTools 全域事件匯流排
       頂層立即宣告，確保 bp-slide / ir-challenge / word-flip
