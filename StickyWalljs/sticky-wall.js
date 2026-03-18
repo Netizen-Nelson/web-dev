@@ -16,7 +16,7 @@
       { name: 'Warning',  val: '#F08080' },
     ],
     defaultColor : '#C3A5E5',
-    defaultWidth : 260,
+    defaultWidth : 360,
     position     : 'fixed',
     storageKey   : 'stickywall_v1',
     zBase        : 8000,
@@ -35,10 +35,9 @@
 article.sn-note {
   position          : ${CFG.position};
   width             : ${CFG.defaultWidth}px;
-  min-width         : 180px;
-  min-height        : 108px;
+  min-width         : 200px;
+  min-height        : 168px;
   background        : var(--sn-bg, #C3A5E5);
-  border-radius     : 7px;
   box-shadow        : 3px 5px 20px rgba(0,0,0,.55),
                       0 0 0 1.5px rgba(0,0,0,.12);
   display           : flex;
@@ -52,7 +51,7 @@ article.sn-note {
   will-change       : transform;
 }
 article.sn-note:focus-within {
-  box-shadow : 4px 7px 28px rgba(0,0,0,.7),
+  box-shadow : 3px 7px 28px rgba(0,0,0,.7),
                0 0 0 2px var(--sn-bg, #C3A5E5);
 }
 article.sn-note.sn-collapsed {
@@ -65,8 +64,8 @@ header.sn-header {
   display         : flex;
   align-items     : center;
   justify-content : space-between;
-  padding         : 5px 7px;
-  gap             : 5px;
+  padding         : 6px 8px;
+  gap             : 6px;
   background      : rgba(0,0,0,.14);
   cursor          : move;
   flex-shrink     : 0;
