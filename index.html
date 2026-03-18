@@ -1,930 +1,833 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-theme="dark">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bp-tools.js 綜合範例</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<title>bp-tools-patch.js 完整說明文件</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-
 <style>
-/* ── 全域過渡 ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --bg      : #0c0d0c;
+  --surface : #1a1b1a;
+  --region  : #242524;
+  --border  : #2a2b2a;
+  --shell   : #c6c7bd;
+  --dim     : #555;
+  --lavender: #C3A5E5;
+  --special : #C8DD5A;
+  --sky     : #04b5a3;
+  --safe    : #81E6D9;
+  --warning : #F08080;
+  --orange  : #f69653;
+  --info    : #90CDF4;
+  --pink    : #FFB3D9;
+  --brown   : #d9b375;
+}
 
 body {
-  font-family: 'Noto Sans TC', sans-serif;
-  background: var(--color-bg, #0c0d0c);
-  color: var(--color-shell, #c6c7bd);
-  font-size: 1rem;
-  line-height: 1.75;
-  min-height: 100vh;
-  transition: background .4s ease, color .4s ease;
+  background : var(--bg);
+  color      : var(--shell);
+  font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+  font-size  : 16px;
+  line-height: 1.8;
 }
 
-/* ── 頁面骨架 ─────────────────────────────────────────── */
-.page-wrap {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
+/* ══ 側邊欄 ══ */
+#sidebar {
+  position   : fixed;
+  top        : 0; left: 0; bottom: 0;
+  width      : 220px;
+  background : var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y : auto;
+  z-index    : 200;
+  padding    : 24px 0 40px;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sb-logo {
+  padding      : 0 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.sb-logo h1 { font-size: .9rem; font-weight: 700; color: var(--lavender); }
+.sb-logo p  { font-size: .7rem; color: var(--dim); margin-top: 2px; }
+
+.sb-group { padding: 8px 20px 4px; font-size: .64rem; letter-spacing: .14em;
+  text-transform: uppercase; color: #3a3b3a; }
+
+.sb-link {
+  display     : flex;
+  align-items : center;
+  gap         : 8px;
+  padding     : 6px 20px;
+  font-size   : .8rem;
+  color       : var(--dim);
+  text-decoration: none;
+  transition  : all .15s;
+  border-left : 2px solid transparent;
+}
+.sb-link:hover  { color: var(--shell); background: var(--region); }
+.sb-link.active { color: var(--lavender); border-left-color: var(--lavender); background: rgba(195,165,229,.06); }
+.sb-link i { font-size: .85rem; flex-shrink: 0; }
+
+/* ══ 主內容 ══ */
+#main {
+  margin-left : 220px;
+  min-height  : 100vh;
 }
 
-/* ── 頂部橫幅 ─────────────────────────────────────────── */
-.site-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 56px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--color-border-subtle, rgba(198,199,189,.15));
+/* ══ 頂部 Hero ══ */
+#hero {
+  background   : linear-gradient(180deg, #111210 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  padding      : 80px 60px 64px;
+  max-width    : 860px;
 }
-
-.logo-block {}
-.logo-kicker {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .7rem;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--color-sky);
-  margin-bottom: 4px;
-}
-.logo-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1.1;
-  color: var(--color-shell);
-  letter-spacing: -.02em;
-}
-.logo-title span { color: var(--color-special); }
-
-/* ── 主題切換按鈕 ─────────────────────────────────────── */
-.theme-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-subtle, rgba(198,199,189,.2));
-  border-radius: 999px;
-  padding: 6px 16px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .78rem;
-  color: var(--color-shell);
-  cursor: pointer;
-  transition: background .25s, border-color .25s, color .25s;
-}
-.theme-toggle:hover { border-color: var(--color-sky); color: var(--color-sky); }
-.theme-toggle i { font-size: 1rem; }
-
-/* ── 區塊標題 ─────────────────────────────────────────── */
-.section-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .68rem;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--color-lavender);
-  margin-bottom: 8px;
-}
-.section-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--color-shell);
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--region); border: 1px solid var(--border);
+  border-radius: 999px; padding: 3px 14px;
+  font-size: .72rem; color: var(--sky); letter-spacing: .1em;
   margin-bottom: 20px;
 }
-.section-desc {
-  font-size: .9rem;
-  color: var(--color-shell);
-  opacity: .7;
-  margin-bottom: 24px;
-  max-width: 580px;
+#hero h2 {
+  font-size: 2.2rem; font-weight: 800; line-height: 1.2;
+  color: var(--shell); margin-bottom: 14px;
+}
+#hero h2 em { color: var(--lavender); font-style: normal; }
+#hero p.lead { color: var(--dim); font-size: .95rem; max-width: 520px; margin-bottom: 32px; }
+
+.load-block {
+  background: var(--region); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px 20px;
+  font-family: monospace; font-size: .82rem; color: #8a9070;
+  line-height: 1.9; max-width: 560px;
+}
+.load-block .cm { color: #3a3b3a; }
+.load-block .tg { color: var(--sky); }
+.load-block .at { color: var(--special); }
+.load-block .vl { color: #E5C3B3; }
+
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--region); border: 1px solid var(--border);
+  border-radius: 5px; padding: 4px 11px;
+  font-size: .75rem; color: var(--dim);
 }
 
-.demo-block {
-  margin-bottom: 64px;
+/* ══ 文件區塊 ══ */
+.doc-section {
+  padding     : 64px 60px;
+  max-width   : 860px;
+  border-bottom: 1px solid var(--border);
 }
 
-.divider {
-  border: none;
-  border-top: 1px solid var(--color-border-subtle, rgba(198,199,189,.1));
-  margin: 56px 0;
+.section-label {
+  display     : flex;
+  align-items : center;
+  gap         : 10px;
+  margin-bottom: 6px;
+}
+.section-badge {
+  font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 3px; font-weight: 700;
+}
+.badge-ir  { background: rgba(4,181,163,.15);    color: var(--sky);     }
+.badge-dc  { background: rgba(195,165,229,.15);  color: var(--lavender);}
+.badge-wf  { background: rgba(200,221,90,.15);   color: var(--special); }
+.badge-sl  { background: rgba(246,150,83,.15);   color: var(--orange);  }
+.badge-bp  { background: rgba(144,205,244,.15);  color: var(--info);    }
+.badge-ic  { background: rgba(129,230,217,.15);  color: var(--safe);    }
+.badge-bn  { background: rgba(240,128,128,.15);  color: var(--warning); }
+.badge-sn  { background: rgba(255,179,217,.15);  color: var(--pink);    }
+.badge-bus { background: rgba(217,179,117,.15);  color: var(--brown);   }
+
+.doc-section h2 {
+  font-size: 1.5rem; font-weight: 700; color: var(--shell); margin-bottom: 10px;
+}
+.doc-section h2 em { font-style: normal; }
+.doc-section h2 em.sky      { color: var(--sky);     }
+.doc-section h2 em.lavender { color: var(--lavender);}
+.doc-section h2 em.special  { color: var(--special); }
+.doc-section h2 em.orange   { color: var(--orange);  }
+.doc-section h2 em.info     { color: var(--info);    }
+.doc-section h2 em.safe     { color: var(--safe);    }
+.doc-section h2 em.warning  { color: var(--warning); }
+.doc-section h2 em.pink     { color: var(--pink);    }
+.doc-section h2 em.brown    { color: var(--brown);   }
+
+p.doc-desc { color: var(--dim); font-size: .88rem; margin-bottom: 28px; max-width: 600px; }
+
+/* ══ 程式碼區塊 ══ */
+.code-wrap {
+  background: #0a0b0a; border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; margin: 16px 0 24px;
+}
+.code-head {
+  background: var(--region); border-bottom: 1px solid var(--border);
+  padding: 7px 14px; font-size: .7rem; color: var(--dim);
+  display: flex; align-items: center; gap: 8px;
+}
+.code-head i { color: var(--sky); }
+pre {
+  padding: 18px 22px; font-size: .79rem; color: #8a9070;
+  line-height: 1.85; margin: 0; overflow-x: auto;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+}
+.cm { color: #3a3b3a; }
+.tg { color: var(--sky); }
+.at { color: var(--special); }
+.vl { color: #E5C3B3; }
+.kw { color: var(--lavender); }
+.fn { color: var(--safe); }
+.st { color: var(--orange); }
+
+/* ══ 屬性表格 ══ */
+.attr-table {
+  width: 100%; border-collapse: collapse;
+  font-size: .82rem; margin: 16px 0 24px;
+}
+.attr-table th {
+  text-align: left; color: #3a3b3a; font-weight: 400;
+  font-size: .68rem; letter-spacing: .1em;
+  padding: 8px 14px; border-bottom: 1px solid var(--border);
+}
+.attr-table td {
+  padding: 10px 14px; border-bottom: 1px solid #111;
+  vertical-align: top;
+}
+.attr-table td:first-child { color: var(--special); font-family: monospace; white-space: nowrap; }
+.attr-table td:nth-child(2){ color: var(--dim); font-family: monospace; white-space: nowrap; }
+.attr-table td:last-child  { color: #666; }
+.attr-table tr:hover td    { background: rgba(255,255,255,.015); }
+
+/* ══ API 卡片 ══ */
+.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 10px; margin: 16px 0 24px; }
+.api-card { background: var(--region); border: 1px solid var(--border); border-radius: 7px; padding: 14px 16px; }
+.api-card .sig  { color: var(--safe); font-family: monospace; font-size: .8rem; margin-bottom: 6px; }
+.api-card p     { color: #666; font-size: .8rem; line-height: 1.6; }
+
+/* ══ 色帶展示 ══ */
+.color-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 24px; }
+.color-swatch {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.color-dot { width: 36px; height: 36px; border-radius: 7px; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.color-swatch small { font-size: .62rem; color: var(--dim); }
+
+/* ══ 提示框 ══ */
+.tip {
+  background: var(--region); border-left: 3px solid var(--border);
+  border-radius: 0 6px 6px 0; padding: 12px 16px;
+  font-size: .84rem; color: #666; margin: 12px 0 20px; line-height: 1.7;
+}
+.tip.sky     { border-left-color: var(--sky);     }
+.tip.lavender{ border-left-color: var(--lavender);}
+.tip.special { border-left-color: var(--special); }
+.tip.warning { border-left-color: var(--warning); }
+.tip strong  { color: var(--shell); }
+
+/* ══ 標籤群 ══ */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 20px; }
+.tag {
+  background: var(--region); border: 1px solid var(--border);
+  border-radius: 4px; padding: 3px 10px;
+  font-size: .75rem; color: var(--dim); font-family: monospace;
 }
 
-/* ── 行內程式碼 ──────────────────────────────────────── */
+/* ══ 流程圖 ══ */
+.flow {
+  background: var(--region); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px 24px;
+  font-family: monospace; font-size: .8rem;
+  color: #666; line-height: 2.2; margin: 16px 0 24px;
+  white-space: pre-line;
+}
+.flow .ev  { color: var(--sky); }
+.flow .el  { color: var(--lavender); }
+.flow .ok  { color: var(--safe); }
+.flow .arr { color: var(--dim); }
+
+/* ══ 頁尾 ══ */
+#footer {
+  padding: 40px 60px; text-align: center;
+  font-size: .78rem; color: #333;
+  border-top: 1px solid var(--border);
+}
+#footer span { color: var(--lavender); }
+
 code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .83em;
-  background: var(--color-surface);
-  color: var(--color-sky);
-  padding: 1px 6px;
-  border-radius: 3px;
+  background: var(--region); padding: 1px 6px; border-radius: 3px;
+  font-size: .82rem; color: var(--sky); font-family: monospace;
 }
 
-/* ── 示範內容卡 ──────────────────────────────────────── */
-#content-a, #content-b {
-  display: none;
-  background: var(--color-surface);
-  border-left: 3px solid var(--color-lavender);
-  padding: 12px 16px;
-  border-radius: 0 6px 6px 0;
-  font-size: .9rem;
-  margin-top: 8px;
+@media (max-width: 680px) {
+  #sidebar { display: none; }
+  #main    { margin-left: 0; }
+  .doc-section, #hero { padding: 40px 24px; }
 }
-
-/* ── flip-card 高度 ──────────────────────────────────── */
-flip-card { min-height: 90px; }
-.wf-card-inner { min-height: 90px; }
-card-front, card-back { min-height: 90px; }
-
-/* ── WordFlip 示範段落 ───────────────────────────────── */
-.wf-paragraph {
-  font-size: 1rem;
-  line-height: 2;
-  margin-bottom: 20px;
-}
-.wf-paragraph + .wf-paragraph { margin-top: 4px; }
-
-/* ── InfoRegion 示範目標區 ──────────────────────────── */
-#dc-push-target {
-  background: var(--color-surface);
-  border: 1px dashed var(--color-border-subtle, rgba(198,199,189,.2));
-  border-radius: 6px;
-  padding: 12px 16px;
-  min-height: 48px;
-  font-size: .88rem;
-  color: var(--color-shell);
-  opacity: .6;
-  margin-top: 12px;
-  transition: opacity .3s;
-}
-#dc-push-target:not(:empty) { opacity: 1; border-style: solid; border-color: var(--color-sky); }
-
-/* ── 步驟說明 ────────────────────────────────────────── */
-.step-note {
-  font-size: .8rem;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--color-attention);
-  margin-top: 6px;
-  opacity: .75;
-}
-
-/* ── 淺色主題下 wf-modal/drawer 背景補正 ────────────── */
-[data-theme="light"] .wf-tooltip-box,
-[data-theme="light"] .wf-popover-box,
-[data-theme="light"] .wf-modal-box,
-[data-theme="light"] .wf-drawer-panel { color: var(--color-shell); }
-
-/* ── 進場動畫 ────────────────────────────────────────── */
-@keyframes fade-up { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-.page-wrap > * { animation: fade-up .5s ease both; }
-.page-wrap > *:nth-child(1) { animation-delay: .05s; }
-.page-wrap > *:nth-child(2) { animation-delay: .12s; }
-.page-wrap > *:nth-child(3) { animation-delay: .18s; }
-.page-wrap > *:nth-child(4) { animation-delay: .24s; }
-.page-wrap > *:nth-child(5) { animation-delay: .30s; }
-.page-wrap > *:nth-child(6) { animation-delay: .36s; }
 </style>
 </head>
 <body>
 
-<!-- ══════════════ 隱藏內容範本 ══════════════ -->
-<div style="display:none">
-
-  <div id="tpl-word">
-    <p>「字詞翻轉」是 <code>bp-tools.js</code> 的核心功能之一。點擊帶有底線的詞彙後，會就地展開補充說明，無需跳轉頁面。</p>
-    <p>支援 <strong>自動返回</strong>、<strong>已讀標記</strong>、以及多種觸發樣式。</p>
+<!-- ══ 側邊欄 ══ -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <h1>bp-tools-patch.js</h1>
+    <p>v2.1 完整說明文件</p>
   </div>
 
-  <div id="tpl-inline">
-    <p>這是 <strong>inline 模式</strong>：內容直接在文字中展開，不彈出任何浮動面板。適合短段補充說明或詞彙解釋。</p>
+  <div class="sb-group">載入</div>
+  <a href="#load"    class="sb-link"><i class="bi bi-box-arrow-in-down"></i>快速開始</a>
+  <a href="#bus"     class="sb-link"><i class="bi bi-diagram-3"></i>BPTools 匯流排</a>
+  <a href="#colors"  class="sb-link"><i class="bi bi-palette2"></i>品牌色系</a>
+
+  <div class="sb-group">元件</div>
+  <a href="#ir"      class="sb-link"><i class="bi bi-play-circle"></i>InfoRegion</a>
+  <a href="#dc"      class="sb-link"><i class="bi bi-table"></i>DualCell</a>
+  <a href="#wf"      class="sb-link"><i class="bi bi-cursor-text"></i>WordFlip</a>
+  <a href="#ic"      class="sb-link"><i class="bi bi-input-cursor-text"></i>ir-challenge</a>
+  <a href="#sl"      class="sb-link"><i class="bi bi-collection-play"></i>bp-slide</a>
+  <a href="#bn"      class="sb-link"><i class="bi bi-megaphone"></i>bp-notice</a>
+  <a href="#sn"      class="sb-link"><i class="bi bi-sticky"></i>BpNote</a>
+
+  <div class="sb-group">進階</div>
+  <a href="#flow"    class="sb-link"><i class="bi bi-arrows-angle-expand"></i>連動流程</a>
+  <a href="#api"     class="sb-link"><i class="bi bi-braces"></i>公開 API</a>
+  <a href="#compat"  class="sb-link"><i class="bi bi-check2-all"></i>相容性</a>
+</nav>
+
+<!-- ══ 主內容 ══ -->
+<div id="main">
+
+<!-- ── Hero ── -->
+<section id="hero">
+  <div class="hero-eyebrow"><i class="bi bi-file-earmark-code"></i> bp-tools.js 擴充補丁</div>
+  <h2>bp-tools-patch.js<br><em>六個元件，一個補丁</em></h2>
+  <p class="lead">只需兩個 script 標籤，為任何網頁加入 InfoRegion、DualCell、WordFlip、bp-slide、bp-notice、BpNote 六大元件，並透過 BPTools 事件匯流排串接所有互動。</p>
+
+  <div class="load-block">
+    <span class="cm">&lt;!-- 1. Bootstrap Icons（部分元件需要）--&gt;</span><br>
+    <span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="vl">"stylesheet"</span> <span class="at">href</span>=<span class="vl">"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"</span><span class="tg">&gt;</span><br><br>
+    <span class="cm">&lt;!-- 2. 主工具庫（永遠不動）--&gt;</span><br>
+    <span class="tg">&lt;script</span> <span class="at">src</span>=<span class="vl">"bp-tools.js"</span><span class="tg">&gt;&lt;/script&gt;</span><br><br>
+    <span class="cm">&lt;!-- 3. 擴充補丁（所有新功能）--&gt;</span><br>
+    <span class="tg">&lt;script</span> <span class="at">src</span>=<span class="vl">"bp-tools-patch.js"</span><span class="tg">&gt;&lt;/script&gt;</span>
   </div>
 
-  <div id="tpl-tooltip">
-    <p>輕量浮動提示，hover 或 click 觸發，自動計算位置，超出視窗邊界時會翻轉方向。</p>
+  <div class="chip-row">
+    <span class="chip"><i class="bi bi-diagram-3" style="color:var(--brown)"></i>BPTools 匯流排</span>
+    <span class="chip"><i class="bi bi-play-circle" style="color:var(--sky)"></i>InfoRegion</span>
+    <span class="chip"><i class="bi bi-table" style="color:var(--lavender)"></i>DualCell</span>
+    <span class="chip"><i class="bi bi-cursor-text" style="color:var(--special)"></i>WordFlip</span>
+    <span class="chip"><i class="bi bi-input-cursor-text" style="color:var(--safe)"></i>ir-challenge</span>
+    <span class="chip"><i class="bi bi-collection-play" style="color:var(--orange)"></i>bp-slide</span>
+    <span class="chip"><i class="bi bi-megaphone" style="color:var(--warning)"></i>bp-notice</span>
+    <span class="chip"><i class="bi bi-sticky" style="color:var(--pink)"></i>BpNote</span>
+  </div>
+</section>
+
+<!-- ── 快速開始 ── -->
+<section class="doc-section" id="load">
+  <div class="section-label"><span class="section-badge badge-bus">基礎</span></div>
+  <h2>快速開始</h2>
+  <p class="doc-desc">頁面裡使用 BPTools 訂閱事件時，必須用輪詢寫法，確保 BPTools 建立完成後才執行。</p>
+
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 頁面自訂訂閱的正確寫法</div>
+    <pre><span class="cm">// ✓ 正確：輪詢等待</span>
+(<span class="kw">function</span> <span class="fn">wait</span>() {
+  <span class="kw">if</span> (<span class="kw">typeof</span> BPTools === <span class="vl">'undefined'</span>) { <span class="fn">setTimeout</span>(wait, <span class="vl">50</span>); <span class="kw">return</span>; }
+  BPTools.<span class="fn">on</span>(<span class="vl">'my:event'</span>, () => { <span class="cm">/* 你的邏輯 */</span> });
+})();
+
+<span class="cm">// ✗ 錯誤：DOMContentLoaded 不保證 BPTools 已就緒</span>
+document.<span class="fn">addEventListener</span>(<span class="vl">'DOMContentLoaded'</span>, () => {
+  BPTools.<span class="fn">on</span>(<span class="vl">'my:event'</span>, ...); <span class="cm">// 可能噴 BPTools is not defined</span>
+});</pre>
   </div>
 
-  <div id="tpl-popover">
-    <h5 style="margin-bottom:8px">Popover 面板</h5>
-    <p>比 tooltip 更豐富的浮動面板，包含標題列與關閉按鈕。支援自訂寬高與字體大小。</p>
-    <ul style="padding-left:18px;margin-top:8px">
-      <li>自動定位（上下左右皆可）</li>
-      <li>點擊外部自動關閉</li>
-      <li>同時只開一個面板</li>
-    </ul>
+  <div class="tip sky"><strong>全域設定</strong>：BpNote 和 bp-slide 支援在 patch 載入前定義 <code>window.StickyNotesConfig</code> 覆蓋預設值。各元件的設定方式詳見各自章節。</div>
+</section>
+
+<!-- ── BPTools ── -->
+<section class="doc-section" id="bus">
+  <div class="section-label"><span class="section-badge badge-bus">核心</span></div>
+  <h2><em class="brown">BPTools</em> 事件匯流排</h2>
+  <p class="doc-desc">六個元件的通訊中樞。發布端不知道誰在聽，訂閱端不知道誰觸發，靠事件名稱字串鬆散耦合。<code>_fired</code> 紀錄歷史，後來載入的元件也能知道事件是否已發過並立即解鎖。</p>
+
+  <div class="api-grid">
+    <div class="api-card"><div class="sig">BPTools.on(ev, fn)</div><p>訂閱事件。同一事件可訂閱多次，全部觸發。</p></div>
+    <div class="api-card"><div class="sig">BPTools.emit(ev, data)</div><p>發布事件。同時記入 _fired 歷史。</p></div>
+    <div class="api-card"><div class="sig">BPTools.off(ev, fn)</div><p>取消特定訂閱。</p></div>
+    <div class="api-card"><div class="sig">BPTools._fired</div><p>Set&lt;string&gt;，記錄所有曾發過的事件名稱。</p></div>
   </div>
 
-  <div id="tpl-modal">
-    <p>Modal 模式適合較長篇幅的內容。點擊遮罩或按 <code>ESC</code> 即可關閉。</p>
-    <h5 style="margin:12px 0 6px">特點</h5>
-    <ul style="padding-left:18px">
-      <li>背景滾動鎖定</li>
-      <li>入場動畫（scale + translate）</li>
-      <li>支援自訂寬高</li>
-      <li>標題可附加 Bootstrap Icon</li>
-    </ul>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 一個事件同時觸發多件事</div>
+    <pre>BPTools.<span class="fn">on</span>(<span class="vl">'lesson:done'</span>, () => badge.style.display = <span class="vl">'block'</span>);
+BPTools.<span class="fn">on</span>(<span class="vl">'lesson:done'</span>, () => <span class="fn">fetch</span>(<span class="vl">'/api/progress'</span>, { method: <span class="vl">'POST'</span> }));
+BPTools.<span class="fn">on</span>(<span class="vl">'lesson:done'</span>, () => localStorage.<span class="fn">setItem</span>(<span class="vl">'done'</span>, <span class="vl">'1'</span>));</pre>
   </div>
 
-  <div id="tpl-drawer">
-    <p>Drawer 從右側滑入，適合需要保留頁面脈絡同時查閱詳細資料的場景。</p>
-    <p style="margin-top:10px">按 <code>ESC</code> 或左側遮罩可關閉。支援自訂寬度。</p>
-    <p style="margin-top:10px;font-size:.85rem;opacity:.75">這個詞彙是 <em>drawer 模式</em> 的示範，所有四種浮動模式共用同一套動畫與定位邏輯。</p>
+  <div class="tip special"><strong>事件命名建議</strong>：用 <code>主體:動作</code> 格式，例如 <code>quiz:pass</code>、<code>lesson:done</code>、<code>slide:revealed</code>。描述「發生了什麼」而不是「要做什麼」。</div>
+</section>
+
+<!-- ── 品牌色 ── -->
+<section class="doc-section" id="colors">
+  <div class="section-label"><span class="section-badge badge-bus">基礎</span></div>
+  <h2>品牌色系</h2>
+  <p class="doc-desc">所有元件共用同一套色系，透過 <code>BrandColors</code> 統一管理。支援深色／淺色雙主題切換。</p>
+
+  <div class="color-grid">
+    <div class="color-swatch"><div class="color-dot" style="background:#c6c7bd"></div><small>shell</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#C3A5E5"></div><small>lavender</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#C8DD5A"></div><small>special</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#F08080"></div><small>warning</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#E5C3B3"></div><small>salmon</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#E5E5A6"></div><small>attention</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#04b5a3"></div><small>sky</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#81E6D9"></div><small>safe</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#d9b375"></div><small>brown</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#90CDF4"></div><small>info</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#FFB3D9"></div><small>pink</small></div>
+    <div class="color-swatch"><div class="color-dot" style="background:#f69653"></div><small>orange</small></div>
   </div>
 
-  <div id="tpl-badge">
-    <p>Badge 與 Pill 觸發樣式讓詞彙在視覺上更像「標籤」，適合用於專業術語、狀態標示或分類標記。</p>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> BrandColors API</div>
+    <pre>BrandColors.<span class="fn">applyTheme</span>(<span class="vl">'light'</span>);        <span class="cm">// 切換主題，全頁自動更新</span>
+BrandColors.<span class="fn">get</span>(<span class="vl">'sky'</span>);               <span class="cm">// '#04b5a3'</span>
+BrandColors.<span class="fn">get</span>(<span class="vl">'sky'</span>, <span class="vl">'light'</span>);      <span class="cm">// '#027a6c'（淺色主題值）</span>
+BrandColors.<span class="fn">resolve</span>(<span class="vl">'sky'</span>);           <span class="cm">// 同 get，找不到時原值回傳</span></pre>
+  </div>
+</section>
+
+<!-- ── InfoRegion ── -->
+<section class="doc-section" id="ir">
+  <div class="section-label"><span class="section-badge badge-ir">元件</span></div>
+  <h2><em class="sky">InfoRegion</em> 步驟引導</h2>
+  <p class="doc-desc">逐步動畫顯示的說明區塊，支援自動播放、倒數、手動確認、全域進度條。patch 新增分支路徑與 link 事件發布。</p>
+
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 基本串接</div>
+    <pre><span class="tg">&lt;info-region-group</span> <span class="at">global-progress</span> <span class="at">progress-color</span>=<span class="vl">"sky"</span> <span class="at">show-percent</span>
+  <span class="at">start-label</span>=<span class="vl">"▶ 開始"</span> <span class="at">start-color</span>=<span class="vl">"sky"</span><span class="tg">&gt;</span>
+
+  <span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"s1"</span> <span class="at">color</span>=<span class="vl">"sky"</span> <span class="at">next</span>=<span class="vl">"s2"</span> <span class="at">countdown</span>=<span class="vl">"2000"</span><span class="tg">&gt;</span>
+    第一步，2 秒後自動前進。
+  <span class="tg">&lt;/info-region&gt;</span>
+
+  <span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"s2"</span> <span class="at">color</span>=<span class="vl">"lavender"</span>
+    <span class="at">manual</span> <span class="at">manual-label</span>=<span class="vl">"下一步 →"</span> <span class="at">link</span>=<span class="vl">"lesson:done"</span><span class="tg">&gt;</span>
+    第二步，手動確認，完成時發出 lesson:done 事件。
+  <span class="tg">&lt;/info-region&gt;</span>
+
+<span class="tg">&lt;/info-region-group&gt;</span></pre>
   </div>
 
-  <div id="tpl-button">
-    <p>Button 樣式讓詞彙看起來像可點擊的操作按鈕，顏色會自動計算對比色，確保可讀性。</p>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 分支路徑（patch 新增）</div>
+    <pre><span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"q1"</span> <span class="at">color</span>=<span class="vl">"lavender"</span> <span class="at">choice-align</span>=<span class="vl">"left"</span><span class="tg">&gt;</span>
+  &lt;p&gt;問題文字&lt;/p&gt;
+  <span class="tg">&lt;ir-choice</span> <span class="at">target</span>=<span class="vl">"ans-ok"</span>  <span class="at">color</span>=<span class="vl">"safe"</span>    <span class="at">icon</span>=<span class="vl">"check-circle"</span><span class="tg">&gt;</span>正確選項<span class="tg">&lt;/ir-choice&gt;</span>
+  <span class="tg">&lt;ir-choice</span> <span class="at">target</span>=<span class="vl">"ans-no"</span>  <span class="at">color</span>=<span class="vl">"warning"</span> <span class="at">icon</span>=<span class="vl">"x-circle"</span><span class="tg">&gt;</span>錯誤選項<span class="tg">&lt;/ir-choice&gt;</span>
+<span class="tg">&lt;/info-region&gt;</span>
+
+<span class="cm">&lt;!-- 答錯：next 指回題目，自動重置 --&gt;</span>
+<span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"ans-no"</span> <span class="at">color</span>=<span class="vl">"warning"</span> <span class="at">next</span>=<span class="vl">"q1"</span><span class="tg">&gt;</span>
+  ✗ 不對，再試一次。
+<span class="tg">&lt;/info-region&gt;</span></pre>
   </div>
 
-  <!-- word-flip in dual-cell 用的範本 -->
-  <div id="tpl-mvc">
-    <p><strong>MVC</strong>（Model-View-Controller）是一種將應用程式分為三個核心層的架構模式。</p>
-    <ul style="padding-left:18px;margin-top:6px">
-      <li><em>Model</em>：資料與商業邏輯</li>
-      <li><em>View</em>：使用者介面</li>
-      <li><em>Controller</em>：協調 Model 與 View</li>
-    </ul>
-  </div>
-  <div id="tpl-spa">
-    <p><strong>SPA</strong>（Single Page Application）在初次載入後不再重新整理整個頁面，而是透過 JS 動態更新 DOM，帶來接近原生 App 的操作體驗。</p>
-  </div>
-  <div id="tpl-ssr">
-    <p><strong>SSR</strong>（Server-Side Rendering）在伺服器端將 HTML 完整渲染後再傳送給瀏覽器，有助於 SEO 與首屏載入速度。</p>
-    <p style="margin-top:6px;font-size:.88rem;opacity:.8">相關：Next.js、Nuxt.js、SvelteKit 均支援 SSR。</p>
-  </div>
-  <div id="tpl-cdn">
-    <p><strong>CDN</strong>（Content Delivery Network）透過分散在各地的伺服器節點，讓使用者從距離最近的節點取得靜態資源，降低延遲。</p>
-  </div>
-  <div id="tpl-wasm">
-    <p><strong>WebAssembly</strong> 是一種低階二進位指令格式，可在瀏覽器中以接近原生速度執行 C/C++/Rust 等語言編譯的程式。</p>
-  </div>
-  <div id="tpl-pwa">
-    <p><strong>PWA</strong>（Progressive Web App）利用 Service Worker 與 Web App Manifest，讓網頁具備離線運作、推播通知、安裝到桌面等原生 App 特性。</p>
-  </div>
+  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px;margin-top:4px">patch 新增屬性</h3>
+  <table class="attr-table">
+    <tr><th>屬性（info-region）</th><th>預設</th><th>說明</th></tr>
+    <tr><td>link</td><td>—</td><td>啟動時向匯流排發出事件</td></tr>
+    <tr><th>屬性（ir-choice）</th><th></th><th></th></tr>
+    <tr><td>target</td><td>必填</td><td>點擊後跳往的 info-region id</td></tr>
+    <tr><td>color</td><td>父層色</td><td>按鈕品牌色</td></tr>
+    <tr><td>icon</td><td>—</td><td>Bootstrap Icon 類名（不含 bi-）</td></tr>
+    <tr><th>屬性（info-region，choice-align）</th><th></th><th></th></tr>
+    <tr><td>choice-align</td><td>left</td><td>選項按鈕對齊：left / center / right</td></tr>
+  </table>
+</section>
 
-  <div id="fc-front-1">
-    <h4>什麼是 flip-card？</h4>
-    <p>一個具有 3D 翻轉效果的雙面卡片元件。<strong>正面</strong>顯示問題或標題，翻轉後顯示答案或詳細說明。</p>
-    <small>點擊卡片翻轉 →</small>
-  </div>
-  <div id="fc-back-1">
-    <h4>flip-card 特性</h4>
-    <p>透過 CSS <em>transform-style: preserve-3d</em> 實現原生 3D 翻轉，零依賴，支援巢狀 word-flip 元件。</p>
-    <small>再次點擊返回正面</small>
-  </div>
+<!-- ── DualCell ── -->
+<section class="doc-section" id="dc">
+  <div class="section-label"><span class="section-badge badge-dc">元件</span></div>
+  <h2><em class="lavender">DualCell</em> 多欄表格</h2>
+  <p class="doc-desc">語義化多欄表格，支援主題色、遮罩揭示、群組折疊、輪播等。patch 新增 <code>on-link</code>，訂閱事件後自動移除遮罩。</p>
 
-  <div id="fc-front-2">
-    <h4>InfoRegion 的用途？</h4>
-    <p>用於逐步揭示內容的動畫區塊元件，可設定自動鏈結、倒數進度條與全體進度追蹤。</p>
-  </div>
-  <div id="fc-back-2">
-    <h4>典型使用情境</h4>
-    <ul>
-      <li>教學步驟演示</li>
-      <li>引導式表單填寫</li>
-      <li>分段展示的簡報</li>
-    </ul>
-    <small>支援水平與垂直兩種佈局模式</small>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> on-link 解鎖遮罩（patch 新增）</div>
+    <pre><span class="tg">&lt;div</span> <span class="at">id</span>=<span class="vl">"t1"</span> <span class="at">data-dual-cell</span> <span class="at">data-cols</span>=<span class="vl">"2"</span> <span class="at">data-theme</span>=<span class="vl">"sky"</span>
+     <span class="at">data-show-menu-button</span>=<span class="vl">"false"</span><span class="tg">&gt;</span>
+
+  <span class="tg">&lt;div</span> <span class="at">data-col</span><span class="tg">&gt;</span>問題<span class="tg">&lt;/div&gt;</span>
+
+  <span class="cm">&lt;!-- on-link：監聽事件，事件發生後移除遮罩 --&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">data-col</span>
+       <span class="at">data-on-link</span>=<span class="vl">"quiz:pass"</span>
+       <span class="at">data-overlay-1-text</span>=<span class="vl">"答對後解鎖"</span><span class="tg">&gt;</span>
+    答案內容
+  <span class="tg">&lt;/div&gt;</span>
+
+<span class="tg">&lt;/div&gt;</span></pre>
   </div>
 
-</div>
-<!-- ═══════════════════════════════════════════════ -->
+  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px">patch 新增屬性</h3>
+  <table class="attr-table">
+    <tr><th>屬性（data-col）</th><th>說明</th></tr>
+    <tr><td>data-on-link</td><td>事件名稱。事件發生時移除此格的所有遮罩，取消 blur。</td></tr>
+  </table>
 
+  <div class="tip lavender"><strong>主題色</strong>：data-theme 支援所有品牌色名稱：sky / lavender / special / safe / info / warning / salmon / attention / pink / orange / brown / default</div>
+</section>
 
-<div class="page-wrap">
+<!-- ── WordFlip ── -->
+<section class="doc-section" id="wf">
+  <div class="section-label"><span class="section-badge badge-wf">元件</span></div>
+  <h2><em class="special">WordFlip</em> 行內互動詞彙</h2>
+  <p class="doc-desc">夾在段落中的可點擊詞彙，點擊後展開說明。patch 新增四項擴充，並支援 12 種視覺樣式。</p>
 
-  <!-- ── 頁首 ──────────────────────────────────── -->
-  <header class="site-header">
-    <div class="logo-block">
-      <div class="logo-kicker">Component Library</div>
-      <h1 class="logo-title">bp<span>-tools</span>.js</h1>
-    </div>
-    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">
-      <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
-      <span id="themeLabel">切換亮色</span>
-    </button>
-  </header>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> patch 擴充屬性</div>
+    <pre><span class="cm">&lt;!-- link：翻開時發出事件 --&gt;</span>
+<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"sky"</span> <span class="at">link</span>=<span class="vl">"term:opened"</span>
+           <span class="at">data-content</span>=<span class="vl">"說明文字"</span><span class="tg">&gt;</span>詞彙<span class="tg">&lt;/word-flip&gt;</span>
 
+<span class="cm">&lt;!-- unlock-on：預設鎖定，事件發生後才可點擊 --&gt;</span>
+<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"safe"</span> <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span>
+           <span class="at">data-content</span>=<span class="vl">"解鎖後的說明"</span><span class="tg">&gt;</span>鎖定中<span class="tg">&lt;/word-flip&gt;</span>
 
-  <!-- ══════════ SECTION 1：DualCell ══════════ -->
-  <div class="demo-block">
-    <div class="section-tag">01 / DualCell</div>
-    <h2 class="section-title">多欄格狀佈局元件</h2>
-    <p class="section-desc">以宣告式 HTML 標籤定義多欄資料表，支援選單操作（push / copy / toggle / show-next）、群組折疊、垂直輪播與遮罩揭示。</p>
+<span class="cm">&lt;!-- answer-src：從外部元素讀取 HTML 內容 --&gt;</span>
+<span class="tg">&lt;div</span> <span class="at">id</span>=<span class="vl">"my-detail"</span> <span class="at">style</span>=<span class="vl">"display:none"</span><span class="tg">&gt;</span>&lt;strong&gt;完整 HTML 說明&lt;/strong&gt;<span class="tg">&lt;/div&gt;</span>
+<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"lavender"</span> <span class="at">answer-src</span>=<span class="vl">"my-detail"</span><span class="tg">&gt;</span>詞彙<span class="tg">&lt;/word-flip&gt;</span>
 
-    <!-- 示範 A：基本雙欄 + push -->
-    <p class="step-note mb-2">▸ 點擊 ▶ 按鈕，將左欄內容推送到下方目標區</p>
-    <div id="dc-basic" data-dual-cell
-      data-theme="sky"
-      data-cols="2"
-      data-border-follow-theme="true"
-      data-menu-button-icon-push="bi-arrow-down-circle"
-      data-menu-button-icon-copy="bi-clipboard"
-      data-menu-button-icon-toggle="bi-chevron-down"
-      data-menu-button-icon-toggle-expanded="bi-chevron-up"
-      data-target-id="dc-push-target">
-
-      <dual-row>
-        <dual-col menu-action="push">
-          <strong>框架選型</strong><br>
-          React / Vue / Svelte 各有優劣，選擇時應優先考量團隊熟悉度而非技術流行度。
-        </dual-col>
-        <dual-col menu-action="copy">
-          <strong>效能指標</strong><br>
-          Core Web Vitals：LCP、FID、CLS 是 Google 搜尋排名的重要參數。
-        </dual-col>
-      </dual-row>
-
-      <dual-row>
-        <dual-col menu-action="toggle" span="all">
-          <i class="bi bi-info-circle me-2" style="color:var(--color-sky)"></i>
-          點擊 ▾ 展開補充說明（toggle slot 示範）
-          <dual-slot>
-            <p style="margin:0;font-size:.88rem;opacity:.85">
-              Toggle 動作會在列下方插入一個滑動展開的區塊，可以放置任意 HTML 內容。
-              再次點擊同一按鈕即可收合。
-            </p>
-          </dual-slot>
-        </dual-col>
-      </dual-row>
-
-      <!-- 群組折疊 -->
-      <dual-group title="進階主題" title-icon="bi-layers" collapsed="true"
-        group-collapsed-icon="bi-chevron-right"
-        group-expanded-icon="bi-chevron-down">
-        <dual-col>Web Components 是瀏覽器原生的元件系統，無框架依賴。</dual-col>
-        <dual-col>Shadow DOM 提供樣式隔離，但與全域 CSS 的整合需要額外設計。</dual-col>
-        <dual-col>Custom Elements 的生命週期回呼：connectedCallback / disconnectedCallback / attributeChangedCallback。</dual-col>
-        <dual-col>HTML Template 元素允許定義惰性 DOM 片段，搭配 slot 實現靈活的內容分發。</dual-col>
-      </dual-group>
-
-    </div>
-
-    <div id="dc-push-target">（push 目標：點擊上方欄位的 ▶ 後內容會顯示在這裡）</div>
+<span class="cm">&lt;!-- group：同組互斥，同時只展開一個 --&gt;</span>
+<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"sky"</span>     <span class="at">group</span>=<span class="vl">"terms"</span> <span class="at">data-content</span>=<span class="vl">"A 的說明"</span><span class="tg">&gt;</span>詞 A<span class="tg">&lt;/word-flip&gt;</span>
+<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"lavender"</span> <span class="at">group</span>=<span class="vl">"terms"</span> <span class="at">data-content</span>=<span class="vl">"B 的說明"</span><span class="tg">&gt;</span>詞 B<span class="tg">&lt;/word-flip&gt;</span></pre>
   </div>
 
-  <!-- 示範 B：輪播 + show-next -->
-  <div class="demo-block">
-    <p class="section-tag">01 / DualCell — 輪播 &amp; 逐步展開</p>
-    <p class="step-note mb-2">▸ 左欄自動輪播；右欄點擊 ▸ 按鈕逐步展開隱藏列</p>
+  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px">全部 style-type 樣式</h3>
+  <div class="tag-row">
+    <span class="tag">badge</span><span class="tag">pill</span><span class="tag">highlight</span>
+    <span class="tag">tag</span><span class="tag">button</span><span class="tag">icon</span>
+    <span class="tag">underline</span><span class="tag">dotted</span>
+    <span class="tag" style="color:var(--lavender)">card ★</span>
+    <span class="tag" style="color:var(--sky)">glow ★</span>
+    <span class="tag" style="color:var(--pink)">neon ★</span>
+    <span class="tag" style="color:var(--special)">chip ★</span>
+    <span class="tag" style="color:var(--brown)">ribbon ★</span>
+    <span class="tag" style="color:var(--orange)">announce ★</span>
+  </div>
+  <p style="font-size:.75rem;color:var(--dim)">★ = patch 新增樣式</p>
 
-    <div id="dc-carousel" data-dual-cell
-      data-theme="lavender"
-      data-cols="2"
-      data-col-widths="1:1"
-      data-border-follow-theme="true"
-      data-menu-button-icon-show-next="bi-chevron-bar-down">
+  <div class="tip warning"><strong>注意</strong>：bp-tools.js 原始元件的展開內容屬性是 <code>data-content</code>，不是 <code>answer</code>。</div>
+</section>
 
-      <dual-row>
-        <!-- 輪播欄 -->
-        <dual-col show-menu="false" carousel-interval="2800" carousel-indicator-color="var(--color-lavender)" carousel-indicator-height="3px">
-          <dual-item><div><strong>第 1 項</strong><br>輪播內容可以包含任意 HTML，支援 per-col 獨立設定切換速度</div></dual-item>
-          <dual-item><div><strong>第 2 項</strong><br>進度條顯示距離下次切換的剩餘時間，顏色跟隨主題</div></dual-item>
-          <dual-item><div><strong>第 3 項</strong><br>輪播採用 setTimeout 遞迴，避免 setInterval 累積誤差</div></dual-item>
-        </dual-col>
-        <!-- show-next 欄 -->
-        <dual-col menu-action="show-next">
-          點擊右側 ▸ 按鈕展開下一列（show-next 模式）
-        </dual-col>
-      </dual-row>
+<!-- ── ir-challenge ── -->
+<section class="doc-section" id="ic">
+  <div class="section-label"><span class="section-badge badge-ic">元件</span></div>
+  <h2><em class="safe">ir-challenge</em> 輸入驗證</h2>
+  <p class="doc-desc">答對才向匯流排發出事件，可連動解鎖任意訂閱同一事件的元件。支援多個正確答案。</p>
 
-      <dual-row hidden>
-        <dual-col show-menu="false" span="all" style="color:var(--color-lavender)">
-          <i class="bi bi-check2-circle me-2"></i>第一列已展開！再按一次繼續展開下一列。
-        </dual-col>
-      </dual-row>
-
-      <dual-row hidden>
-        <dual-col show-menu="false" span="all" style="color:var(--color-safe)">
-          <i class="bi bi-check2-all me-2"></i>全部展開完畢。這是最後一列。
-        </dual-col>
-      </dual-row>
-
-    </div>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 完整範例</div>
+    <pre><span class="tg">&lt;ir-challenge</span>
+  <span class="at">answer</span>=<span class="vl">"Cookie|cookie|COOKIE"</span>  <span class="cm">&lt;!-- | 分隔多個答案 --&gt;</span>
+  <span class="at">link</span>=<span class="vl">"q:correct"</span>             <span class="cm">&lt;!-- 答對後發出的事件 --&gt;</span>
+  <span class="at">color</span>=<span class="vl">"sky"</span>
+  <span class="at">placeholder</span>=<span class="vl">"輸入答案…"</span>
+  <span class="at">hint</span>=<span class="vl">"提示文字"</span>
+  <span class="at">btn-label</span>=<span class="vl">"確認"</span>
+  <span class="at">font-size</span>=<span class="vl">"1rem"</span>           <span class="cm">&lt;!-- 同時設定輸入框與按鈕 --&gt;</span>
+  <span class="at">btn-font-size</span>=<span class="vl">"0.9rem"</span>    <span class="cm">&lt;!-- 單獨設定按鈕 --&gt;</span>
+  <span class="at">input-font-size</span>=<span class="vl">"1rem"</span>   <span class="cm">&lt;!-- 單獨設定輸入框 --&gt;</span>
+  <span class="at">btn-padding</span>=<span class="vl">"8px 24px"</span>
+  <span class="at">case-sensitive</span><span class="tg">&gt;</span>           <span class="cm">&lt;!-- 加上此屬性則區分大小寫 --&gt;</span>
+<span class="tg">&lt;/ir-challenge&gt;</span></pre>
   </div>
 
-  <!-- ══════════ NEW-BAR：側邊條 ══════════ -->
-  <div class="demo-block">
-    <p class="section-tag">01 / DualCell — 新功能</p>
-    <h2 class="section-title">側邊條、懸停 Tooltip、圖示說明</h2>
-    <p class="section-desc">
-      三項新增功能：<code>bar-side</code>（格子側邊條）、<code>hover-tip-src</code>（懸停整格浮現 tooltip）、<code>info</code> / <code>info-src</code>（右上角圖示懸停說明）。
-    </p>
+  <table class="attr-table">
+    <tr><th>屬性</th><th>預設</th><th>說明</th></tr>
+    <tr><td>answer</td><td>必填</td><td>正確答案，<code>|</code> 分隔多個</td></tr>
+    <tr><td>link</td><td>—</td><td>答對後向匯流排發出的事件名稱</td></tr>
+    <tr><td>color</td><td>sky</td><td>品牌色（影響邊框、按鈕、focus 光暈）</td></tr>
+    <tr><td>placeholder</td><td>輸入答案…</td><td>輸入框提示</td></tr>
+    <tr><td>hint</td><td>—</td><td>輸入框下方灰色提示文字</td></tr>
+    <tr><td>btn-label</td><td>確認</td><td>按鈕文字</td></tr>
+    <tr><td>font-size</td><td>—</td><td>同時設定輸入框與按鈕字體</td></tr>
+    <tr><td>input-font-size</td><td>—</td><td>單獨設定輸入框字體</td></tr>
+    <tr><td>btn-font-size</td><td>—</td><td>單獨設定按鈕字體</td></tr>
+    <tr><td>btn-padding</td><td>7px 20px</td><td>按鈕 padding</td></tr>
+    <tr><td>case-sensitive</td><td>—</td><td>布林屬性，加上後區分大小寫</td></tr>
+  </table>
+</section>
 
-    <!-- 側邊條示範 -->
-    <p class="step-note mb-2">▸ 側邊條：<code>bar-side="left|right"</code>，<code>bar-width</code>，<code>bar-color</code></p>
-    <div id="dc-bars" data-dual-cell
-      data-theme="sky"
-      data-cols="3"
-      data-border-follow-theme="true"
-      data-show-menu-button="false"
-      data-cell-padding="18px">
+<!-- ── bp-slide ── -->
+<section class="doc-section" id="sl">
+  <div class="section-label"><span class="section-badge badge-sl">元件</span></div>
+  <h2><em class="orange">bp-slide</em> 投影片</h2>
+  <p class="doc-desc">原 slider-show.js 已整合進 patch，標籤改為 <code>&lt;bp-slide&gt;</code>。完整保留原有功能，新增四個匯流排連動屬性。</p>
 
-      <dual-col bar-side="left" bar-width="12" bar-color="shell">
-        <div>
-          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar-side="left" bar-color="lavender"</div>
-          左側邊條，粗細 5px，顏色使用品牌色名稱 <code>lavender</code>。
-        </div>
-      </dual-col>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 連動屬性範例</div>
+    <pre><span class="tg">&lt;bp-slide</span>
+  <span class="at">theme</span>=<span class="vl">"orange"</span>
+  <span class="at">height</span>=<span class="vl">"240px"</span>
+  <span class="at">link</span>=<span class="vl">"slider:done"</span>          <span class="cm">&lt;!-- 按完成按鈕時發事件 --&gt;</span>
+  <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span>     <span class="cm">&lt;!-- 等事件才解鎖整個導航 --&gt;</span>
+  <span class="at">auto-show-part-buttons</span>=<span class="vl">"true"</span>
+  <span class="at">finish-btn-text</span>=<span class="vl">"完成課程 →"</span><span class="tg">&gt;</span>
 
-      <dual-col bar-side="right" bar-width="6" bar-color="special">
-        <div>
-          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar-side="right" bar-color="special"</div>
-          右側邊條，粗細 6px，顏色 <code>special</code>（黃綠）。
-        </div>
-      </dual-col>
+  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span><span class="tg">&gt;</span>第一頁<span class="tg">&lt;/div&gt;</span>
 
-      <dual-col bar-side="left" bar-width="8" bar-color="warning">
-        <div>
-          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar-side="left" bar-width="8" bar-color="warning"</div>
-          粗側邊條 8px，顏色 <code>warning</code>。邊條以 <code>::before</code> 偽元素實作，不影響既有 border 結構。
-        </div>
-      </dual-col>
+  <span class="cm">&lt;!-- 切換到此頁時發出事件 --&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">link</span>=<span class="vl">"slide:p2"</span><span class="tg">&gt;</span>第二頁<span class="tg">&lt;/div&gt;</span>
 
-    </div>
+  <span class="cm">&lt;!-- 停在此頁時鎖住下一頁，等 quiz:pass 才放行 --&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span><span class="tg">&gt;</span>第三頁<span class="tg">&lt;/div&gt;</span>
 
-    <!-- 懸停整格 tooltip + info 圖示 -->
-    <p class="step-note mt-4 mb-2">▸ 懸停整格顯示 tooltip（<code>hover-tip-src</code>）+ 右上角圖示說明（<code>info-src</code>）</p>
-    <div id="dc-tips" data-dual-cell
-      data-theme="orange"
-      data-cols="2"
-      data-border-follow-theme="true"
-      data-show-menu-button="false"
-      data-cell-padding="14px 18px"
-      data-cell-min-height="64px">
-
-      <!-- hover-tip-src：懸停整個格子浮出 tooltip -->
-      <dual-col
-        hover-tip-src="#tip-hovertip"
-        bar-side="left" bar-width="4" bar-color="orange">
-        <div>
-          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">hover-tip-src="#tip-hovertip"</div>
-          <i class="bi bi-cursor-fill" style="color:var(--color-orange);margin-right:6px"></i>
-          將滑鼠移入此格，tooltip 從下方浮現，移出後自動消失。
-        </div>
-      </dual-col>
-
-      <!-- info-src：右上角圖示，hover 圖示顯示說明 -->
-      <dual-col
-        info-src="#tip-infosrc"
-        info-color="orange"
-        info-icon="question-circle-fill"
-        bar-side="left" bar-width="4" bar-color="attention">
-        <div>
-          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">info-src="#tip-infosrc" info-icon="question-circle-fill"</div>
-          <i class="bi bi-question-circle" style="color:var(--color-attention);margin-right:6px"></i>
-          將滑鼠移到右上角的 <i class="bi bi-question-circle-fill" style="font-size:.9em"></i> 圖示，浮出說明，移離圖示後消失。
-        </div>
-      </dual-col>
-
-      <!-- 兩種組合 -->
-      <dual-col
-        hover-tip="這個格子同時使用 hover-tip 與 info，滑鼠位置決定顯示哪一個說明。"
-        info="這是透過 info 屬性直接寫入的純文字說明，不需要隱藏範本元素。"
-        info-color="safe"
-        info-icon="lightbulb-fill"
-        bar-side="right" bar-width="5" bar-color="safe">
-        <div>
-          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">hover-tip="…" info="…"（兩者並用）</div>
-          <i class="bi bi-layers" style="color:var(--color-safe);margin-right:6px"></i>
-          懸停整格→顯示 <code>hover-tip</code>，懸停右上角圖示→顯示 <code>info</code>。
-        </div>
-      </dual-col>
-
-      <!-- bar + word-flip 組合 -->
-      <dual-col
-        bar-side="left" bar-width="5" bar-color="pink"
-        info="這個格子示範側邊條與 word-flip 的組合使用。">
-        <div>
-          <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;opacity:.55;margin-bottom:4px">bar + word-flip + info 三合一</div>
-          側邊條搭配行內
-          <word-flip data-color="pink" mode="popover" data-content="#tpl-pwa" title="PWA 說明">PWA</word-flip>
-          詞彙翻轉，右上角仍有圖示說明。
-        </div>
-      </dual-col>
-
-    </div>
-
-    <!-- 隱藏範本 -->
-    <div style="display:none">
-      <div id="tip-hovertip">
-        <strong>hover-tip-src 模式</strong><br>
-        懸停整個格子時浮現此 tooltip，取得 HTML 內容自指定元素。<br>
-        適合顯示欄位說明、資料來源標注等輔助資訊。
-      </div>
-      <div id="tip-infosrc">
-        <strong>info-src 圖示說明</strong><br>
-        只有 hover 到右上角的圖示時才顯示，不干擾格子的主要互動行為。<br>
-        可與 <code>bar-side</code>、<code>hover-tip</code>、<code>word-flip</code> 自由組合。
-      </div>
-    </div>
-
-  </div><!-- /NEW-BAR -->
-
-  <!-- ══════════ NEW A：DualCell + word-flip ══════════ -->
-  <div class="demo-block">
-    <p class="section-tag">01 / DualCell — 格子內嵌 word-flip</p>
-    <h2 class="section-title">在格子裡使用 word-flip</h2>
-    <p class="section-desc">
-      將 <code>&lt;word-flip&gt;</code> 直接寫在 <code>&lt;dual-col&gt;</code> 內即可。
-      DualCell 重新注入 innerHTML 時，Custom Element 會自動觸發
-      <code>connectedCallback</code>，word-flip 完整初始化。
-      <br>注意：word-flip <strong>不要設 id</strong>，讓 <code>data-content</code> 指向頁面上的隱藏範本元素。
-    </p>
-
-    <div id="dc-wf" data-dual-cell
-      data-theme="brown"
-      data-cols="2"
-      data-border-follow-theme="true"
-      data-show-menu-button="false"
-      data-cell-padding="14px 18px">
-
-      <dual-row>
-        <dual-col>
-          <div>
-            <div style="font-size:.75rem;opacity:.6;margin-bottom:4px;font-family:'JetBrains Mono',monospace">架構模式</div>
-            常見的 Web 架構包含
-            <word-flip data-color="special" mode="popover" data-content="#tpl-mvc" title="MVC 架構">MVC</word-flip>、
-            <word-flip data-color="sky" mode="popover" data-content="#tpl-spa" title="SPA 說明">SPA</word-flip>、
-            以及近年流行的
-            <word-flip data-color="lavender" mode="popover" data-content="#tpl-ssr" title="SSR 說明">SSR</word-flip>
-            模式，各有適用情境。
-          </div>
-        </dual-col>
-        <dual-col>
-          <div>
-            <div style="font-size:.75rem;opacity:.6;margin-bottom:4px;font-family:'JetBrains Mono',monospace">部署技術</div>
-            靜態資源通常透過
-            <word-flip data-color="orange" mode="popover" data-content="#tpl-cdn" title="CDN 說明">CDN</word-flip>
-            分發，而
-            <word-flip data-color="info" mode="popover" data-content="#tpl-wasm" title="WebAssembly">WebAssembly</word-flip>
-            與
-            <word-flip data-color="pink" mode="popover" data-content="#tpl-pwa" title="PWA 說明">PWA</word-flip>
-            正在重新定義瀏覽器的能力邊界。
-          </div>
-        </dual-col>
-      </dual-row>
-
-    </div>
-    <p class="step-note mt-2">▸ 點擊段落中帶底線的詞彙可查看 Popover 說明</p>
+<span class="tg">&lt;/bp-slide&gt;</span></pre>
   </div>
 
-  <!-- ══════════ NEW B：三欄以上 ══════════ -->
-  <div class="demo-block">
-    <p class="section-tag">01 / DualCell — 三欄以上</p>
-    <h2 class="section-title">任意欄數與比例設定</h2>
-    <p class="section-desc">
-      <code>data-cols</code> 可設任意整數；<code>data-col-widths</code> 用冒號分隔的比例值設定各欄寬度，例如 <code>1:2:1</code> 表示中欄佔兩倍寬。
-    </p>
+  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px">patch 新增連動屬性</h3>
+  <table class="attr-table">
+    <tr><th>屬性位置</th><th>屬性</th><th>說明</th></tr>
+    <tr><td>&lt;bp-slide&gt;</td><td>link</td><td>按「完成」按鈕時發出事件</td></tr>
+    <tr><td>&lt;bp-slide&gt;</td><td>unlock-on</td><td>等事件才解鎖整個 slider 的導航</td></tr>
+    <tr><td>[slide]</td><td>link</td><td>切換到此張時發出事件</td></tr>
+    <tr><td>[slide]</td><td>unlock-on</td><td>停在此張時鎖住下一頁，等事件才放行</td></tr>
+  </table>
+</section>
 
-    <!-- 三欄 1:2:1 -->
-    <p class="step-note mb-2">▸ 三欄，比例 1 : 2 : 1</p>
-    <div id="dc-3col" data-dual-cell
-      data-theme="info"
-      data-cols="3"
-      data-col-widths="1:2:1"
-      data-border-follow-theme="true"
-      data-show-menu-button="false">
+<!-- ── bp-notice ── -->
+<section class="doc-section" id="bn">
+  <div class="section-label"><span class="section-badge badge-bn">元件</span></div>
+  <h2><em class="warning">bp-notice</em> 公告元件</h2>
+  <p class="doc-desc">區塊級公告，支援燃燒引線倒數動畫、可關閉、置頂固定、事件解鎖。內文支援完整 HTML 與 Bootstrap Icons。</p>
 
-      <dual-col>
-        <div style="text-align:center;width:100%">
-          <i class="bi bi-layout-sidebar" style="font-size:1.4rem;color:var(--color-info);display:block;margin-bottom:4px"></i>
-          <strong>左側欄</strong><br>
-          <span style="font-size:.8rem;opacity:.7">flex: 1</span>
-        </div>
-      </dual-col>
-      <dual-col>
-        <div style="text-align:center;width:100%">
-          <i class="bi bi-layout-text-window-reverse" style="font-size:1.4rem;color:var(--color-info);display:block;margin-bottom:4px"></i>
-          <strong>主要內容欄（較寬）</strong><br>
-          <span style="font-size:.8rem;opacity:.7">flex: 2 — 此欄佔整體兩倍寬，適合放置主要資訊或說明文字</span>
-        </div>
-      </dual-col>
-      <dual-col>
-        <div style="text-align:center;width:100%">
-          <i class="bi bi-layout-sidebar-reverse" style="font-size:1.4rem;color:var(--color-info);display:block;margin-bottom:4px"></i>
-          <strong>右側欄</strong><br>
-          <span style="font-size:.8rem;opacity:.7">flex: 1</span>
-        </div>
-      </dual-col>
-
-    </div>
-
-    <!-- 四欄等寬 -->
-    <p class="step-note mt-4 mb-2">▸ 四欄等寬，搭配群組標題</p>
-    <div id="dc-4col" data-dual-cell
-      data-theme="attention"
-      data-cols="4"
-      data-border-follow-theme="true"
-      data-show-menu-button="false"
-      data-cell-padding="10px 14px">
-
-      <dual-group title="四欄等寬示範" title-icon="bi-grid-3x2-gap-fill">
-        <dual-col>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-1-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
-            欄位 A
-          </div>
-        </dual-col>
-        <dual-col>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-2-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
-            欄位 B
-          </div>
-        </dual-col>
-        <dual-col>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-3-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
-            欄位 C
-          </div>
-        </dual-col>
-        <dual-col>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-4-circle" style="font-size:1.2rem;color:var(--color-attention);margin-bottom:4px;display:block"></i>
-            欄位 D
-          </div>
-        </dual-col>
-        <dual-col>Q1 季度目標</dual-col>
-        <dual-col>Q2 季度目標</dual-col>
-        <dual-col>Q3 季度目標</dual-col>
-        <dual-col>Q4 季度目標</dual-col>
-      </dual-group>
-
-    </div>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 完整範例</div>
+    <pre><span class="cm">&lt;!-- 燃燒引線 + 可關閉 --&gt;</span>
+<span class="tg">&lt;bp-notice</span>
+  <span class="at">color</span>=<span class="vl">"sky"</span>
+  <span class="at">icon</span>=<span class="vl">"info-circle-fill"</span>    <span class="cm">&lt;!-- Bootstrap Icon 類名 --&gt;</span>
+  <span class="at">font-size</span>=<span class="vl">"1rem"</span>
+  <span class="at">icon-size</span>=<span class="vl">"1.4rem"</span>
+  <span class="at">padding</span>=<span class="vl">"16px 20px"</span>
+  <span class="at">dismissible</span>                <span class="cm">&lt;!-- 顯示關閉按鈕 --&gt;</span>
+  <span class="at">auto-hide</span>=<span class="vl">"5000"</span>           <span class="cm">&lt;!-- 5 秒後燃盡消失 --&gt;</span>
+  <span class="at">sticky</span>                     <span class="cm">&lt;!-- 置頂固定 --&gt;</span>
+  <span class="at">unlock-on</span>=<span class="vl">"lesson:done"</span>  <span class="cm">&lt;!-- 等事件才顯示，顯示後才倒數 --&gt;</span>
+  <span class="at">link</span>=<span class="vl">"notice:closed"</span>      <span class="cm">&lt;!-- 關閉時發出事件 --&gt;</span><span class="tg">&gt;</span>
+  <span class="cm">&lt;!-- 完整 HTML + Bootstrap Icons --&gt;</span>
+  &lt;strong&gt;公告標題&lt;/strong&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;i class="bi bi-check2"&gt;&lt;/i&gt; 項目一&lt;/li&gt;
+  &lt;/ul&gt;
+<span class="tg">&lt;/bp-notice&gt;</span></pre>
   </div>
 
-  <!-- ══════════ NEW C：單一格子輪播 ══════════ -->
-  <div class="demo-block">
-    <p class="section-tag">01 / DualCell — 單一格子輪播</p>
-    <h2 class="section-title">同列混合靜態與輪播格子</h2>
-    <p class="section-desc">
-      每個 <code>&lt;dual-col&gt;</code> 獨立控制是否啟用輪播。只要放入兩個以上的
-      <code>&lt;dual-item&gt;</code> 子元素，該格子就會自動啟動；旁邊的靜態格子完全不受影響。
-      不同格子可以設定不同的切換速度與進度條顏色。
-    </p>
+  <table class="attr-table">
+    <tr><th>屬性</th><th>預設</th><th>說明</th></tr>
+    <tr><td>color</td><td>sky</td><td>品牌色</td></tr>
+    <tr><td>icon</td><td>—</td><td>左側 Bootstrap Icon 類名（不含 bi-）</td></tr>
+    <tr><td>font-size</td><td>.92rem</td><td>整體字體大小</td></tr>
+    <tr><td>icon-size</td><td>1.2rem</td><td>左側圖示大小</td></tr>
+    <tr><td>padding</td><td>14px 18px</td><td>內距</td></tr>
+    <tr><td>dismissible</td><td>—</td><td>布林屬性，顯示關閉按鈕</td></tr>
+    <tr><td>auto-hide</td><td>—</td><td>毫秒數，到時燃燒引線燃盡後淡出</td></tr>
+    <tr><td>sticky</td><td>—</td><td>布林屬性，position:sticky 置頂</td></tr>
+    <tr><td>unlock-on</td><td>—</td><td>等匯流排事件才顯示，顯示後才開始倒數</td></tr>
+    <tr><td>link</td><td>—</td><td>關閉或 auto-hide 消失時發出的事件</td></tr>
+  </table>
 
-    <div id="dc-percol" data-dual-cell
-      data-theme="pink"
-      data-cols="3"
-      data-col-widths="1:1:1"
-      data-border-follow-theme="true"
-      data-show-menu-button="false"
-      data-cell-min-height="90px"
-      data-vertical-alignment="middle">
+  <div class="tip sky"><strong>燃燒引線</strong>：加上 <code>auto-hide</code> 屬性後底部自動出現引線動畫，火花顏色跟隨 <code>color</code> 屬性，無需額外設定。</div>
+</section>
 
-      <!-- 欄 1：靜態 -->
-      <dual-col>
-        <div style="text-align:center;width:100%">
-          <i class="bi bi-pin-angle" style="font-size:1.1rem;color:var(--color-pink);margin-bottom:4px;display:block"></i>
-          <strong>靜態格子</strong><br>
-          <span style="font-size:.8rem;opacity:.7">無 dual-item，不啟動輪播</span>
-        </div>
-      </dual-col>
+<!-- ── BpNote ── -->
+<section class="doc-section" id="sn">
+  <div class="section-label"><span class="section-badge badge-sn">元件</span></div>
+  <h2><em class="pink">BpNote</em> 便利貼</h2>
+  <p class="doc-desc">雙擊頁面任意空白處建立便利貼。整合 BrandColors 品牌色，支援拖曳、調色、收合、localStorage 自動儲存，並可透過 BPTools 匯流排通知其他元件。</p>
 
-      <!-- 欄 2：快速輪播 2s -->
-      <dual-col
-        carousel-interval="2000"
-        carousel-indicator-color="var(--color-pink)"
-        carousel-indicator-height="3px">
-        <dual-item>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-1-circle-fill" style="color:var(--color-pink);font-size:1.1rem;margin-bottom:4px;display:block"></i>
-            <strong>輪播 A-1</strong><br>
-            <span style="font-size:.78rem;opacity:.75">每 2 秒切換</span>
-          </div>
-        </dual-item>
-        <dual-item>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-2-circle-fill" style="color:var(--color-pink);font-size:1.1rem;margin-bottom:4px;display:block"></i>
-            <strong>輪播 A-2</strong><br>
-            <span style="font-size:.78rem;opacity:.75">底部進度條倒數</span>
-          </div>
-        </dual-item>
-        <dual-item>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-3-circle-fill" style="color:var(--color-pink);font-size:1.1rem;margin-bottom:4px;display:block"></i>
-            <strong>輪播 A-3</strong><br>
-            <span style="font-size:.78rem;opacity:.75">支援任意 HTML</span>
-          </div>
-        </dual-item>
-      </dual-col>
-
-      <!-- 欄 3：慢速輪播 4.5s，關閉進度條 -->
-      <dual-col
-        carousel-interval="4500"
-        carousel-indicator="false">
-        <dual-item>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-hourglass-split" style="color:var(--color-salmon);font-size:1.1rem;margin-bottom:4px;display:block"></i>
-            <strong>輪播 B-1</strong><br>
-            <span style="font-size:.78rem;opacity:.75">每 4.5 秒切換<br>進度條已關閉</span>
-          </div>
-        </dual-item>
-        <dual-item>
-          <div style="text-align:center;width:100%">
-            <i class="bi bi-hourglass-bottom" style="color:var(--color-salmon);font-size:1.1rem;margin-bottom:4px;display:block"></i>
-            <strong>輪播 B-2</strong><br>
-            <span style="font-size:.78rem;opacity:.75">與左欄速度不同步<br>各自獨立計時</span>
-          </div>
-        </dual-item>
-      </dual-col>
-
-    </div>
-    <p class="step-note mt-2">▸ 中欄每 2 秒、右欄每 4.5 秒各自獨立切換，互不干擾</p>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 全域設定（在 patch 載入前定義）</div>
+    <pre><span class="tg">&lt;script&gt;</span>
+  window.StickyNotesConfig = {
+    defaultColor : <span class="vl">'lavender'</span>,  <span class="cm">// 品牌色名稱或 hex</span>
+    defaultWidth : <span class="vl">280</span>,
+    position     : <span class="vl">'fixed'</span>,      <span class="cm">// 'fixed' | 'absolute'</span>
+    storageKey   : <span class="vl">'my_notes'</span>,  <span class="cm">// localStorage 鍵名</span>
+    excludeClass : <span class="vl">'no-sticky'</span>, <span class="cm">// 掛此 class 的元素不觸發</span>
+    fontSize     : <span class="vl">'1rem'</span>,       <span class="cm">// 便利貼字體大小</span>
+    lineHeight   : <span class="vl">'1.8'</span>,        <span class="cm">// 便利貼行高</span>
+    link         : <span class="vl">'note:saved'</span>, <span class="cm">// 操作時向匯流排發出的事件</span>
+  };
+<span class="tg">&lt;/script&gt;</span></pre>
   </div>
 
-  <hr class="divider">
-
-  <!-- ══════════ SECTION 2：InfoRegion ══════════ -->
-  <div class="demo-block">
-    <div class="section-tag">02 / InfoRegion</div>
-    <h2 class="section-title">逐步揭示資訊區塊</h2>
-    <p class="section-desc">以鏈結驅動的動畫展示元件，支援倒數進度條、手動觸發、全體進度追蹤與水平佈局。</p>
-
-    <info-region-group
-      start-label="▶ 開始演示"
-      reset-label="↺ 重設"
-      start-color="sky"
-      reset-color="warning"
-      global-progress
-      show-percent
-      progress-color="sky"
-      progress-position="bottom">
-
-      <info-region id="ir-1" color="sky" next="ir-2" countdown="2200" countdown-color="sky">
-        <strong>第一步：載入 bp-tools.js</strong>
-        <p style="margin-top:6px;font-size:.9rem">透過 jsDelivr CDN 直接引用，無需安裝任何套件。頁面載入後自動注入所需 CSS 並初始化元件。</p>
-      </info-region>
-
-      <info-region id="ir-2" color="lavender" next="ir-3" countdown="2000" countdown-color="lavender">
-        <strong>第二步：宣告 HTML 標籤</strong>
-        <p style="margin-top:6px;font-size:.9rem">所有元件均採用自訂 HTML 標籤（Custom Elements），語意清晰，不需寫任何 JavaScript 即可運作基本功能。</p>
-      </info-region>
-
-      <info-region id="ir-3" color="special" next="ir-4" countdown="2000" countdown-color="special">
-        <strong>第三步：設定主題</strong>
-        <p style="margin-top:6px;font-size:.9rem">呼叫 <code>BrandColors.applyTheme('light')</code> 即可切換深淺色主題，CSS 變數即時更新，所有元件同步反映。</p>
-      </info-region>
-
-      <info-region id="ir-4" color="safe" manual manual-label="完成 →" manual-color="safe">
-        <strong>第四步：部署上線</strong>
-        <p style="margin-top:6px;font-size:.9rem">將 <code>bp-tools.js</code> 推送到 GitHub，透過 jsDelivr CDN 在任何網頁中引用即可。支援版本號鎖定（<code>@v1.0.0</code>）。</p>
-      </info-region>
-
-    </info-region-group>
+  <div class="api-grid">
+    <div class="api-card"><div class="sig">BpNote.save()</div><p>手動觸發 localStorage 儲存。</p></div>
+    <div class="api-card"><div class="sig">BpNote.clearAll()</div><p>清除所有便利貼。</p></div>
+    <div class="api-card"><div class="sig">BpNote.export()</div><p>回傳 JSON 陣列，可存入資料庫。</p></div>
+    <div class="api-card"><div class="sig">BpNote.import(arr)</div><p>批次匯入便利貼資料（疊加）。</p></div>
+    <div class="api-card"><div class="sig">BpNote.disable()</div><p>暫停雙擊建立功能。</p></div>
+    <div class="api-card"><div class="sig">BpNote.enable()</div><p>恢復雙擊建立功能。</p></div>
   </div>
 
-  <!-- 水平佈局示範 -->
-  <div class="demo-block">
-    <p class="section-tag">02 / InfoRegion — 水平佈局</p>
-    <p class="section-desc">設定 <code>layout="horizontal"</code> 後，所有區塊並排顯示，同時啟動。</p>
+  <div class="tip lavender"><strong>向後相容</strong>：<code>window.StickyWall</code> 是 <code>BpNote</code> 的別名，原本使用 sticky-wall.js 的程式碼無需修改。</div>
 
-    <info-region-group
-      layout="horizontal"
-      auto-start
-      cascade-interval="300"
-      show-controls="false">
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 資料庫存取範例</div>
+    <pre><span class="cm">// 存入資料庫</span>
+<span class="kw">const</span> data = BpNote.<span class="fn">export</span>();
+<span class="fn">fetch</span>(<span class="vl">'/api/save-notes'</span>, {
+  method: <span class="vl">'POST'</span>,
+  headers: { <span class="vl">'Content-Type'</span>: <span class="vl">'application/json'</span> },
+  body: JSON.<span class="fn">stringify</span>(data),
+});
 
-      <info-region color="lavender">
-        <i class="bi bi-palette2" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
-        <strong>BrandColors</strong><br>
-        <span style="font-size:.85rem">深色 / 淺色雙主題，CSS 變數驅動，一行切換。</span>
-      </info-region>
-
-      <info-region color="sky">
-        <i class="bi bi-grid-3x2-gap" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
-        <strong>DualCell</strong><br>
-        <span style="font-size:.85rem">多欄格狀佈局，宣告式標籤，支援群組與輪播。</span>
-      </info-region>
-
-      <info-region color="special">
-        <i class="bi bi-arrow-right-square" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
-        <strong>InfoRegion</strong><br>
-        <span style="font-size:.85rem">逐步揭示，倒數進度條，鏈結驅動的展示流程。</span>
-      </info-region>
-
-      <info-region color="orange">
-        <i class="bi bi-type-bold" style="font-size:1.4rem;margin-bottom:6px;display:block"></i>
-        <strong>WordFlip</strong><br>
-        <span style="font-size:.85rem">行內詞彙翻轉，四種浮動面板，九種觸發樣式。</span>
-      </info-region>
-
-    </info-region-group>
+<span class="cm">// 從資料庫還原</span>
+<span class="fn">fetch</span>(<span class="vl">'/api/load-notes'</span>)
+  .<span class="fn">then</span>(r => r.<span class="fn">json</span>())
+  .<span class="fn">then</span>(arr => BpNote.<span class="fn">import</span>(arr));</pre>
   </div>
+</section>
 
-  <hr class="divider">
+<!-- ── 連動流程 ── -->
+<section class="doc-section" id="flow">
+  <div class="section-label"><span class="section-badge badge-bus">進階</span></div>
+  <h2>連動流程範例</h2>
+  <p class="doc-desc">以雅思口說教學場景為例，展示五個元件如何透過一個事件名稱串接完整的學習流程。</p>
 
-  <!-- ══════════ SECTION 3：WordFlip ══════════ -->
-  <div class="demo-block">
-    <div class="section-tag">03 / WordFlip — 行內 &amp; 浮動模式</div>
-    <h2 class="section-title">詞彙翻轉與浮動說明</h2>
-    <p class="section-desc">點擊以下段落中的標示詞彙，觀察四種不同的顯示模式。</p>
+  <div class="flow"><span class="el">bp-slide</span> 第一頁 → 第二頁（<span class="ev">link="slide:intro"</span> 發出）
+  <span class="arr">↓</span>
+<span class="el">WordFlip</span> 解鎖（<span class="ev">unlock-on="slide:intro"</span>）
 
-    <p class="wf-paragraph">
-      現代前端開發中，
-      <word-flip data-color="lavender" data-content="#tpl-inline">行內翻轉（inline）</word-flip>
-      適合在文章中就地補充說明，而
-      <word-flip data-color="sky" mode="tooltip" data-content="#tpl-tooltip" hover>懸停提示（hover tooltip）</word-flip>
-      則更適合快速查閱詞義。當說明內容較長時，
-      <word-flip data-color="special" mode="popover" data-content="#tpl-popover" title="Popover 說明">Popover 面板</word-flip>
-      能提供結構化的浮動區塊，而
-      <word-flip data-color="info" mode="modal" data-content="#tpl-modal" title="Modal 示範" icon="window-fullscreen">Modal 對話框</word-flip>
-      則適合篇幅更長的參考資料。
-    </p>
+<span class="el">bp-slide</span> 第三頁（<span class="ev">unlock-on="quiz:pass"</span> 鎖住）
+  <span class="arr">↓ 需答題才能翻頁</span>
+<span class="el">ir-challenge</span> 答對 → <span class="ev">BPTools.emit("quiz:pass")</span>
+  <span class="arr">↓ 同時觸發</span>
+<span class="ok">✓</span> <span class="el">bp-slide</span> 第三頁解鎖
+<span class="ok">✓</span> <span class="el">DualCell</span> 高分範例遮罩移除（<span class="ev">on-link="quiz:pass"</span>）
+<span class="ok">✓</span> <span class="el">InfoRegion</span> 正確回饋滑入（<span class="ev">unlock-on="quiz:pass"</span>）
 
-    <p class="wf-paragraph">
-      需要在查閱資料的同時保留頁面脈絡時，
-      <word-flip data-color="orange" mode="drawer" data-content="#tpl-drawer" title="Drawer 側欄">Drawer 側欄</word-flip>
-      是最佳選擇——它從右側滑入，不遮蓋整個頁面。
-    </p>
+<span class="el">bp-slide</span> 按「完成」→ <span class="ev">BPTools.emit("slider:done")</span>
+  <span class="arr">↓</span>
+<span class="ok">✓</span> <span class="el">bp-notice</span> 完課公告浮現（<span class="ev">unlock-on="slider:done"</span>）
+<span class="ok">✓</span> JS 顯示完課徽章
+<span class="ok">✓</span> JS 打 API 記錄進度</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 完整連動 HTML 骨架</div>
+    <pre><span class="cm">&lt;!-- 投影片：答題通過才進第三頁，完成發事件 --&gt;</span>
+<span class="tg">&lt;bp-slide</span> <span class="at">theme</span>=<span class="vl">"orange"</span> <span class="at">link</span>=<span class="vl">"slider:done"</span> <span class="at">auto-show-part-buttons</span>=<span class="vl">"true"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">link</span>=<span class="vl">"slide:intro"</span><span class="tg">&gt;</span>第一頁<span class="tg">&lt;/div&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span><span class="tg">&gt;</span>第二頁（鎖住）<span class="tg">&lt;/div&gt;</span>
+<span class="tg">&lt;/bp-slide&gt;</span>
+
+<span class="cm">&lt;!-- 答題：答對後解鎖所有訂閱 quiz:pass 的元件 --&gt;</span>
+<span class="tg">&lt;ir-challenge</span> <span class="at">answer</span>=<span class="vl">"Cookie"</span> <span class="at">link</span>=<span class="vl">"quiz:pass"</span> <span class="at">color</span>=<span class="vl">"lavender"</span><span class="tg">&gt;&lt;/ir-challenge&gt;</span>
+
+<span class="cm">&lt;!-- 答案表格：答對解鎖 --&gt;</span>
+<span class="tg">&lt;div</span> <span class="at">data-dual-cell</span> <span class="at">data-cols</span>=<span class="vl">"2"</span> <span class="at">data-theme</span>=<span class="vl">"lavender"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">data-col</span><span class="tg">&gt;</span>問題<span class="tg">&lt;/div&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">data-col</span> <span class="at">data-on-link</span>=<span class="vl">"quiz:pass"</span> <span class="at">data-overlay-1-text</span>=<span class="vl">"答對後解鎖"</span><span class="tg">&gt;</span>答案<span class="tg">&lt;/div&gt;</span>
+<span class="tg">&lt;/div&gt;</span>
+
+<span class="cm">&lt;!-- 完課公告：完成投影片才顯示，5 秒引線 --&gt;</span>
+<span class="tg">&lt;bp-notice</span> <span class="at">color</span>=<span class="vl">"special"</span> <span class="at">icon</span>=<span class="vl">"stars"</span>
+  <span class="at">unlock-on</span>=<span class="vl">"slider:done"</span> <span class="at">auto-hide</span>=<span class="vl">"5000"</span> <span class="at">dismissible</span><span class="tg">&gt;</span>
+  🎓 課程完成！
+<span class="tg">&lt;/bp-notice&gt;</span></pre>
   </div>
+</section>
 
-  <!-- Trigger Styles 示範 -->
-  <div class="demo-block">
-    <p class="section-tag">03 / WordFlip — 觸發樣式</p>
-    <p class="section-desc">九種觸發樣式（<code>trigger-style</code>）可以改變詞彙的外觀呈現，點擊後效果相同。</p>
+<!-- ── 公開 API ── -->
+<section class="doc-section" id="api">
+  <div class="section-label"><span class="section-badge badge-bus">進階</span></div>
+  <h2>所有公開 API</h2>
+  <p class="doc-desc">patch 載入後全域可用的所有物件與方法。</p>
 
-    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;line-height:2.5">
-      <word-flip trigger-style="underline" data-color="lavender" data-content="#tpl-badge">underline</word-flip>
-      <word-flip trigger-style="highlight" data-color="sky" data-content="#tpl-badge">highlight</word-flip>
-      <word-flip trigger-style="badge" data-color="special" data-content="#tpl-badge">badge</word-flip>
-      <word-flip trigger-style="tag" data-color="warning" data-content="#tpl-badge">tag</word-flip>
-      <word-flip trigger-style="button" data-color="safe" data-content="#tpl-button">button</word-flip>
-      <word-flip trigger-style="pill" data-color="pink" data-content="#tpl-badge">pill</word-flip>
-      <word-flip trigger-style="dotted" data-color="brown" data-content="#tpl-badge">dotted</word-flip>
-      <word-flip trigger-style="icon" data-color="info" icon="info-circle" data-content="#tpl-badge">icon 模式</word-flip>
-    </div>
+  <div class="code-wrap">
+    <div class="code-head"><i class="bi bi-code-slash"></i> 完整 API 一覽</div>
+    <pre><span class="cm">/* BPTools 匯流排 */</span>
+BPTools.<span class="fn">on</span>(ev, fn)        <span class="cm">// 訂閱</span>
+BPTools.<span class="fn">emit</span>(ev, data)   <span class="cm">// 發布</span>
+BPTools.<span class="fn">off</span>(ev, fn)       <span class="cm">// 取消訂閱</span>
+BPTools._fired             <span class="cm">// Set，已發過的事件歷史</span>
+
+<span class="cm">/* BrandColors */</span>
+BrandColors.<span class="fn">applyTheme</span>(<span class="vl">'dark'</span> | <span class="vl">'light'</span>)
+BrandColors.<span class="fn">get</span>(colorName)
+BrandColors.<span class="fn">resolve</span>(val)
+BrandColors.<span class="fn">toCSSVars</span>(themeName)
+
+<span class="cm">/* InfoRegion */</span>
+InfoRegion.<span class="fn">activate</span>(id)
+InfoRegion.<span class="fn">resetAll</span>()
+
+<span class="cm">/* BpNote（便利貼）*/</span>
+BpNote.<span class="fn">save</span>()
+BpNote.<span class="fn">clearAll</span>()
+BpNote.<span class="fn">export</span>()          <span class="cm">// → JSON 陣列</span>
+BpNote.<span class="fn">import</span>(arr)
+BpNote.<span class="fn">enable</span>() / <span class="fn">disable</span>()
+StickyWall                 <span class="cm">// BpNote 的別名（向後相容）</span></pre>
   </div>
+</section>
 
-  <!-- flip-card 示範 -->
-  <div class="demo-block">
-    <p class="section-tag">03 / WordFlip — flip-card</p>
-    <p class="section-desc">具有 3D 翻轉效果的雙面卡片，正面與背面可放置任意 HTML。</p>
+<!-- ── 相容性 ── -->
+<section class="doc-section" id="compat">
+  <div class="section-label"><span class="section-badge badge-bus">進階</span></div>
+  <h2>相容性與注意事項</h2>
 
-    <flip-cards>
-      <flip-card data-color="lavender" data-click-to-flip data-bar-width="5">
-        <card-front>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <i class="bi bi-question-circle" style="font-size:1.3rem;color:var(--color-lavender)"></i>
-            <strong>什麼是 flip-card？</strong>
-          </div>
-          <p style="font-size:.9rem;opacity:.85;margin:0">點擊此卡片翻轉查看說明 →</p>
-        </card-front>
-        <card-back>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <i class="bi bi-check-circle" style="font-size:1.3rem;color:var(--color-lavender)"></i>
-            <strong>flip-card 特性</strong>
-          </div>
-          <p style="font-size:.9rem;margin:0">透過 CSS <em>preserve-3d</em> 實現原生 3D 翻轉，零依賴，支援巢狀 word-flip 元件。再次點擊返回正面。</p>
-        </card-back>
-      </flip-card>
+  <table class="attr-table">
+    <tr><th>項目</th><th>說明</th></tr>
+    <tr><td>瀏覽器支援</td><td>Chrome 80+、Edge 80+、Firefox 75+、Safari 14+。使用 Custom Elements v1、CSS 變數、ResizeObserver。</td></tr>
+    <tr><td>相依檔案</td><td>bp-tools.js 必須在 patch 之前載入。Bootstrap Icons CSS 為選填，但 icon 屬性需要它。</td></tr>
+    <tr><td>slider-show.js</td><td>已整合進 patch，可以移除。<code>&lt;slider-show&gt;</code> 舊標籤須改為 <code>&lt;bp-slide&gt;</code>。</td></tr>
+    <tr><td>sticky-wall.js</td><td>已整合進 patch，可以移除。<code>StickyWall</code> 別名保留，舊程式碼不需修改。</td></tr>
+    <tr><td>word-flip 屬性</td><td>展開內容用 <code>data-content</code>，不是 <code>answer</code>。patch 的 answer-src 功能不受影響。</td></tr>
+    <tr><td>BPTools 訂閱時機</td><td>頁面 script 裡使用 BPTools 須用輪詢寫法，避免 BPTools is not defined 錯誤。</td></tr>
+    <tr><td>unlock-on + auto-hide</td><td>bp-notice 的倒數從「公告出現後」才開始，不是頁面載入時。</td></tr>
+  </table>
+</section>
 
-      <flip-card data-color="sky" data-click-to-flip data-bar-width="5">
-        <card-front>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <i class="bi bi-layers" style="font-size:1.3rem;color:var(--color-sky)"></i>
-            <strong>InfoRegion 的用途？</strong>
-          </div>
-          <p style="font-size:.9rem;opacity:.85;margin:0">用於逐步揭示內容的動畫區塊元件。點擊查看使用情境 →</p>
-        </card-front>
-        <card-back>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <i class="bi bi-list-check" style="font-size:1.3rem;color:var(--color-sky)"></i>
-            <strong>典型使用情境</strong>
-          </div>
-          <ul style="font-size:.9rem;padding-left:18px;margin:0">
-            <li>教學步驟演示</li>
-            <li>引導式表單填寫</li>
-            <li>分段展示的簡報內容</li>
-          </ul>
-        </card-back>
-      </flip-card>
-    </flip-cards>
-  </div>
+<footer id="footer">
+  bp-tools-patch.js v2.1 ·
+  搭配 <span>bp-tools.js</span> 使用 ·
+  零外部依賴 · 單檔掛載
+</footer>
 
+</div><!-- /main -->
 
-</div><!-- /page-wrap -->
-
-<script src="https://cdn.jsdelivr.net/gh/Netizen-Nelson/web-dev/bp-tools.js"></script>
 <script>
-  /* ── 主題切換 ──────────────────────────────────── */
-  let isDark = true;
-
-  function toggleTheme() {
-    isDark = !isDark;
-    const theme = isDark ? 'dark' : 'light';
-    BrandColors.applyTheme(theme);
-
-    const icon  = document.getElementById('themeIcon');
-    const label = document.getElementById('themeLabel');
-    icon.className  = isDark ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
-    label.textContent = isDark ? '切換亮色' : '切換暗色';
-  }
+/* 側邊欄 active 狀態 */
+const links = document.querySelectorAll('.sb-link');
+const sections = document.querySelectorAll('.doc-section, #hero');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      links.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { threshold: 0.25 });
+sections.forEach(s => observer.observe(s));
 </script>
+
 </body>
 </html>
