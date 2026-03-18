@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StickyWall — 便利貼元件示範</title>
+  <style>
+    /* ─── 頁面底層樣式（與元件無關） ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg       : #0c0d0c;
+      --region   : #333333;
+      --shell    : #c6c7bd;
+      --lavender : #C3A5E5;
+      --special  : #C8DD5A;
+      --sky      : #04b5a3;
+      --safe     : #81E6D9;
+      --warning  : #F08080;
+      --info     : #90CDF4;
+      --attention: #E5E5A6;
+      --orange   : #f69653;
+    }
+
+    html, body {
+      min-height   : 100%;
+      background   : var(--bg);
+      color        : var(--shell);
+      font-family  : 'Segoe UI', 'Noto Sans TC', sans-serif;
+      font-size    : 16px;
+      line-height  : 1.6;
+    }
+
+    /* ─── 頂部導覽列 ─── */
+    header#site-header {
+      position         : sticky;
+      top              : 0;
+      z-index          : 100;
+      background       : rgba(12,13,12,.92);
+      backdrop-filter  : blur(8px);
+      border-bottom    : 1px solid #333;
+      padding          : 0 32px;
+      display          : flex;
+      align-items      : center;
+      justify-content  : space-between;
+      gap              : 16px;
+      height           : 52px;
+    }
+    #site-header h1 {
+      font-size   : 1.15rem;
+      font-weight : 600;
+      color        : var(--lavender);
+      display      : flex;
+      align-items  : center;
+      gap          : 8px;
+    }
+    #site-header h1 span { color: var(--shell); font-weight: 400; font-size: .85rem; }
+
+    .hdr-actions { display: flex; gap: 8px; }
+    .hdr-btn {
+      background    : var(--region);
+      color         : var(--shell);
+      border        : 1px solid #555;
+      border-radius : 5px;
+      padding       : 5px 14px;
+      font-size     : .82rem;
+      cursor        : pointer;
+      transition    : background .15s, color .15s;
+    }
+    .hdr-btn:hover             { background: #444; color: var(--special); }
+    .hdr-btn.danger:hover      { background: var(--warning); color: #111; border-color: var(--warning); }
+
+    /* ─── 主要內容 ─── */
+    main#content {
+      max-width  : 860px;
+      margin     : 0 auto;
+      padding    : 56px 32px 120px;
+    }
+
+    /* ─── Hero 區塊 ─── */
+    section#hero {
+      text-align    : center;
+      margin-bottom : 64px;
+    }
+    #hero .badge {
+      display       : inline-block;
+      background    : var(--region);
+      border        : 1px solid #555;
+      border-radius : 999px;
+      padding       : 4px 14px;
+      font-size     : .78rem;
+      color         : var(--sky);
+      margin-bottom : 20px;
+      letter-spacing: .06em;
+    }
+    #hero h2 {
+      font-size    : 2.4rem;
+      font-weight  : 700;
+      line-height  : 1.2;
+      margin-bottom: 16px;
+      color        : var(--shell);
+    }
+    #hero h2 em { color: var(--lavender); font-style: normal; }
+    #hero p {
+      font-size    : 1rem;
+      color        : #8a8b84;
+      max-width    : 480px;
+      margin       : 0 auto 32px;
+    }
+    .hint-chip {
+      display       : inline-flex;
+      align-items   : center;
+      gap           : 8px;
+      background    : var(--region);
+      border        : 1px dashed #555;
+      border-radius : 8px;
+      padding       : 10px 20px;
+      font-size     : .88rem;
+      color         : var(--attention);
+    }
+    .hint-chip kbd {
+      background    : #444;
+      border        : 1px solid #666;
+      border-radius : 4px;
+      padding       : 1px 6px;
+      font-size     : .78rem;
+      color         : var(--shell);
+    }
+
+    /* ─── 調色盤展示 ─── */
+    section#palette-demo {
+      margin-bottom : 56px;
+    }
+    .section-title {
+      font-size    : .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color        : #666;
+      margin-bottom: 16px;
+    }
+    .color-swatches {
+      display         : flex;
+      flex-wrap       : wrap;
+      gap             : 10px;
+    }
+    .swatch {
+      display         : flex;
+      flex-direction  : column;
+      align-items     : center;
+      gap             : 6px;
+    }
+    .swatch-box {
+      width           : 44px;
+      height          : 44px;
+      border-radius   : 8px;
+      box-shadow      : 0 2px 8px rgba(0,0,0,.4);
+    }
+    .swatch small {
+      font-size       : .66rem;
+      color           : #666;
+    }
+
+    /* ─── 設定程式碼區塊 ─── */
+    section#usage {
+      margin-bottom : 56px;
+    }
+    pre {
+      background    : var(--region);
+      border        : 1px solid #444;
+      border-radius : 8px;
+      padding       : 20px 24px;
+      font-size     : .82rem;
+      color         : var(--safe);
+      overflow-x    : auto;
+      line-height   : 1.7;
+    }
+    pre .cm { color: #666; }
+    pre .kw { color: var(--lavender); }
+    pre .st { color: var(--attention); }
+    pre .nm { color: var(--orange); }
+
+    /* ─── 功能列表 ─── */
+    section#features ul {
+      list-style : none;
+      display    : grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap        : 12px;
+    }
+    section#features li {
+      background    : var(--region);
+      border        : 1px solid #444;
+      border-radius : 8px;
+      padding       : 14px 16px;
+      font-size     : .88rem;
+      display       : flex;
+      gap           : 10px;
+      align-items   : flex-start;
+    }
+    section#features li .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    section#features li strong { color: var(--shell); display: block; margin-bottom: 3px; }
+    section#features li span   { color: #8a8b84; font-size: .8rem; }
+
+    /* ─── 頁尾 ─── */
+    footer#site-footer {
+      border-top  : 1px solid #333;
+      padding     : 24px 32px;
+      text-align  : center;
+      font-size   : .78rem;
+      color       : #555;
+    }
+
+    /* ─── 內容區不觸發便利貼的區塊已加 class ─── */
+    pre, .hdr-btn, #site-header { /* 本頁不需額外處理，header 已在 excludeTags 內 */ }
+  </style>
+
+  <!--
+    ════════════════════════════════════════════
+    ▌ 全域設定：在載入 sticky-wall.js 前定義
+    ════════════════════════════════════════════
+  -->
+  <script>
+    window.StickyNotesConfig = {
+      defaultColor : '#C3A5E5',   // 預設便利貼顏色
+      defaultWidth : 260,         // 預設寬度（px）
+      position     : 'fixed',     // 'fixed'=視窗相對 | 'absolute'=頁面相對
+      storageKey   : 'stickywall_demo',
+      excludeClass : 'sn-no-sticky',
+    };
+  </script>
+</head>
+<body>
+
+  <!-- ══ 頂部導覽列 ══ -->
+  <header id="site-header">
+    <h1>📌 StickyWall <span>便利貼元件示範</span></h1>
+    <div class="hdr-actions">
+      <button class="hdr-btn" onclick="exportNotes()">匯出 JSON</button>
+      <button class="hdr-btn danger" onclick="StickyWall.clearAll()">清除全部</button>
+    </div>
+  </header>
+
+  <!-- ══ 主要內容 ══ -->
+  <main id="content">
+
+    <!-- Hero -->
+    <section id="hero">
+      <p class="badge">JS Web Component · No Shadow DOM · Zero Dependencies</p>
+      <h2>在任何網頁上<br><em>雙擊建立便利貼</em></h2>
+      <p>只要一個 &lt;script&gt; 標籤，雙擊頁面空白處即可建立可拖曳、可調色、自動儲存的便利貼。</p>
+      <div class="hint-chip">
+        <kbd>dblclick</kbd> 任意空白處 → 建立便利貼
+      </div>
+    </section>
+
+    <!-- 調色盤 -->
+    <section id="palette-demo">
+      <p class="section-title">支援的品牌色彩</p>
+      <div class="color-swatches">
+        <div class="swatch"><div class="swatch-box" style="background:#C3A5E5"></div><small>Lavender</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#C8DD5A"></div><small>Special</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#E5C3B3"></div><small>Salmon</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#E5E5A6"></div><small>Attention</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#04b5a3"></div><small>Sky</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#81E6D9"></div><small>Safe</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#d9b375"></div><small>Brown</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#90CDF4"></div><small>Info</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#FFB3D9"></div><small>Pink</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#f69653"></div><small>Orange</small></div>
+        <div class="swatch"><div class="swatch-box" style="background:#F08080"></div><small>Warning</small></div>
+      </div>
+    </section>
+
+    <!-- 用法 -->
+    <section id="usage">
+      <p class="section-title">掛載與設定方式</p>
+      <pre><span class="cm">&lt;!-- 1. 可選：載入前定義全域設定 --&gt;</span>
+<span class="kw">&lt;script&gt;</span>
+  <span class="nm">window.StickyNotesConfig</span> = {
+    <span class="nm">defaultColor</span> : <span class="st">'#81E6D9'</span>,   <span class="cm">// 初始顏色</span>
+    <span class="nm">defaultWidth</span> : <span class="st">300</span>,          <span class="cm">// 初始寬度 px</span>
+    <span class="nm">position</span>     : <span class="st">'fixed'</span>,       <span class="cm">// 'fixed' | 'absolute'</span>
+    <span class="nm">storageKey</span>   : <span class="st">'my_notes'</span>,    <span class="cm">// localStorage 鍵名</span>
+    <span class="nm">excludeClass</span> : <span class="st">'no-sticky'</span>,  <span class="cm">// 此 class 的元素不觸發</span>
+    <span class="nm">colors</span>: [                      <span class="cm">// 完全自訂調色盤（選填）</span>
+      { <span class="nm">name</span>:<span class="st">'自訂紫'</span>, <span class="nm">val</span>:<span class="st">'#9B59B6'</span> },
+    ],
+  };
+<span class="kw">&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- 2. 載入元件（放 &lt;/body&gt; 前） --&gt;</span>
+<span class="kw">&lt;script</span> <span class="nm">src</span>=<span class="st">"sticky-wall.js"</span><span class="kw">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- 3. 公開 API --&gt;</span>
+<span class="kw">&lt;script&gt;</span>
+  <span class="nm">StickyWall.clearAll</span>();   <span class="cm">// 清除全部</span>
+  <span class="nm">StickyWall.export</span>();     <span class="cm">// 匯出資料陣列</span>
+  <span class="nm">StickyWall.import</span>(arr); <span class="cm">// 匯入資料陣列（疊加）</span>
+  <span class="nm">StickyWall.save</span>();       <span class="cm">// 手動觸發儲存</span>
+<span class="kw">&lt;/script&gt;</span></pre>
+    </section>
+
+    <!-- 功能列表 -->
+    <section id="features">
+      <p class="section-title">元件功能一覽</p>
+      <ul>
+        <li>
+          <span class="icon">🖱️</span>
+          <div>
+            <strong>雙擊建立</strong>
+            <span>頁面任意空白處 dblclick，便利貼出現在游標位置。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">🎨</span>
+          <div>
+            <strong>11 種品牌色</strong>
+            <span>標題列色點即時切換，顏色對應完整品牌調色盤。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">✋</span>
+          <div>
+            <strong>拖曳移動</strong>
+            <span>拖曳標題列即可任意定位，點擊自動置頂。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">↔️</span>
+          <div>
+            <strong>右下角縮放</strong>
+            <span>CSS resize:both，拖曳右下角自由調整大小。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">─</span>
+          <div>
+            <strong>收合 / 展開</strong>
+            <span>點「─」只保留標題列，再點展開全文。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">💾</span>
+          <div>
+            <strong>自動持久化</strong>
+            <span>所有操作即時寫入 localStorage，重開頁面自動還原。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">🌐</span>
+          <div>
+            <strong>全域設定系統</strong>
+            <span>StickyNotesConfig 可在載入前覆蓋任意預設值。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">♿</span>
+          <div>
+            <strong>語義化 HTML</strong>
+            <span>article / header / nav / section 語義標籤，支援鍵盤操作。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">📤</span>
+          <div>
+            <strong>匯出 / 匯入</strong>
+            <span>StickyWall.export() 取得 JSON，import() 批次載入。</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">🚫</span>
+          <div>
+            <strong>排除區域</strong>
+            <span>excludeClass 指定不觸發的區塊，避免誤操作。</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer id="site-footer">
+    StickyWall.js · 零依賴 · 單檔掛載 · 支援 ES2017+
+  </footer>
+
+  <!-- ════════════════════════════════
+       掛載便利貼元件（放 </body> 前）
+  ════════════════════════════════ -->
+  <script src="sticky-wall.js"></script>
+
+  <script>
+    /* 示範：匯出按鈕 */
+    function exportNotes() {
+      const data = StickyWall.export();
+      if (data.length === 0) {
+        alert('目前沒有便利貼。');
+        return;
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a    = document.createElement('a');
+      a.href     = URL.createObjectURL(blob);
+      a.download = 'sticky-notes.json';
+      a.click();
+    }
+  </script>
+
+</body>
+</html>
