@@ -1,18 +1,60 @@
+/**
+ * bp-tools-patch.js  v2.1
+ * ─────────────────────────────────────────────────────────────
+ * 【A】BPTools 全域事件匯流排（頂層宣告，任何時間都能安全使用）
+ * 【B】InfoRegion 擴充：<ir-choice> 分支路徑 + link 發事件
+ * 【C】DualCell 擴充：on-link 訂閱解鎖遮罩
+ * 【D】WordFlip 擴充：link / answer-src / unlock-on / group
+ * 【E】ir-challenge 輸入驗證元件
+ * 【F】bp-slide 投影片元件（原 slider-show）
+ *
+ * 載入順序：
+ *   <script src="bp-tools.js"></script>
+ *   <script src="bp-tools-patch.js"></script>
+ *
+ * 頁面自訂訂閱寫法（避免 BPTools is not defined）：
+ *   (function wait() {
+ *     if (typeof BPTools === 'undefined') { setTimeout(wait, 50); return; }
+ *     BPTools.on('my:event', () => { ... });
+ *   })();
+ *
+ * changelog：
+ *   v1.x  各項功能逐步新增
+ *   v2.0  bp-slide 整合
+ *   v2.1  BPTools 移至頂層；bp-slide connectedCallback 修正；
+ *         word-flip 改用 data-content 屬性
+ * ─────────────────────────────────────────────────────────────
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   A. BPTools 全域事件匯流排
+      頂層立即宣告，確保 bp-slide / ir-challenge / word-flip
+      在任何時間點都能安全呼叫 BPTools.emit() / BPTools.on()
+═══════════════════════════════════════════════════════════════ */
 window.BPTools = {
-  _listeners: {},
-  _fired: new Set(),
+  _listeners : {},
+  _fired     : new Set(),
+
   on(ev, fn) {
     (this._listeners[ev] = this._listeners[ev] || []).push(fn);
   },
+
   emit(ev, data = {}) {
     this._fired.add(ev);
     (this._listeners[ev] || []).forEach(fn => fn(data));
   },
+
   off(ev, fn) {
     if (!this._listeners[ev]) return;
     this._listeners[ev] = this._listeners[ev].filter(f => f !== fn);
   },
 };
+
+/* ═══════════════════════════════════════════════════════════════
+   F. BpSlide（<bp-slide>）投影片元件
+      頂層宣告，不依賴 bp-tools.js，可獨立運作。
+      BrandColors / BPTools 不存在時自動降級。
+═══════════════════════════════════════════════════════════════ */
 class BpSlide extends HTMLElement {
   constructor() {
     super();
@@ -22,6 +64,7 @@ class BpSlide extends HTMLElement {
     this.isTransitioning = false;
     this.container = null;
     this._slideUnlocked = new Set();
+    this._sliderLocked  = false;
   }
 
   static get observedAttributes() {
@@ -44,30 +87,31 @@ class BpSlide extends HTMLElement {
     ];
   }
 
-    connectedCallback() {
+  connectedCallback() {
     this.render();
-    this.analyzeParts();       
+    this.analyzeParts();        /* 必須在 render() 後、updateDisplay() 前立刻執行 */
     this.setupEventListeners();
     this.setupExtraNotes();
     this.setupSpoilerMasks();
     this.setupQuizzes();
     this._setupBPTools();
-    this.updateDisplay();     
+    this.updateDisplay();       /* 同步呼叫，不用 setTimeout */
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (!this.isConnected || oldValue === newValue) return;
+  attributeChangedCallback(name, oldVal, newVal) {
+    if (!this.isConnected || oldVal === newVal) return;
     if (name === 'current-part') {
-      this.currentPart = parseInt(newValue) || 1;
+      this.currentPart = parseInt(newVal) || 1;
       this.currentSlideInPart = 0;
       this.updateDisplay();
     } else {
       this.render();
+      this.analyzeParts();
       this.setupEventListeners();
     }
   }
 
-  /* ── 顏色解析：優先 BrandColors ── */
+  /* ── 顏色解析 ── */
   parseColor(val) {
     if (!val) return null;
     if (typeof BrandColors !== 'undefined') {
@@ -135,16 +179,16 @@ class BpSlide extends HTMLElement {
   }
 
   _emitSlideEvents() {
-    const bp = this._bp();
+    const bp    = this._bp();
     if (!bp) return;
     const slide = this.getCurrentPartSlides()[this.currentSlideInPart];
-    const ev = slide?.getAttribute('link');
+    const ev    = slide?.getAttribute('link');
     if (ev) bp.emit(ev, { sliderId:this.id||null, part:this.currentPart, slide:this.currentSlideInPart });
   }
 
   _checkSlideUnlock() {
-    const bp = this._bp();
-    const slide = this.getCurrentPartSlides()[this.currentSlideInPart];
+    const bp      = this._bp();
+    const slide   = this.getCurrentPartSlides()[this.currentSlideInPart];
     if (!slide) return;
     const unlockOn = slide.getAttribute('unlock-on');
     if (!unlockOn) return;
@@ -181,8 +225,7 @@ class BpSlide extends HTMLElement {
       const post = note.getAttribute('postfix') !== null ? note.getAttribute('postfix') : gPost;
       if (!targetId || !source) { console.warn('extra-note 需要 target 和 source'); return; }
       const span = document.createElement('span');
-      span.className = 'extra-note-trigger';
-      span.style.display = 'inline';
+      span.className = 'extra-note-trigger'; span.style.display = 'inline';
       let preHTML = '';
       if (pre) {
         const m = pre.match(/bi-[\w-]+/);
@@ -219,8 +262,7 @@ class BpSlide extends HTMLElement {
 
   applySpoilerMask(el, text, color) {
     if (el.classList.contains('spoiler-masked')) return;
-    el.classList.add('spoiler-masked');
-    el.style.position = 'relative';
+    el.classList.add('spoiler-masked'); el.style.position = 'relative';
     const mask = document.createElement('div');
     mask.className = 'spoiler-mask';
     Object.assign(mask.style, {
@@ -235,11 +277,9 @@ class BpSlide extends HTMLElement {
       fontSize:'1.2rem',fontWeight:'500',lineHeight:'1.6',
       display:'flex',alignItems:'center',justifyContent:'center',height:'100%',
     });
-    tc.innerHTML = text;
-    mask.appendChild(tc);
+    tc.innerHTML = text; mask.appendChild(tc);
     mask.addEventListener('click', e => {
-      e.stopPropagation();
-      mask.style.opacity = '0';
+      e.stopPropagation(); mask.style.opacity = '0';
       setTimeout(() => { mask.remove(); el.classList.remove('spoiler-masked'); }, 300);
     });
     el.appendChild(mask);
@@ -248,7 +288,7 @@ class BpSlide extends HTMLElement {
   /* ── Quiz 填空題 ── */
   setupQuizzes() {
     this.querySelectorAll('quiz').forEach((quiz, idx) => {
-      const orig = quiz.textContent;
+      const orig    = quiz.textContent;
       const answers = [...orig.matchAll(/\{\{([^}]+)\}\}/g)].map(m => m[1].trim());
       if (!answers.length) return;
       const container = document.createElement('span');
@@ -277,8 +317,7 @@ class BpSlide extends HTMLElement {
   checkQuizCompletion() {
     if (this._sliderLocked) { this.disableNavigation(); return false; }
     if (this.getAttribute('quiz-require-complete') === 'false') { this.enableNavigation(); return true; }
-    const slides = this.getCurrentPartSlides();
-    const slide  = slides[this.currentSlideInPart];
+    const slide = this.getCurrentPartSlides()[this.currentSlideInPart];
     if (!slide) return true;
     const qs = slide.querySelectorAll('.quiz-container');
     if (!qs.length) { this.enableNavigation(); return true; }
@@ -316,12 +355,12 @@ class BpSlide extends HTMLElement {
     });
   }
 
-  getTotalParts()      { return Object.keys(this.partsData).length; }
+  getTotalParts()       { return Object.keys(this.partsData).length; }
   getCurrentPartSlides(){ return this.partsData[this.currentPart] || []; }
-  isLastSlideInPart()  { return this.currentSlideInPart >= this.getCurrentPartSlides().length-1; }
-  isFirstSlideInPart() { return this.currentSlideInPart === 0; }
-  isLastPart()         { return this.currentPart >= this.getTotalParts(); }
-  isFirstPart()        { return this.currentPart === 1; }
+  isLastSlideInPart()   { return this.currentSlideInPart >= this.getCurrentPartSlides().length-1; }
+  isFirstSlideInPart()  { return this.currentSlideInPart === 0; }
+  isLastPart()          { return this.currentPart >= this.getTotalParts(); }
+  isFirstPart()         { return this.currentPart === 1; }
 
   getGlobalSlideIndex() {
     let n = 0;
@@ -391,7 +430,7 @@ class BpSlide extends HTMLElement {
   }
 
   _doTransition(dir, cb) {
-    const sc = this.container?.querySelector('.slides-container');
+    const sc   = this.container?.querySelector('.slides-container');
     if (!sc) { cb(); return; }
     const type = this.getAttribute('part-transition') || 'slide';
     sc.style.transition = 'none';
@@ -412,6 +451,7 @@ class BpSlide extends HTMLElement {
 
   updateDisplay() {
     const slides = this.getCurrentPartSlides();
+    if (!slides.length) return;
 
     /* 填空結果 */
     if (this.currentSlideInPart > 0) {
@@ -429,13 +469,13 @@ class BpSlide extends HTMLElement {
               <span class="quiz-result-label">第 ${i+1} 空：</span>
               <span class="quiz-result-user">你的答案：<strong>${item.userAnswer||'(未填)'}</strong></span>
               <span class="quiz-result-correct">正確答案：<strong>${item.correctAnswer}</strong></span>
-            </div>`).join('') +
-            '</div>'
+            </div>`).join('') + '</div>'
           ).join('');
         }
       }
     }
 
+    /* 顯示 / 隱藏 */
     slides.forEach((s,i) => s.style.display = i===this.currentSlideInPart ? 'block' : 'none');
 
     /* 小點 */
@@ -451,7 +491,7 @@ class BpSlide extends HTMLElement {
     }
 
     /* 頁碼 */
-    const pnc = this.container?.querySelector('.page-numbers-container');
+    const pnc    = this.container?.querySelector('.page-numbers-container');
     const showPn = this.getAttribute('show-page-numbers')==='true';
     if (pnc && showPn) {
       pnc.innerHTML = '';
@@ -491,7 +531,7 @@ class BpSlide extends HTMLElement {
       }
     }
 
-    /* 上下頁 */
+    /* 上下頁按鈕 */
     const prevBtn = this.container?.querySelector('.prev-btn');
     const nextBtn = this.container?.querySelector('.next-btn');
     if (prevBtn && nextBtn) {
@@ -504,8 +544,8 @@ class BpSlide extends HTMLElement {
     if (this.getAttribute('update-header')==='true' || this.getAttribute('update-title')==='true') {
       const cur = slides[this.currentSlideInPart];
       if (cur) {
-        const fill = (tpl) => (tpl||'')
-          .replace('{part}', this.currentPart)
+        const fill = tpl => (tpl||'')
+          .replace('{part}',  this.currentPart)
           .replace('{slide}', this.currentSlideInPart+1)
           .replace('{total}', slides.length);
         if (this.getAttribute('update-header')==='true') {
@@ -543,12 +583,12 @@ class BpSlide extends HTMLElement {
   }
 
   render() {
-    const h       = this.getAttribute('height') || '400px';
-    const nPBT    = this.getAttribute('next-part-btn-text')  || '下一部分 →';
-    const pPBT    = this.getAttribute('prev-part-btn-text')  || '← 上一部分';
-    const finT    = this.getAttribute('finish-btn-text')     || '完成';
-    const resT    = this.getAttribute('restart-btn-text')    || '重新開始';
-    const nPBPos  = this.getAttribute('next-part-btn-position') || 'center';
+    const h      = this.getAttribute('height') || '400px';
+    const nPBT   = this.getAttribute('next-part-btn-text')  || '下一部分 →';
+    const pPBT   = this.getAttribute('prev-part-btn-text')  || '← 上一部分';
+    const finT   = this.getAttribute('finish-btn-text')     || '完成';
+    const resT   = this.getAttribute('restart-btn-text')    || '重新開始';
+    const nPBPos = this.getAttribute('next-part-btn-position') || 'center';
     const showDots   = this.getAttribute('show-dots')   !== 'false';
     const showArrows = this.getAttribute('show-arrows') !== 'false';
     const tc = this.getThemeColor();
@@ -556,27 +596,27 @@ class BpSlide extends HTMLElement {
     const gc = v => this.getContrastColor(v);
 
     const vars = {
-      '--theme-color'          : tc,
-      '--arrow-color'          : p(this.getAttribute('arrow-color'))       || tc,
-      '--arrow-bg'             : p(this.getAttribute('arrow-bg'))          || 'rgba(51,51,51,0.8)',
-      '--dot-color'            : p(this.getAttribute('dot-color'))         || 'rgba(198,199,189,0.3)',
-      '--active-dot-color'     : p(this.getAttribute('active-dot-color'))  || tc,
-      '--part-btn-bg'          : p(this.getAttribute('part-btn-bg'))       || tc,
-      '--part-btn-color'       : p(this.getAttribute('part-btn-color'))    || gc(tc),
-      '--part-btn-font-size'   : this.getAttribute('part-btn-font-size')   || '0.9rem',
-      '--part-btn-padding'     : this.getAttribute('part-btn-padding')     || '8px 16px',
-      '--part-btn-border-radius':this.getAttribute('part-btn-border-radius')|| '6px',
-      '--finish-btn-bg'        : p(this.getAttribute('finish-btn-bg'))     || tc,
-      '--finish-btn-color'     : p(this.getAttribute('finish-btn-color'))  || gc(tc),
-      '--restart-btn-bg'       : p(this.getAttribute('restart-btn-bg'))    || tc,
-      '--restart-btn-color'    : p(this.getAttribute('restart-btn-color')) || gc(tc),
-      '--fontcolor-subtitle'   : p(this.getAttribute('fontcolor-subtitle'))|| p('lavender'),
-      '--fontcolor-main'       : p(this.getAttribute('fontcolor-main'))    || p('shell'),
-      '--fontcolor-footer'     : p(this.getAttribute('fontcolor-footer'))  || p('sky'),
-      '--extra-note-hover-color':p(this.getAttribute('extra-note-hover-color'))|| p('special'),
-      '--show-dots'            : showDots   ? 'flex' : 'none',
-      '--show-arrows'          : showArrows ? 'flex' : 'none',
-      '--part-btn-position'    : nPBPos,
+      '--theme-color'           : tc,
+      '--arrow-color'           : p(this.getAttribute('arrow-color'))        || tc,
+      '--arrow-bg'              : p(this.getAttribute('arrow-bg'))           || 'rgba(51,51,51,0.8)',
+      '--dot-color'             : p(this.getAttribute('dot-color'))          || 'rgba(198,199,189,0.3)',
+      '--active-dot-color'      : p(this.getAttribute('active-dot-color'))   || tc,
+      '--part-btn-bg'           : p(this.getAttribute('part-btn-bg'))        || tc,
+      '--part-btn-color'        : p(this.getAttribute('part-btn-color'))     || gc(tc),
+      '--part-btn-font-size'    : this.getAttribute('part-btn-font-size')    || '0.9rem',
+      '--part-btn-padding'      : this.getAttribute('part-btn-padding')      || '8px 16px',
+      '--part-btn-border-radius': this.getAttribute('part-btn-border-radius')|| '6px',
+      '--finish-btn-bg'         : p(this.getAttribute('finish-btn-bg'))      || tc,
+      '--finish-btn-color'      : p(this.getAttribute('finish-btn-color'))   || gc(tc),
+      '--restart-btn-bg'        : p(this.getAttribute('restart-btn-bg'))     || tc,
+      '--restart-btn-color'     : p(this.getAttribute('restart-btn-color'))  || gc(tc),
+      '--fontcolor-subtitle'    : p(this.getAttribute('fontcolor-subtitle')) || p('lavender'),
+      '--fontcolor-main'        : p(this.getAttribute('fontcolor-main'))     || p('shell'),
+      '--fontcolor-footer'      : p(this.getAttribute('fontcolor-footer'))   || p('sky'),
+      '--extra-note-hover-color': p(this.getAttribute('extra-note-hover-color')) || p('special'),
+      '--show-dots'             : showDots   ? 'flex' : 'none',
+      '--show-arrows'           : showArrows ? 'flex' : 'none',
+      '--part-btn-position'     : nPBPos,
     };
     Object.entries(vars).forEach(([k,v]) => this.style.setProperty(k,v));
 
@@ -652,21 +692,21 @@ class BpSlide extends HTMLElement {
 
     const wrapper = document.createElement('div');
     wrapper.className = 'slider-wrapper'; wrapper.style.height = h;
-    const pi = document.createElement('div'); pi.className='part-indicator';
+    const pi = document.createElement('div'); pi.className = 'part-indicator';
     wrapper.appendChild(pi);
-    const sc = document.createElement('div'); sc.className='slides-container';
+    const sc = document.createElement('div'); sc.className = 'slides-container';
     slides.forEach(s => sc.appendChild(s));
     wrapper.appendChild(sc); this.appendChild(wrapper);
 
-    const pnc = document.createElement('div'); pnc.className='page-numbers-container';
+    const pnc = document.createElement('div'); pnc.className = 'page-numbers-container';
     this.appendChild(pnc);
 
-    const ctrl = document.createElement('div'); ctrl.className='controls';
-    ctrl.innerHTML='<button class="prev-btn">◀</button><div class="dots-container"></div><button class="next-btn">▶</button>';
+    const ctrl = document.createElement('div'); ctrl.className = 'controls';
+    ctrl.innerHTML = '<button class="prev-btn">◀</button><div class="dots-container"></div><button class="next-btn">▶</button>';
     this.appendChild(ctrl);
 
-    const pb = document.createElement('div'); pb.className='part-buttons';
-    pb.innerHTML=`<button class="prev-part-btn">${pPBT}</button><button class="next-part-btn">${nPBT}</button><button class="finish-btn">${finT}</button><button class="restart-btn">${resT}</button>`;
+    const pb = document.createElement('div'); pb.className = 'part-buttons';
+    pb.innerHTML = `<button class="prev-part-btn">${pPBT}</button><button class="next-part-btn">${nPBT}</button><button class="finish-btn">${finT}</button><button class="restart-btn">${resT}</button>`;
     this.appendChild(pb);
 
     this.container = this;
@@ -676,7 +716,7 @@ class BpSlide extends HTMLElement {
 customElements.define('bp-slide', BpSlide);
 
 /* ═══════════════════════════════════════════════════════════════
-   以下：等 bp-tools.js 就緒才掛載的功能（A~E）
+   B ~ E：等 bp-tools.js 就緒後掛載
 ═══════════════════════════════════════════════════════════════ */
 (function waitForBpTools() {
 
@@ -693,7 +733,7 @@ customElements.define('bp-slide', BpSlide);
   if (!customElements.get('ir-choice'))
     customElements.define('ir-choice', class extends HTMLElement {});
 
-  const irProto = customElements.get('info-region').prototype;
+  const irProto        = customElements.get('info-region').prototype;
   const _orig_ir_act   = irProto._onActivated;
   const _orig_ir_reset = irProto.reset;
 
@@ -747,9 +787,9 @@ customElements.define('bp-slide', BpSlide);
   };
 
   /* ── C. DualCell：on-link 解鎖遮罩 ── */
-  const dcProto = DualCell.prototype;
-  const _orig_dc_cell   = dcProto.createCell;
-  const _orig_dc_parse  = dcProto.parseCol;
+  const dcProto        = DualCell.prototype;
+  const _orig_dc_cell  = dcProto.createCell;
+  const _orig_dc_parse = dcProto.parseCol;
 
   dcProto.parseCol = function (el) {
     const d = _orig_dc_parse.call(this, el);
@@ -779,8 +819,9 @@ customElements.define('bp-slide', BpSlide);
     document.head.appendChild(s);
   }
 
-  const wfProto = customElements.get('word-flip').prototype;
+  const wfProto     = customElements.get('word-flip').prototype;
   const _orig_wf_cb = wfProto.connectedCallback;
+
   wfProto.connectedCallback = function () { _orig_wf_cb.call(this); this._bpInit(); };
 
   wfProto._bpInit = function () {
@@ -789,6 +830,7 @@ customElements.define('bp-slide', BpSlide);
     const unlockOn  = this.getAttribute('unlock-on');
     const group     = this.getAttribute('group');
 
+    /* answer-src：從外部元素讀取 HTML */
     if (answerSrc) {
       const id = answerSrc.startsWith('#') ? answerSrc.slice(1) : answerSrc;
       const el = document.getElementById(id);
@@ -796,30 +838,38 @@ customElements.define('bp-slide', BpSlide);
       else console.warn('[bp-tools-patch] answer-src 找不到 id="'+id+'"');
     }
 
+    /* unlock-on：預設鎖定 */
     if (unlockOn) {
       this.classList.add('wf-bp-locked');
       BPTools.on(unlockOn, () => this.classList.remove('wf-bp-locked'));
     }
 
+    /* group：互斥展開 */
     if (group) {
       if (!_wfGroups.has(group)) _wfGroups.set(group, new Set());
       _wfGroups.get(group).add(this);
     }
 
+    /* capture 階段（在原本 handler 之前執行） */
     this.addEventListener('click', () => {
+      /* answer-src：翻開前設佔位符，bubble 階段再替換 */
       if (this._bpAnswerHtml && !this.classList.contains('wf-flipped'))
-        this.setAttribute('data-content','▌');
+        this.setAttribute('data-content', '▌');
+      /* group 互斥 */
       if (group && !this.classList.contains('wf-flipped') && _wfGroups.has(group))
         _wfGroups.get(group).forEach(el => {
           if (el !== this && el.classList.contains('wf-flipped'))
-            el.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+            el.dispatchEvent(new MouseEvent('click', { bubbles:true }));
         });
     }, true);
 
+    /* bubble 階段（在原本 handler 之後執行） */
     this.addEventListener('click', () => {
       const flipped = this.classList.contains('wf-flipped');
+      /* answer-src：翻開後寫入完整 HTML */
       if (this._bpAnswerHtml && flipped) this.innerHTML = this._bpAnswerHtml;
-      if (link && flipped) BPTools.emit(link, { id:this.id||null });
+      /* link：翻開時發事件 */
+      if (link && flipped) BPTools.emit(link, { id: this.id || null });
     });
   };
 
@@ -857,50 +907,49 @@ customElements.define('bp-slide', BpSlide);
       const answers   = (this.getAttribute('answer')||'').split('|').map(s=>s.trim()).filter(Boolean);
       const link      = this.getAttribute('link');
       const colorName = this.getAttribute('color') || 'sky';
-      const colorHex  = BrandColors.get(colorName) || BrandColors.get('sky');
+      const colorHex  = (typeof BrandColors!=='undefined' ? BrandColors.get(colorName) : null)
+                        || '#04b5a3';
       this.style.setProperty('--irc-color', colorHex);
       this.style.setProperty('--irc-rgb',   _hexToRgb(colorHex));
-      const fSize   = this.getAttribute('font-size')        || null;
-      const bFSize  = this.getAttribute('btn-font-size')    || fSize;
-      const iFSize  = this.getAttribute('input-font-size')  || fSize;
-      const bPad    = this.getAttribute('btn-padding')      || null;
-      const caseSens= this.hasAttribute('case-sensitive');
+      const fSize  = this.getAttribute('font-size')       || null;
+      const bFSize = this.getAttribute('btn-font-size')   || fSize;
+      const iFSize = this.getAttribute('input-font-size') || fSize;
+      const bPad   = this.getAttribute('btn-padding')     || null;
+      const caseSens = this.hasAttribute('case-sensitive');
       const wrap = document.createElement('div'); wrap.className='irc-wrap';
       const input= document.createElement('input');
       input.type='text'; input.className='irc-input';
       input.placeholder = this.getAttribute('placeholder')||'輸入答案…';
-      if (iFSize) input.style.fontSize = iFSize;
-      const btn = document.createElement('button'); btn.className='irc-btn';
-      btn.textContent = this.getAttribute('btn-label')||'確認';
-      if (bFSize) btn.style.fontSize = bFSize;
-      if (bPad)   btn.style.padding  = bPad;
+      if (iFSize) input.style.fontSize=iFSize;
+      const btn=document.createElement('button'); btn.className='irc-btn';
+      btn.textContent=this.getAttribute('btn-label')||'確認';
+      if (bFSize) btn.style.fontSize=bFSize;
+      if (bPad)   btn.style.padding=bPad;
       wrap.append(input,btn); this.appendChild(wrap);
-      const hint = this.getAttribute('hint');
+      const hint=this.getAttribute('hint');
       if (hint) { const h=document.createElement('p'); h.className='irc-hint'; h.textContent=hint; this.appendChild(h); }
-      const msg = document.createElement('p'); msg.className='irc-msg'; this.appendChild(msg);
-      const verify = () => {
-        const val = input.value.trim();
-        const ok  = answers.some(a => caseSens ? val===a : val.toLowerCase()===a.toLowerCase());
+      const msg=document.createElement('p'); msg.className='irc-msg'; this.appendChild(msg);
+      const verify=()=>{
+        const val=input.value.trim();
+        const ok=answers.some(a=>caseSens?val===a:val.toLowerCase()===a.toLowerCase());
         if (ok) {
           msg.className='irc-msg irc-ok'; msg.textContent='✓ 正確！';
           input.disabled=btn.disabled=true;
-          if (link) BPTools.emit(link, { value:val });
+          if (link) BPTools.emit(link,{value:val});
         } else {
           msg.className='irc-msg irc-error'; msg.textContent='✗ 答案不正確，請再試一次。';
           input.select();
         }
       };
-      btn.addEventListener('click', verify);
-      input.addEventListener('keydown', e => { if (e.key==='Enter') verify(); });
-      input.addEventListener('input', () => {
-        if (msg.classList.contains('irc-error')) { msg.className='irc-msg'; msg.textContent=''; }
+      btn.addEventListener('click',verify);
+      input.addEventListener('keydown',e=>{ if(e.key==='Enter') verify(); });
+      input.addEventListener('input',()=>{
+        if(msg.classList.contains('irc-error')){ msg.className='irc-msg'; msg.textContent=''; }
       });
     }
   }
 
   if (!customElements.get('ir-challenge'))
     customElements.define('ir-challenge', IrChallenge);
-
-  console.log('[bp-tools-patch] v2.0 已載入（BPTools + InfoRegion + DualCell + WordFlip + ir-challenge + bp-slide）✓');
 
 })();
