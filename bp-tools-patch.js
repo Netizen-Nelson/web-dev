@@ -1,20 +1,5 @@
-/**
- * bp-tools-patch.js  v1.2
- * ─────────────────────────────────────────────────────────────
- * 為 bp-tools.js 新增 InfoRegion 分支路徑功能
- * 新增標籤：<ir-choice target="id" color="色名" icon="bi-類名">
- *
- * 載入順序（HTML 裡的順序必須正確）：
- *   <script src="bp-tools.js"></script>
- *   <script src="bp-tools-patch.js"></script>
- *
- * v1.2 修正：改用輪詢等待 bp-tools.js 載入，
- *           避免 CDN 遠端載入時的 DOMContentLoaded 時序問題。
- * ─────────────────────────────────────────────────────────────
- */
 (function waitForBpTools() {
 
-  /* bp-tools.js 尚未執行完畢，每 50ms 再試一次，最多等 10 秒 */
   if (!customElements.get('info-region')) {
     if ((waitForBpTools._tries = (waitForBpTools._tries || 0) + 1) > 200) {
       console.error('[bp-tools-patch] 等待逾時，請確認 bp-tools.js 已正確載入。');
@@ -23,8 +8,6 @@
     setTimeout(waitForBpTools, 50);
     return;
   }
-
-  /* ── bp-tools.js 已就緒，開始掛載補丁 ───────────────────── */
 
   /* 1. 註冊 <ir-choice> 自訂標籤 */
   if (!customElements.get('ir-choice')) {
@@ -38,7 +21,7 @@
   const _orig_onActivated = proto._onActivated;
   const _orig_reset       = proto.reset;
 
-  /* 4. 覆蓋 _onActivated：插入分支偵測 */
+  /* 4. 覆蓋 _onActivated */
   proto._onActivated = function () {
     this._applyBorderStyles();
 
@@ -51,14 +34,12 @@
       return;
     }
 
-    /* 沒有選項：原本邏輯完整執行 */
     _orig_onActivated.call(this);
   };
 
-  /* 5. 新增 _renderChoices 方法 */
+  /* 5. 新增 _renderChoices */
   proto._renderChoices = function (choiceEls) {
 
-    /* reset 後重新 activate 時，先清掉上一輪的按鈕 */
     this.querySelector('.ir-choices-wrap')?.remove();
 
     const cfg        = window.InfoRegionConfig || {};
@@ -105,12 +86,23 @@
 
         targetEl._activatedBy = this.id;
 
-        /* 把回饋區（自己）收起來，避免畫面堆疊 */
+        /* ── v1.3 核心修正 ────────────────────────────────────
+           掃描頁面上所有 active 的 info-region，
+           凡是帶有 _activatedBy（表示由選擇觸發的回饋區）
+           且不是本次目標的，全部 reset 清掉。
+           這樣不管之前按了幾個錯誤選項，殘留的都會被清除。 */
+        document.querySelectorAll('info-region[active="true"]').forEach(el => {
+          if (el !== targetEl && el._activatedBy) {
+            el.reset();
+          }
+        });
+        /* ───────────────────────────────────────────────────── */
+
+        /* 把回饋區（自己）也收起來 */
         const selfEl = this;
         setTimeout(() => selfEl.reset(), 30);
 
-        /* 目標若已是 active="true"（例如答錯重回題目）
-           必須先 reset 讓屬性真正變化，再重新啟動         */
+        /* 目標若已是 active="true"，先 reset 再重新啟動 */
         if (targetEl.getAttribute('active') === 'true') {
           targetEl.reset();
           setTimeout(() => targetEl.activate(), 60);
@@ -125,7 +117,7 @@
     this.appendChild(wrap);
   };
 
-  /* 6. 擴充 reset()：補上選項按鈕的清理 */
+  /* 6. 擴充 reset() */
   proto.reset = function () {
     _orig_reset.call(this);
     this.querySelector('.ir-choices-wrap')?.remove();
