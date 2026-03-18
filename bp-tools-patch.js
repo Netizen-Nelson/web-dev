@@ -1,26 +1,44 @@
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * bp-tools-patch.js  v1.2
+ * ─────────────────────────────────────────────────────────────
+ * 為 bp-tools.js 新增 InfoRegion 分支路徑功能
+ * 新增標籤：<ir-choice target="id" color="色名" icon="bi-類名">
+ *
+ * 載入順序（HTML 裡的順序必須正確）：
+ *   <script src="bp-tools.js"></script>
+ *   <script src="bp-tools-patch.js"></script>
+ *
+ * v1.2 修正：改用輪詢等待 bp-tools.js 載入，
+ *           避免 CDN 遠端載入時的 DOMContentLoaded 時序問題。
+ * ─────────────────────────────────────────────────────────────
+ */
+(function waitForBpTools() {
+
+  /* bp-tools.js 尚未執行完畢，每 50ms 再試一次，最多等 10 秒 */
   if (!customElements.get('info-region')) {
-    console.error('[bp-tools-patch] 找不到 info-region 元素，請確認 bp-tools.js 已在此檔案之前載入。');
+    if ((waitForBpTools._tries = (waitForBpTools._tries || 0) + 1) > 200) {
+      console.error('[bp-tools-patch] 等待逾時，請確認 bp-tools.js 已正確載入。');
+      return;
+    }
+    setTimeout(waitForBpTools, 50);
     return;
   }
 
-  /* ── 1. 註冊 <ir-choice> 自訂標籤 ────────────────────────── */
+  /* ── bp-tools.js 已就緒，開始掛載補丁 ───────────────────── */
+
+  /* 1. 註冊 <ir-choice> 自訂標籤 */
   if (!customElements.get('ir-choice')) {
     customElements.define('ir-choice', class extends HTMLElement {});
   }
 
-  /* ── 2. 取得 InfoRegion 原型 ──────────────────────────────── */
+  /* 2. 取得 InfoRegion 原型 */
   const proto = customElements.get('info-region').prototype;
 
-  /* ── 3. 保存原本的方法（monkey-patch 的安全做法）────────────
-     先把舊方法存起來，新方法裡在適當時機用 .call(this) 呼叫，
-     確保原有功能百分之百保留，只是在前面插入新邏輯。          */
+  /* 3. 保存原本的方法 */
   const _orig_onActivated = proto._onActivated;
   const _orig_reset       = proto.reset;
 
-  /* ── 4. 覆蓋 _onActivated：插入分支偵測 ─────────────────────
-     偵測到 <ir-choice> 子元素就進選擇模式，
-     否則完整交還給原本的邏輯。                                 */
+  /* 4. 覆蓋 _onActivated：插入分支偵測 */
   proto._onActivated = function () {
     this._applyBorderStyles();
 
@@ -30,14 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (choiceEls.length > 0) {
       this._renderChoices(choiceEls);
-      return; /* 有選項就不走原本的自動觸發 / 倒數 */
+      return;
     }
 
     /* 沒有選項：原本邏輯完整執行 */
     _orig_onActivated.call(this);
   };
 
-  /* ── 5. 新增 _renderChoices 方法 ─────────────────────────── */
+  /* 5. 新增 _renderChoices 方法 */
   proto._renderChoices = function (choiceEls) {
 
     /* reset 後重新 activate 時，先清掉上一輪的按鈕 */
@@ -48,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const alignAttr  = this.getAttribute('choice-align') || 'left';
     const justifyMap = { left: 'flex-start', center: 'center', right: 'flex-end' };
 
-    /* 按鈕容器 */
     const wrap = document.createElement('div');
     wrap.className    = 'ir-choices-wrap';
     wrap.style.cssText =
@@ -61,18 +78,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const iconClass = choiceEl.getAttribute('icon')  || null;
       const label     = choiceEl.textContent.trim();
 
-      /* 防呆：缺少 target 屬性就跳過並警告 */
       if (!target) {
         console.warn('[bp-tools-patch] <ir-choice> 缺少 target 屬性：', choiceEl);
         return;
       }
 
-      /* 建立按鈕，沿用現有的 .ir-btn 樣式，無需新增 CSS */
       const btn = document.createElement('button');
       btn.className = 'ir-btn ir-btn--' + colorName;
 
       if (iconClass) {
-        const icon    = document.createElement('i');
+        const icon     = document.createElement('i');
         icon.className = 'bi bi-' + iconClass;
         icon.style.marginRight = '5px';
         btn.appendChild(icon);
@@ -80,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.appendChild(document.createTextNode(label));
 
       btn.addEventListener('click', () => {
-        /* 立刻移除按鈕群，防止重複點擊 */
         wrap.remove();
 
         const targetEl = document.getElementById(target);
@@ -89,24 +103,18 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        /* 記錄來源 id，為未來的「返回上一步」預留接口 */
         targetEl._activatedBy = this.id;
 
-        /* ── 把「自己」（回饋區）也 reset，避免畫面堆疊 ──
-           延遲 30ms 讓使用者能瞄到回饋文字後再消失        */
-        const selfEl = this; /* 保存 this 供 setTimeout 使用 */
+        /* 把回饋區（自己）收起來，避免畫面堆疊 */
+        const selfEl = this;
         setTimeout(() => selfEl.reset(), 30);
 
-        /* ── 前往目標 ────────────────────────────────────
-           關鍵：若目標已是 active="true"（例如答錯重回題目），
-           直接 setAttribute 不會觸發 attributeChangedCallback，
-           必須先 reset 讓它回到非 active 狀態，
-           再用 setTimeout 給 CSS 動畫時間，然後重新啟動。   */
+        /* 目標若已是 active="true"（例如答錯重回題目）
+           必須先 reset 讓屬性真正變化，再重新啟動         */
         if (targetEl.getAttribute('active') === 'true') {
           targetEl.reset();
           setTimeout(() => targetEl.activate(), 60);
         } else {
-          /* 第一次到達這個目標，延遲與上面一致以保持節奏 */
           setTimeout(() => targetEl.activate(), 60);
         }
       });
@@ -117,12 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
     this.appendChild(wrap);
   };
 
-  /* ── 6. 擴充 reset()：補上選項按鈕的清理 ────────────────── */
+  /* 6. 擴充 reset()：補上選項按鈕的清理 */
   proto.reset = function () {
-    /* 先執行原本的 reset（清倒數條、manual 按鈕等） */
     _orig_reset.call(this);
-    /* 再清掉我們新增的選項按鈕 */
     this.querySelector('.ir-choices-wrap')?.remove();
   };
 
-});
+})();
