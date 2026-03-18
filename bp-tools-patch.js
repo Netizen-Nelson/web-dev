@@ -1,24 +1,4 @@
-/**
- * bp-tools-patch.js  v1.1
- * ─────────────────────────────────────────────────────────────
- * 為 bp-tools.js 新增 InfoRegion 分支路徑功能
- * 新增標籤：<ir-choice target="id" color="色名" icon="bi-類名">
- *
- * 載入順序（HTML 裡的順序必須正確）：
- *   <script src="bp-tools.js"></script>
- *   <script src="bp-tools-patch.js"></script>
- *
- * 使用範例：
- *   <info-region id="q1" color="sky" choice-align="left">
- *     <p>你懂了嗎？</p>
- *     <ir-choice target="ans-yes" color="safe"    icon="check-circle">懂了</ir-choice>
- *     <ir-choice target="ans-no"  color="warning" icon="x-circle">還不懂</ir-choice>
- *   </info-region>
- * ─────────────────────────────────────────────────────────────
- */
 document.addEventListener('DOMContentLoaded', () => {
-
-  /* ── 0. 安全檢查：確認 bp-tools.js 已載入 ─────────────────── */
   if (!customElements.get('info-region')) {
     console.error('[bp-tools-patch] 找不到 info-region 元素，請確認 bp-tools.js 已在此檔案之前載入。');
     return;
