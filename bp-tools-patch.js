@@ -44,15 +44,15 @@ class BpSlide extends HTMLElement {
     ];
   }
 
-  connectedCallback() {
+    connectedCallback() {
     this.render();
+    this.analyzeParts();       
     this.setupEventListeners();
-    this.analyzeParts();
     this.setupExtraNotes();
     this.setupSpoilerMasks();
     this.setupQuizzes();
     this._setupBPTools();
-    setTimeout(() => this.updateDisplay(), 0);
+    this.updateDisplay();     
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
