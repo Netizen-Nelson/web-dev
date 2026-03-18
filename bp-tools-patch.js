@@ -1,3 +1,18 @@
+window.BPTools = {
+  _listeners: {},
+  _fired: new Set(),
+  on(ev, fn) {
+    (this._listeners[ev] = this._listeners[ev] || []).push(fn);
+  },
+  emit(ev, data = {}) {
+    this._fired.add(ev);
+    (this._listeners[ev] || []).forEach(fn => fn(data));
+  },
+  off(ev, fn) {
+    if (!this._listeners[ev]) return;
+    this._listeners[ev] = this._listeners[ev].filter(f => f !== fn);
+  },
+};
 class BpSlide extends HTMLElement {
   constructor() {
     super();
@@ -673,23 +688,6 @@ customElements.define('bp-slide', BpSlide);
     setTimeout(waitForBpTools, 50);
     return;
   }
-
-  /* ── A. BPTools 匯流排 ── */
-  window.BPTools = {
-    _listeners: {},
-    _fired: new Set(),
-    on(ev, fn) {
-      (this._listeners[ev] = this._listeners[ev] || []).push(fn);
-    },
-    emit(ev, data = {}) {
-      this._fired.add(ev);
-      (this._listeners[ev] || []).forEach(fn => fn(data));
-    },
-    off(ev, fn) {
-      if (!this._listeners[ev]) return;
-      this._listeners[ev] = this._listeners[ev].filter(f => f !== fn);
-    },
-  };
 
   /* ── B. InfoRegion：分支路徑 + link ── */
   if (!customElements.get('ir-choice'))
