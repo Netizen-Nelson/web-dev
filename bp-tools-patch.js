@@ -808,7 +808,7 @@ customElements.define('bp-slide', BpSlide);
 
     this.addEventListener('click', () => {
       if (this._bpAnswerHtml && !this.classList.contains('wf-flipped'))
-        this.setAttribute('answer','▌');
+        this.setAttribute('data-content','▌');
       if (group && !this.classList.contains('wf-flipped') && _wfGroups.has(group))
         _wfGroups.get(group).forEach(el => {
           if (el !== this && el.classList.contains('wf-flipped'))
