@@ -1,6 +1,5 @@
 (function (G) {
   'use strict';
-
   function deepMerge(target) {
     for (var i=1;i<arguments.length;i++) {
       var src=arguments[i];
@@ -21,7 +20,6 @@
     return (parseFloat(m[1])*factor).toFixed(3)+m[2];
   }
 
-  // ── Built-in themes ────────────────────────────────────────────────
   var _THEMES = {
     default: { accent:'#C8DD5A', accentText:'#0c0d0c', progressBg:'#C8DD5A', triggerColor:'#C8DD5A',
                panelBg:'#0e0f0e', panelBorder:'#1e1f1e', headerColor:'#c6c7bd', toastBorder:'#1e1f1e' },
@@ -345,7 +343,8 @@
         +'<div class="ach-item-meta" style="font-size:'+this._fs('panelMeta')+'">'
           +'<span class="ach-rarity" style="color:'+r.color+'">'+r.label+'</span>'
           +(a._unlocked&&a._unlockedAt?'<span class="ach-time">'+this._fmtTime(a._unlockedAt)+'</span>':'')
-          +(a.reward&&a._unlocked?'<span class="ach-reward"><i class="bi bi-gift-fill"></i> '+a.reward+'</span>':'')
+          +(a.reward&&a._unlocked?(function(){var b=parseInt(a.reward);var c=(!isNaN(b)&&b<0)?'#F08080':'#C8DD5A';return '<span class="ach-reward" style="color:'+c+'"><i class="bi bi-gift-fill"></i> '+a.reward+'</span>';}()):'')
+
         +'</div>'
       +'</div>'
       +'</div>';
@@ -389,7 +388,7 @@
           + '<span>成就解鎖</span><span class="ach-toast-rarity" style="color:'+r.color+'">'+r.label+'</span></div>'
         + '<div class="ach-toast-title" style="color:'+r.color+';font-size:'+this._fs('toastTitle')+'">'+(a.title||a.id)+'</div>'
         + (a.desc   ? '<div class="ach-toast-desc"   style="font-size:'+this._fs('toastDesc')+'">'+a.desc+'</div>'   : '')
-        + (a.reward ? '<div class="ach-toast-reward" style="font-size:'+this._fs('toastDesc')+'"><i class="bi bi-gift-fill"></i> '+a.reward+'</div>' : '')
+        + (a.reward ? '<div class="ach-toast-reward" style="font-size:'+this._fs('toastDesc')+';color:'+(parseInt(a.reward)<0?'#F08080':'#C8DD5A')+'"><i class="bi bi-gift-fill"></i> '+a.reward+'</div>' : '')
       + '</div>';
     this._toastEl.appendChild(toast);
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ toast.classList.add('ach-toast--show'); }); });
@@ -596,7 +595,7 @@
       opts.onUnlock = function(a) {
         if (a._reward && a.reward) {
           var bonus = parseInt(a.reward);
-          if (!isNaN(bonus) && bonus > 0) {
+          if (!isNaN(bonus) && bonus !== 0) {
             // Dispatch a custom event so host page can react
             document.dispatchEvent(new CustomEvent('ach:reward', {
               detail: { id: a.id, bonus: bonus, achievement: a }
@@ -1082,18 +1081,15 @@
       var selectedKeys   = Object.keys(selectedSet).map(Number);
       var correctKeys    = Object.keys(correctIndices).map(Number);
 
-      // Check: selected set must exactly match correct set
       var isCorrect =
         selectedKeys.length === correctKeys.length &&
         selectedKeys.every(function(k) { return correctIndices[k]; });
 
-      // Lock all options
       optDivs.forEach(function(d) { d.classList.add('is-disabled'); });
       confirmBtn.disabled = true;
       wrap.classList.add('ach-choice--done');
 
       if (isCorrect) {
-        // Reveal correct options in green
         optDivs.forEach(function(d, i) {
           if (correctIndices[i]) {
             d.classList.remove('is-selected');
@@ -1111,7 +1107,6 @@
           detail: { achId: achId, selected: selectedKeys, element: wrap }
         }));
       } else {
-        // Show which were right/wrong
         optDivs.forEach(function(d, i) {
           if (correctIndices[i]) {
             d.classList.remove('is-selected');
@@ -1128,7 +1123,7 @@
         fb.innerHTML = '<i class="bi bi-x-circle-fill" style="color:#F08080"></i>'
           + '<span style="color:#F08080">再試試看，綠色是正確答案</span>';
         wrap.style.borderColor = '#F08080';
-        // Unlock and re-enable after a pause so user can review
+
         setTimeout(function() {
           wrap.classList.remove('ach-choice--done');
           wrap.style.borderColor = panelBorder;
@@ -1162,19 +1157,15 @@
     choiceEls.forEach(function(el) { _buildChoice(el); });
   }
 
-  // ── Init all ach-quiz elements ────────────────────────────────────
   function _initQuiz() {
     _injectQuizCSS();
-    // Collect first (replaceChild invalidates live NodeList)
     var quizEls = Array.prototype.slice.call(document.querySelectorAll('ach-quiz'));
     quizEls.forEach(function(el) { _buildQuiz(el); });
   }
 
-  // Auto-init
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _initDeclarative);
   } else {
     _initDeclarative();
   }
-
 })(window);
