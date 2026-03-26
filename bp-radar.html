@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bp-radar 雷達圖元件</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0c0d0c;
+  --region:   #333333;
+  --shell:    #c6c7bd;
+  --lavender: #C3A5E5;
+  --special:  #C8DD5A;
+  --warning:  #F08080;
+  --salmon:   #E5C3B3;
+  --sky:      #04b5a3;
+  --safe:     #81E6D9;
+  --yellow:   #D4B440;
+  --info:     #90CDF4;
+  --stone:    #7090A8;
+  --pink:     #FFB3D9;
+  --orange:   #f69653;
+}
+
+body {
+  background: var(--bg);
+  color: var(--shell);
+  font-family: 'Courier New', 'Noto Sans TC', monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 72px;
+  gap: 48px;
+}
+
+.page-header { text-align: center; }
+.page-header h1 {
+  font-size: 1.1rem;
+  letter-spacing: 0.22em;
+  color: var(--special);
+  font-weight: 400;
+  text-transform: uppercase;
+}
+.page-header p {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--stone);
+  letter-spacing: 0.06em;
+}
+
+.demo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: center;
+  align-items: flex-start;
+}
+bp-radar {
+  display: block;
+  width: 330px;
+  max-width: calc(100vw - 40px);
+}
+
+/* ── root-font 即時示範 ── */
+.live-demo {
+  width: 100%;
+  max-width: 720px;
+  background: #161816;
+  border: 1px solid #2a2c2a;
+  border-radius: 12px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.live-demo h2 {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--stone);
+  text-transform: uppercase;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2c2a;
+}
+.live-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 36px;
+  align-items: center;
+}
+.ctrl-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ctrl-row label {
+  font-size: 0.78rem;
+  color: var(--sky);
+  font-family: 'Courier New', monospace;
+  min-width: 108px;
+}
+.ctrl-row input[type=range] {
+  -webkit-appearance: none;
+  width: 130px;
+  height: 3px;
+  background: var(--region);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.ctrl-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sky);
+  cursor: pointer;
+}
+.ctrl-row .val-badge {
+  min-width: 40px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--special);
+  font-family: 'Courier New', monospace;
+}
+.live-preview {
+  display: flex;
+  justify-content: center;
+}
+.live-preview bp-radar { width: 300px; }
+
+/* ── API 文件 ── */
+.doc-block {
+  width: 100%;
+  max-width: 720px;
+  background: #161816;
+  border: 1px solid #2a2c2a;
+  border-radius: 12px;
+  padding: 28px 32px;
+}
+.doc-block h2 {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--stone);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2c2a;
+}
+.doc-block h3 {
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  color: var(--yellow);
+  text-transform: uppercase;
+  margin: 24px 0 12px;
+}
+.attr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.attr-table th {
+  text-align: left;
+  color: var(--stone);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  padding: 6px 12px 10px 0;
+  border-bottom: 1px solid #2a2c2a;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+.attr-table td {
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid #1e201e;
+  vertical-align: top;
+  line-height: 1.6;
+}
+.attr-table tr:last-child td { border-bottom: none; }
+.attr-table .attr-name    { color: var(--sky);     font-family: 'Courier New', monospace; }
+.attr-table .attr-new     { color: var(--special); font-family: 'Courier New', monospace; }
+.attr-table .attr-default { color: var(--stone);   font-size: 0.75rem; }
+.attr-table .attr-desc    { color: var(--shell);   opacity: 0.8; }
+
+.code-example {
+  margin-top: 20px;
+  background: #0c0d0c;
+  border: 1px solid #2a2c2a;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 0.77rem;
+  color: var(--shell);
+  opacity: 0.8;
+  line-height: 1.8;
+  white-space: pre;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+}
+.code-example .kw  { color: var(--lavender); }
+.code-example .val { color: var(--special); }
+.code-example .tag { color: var(--sky); }
+.code-example .cmt { color: var(--stone); }
+.code-example .new { color: var(--yellow); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>bp-radar</h1>
+  <p>SVG 雷達圖 Web Component &nbsp;·&nbsp; 無 Shadow DOM &nbsp;·&nbsp; 全域配置 + 字體比例系統</p>
+</div>
+
+<!-- ── 靜態示範（3 個元件，不同 root-font）── -->
+<div class="demo-grid">
+
+  <!-- 預設 root-font (14px) -->
+  <bp-radar
+    color-label="sky" color-web="sky" color-fill="special"
+    min-scale="1" max-scale="10"
+    title="雅思口說評分">
+    <radar-note value="8.4">發音</radar-note>
+    <radar-note value="6.5">文法</radar-note>
+    <radar-note value="5.8">字彙</radar-note>
+    <radar-note value="4.9">流利</radar-note>
+    <radar-note value="5.3">連貫</radar-note>
+  </bp-radar>
+
+  <!-- root-font 16，font-title 獨立放大 -->
+  <bp-radar
+    color-label="lavender" color-web="stone" web-width="3" color-fill="pink"
+    min-scale="0" max-scale="100" levels="4"
+    root-font="16" font-title="18"
+    title="綜合能力">
+    <radar-note value="82">速度</radar-note>
+    <radar-note value="67">精準</radar-note>
+    <radar-note value="55">穩定</radar-note>
+    <radar-note value="90">反應</radar-note>
+    <radar-note value="73">耐力</radar-note>
+    <radar-note value="61">協調</radar-note>
+  </bp-radar>
+
+  <!-- root-font 11，整體縮小 -->
+  <bp-radar
+    color-label="orange" color-web="yellow" color-fill="orange"
+    min-scale="0" max-scale="5" levels="5"
+    root-font="11" show-values="false"
+    title="技術評估">
+    <radar-note value="4.2">架構</radar-note>
+    <radar-note value="3.8">效能</radar-note>
+    <radar-note value="2.5">安全</radar-note>
+    <radar-note value="4.7">可讀</radar-note>
+  </bp-radar>
+
+</div>
+
+<!-- ── 即時示範區 ─────────────────────────── -->
+<div class="live-demo">
+  <h2>root-font 即時預覽</h2>
+
+  <div class="live-controls">
+    <div class="ctrl-row">
+      <label>root-font</label>
+      <input type="range" id="sl-root"  min="8"  max="24" step="1" value="14">
+      <span class="val-badge" id="lbl-root">14px</span>
+    </div>
+    <div class="ctrl-row">
+      <label>font-title</label>
+      <input type="range" id="sl-title" min="0"  max="28" step="1" value="0">
+      <span class="val-badge" id="lbl-title">auto</span>
+    </div>
+    <div class="ctrl-row">
+      <label>font-label</label>
+      <input type="range" id="sl-label" min="0"  max="28" step="1" value="0">
+      <span class="val-badge" id="lbl-label">auto</span>
+    </div>
+    <div class="ctrl-row">
+      <label>font-value</label>
+      <input type="range" id="sl-value" min="0"  max="24" step="1" value="0">
+      <span class="val-badge" id="lbl-value">auto</span>
+    </div>
+    <div class="ctrl-row">
+      <label>font-tick</label>
+      <input type="range" id="sl-tick"  min="0"  max="20" step="1" value="0">
+      <span class="val-badge" id="lbl-tick">auto</span>
+    </div>
+  </div>
+
+  <div class="live-preview">
+    <bp-radar id="live-radar"
+      color-label="safe" color-web="stone" color-fill="safe"
+      min-scale="1" max-scale="10" animate="false"
+      title="即時預覽">
+      <radar-note value="8.4">發音</radar-note>
+      <radar-note value="6.5">文法</radar-note>
+      <radar-note value="5.8">字彙</radar-note>
+      <radar-note value="4.9">流利</radar-note>
+      <radar-note value="5.3">連貫</radar-note>
+    </bp-radar>
+  </div>
+</div>
+
+<!-- ── API 文件 ───────────────────────────── -->
+<div class="doc-block">
+  <h2>屬性 API</h2>
+
+  <h3>外觀 / 資料</h3>
+  <table class="attr-table">
+    <tr><th>屬性</th><th>預設值</th><th>說明</th></tr>
+    <tr><td class="attr-name">color-label</td><td class="attr-default">shell</td><td class="attr-desc">軸標籤文字顏色（調色盤名稱或 hex）</td></tr>
+    <tr><td class="attr-name">color-web</td><td class="attr-default">stone</td><td class="attr-desc">格線與軸線顏色</td></tr>
+    <tr><td class="attr-name">color-fill</td><td class="attr-default">sky</td><td class="attr-desc">資料多邊形填色與頂點顏色</td></tr>
+    <tr><td class="attr-name">min-scale</td><td class="attr-default">0</td><td class="attr-desc">最小刻度值</td></tr>
+    <tr><td class="attr-name">max-scale</td><td class="attr-default">10</td><td class="attr-desc">最大刻度值</td></tr>
+    <tr><td class="attr-name">levels</td><td class="attr-default">5</td><td class="attr-desc">格線層數（2–10）</td></tr>
+    <tr><td class="attr-name">show-values</td><td class="attr-default">true</td><td class="attr-desc">是否在標籤旁顯示數值</td></tr>
+    <tr><td class="attr-name">stroke-width</td><td class="attr-default">2</td><td class="attr-desc">資料多邊形線寬（px）</td></tr>
+    <tr><td class="attr-name">web-width</td><td class="attr-default">0.75</td><td class="attr-desc">格線與軸線粗細（px），數值越大網格越明顯</td></tr>
+    <tr><td class="attr-name">animate</td><td class="attr-default">true</td><td class="attr-desc">是否啟用淡入動畫</td></tr>
+    <tr><td class="attr-name">title</td><td class="attr-default">（無）</td><td class="attr-desc">圖表標題文字</td></tr>
+  </table>
+
+  <h3>字體大小</h3>
+  <table class="attr-table">
+    <tr><th>屬性</th><th>預設值</th><th>說明</th></tr>
+    <tr>
+      <td class="attr-new">root-font</td>
+      <td class="attr-default">14</td>
+      <td class="attr-desc">
+        基礎字體大小（px）。所有未單獨設定的文字皆依固定比例縮放：<br>
+        標題 ×1.036 &nbsp;·&nbsp; 標籤 ×0.964 &nbsp;·&nbsp; 數值 ×0.786 &nbsp;·&nbsp; 刻度 ×0.679。<br>
+        接受純數字或含 <code>px</code> 單位（如 <code>"18"</code> 或 <code>"18px"</code>）。
+      </td>
+    </tr>
+    <tr>
+      <td class="attr-new">font-title</td>
+      <td class="attr-default">auto</td>
+      <td class="attr-desc">標題字體大小（px）。設定後不受 root-font 影響。</td>
+    </tr>
+    <tr>
+      <td class="attr-new">font-label</td>
+      <td class="attr-default">auto</td>
+      <td class="attr-desc">軸標籤字體大小（px）。設定後不受 root-font 影響。</td>
+    </tr>
+    <tr>
+      <td class="attr-new">font-value</td>
+      <td class="attr-default">auto</td>
+      <td class="attr-desc">數值字體大小（px）。設定後不受 root-font 影響。</td>
+    </tr>
+    <tr>
+      <td class="attr-new">font-tick</td>
+      <td class="attr-default">auto</td>
+      <td class="attr-desc">刻度標籤字體大小（px）。設定後不受 root-font 影響。</td>
+    </tr>
+  </table>
+
+  <pre class="code-example"><span class="cmt">/* ① root-font 一次縮放全部文字 */</span>
+<span class="tag">&lt;bp-radar</span> <span class="new">root-font=<span class="val">"18"</span></span> color-fill=<span class="val">"sky"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/bp-radar&gt;</span>
+
+<span class="cmt">/* ② 個別覆蓋，其餘仍依 root-font 比例 */</span>
+<span class="tag">&lt;bp-radar</span> <span class="new">root-font=<span class="val">"16"</span></span> <span class="new">font-title=<span class="val">"20"</span></span> <span class="new">font-tick=<span class="val">"8"</span></span><span class="tag">&gt;</span>...<span class="tag">&lt;/bp-radar&gt;</span>
+
+<span class="cmt">/* ③ 全域預設（優先序：元件屬性 > BpRadarConfig > 內建）*/</span>
+<span class="kw">window</span>.BpRadarConfig = {
+  <span class="new">'root-font'</span>:  <span class="val">'18'</span>,   <span class="cmt">// 所有元件預設放大</span>
+  <span class="new">'font-value'</span>: <span class="val">'12'</span>,   <span class="cmt">// 數值欄固定 12px</span>
+  <span class="val">'color-fill'</span>: <span class="val">'lavender'</span>,
+};</pre>
+</div>
+
+<!-- ══════════════════════════════════════════
+     bp-radar Web Component
+══════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── 1. 調色盤 ──────────────────────────── */
+  const PALETTE = {
+    shell:    '#c6c7bd',
+    lavender: '#C3A5E5',
+    special:  '#C8DD5A',
+    warning:  '#F08080',
+    salmon:   '#E5C3B3',
+    sky:      '#04b5a3',
+    safe:     '#81E6D9',
+    yellow:   '#D4B440',
+    info:     '#90CDF4',
+    stone:    '#7090A8',
+    pink:     '#FFB3D9',
+    orange:   '#f69653',
+  };
+  const color = (v) => PALETTE[v] || v || PALETTE.shell;
+
+  /* ── 2. 全域預設 ─────────────────────────── */
+  window.BpRadarConfig = Object.assign({
+    'color-label':  'shell',
+    'color-web':    'stone',
+    'color-fill':   'sky',
+    'min-scale':    '0',
+    'max-scale':    '10',
+    'levels':       '5',
+    'show-values':  'true',
+    'stroke-width': '2',
+    'animate':      'true',
+    'web-width':    '0.75', // 格線與軸線粗細
+    /* 字體 */
+    'root-font':    '14',  // 基礎 px
+    'font-title':   '',    // 空 = 依 root-font 比例推算
+    'font-label':   '',
+    'font-value':   '',
+    'font-tick':    '',
+  }, window.BpRadarConfig || {});
+
+  /* ── 3. 字體比例（設計基準 14px）───────── */
+  const ROOT_BASE   = 14;
+  const FONT_RATIOS = {
+    title: 14.5 / ROOT_BASE,  // 1.036
+    label: 13.5 / ROOT_BASE,  // 0.964
+    value: 11.0 / ROOT_BASE,  // 0.786
+    tick:   9.5 / ROOT_BASE,  // 0.679
+  };
+
+  /* ── 4. 動畫 keyframe（只注入一次）──────── */
+  if (!document.getElementById('_bp-radar-kf')) {
+    const s = document.createElement('style');
+    s.id = '_bp-radar-kf';
+    s.textContent = '@keyframes _bp-radar-in{from{opacity:0}to{opacity:1}}';
+    document.head.appendChild(s);
+  }
+
+  /* ── 5. 幾何工具 ─────────────────────────── */
+  const polar  = (cx, cy, r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  const ptsToD = (pts, close = true) =>
+    pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ') + (close ? 'Z' : '');
+  const fmtN   = (v) => Number.isInteger(v) ? v : parseFloat(v.toFixed(1));
+
+  /* ── 6. 主元件 ───────────────────────────── */
+  class BpRadar extends HTMLElement {
+
+    static get observedAttributes() {
+      return [
+        'color-label', 'color-web', 'color-fill',
+        'min-scale', 'max-scale', 'levels',
+        'show-values', 'stroke-width', 'animate', 'title',
+        'root-font', 'font-title', 'font-label', 'font-value', 'font-tick',
+        'web-width',
+      ];
+    }
+
+    connectedCallback()        { this._render(); }
+    attributeChangedCallback() { if (this.isConnected) this._render(); }
+
+    /** 個別屬性 → 全域預設，依序取值 */
+    _cfg(key) { return this.getAttribute(key) ?? window.BpRadarConfig[key]; }
+
+    /**
+     * 解析字體大小
+     *   font-* 有數值 → 直接使用
+     *   否則 → parseFloat(root-font) × ratio
+     */
+    _fs(key) {
+      const v = parseFloat(this._cfg('font-' + key));
+      if (v > 0) return v;
+      const root = parseFloat(this._cfg('root-font')) || ROOT_BASE;
+      return root * FONT_RATIOS[key];
+    }
+
+    _render() {
+      const notes = [...this.querySelectorAll('radar-note')].map((el) => ({
+        label: el.textContent.trim(),
+        value: parseFloat(el.getAttribute('value')) || 0,
+      }));
+      if (notes.length < 3) return;
+
+      /* 設定值 */
+      const cLabel   = color(this._cfg('color-label'));
+      const cWeb     = color(this._cfg('color-web'));
+      const cFill    = color(this._cfg('color-fill'));
+      const minV     = parseFloat(this._cfg('min-scale'));
+      const maxV     = parseFloat(this._cfg('max-scale'));
+      const range    = maxV - minV || 1;
+      const levels   = Math.max(2, Math.min(10, parseInt(this._cfg('levels')) || 5));
+      const showVals = this._cfg('show-values') !== 'false';
+      const sw       = Math.max(0.5, parseFloat(this._cfg('stroke-width')) || 2);
+      const ww       = Math.max(0.1, parseFloat(this._cfg('web-width')) || 0.75);
+      const doAnim   = this._cfg('animate') !== 'false';
+      const title    = this.getAttribute('title') || '';
+
+      /* 字體大小 */
+      const fsTitle = this._fs('title');
+      const fsLabel = this._fs('label');
+      const fsValue = this._fs('value');
+      const fsTick  = this._fs('tick');
+
+      /* 行高隨 root-font 縮放 */
+      const rootPx = parseFloat(this._cfg('root-font')) || ROOT_BASE;
+      const LH     = 18 * (rootPx / ROOT_BASE);
+
+      /* SVG 幾何 */
+      const n  = notes.length;
+      const W  = 500;
+      const TH = title ? 46 : 0;
+      const H  = W + TH;
+      const cx = W / 2;
+      const cy = W / 2 + TH;
+      const R  = 155;
+      const LP = 44;
+      const uid = '_bp' + Math.random().toString(36).slice(2, 7);
+      const ang = (i) => -Math.PI / 2 + (2 * Math.PI * i) / n;
+
+      /* 格線 */
+      let gridSVG = '';
+      for (let lv = 1; lv <= levels; lv++) {
+        const r    = R * lv / levels;
+        const fill = lv % 2 === 0 ? 'rgba(255,255,255,0.025)' : 'none';
+        const pts  = Array.from({ length: n }, (_, i) => polar(cx, cy, r, ang(i)));
+        gridSVG += `<path d="${ptsToD(pts)}" fill="${fill}" stroke="${cWeb}" stroke-width="${ww}" opacity="0.5"/>`;
+      }
+
+      /* 軸線 */
+      const axesSVG = notes.map((_, i) => {
+        const [x, y] = polar(cx, cy, R, ang(i));
+        return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(2)}" y2="${y.toFixed(2)}" stroke="${cWeb}" stroke-width="${ww}" opacity="0.4"/>`;
+      }).join('');
+
+      /* 刻度標籤 */
+      const ticksSVG = Array.from({ length: levels }, (_, li) => {
+        const lv = li + 1;
+        const r  = R * lv / levels;
+        const val = minV + range * lv / levels;
+        const [tx, ty] = polar(cx, cy, r, ang(0));
+        return `<text x="${(tx + 7).toFixed(1)}" y="${ty.toFixed(1)}"
+          fill="${cWeb}" font-size="${fsTick.toFixed(2)}"
+          font-family="'Courier New',monospace"
+          dominant-baseline="middle" opacity="0.55">${fmtN(val)}</text>`;
+      }).join('');
+
+      /* 資料多邊形 */
+      const dataPts = notes.map((note, i) => {
+        const ratio = Math.max(0, Math.min(1, (note.value - minV) / range));
+        return polar(cx, cy, R * ratio, ang(i));
+      });
+      const dataD = ptsToD(dataPts);
+
+      /* 頂點圓點 */
+      const dotsSVG = dataPts.map(([x, y]) =>
+        `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="4.5" fill="${cFill}" stroke="#0c0d0c" stroke-width="2"/>`
+      ).join('');
+
+      /* 軸標籤 + 數值（雙行）*/
+      const labelsSVG = notes.map((note, i) => {
+        const a    = ang(i);
+        const cosA = Math.cos(a), sinA = Math.sin(a);
+        const [lx, ly] = polar(cx, cy, R + LP, a);
+        const anchor   = Math.abs(cosA) < 0.18 ? 'middle' : cosA > 0 ? 'start' : 'end';
+
+        let y1, y2;
+        if      (sinA < -0.45) { y1 = ly - LH * 0.55; y2 = ly + LH * 0.55; }  // 上
+        else if (sinA >  0.45) { y1 = ly + LH * 0.05; y2 = ly + LH * 1.1; }   // 下
+        else                   { y1 = ly - LH * 0.45; y2 = ly + LH * 0.65; }  // 側
+
+        const lbl = `<text x="${lx.toFixed(2)}" y="${y1.toFixed(2)}"
+          text-anchor="${anchor}" dominant-baseline="middle"
+          fill="${cLabel}" font-size="${fsLabel.toFixed(2)}" font-weight="600"
+          font-family="'Noto Sans TC','PingFang TC',sans-serif">${note.label}</text>`;
+
+        const val = showVals
+          ? `<text x="${lx.toFixed(2)}" y="${y2.toFixed(2)}"
+              text-anchor="${anchor}" dominant-baseline="middle"
+              fill="${cFill}" font-size="${fsValue.toFixed(2)}" font-weight="700"
+              font-family="'Courier New',monospace">${note.value}</text>`
+          : '';
+        return lbl + val;
+      }).join('');
+
+      /* 標題 */
+      const titleSVG = title
+        ? `<text x="${cx}" y="26" text-anchor="middle"
+            fill="${cLabel}" font-size="${fsTitle.toFixed(2)}" font-weight="700"
+            font-family="'Noto Sans TC','PingFang TC',sans-serif"
+            letter-spacing="0.1em" opacity="0.9">${title}</text>`
+        : '';
+
+      /* 動畫 */
+      const animStyle = doAnim ? `style="animation:_bp-radar-in 0.55s ease both"` : '';
+
+      /* 組合 SVG */
+      const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+  style="width:100%;display:block;border-radius:14px;background:#0c0d0c;" ${animStyle}>
+  <defs>
+    <radialGradient id="${uid}-g" cx="50%" cy="50%" r="55%">
+      <stop offset="0%"   stop-color="${cFill}" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="${cFill}" stop-opacity="0.04"/>
+    </radialGradient>
+    <filter id="${uid}-f" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+  ${titleSVG}
+  ${gridSVG}
+  ${axesSVG}
+  ${ticksSVG}
+  <path d="${dataD}" fill="none" stroke="${cFill}" stroke-width="${sw + 5}" opacity="0.14" filter="url(#${uid}-f)"/>
+  <path d="${dataD}" fill="url(#${uid}-g)" stroke="${cFill}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>
+  ${dotsSVG}
+  ${labelsSVG}
+</svg>`;
+
+      /* 注入 DOM */
+      this.querySelectorAll('radar-note').forEach((el) => (el.style.display = 'none'));
+      this.querySelector(':scope > svg')?.remove();
+      this.insertAdjacentHTML('afterbegin', svg);
+    }
+  }
+
+  customElements.define('bp-radar', BpRadar);
+  if (!customElements.get('radar-note'))
+    customElements.define('radar-note', class extends HTMLElement {});
+
+})();
+</script>
+
+<!-- ── 即時示範滑桿邏輯 ──────────────────── -->
+<script>
+(function () {
+  const radar = document.getElementById('live-radar');
+
+  const SLIDERS = [
+    { id: 'sl-root',  lbl: 'lbl-root',  attr: 'root-font',  min: 1, zero: null  },
+    { id: 'sl-title', lbl: 'lbl-title', attr: 'font-title', min: 0, zero: 'auto' },
+    { id: 'sl-label', lbl: 'lbl-label', attr: 'font-label', min: 0, zero: 'auto' },
+    { id: 'sl-value', lbl: 'lbl-value', attr: 'font-value', min: 0, zero: 'auto' },
+    { id: 'sl-tick',  lbl: 'lbl-tick',  attr: 'font-tick',  min: 0, zero: 'auto' },
+  ];
+
+  SLIDERS.forEach(({ id, lbl, attr, zero }) => {
+    const input = document.getElementById(id);
+    const badge = document.getElementById(lbl);
+
+    const sync = () => {
+      const v = parseInt(input.value);
+      if (zero !== null && v === 0) {
+        badge.textContent = zero;
+        radar.removeAttribute(attr);
+      } else {
+        badge.textContent = v + 'px';
+        radar.setAttribute(attr, String(v));
+      }
+    };
+
+    input.addEventListener('input', sync);
+    sync();
+  });
+})();
+</script>
+
+</body>
+</html>
