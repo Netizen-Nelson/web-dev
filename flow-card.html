@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flow-card 元件</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0c0d0c;
+  --region:   #333333;
+  --shell:    #c6c7bd;
+  --lavender: #C3A5E5;
+  --special:  #C8DD5A;
+  --warning:  #F08080;
+  --salmon:   #E5C3B3;
+  --sky:      #04b5a3;
+  --safe:     #81E6D9;
+  --yellow:   #D4B440;
+  --info:     #90CDF4;
+  --stone:    #7090A8;
+  --pink:     #FFB3D9;
+  --orange:   #f69653;
+}
+
+body {
+  background: var(--bg);
+  color: var(--shell);
+  font-family: 'Noto Sans TC', 'PingFang TC', system-ui, sans-serif;
+  min-height: 100vh;
+  padding: 48px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+}
+
+.page-header { text-align: center; }
+.page-header h1 {
+  font-size: 1.1rem;
+  letter-spacing: 0.22em;
+  color: var(--special);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+.page-header p {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--stone);
+  font-family: 'Courier New', monospace;
+}
+
+.demo-section {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.demo-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--stone);
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+  padding-left: 2px;
+}
+
+/* flow-card 最大寬度 */
+flow-card { display: block; width: 100%; }
+
+/* ── API 文件 ── */
+.doc-block {
+  width: 100%;
+  max-width: 900px;
+  background: #161816;
+  border: 1px solid #2a2c2a;
+  border-radius: 12px;
+  padding: 28px 32px;
+}
+.doc-block h2 {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--stone);
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2c2a;
+}
+.doc-block h3 {
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  color: var(--yellow);
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+  margin: 24px 0 12px;
+}
+.attr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.attr-table th {
+  text-align: left;
+  color: var(--stone);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  padding: 6px 12px 10px 0;
+  border-bottom: 1px solid #2a2c2a;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+.attr-table td {
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid #1e201e;
+  vertical-align: top;
+  line-height: 1.65;
+}
+.attr-table tr:last-child td { border-bottom: none; }
+.attr-table .a-name { color: var(--sky);     font-family: 'Courier New', monospace; font-size: 0.82rem; }
+.attr-table .a-who  { color: var(--lavender); font-family: 'Courier New', monospace; font-size: 0.82rem; }
+.attr-table .a-def  { color: var(--stone);   font-size: 0.75rem; font-family: 'Courier New', monospace; }
+.attr-table .a-desc { color: var(--shell);   opacity: 0.8; }
+
+.code-block {
+  margin-top: 20px;
+  background: #0c0d0c;
+  border: 1px solid #2a2c2a;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 0.77rem;
+  line-height: 1.85;
+  white-space: pre;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  color: var(--shell);
+  opacity: 0.85;
+}
+.code-block .kw  { color: var(--lavender); }
+.code-block .val { color: var(--special); }
+.code-block .tag { color: var(--sky); }
+.code-block .cmt { color: var(--stone); }
+.code-block .hi  { color: var(--yellow); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>flow-card</h1>
+  <p>圓形圖示卡片 Web Component &nbsp;·&nbsp; 無 Shadow DOM &nbsp;·&nbsp; 最多五欄</p>
+</div>
+
+<!-- ── Demo 1：3 欄，仿截圖 ── -->
+<div class="demo-section">
+  <div class="demo-label">3 欄 · 主題色個別指定</div>
+  <flow-card connector="VS" connector-color="salmon">
+    <flow-content icon="bi-diagram-3-fill" icon-color="info" title="Process">
+      Process is not only a single task; it is a high-level view of interrelated tasks done to produce a product or a service.
+      <br><br>
+      <a href="#" style="display:inline-block;padding:8px 20px;border-radius:6px;background:#90CDF4;color:#0c0d0c;font-weight:700;font-size:0.85rem;text-decoration:none;">What To Do</a>
+    </flow-content>
+    <flow-content icon="bi-journal-richtext" icon-color="warning" title="Policy">
+      A particular set of work instructions or business rules that align with the agency's objectives, goals, and management philosophies.
+      <br><br>
+      <a href="#" style="display:inline-block;padding:8px 20px;border-radius:6px;background:#F08080;color:#fff;font-weight:700;font-size:0.85rem;text-decoration:none;">Why Do It</a>
+    </flow-content>
+    <flow-content icon="bi-clipboard2-check-fill" icon-color="sky" title="Procedure">
+      On the flip side of policy, procedures refer to detailed instructions on how to do tasks or perform a sub-process action.
+      <br><br>
+      <a href="#" style="display:inline-block;padding:8px 20px;border-radius:6px;background:#04b5a3;color:#fff;font-weight:700;font-size:0.85rem;text-decoration:none;">How To Do It</a>
+    </flow-content>
+  </flow-card>
+</div>
+
+<!-- ── Demo 2：4 欄，使用 connector-icon ── -->
+<div class="demo-section">
+  <div class="demo-label">4 欄 · connector-icon · root-font 16</div>
+  <flow-card
+    theme="lavender"
+    connector-icon="bi-arrow-right-circle-fill"
+    connector-color="special"
+    connector-size="42"
+    root-font="16"
+    icon-size="72"
+    card-bg="#1e201e"
+    text-align="left">
+    <flow-content icon="bi-lightbulb-fill" icon-color="yellow" title="發想">
+      不設限地蒐集各種可能性，鼓勵天馬行空，先求量再求質。
+    </flow-content>
+    <flow-content icon="bi-pencil-square" icon-color="lavender" title="設計">
+      將概念轉換為具體的藍圖，定義使用者流程與視覺結構。
+    </flow-content>
+    <flow-content icon="bi-gear-fill" icon-color="stone" title="開發">
+      依據規格實作功能，保持敏捷節奏，快速迭代修正。
+    </flow-content>
+    <flow-content icon="bi-rocket-takeoff-fill" icon-color="sky" title="上線">
+      部署至正式環境，監測數據，持續優化使用者體驗。
+    </flow-content>
+  </flow-card>
+</div>
+
+<!-- ── Demo 3：5 欄，各欄 connector 個別設定 ── -->
+<div class="demo-section">
+  <div class="demo-label">5 欄 · 各欄獨立 connector 文字 · icon-size 64</div>
+  <flow-card
+    theme="special"
+    connector-color="orange"
+    connector-size="34"
+    icon-size="64"
+    icon-font="26"
+    card-radius="8"
+    root-font="13">
+    <flow-content icon="bi-person-fill"       icon-color="info"     title="需求">需求分析與訪談，釐清核心問題與目標用戶。</flow-content>
+    <flow-content icon="bi-map-fill"          icon-color="lavender" title="規劃" connector="01">架構規劃與技術選型，制定里程碑與時程表。</flow-content>
+    <flow-content icon="bi-code-square"       icon-color="special"  title="實作" connector="02">撰寫程式碼，單元測試，持續整合自動化流程。</flow-content>
+    <flow-content icon="bi-bug-fill"          icon-color="warning"  title="測試" connector="03">QA 全面測試，效能調校，安全性稽核。</flow-content>
+    <flow-content icon="bi-check-circle-fill" icon-color="sky"      title="交付" connector="04">正式上線，文件交付，SLA 維運支援。</flow-content>
+  </flow-card>
+</div>
+
+<!-- ── API 文件 ── -->
+<div class="doc-block">
+  <h2>屬性 API</h2>
+
+  <h3>&lt;flow-card&gt; 容器屬性</h3>
+  <table class="attr-table">
+    <tr><th>屬性</th><th>預設值</th><th>說明</th></tr>
+    <tr><td class="a-name">theme</td><td class="a-def">sky</td><td class="a-desc">全域預設圖示圓圈顏色，可被個別 <code>flow-content</code> 的 <code>icon-color</code> 覆蓋</td></tr>
+    <tr><td class="a-name">connector</td><td class="a-def">VS</td><td class="a-desc">連結徽章的文字，可被個別 <code>flow-content</code> 的 <code>connector</code> 屬性覆蓋</td></tr>
+    <tr><td class="a-name">connector-icon</td><td class="a-def">（無）</td><td class="a-desc">連結徽章改用 Bootstrap icon，例如 <code>bi-arrow-right-fill</code>，優先於 connector 文字</td></tr>
+    <tr><td class="a-name">connector-color</td><td class="a-def">salmon</td><td class="a-desc">連結徽章背景色</td></tr>
+    <tr><td class="a-name">connector-size</td><td class="a-def">36</td><td class="a-desc">連結徽章直徑（px）</td></tr>
+    <tr><td class="a-name">connector-overlap</td><td class="a-def">0.1</td><td class="a-desc">徽章壓入兩側卡片的比例（相對於 connector-size）。0.1 = 各壓入 10%；0 = 不重疊；0.5 = 各壓入半徑</td></tr>
+    <tr><td class="a-name">icon-size</td><td class="a-def">80</td><td class="a-desc">頂部圖示圓圈直徑（px）</td></tr>
+    <tr><td class="a-name">icon-font</td><td class="a-def">32</td><td class="a-desc">圓圈內 Bootstrap icon 的字體大小（px）</td></tr>
+    <tr><td class="a-name">icon-shadow</td><td class="a-def">true</td><td class="a-desc">圖示圓圈是否有陰影</td></tr>
+    <tr><td class="a-name">card-bg</td><td class="a-def">region</td><td class="a-desc">卡片背景色（調色盤名稱或 hex）</td></tr>
+    <tr><td class="a-name">card-radius</td><td class="a-def">12</td><td class="a-desc">卡片圓角（px）</td></tr>
+    <tr><td class="a-name">card-padding</td><td class="a-def">20</td><td class="a-desc">卡片內距（px），上方會自動留出圖示圓圈的重疊空間</td></tr>
+    <tr><td class="a-name">text-align</td><td class="a-def">center</td><td class="a-desc">卡片文字對齊方向：<code>center</code> / <code>left</code> / <code>right</code></td></tr>
+    <tr><td class="a-name">root-font</td><td class="a-def">14</td><td class="a-desc">基礎字體（px），未個別設定時標題 ×1.14、內文 ×0.93 自動推算</td></tr>
+    <tr><td class="a-name">font-title</td><td class="a-def">auto</td><td class="a-desc">標題字體大小覆蓋值（px）</td></tr>
+    <tr><td class="a-name">font-body</td><td class="a-def">auto</td><td class="a-desc">內文字體大小覆蓋值（px）</td></tr>
+    <tr><td class="a-name">font-connector</td><td class="a-def">auto</td><td class="a-desc">連結徽章文字大小覆蓋值（px）</td></tr>
+    <tr><td class="a-name">animate</td><td class="a-def">true</td><td class="a-desc">卡片進場動畫（依序淡入）</td></tr>
+  </table>
+
+  <h3>&lt;flow-content&gt; 子元素屬性</h3>
+  <table class="attr-table">
+    <tr><th>屬性</th><th>說明</th></tr>
+    <tr><td class="a-who">icon</td><td class="a-desc">Bootstrap icon class，例如 <code>bi-diagram-3-fill</code></td></tr>
+    <tr><td class="a-who">icon-color</td><td class="a-desc">此卡片圖示圓圈顏色，覆蓋父元素 <code>theme</code></td></tr>
+    <tr><td class="a-who">title</td><td class="a-desc">卡片標題，顏色自動跟隨圖示圓圈顏色</td></tr>
+    <tr><td class="a-who">connector</td><td class="a-desc">此卡片左側連結徽章文字（覆蓋父元素 <code>connector</code>），設為空字串可隱藏文字</td></tr>
+    <tr><td class="a-who">connector-icon</td><td class="a-desc">此卡片左側連結徽章 Bootstrap icon（覆蓋父元素 <code>connector-icon</code>）</td></tr>
+    <tr><td class="a-who">（內容）</td><td class="a-desc">卡片主體內容，支援完整 HTML（按鈕、連結、圖片等）</td></tr>
+  </table>
+
+  <pre class="code-block"><span class="cmt">/* 全域預設值 */</span>
+<span class="kw">window</span>.FlowCardConfig = {
+  <span class="val">'theme'</span>:          <span class="val">'lavender'</span>,
+  <span class="val">'connector'</span>:      <span class="val">'→'</span>,
+  <span class="val">'root-font'</span>:      <span class="val">'16'</span>,
+  <span class="val">'card-bg'</span>:        <span class="val">'#1e201e'</span>,
+};
+
+<span class="cmt">/* 基本 3 欄 */</span>
+<span class="tag">&lt;flow-card</span> theme=<span class="val">"sky"</span> connector=<span class="val">"VS"</span> connector-color=<span class="val">"salmon"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;flow-content</span> icon=<span class="val">"bi-diagram-3-fill"</span> title=<span class="val">"Process"</span><span class="tag">&gt;</span>
+    說明文字，<span class="hi">&lt;b&gt;支援 HTML&lt;/b&gt;</span>，亦可放按鈕。
+  <span class="tag">&lt;/flow-content&gt;</span>
+  <span class="tag">&lt;flow-content</span> icon=<span class="val">"bi-book-fill"</span> icon-color=<span class="val">"warning"</span> title=<span class="val">"Policy"</span><span class="tag">&gt;</span>
+    ...
+  <span class="tag">&lt;/flow-content&gt;</span>
+<span class="tag">&lt;/flow-card&gt;</span>
+
+<span class="cmt">/* 各欄獨立 connector 文字 */</span>
+<span class="tag">&lt;flow-content</span> connector=<span class="val">"01"</span> connector-icon=<span class="val">"bi-arrow-right-fill"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/flow-content&gt;</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     flow-card Web Component
+══════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── 1. 調色盤 ───────────────────────────── */
+  const PALETTE = {
+    shell:    '#c6c7bd',
+    lavender: '#C3A5E5',
+    special:  '#C8DD5A',
+    warning:  '#F08080',
+    salmon:   '#E5C3B3',
+    sky:      '#04b5a3',
+    safe:     '#81E6D9',
+    yellow:   '#D4B440',
+    info:     '#90CDF4',
+    stone:    '#7090A8',
+    pink:     '#FFB3D9',
+    orange:   '#f69653',
+    region:   '#333333',
+    bg:       '#0c0d0c',
+  };
+  const color = (v) => PALETTE[v] || v || null;
+
+  /* ── 2. 全域預設 ─────────────────────────── */
+  window.FlowCardConfig = Object.assign({
+    'theme':           'sky',
+    'connector':       'VS',
+    'connector-icon':  '',
+    'connector-color': 'salmon',
+    'connector-size':    '36',
+    'connector-overlap': '0.1',  /* 壓入卡片側邊的比例，0.1 = connSize 的 10% */
+    'icon-size':       '80',
+    'icon-font':       '32',
+    'icon-shadow':     'true',
+    'card-bg':         'region',
+    'card-radius':     '12',
+    'card-padding':    '20',
+    'text-align':      'center',
+    'root-font':       '14',
+    'font-title':      '',
+    'font-body':       '',
+    'font-connector':  '',
+    'animate':         'true',
+  }, window.FlowCardConfig || {});
+
+  /* ── 3. 字體比例（基準 root=14）──────────── */
+  const ROOT_BASE   = 14;
+  const FONT_RATIOS = { title: 1.14, body: 0.93 };
+
+  /* ── 4. 全域樣式（一次注入）──────────────── */
+  if (!document.getElementById('_fc-styles')) {
+    const s = document.createElement('style');
+    s.id = '_fc-styles';
+    s.textContent = `
+      flow-card  { display: block; }
+      flow-content { display: none !important; }
+
+      .fc-row {
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+      }
+
+      /* 卡片欄 */
+      .fc-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* 頂部圓圈 */
+      .fc-icon {
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 2;
+      }
+
+      /* 卡片本體 */
+      .fc-card {
+        width: 100%;
+        flex: 1;
+      }
+
+      /* 標題 */
+      .fc-title {
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      /* 內文 */
+      .fc-body {
+        color: #c6c7bd;
+        line-height: 1.7;
+      }
+
+      /* 連結徽章外包裹（align-items:stretch 的容器子項）*/
+      .fc-conn-wrap {
+        display: flex;
+        align-items: center;  /* 在 card 區域垂直置中 */
+        flex-shrink: 0;
+      }
+
+      /* 連結徽章圓圈 */
+      .fc-connector {
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #fff;
+        font-weight: 800;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      }
+
+      /* 進場動畫 */
+      @keyframes fc-in {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
+  /* ── 5. 主元件 ───────────────────────────── */
+  class FlowCard extends HTMLElement {
+
+    static get observedAttributes() {
+      return [
+        'theme', 'connector', 'connector-icon', 'connector-color', 'connector-size', 'connector-overlap',
+        'icon-size', 'icon-font', 'icon-shadow',
+        'card-bg', 'card-radius', 'card-padding',
+        'text-align', 'root-font', 'font-title', 'font-body', 'font-connector',
+        'animate',
+      ];
+    }
+
+    connectedCallback()        { this._render(); }
+    attributeChangedCallback() { if (this.isConnected) this._render(); }
+
+    _cfg(k) { return this.getAttribute(k) ?? window.FlowCardConfig[k]; }
+
+    /** 解析字體大小：font-* 有設定直接用，否則依 root-font 比例 */
+    _fs(key) {
+      const v = parseFloat(this._cfg('font-' + key));
+      if (v > 0) return v;
+      return (parseFloat(this._cfg('root-font')) || ROOT_BASE) * (FONT_RATIOS[key] || 1);
+    }
+
+    _render() {
+      const items = [...this.querySelectorAll(':scope > flow-content')];
+      if (!items.length) return;
+      if (items.length > 5) items.length = 5;  // 最多 5 欄
+
+      /* 讀取父元素設定 */
+      const defaultTheme = color(this._cfg('theme')) || PALETTE.sky;
+      const defConnText  = this._cfg('connector') ?? 'VS';
+      const defConnIcon  = this._cfg('connector-icon') || '';
+      const connColor    = color(this._cfg('connector-color')) || PALETTE.salmon;
+      const connSize     = Math.max(20, parseInt(this._cfg('connector-size')) || 36);
+      const overlap      = connSize * (parseFloat(this._cfg('connector-overlap')) || 0.1);
+      const iconSize     = Math.max(32, parseInt(this._cfg('icon-size'))  || 80);
+      const iconFont     = Math.max(12, parseInt(this._cfg('icon-font'))  || 32);
+      const iconShadow   = this._cfg('icon-shadow') !== 'false';
+      const cardBg       = color(this._cfg('card-bg')) || PALETTE.region;
+      const cardRadius   = parseInt(this._cfg('card-radius'))  || 12;
+      const cardPad      = parseInt(this._cfg('card-padding')) || 20;
+      const tAlign       = this._cfg('text-align') || 'center';
+      const doAnim       = this._cfg('animate') !== 'false';
+      const fsTitle      = this._fs('title');
+      const fsBody       = this._fs('body');
+      const fsConn       = (() => {
+        const v = parseFloat(this._cfg('font-connector'));
+        return v > 0 ? v : connSize * 0.36;
+      })();
+
+      const iconHalf  = iconSize / 2;
+      const shadowCSS = iconShadow ? 'box-shadow:0 4px 20px rgba(0,0,0,0.45);' : '';
+
+      /* 先抽取所有資料（innerHTML 不受 display:none 影響，但先取更保險）*/
+      const data = items.map((el) => ({
+        iconClass:    el.getAttribute('icon') || 'bi-circle',
+        iconColor:    color(el.getAttribute('icon-color') || '') || defaultTheme,
+        title:        el.getAttribute('title') || '',
+        connText:     el.getAttribute('connector'),       // null = 使用父元素預設
+        connIcon:     el.getAttribute('connector-icon'),  // null = 使用父元素預設
+        body:         el.innerHTML,
+      }));
+
+      /* 組合 HTML */
+      let html = '';
+      data.forEach((d, i) => {
+
+        /* 連結徽章（顯示在此卡片左側，從第二欄起）*/
+        if (i > 0) {
+          const ct   = d.connText  != null ? d.connText  : defConnText;
+          const ci   = d.connIcon  != null ? d.connIcon  : defConnIcon;
+          const inner = ci
+            ? `<i class="${ci}" style="font-size:${fsConn.toFixed(1)}px;color:#fff;line-height:1"></i>`
+            : `<span style="font-size:${fsConn.toFixed(1)}px;font-family:'Courier New',monospace;font-weight:800;letter-spacing:0">${ct}</span>`;
+
+          html += `
+<div class="fc-conn-wrap" style="padding-top:${iconHalf}px;margin-left:-${overlap.toFixed(2)}px;margin-right:-${overlap.toFixed(2)}px;z-index:3;position:relative">
+  <div class="fc-connector" style="width:${connSize}px;height:${connSize}px;background:${connColor}">
+    ${inner}
+  </div>
+</div>`;
+        }
+
+        /* 卡片欄 */
+        const animStyle = doAnim
+          ? `animation:fc-in 0.45s ease ${(i * 0.1).toFixed(2)}s both`
+          : '';
+
+        const titleHTML = d.title
+          ? `<div class="fc-title" style="color:${d.iconColor};font-size:${fsTitle.toFixed(1)}px;text-align:${tAlign};font-family:inherit">${d.title}</div>`
+          : '';
+
+        html += `
+<div class="fc-item" style="${animStyle}">
+  <div class="fc-icon" style="width:${iconSize}px;height:${iconSize}px;background:${d.iconColor};margin-bottom:-${iconHalf}px;${shadowCSS}">
+    <i class="${d.iconClass}" style="font-size:${iconFont}px;color:#fff;line-height:1"></i>
+  </div>
+  <div class="fc-card" style="background:${cardBg};border-radius:${cardRadius}px;padding:${iconHalf + cardPad}px ${cardPad}px ${cardPad}px">
+    ${titleHTML}
+    <div class="fc-body" style="font-size:${fsBody.toFixed(1)}px;text-align:${tAlign}">${d.body}</div>
+  </div>
+</div>`;
+      });
+
+      /* 更新 DOM */
+      this.querySelector(':scope > .fc-row')?.remove();
+      const row = document.createElement('div');
+      row.className = 'fc-row';
+      row.innerHTML = html;
+      // 插在 flow-content 之前（flow-content 已被 CSS 隱藏）
+      this.prepend(row);
+    }
+  }
+
+  customElements.define('flow-card', FlowCard);
+  if (!customElements.get('flow-content'))
+    customElements.define('flow-content', class extends HTMLElement {});
+
+})();
+</script>
+
+</body>
+</html>
