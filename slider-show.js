@@ -26,7 +26,12 @@ class SliderShow extends HTMLElement {
       'fontcolor-subtitle', 'fontcolor-main', 'fontcolor-footer',
       'extra-note-hover-color', 'extra-note-prefix', 'extra-note-postfix',
       'spoiler-mode', 'spoiler-text', 'spoiler-color',
-      'quiz-require-complete'
+      'quiz-require-complete',
+      'keyboard-nav', 'keyboard-part-nav',
+      'part-transition-duration', 'part-indicator-format',
+      'filmstrip-label-format', 'filmstrip-thumb-size', 'filmstrip-show-holes',
+      'slide-content-padding',
+      'quiz-icon-correct', 'quiz-icon-incorrect'
     ];
   }
 
@@ -614,22 +619,23 @@ class SliderShow extends HTMLElement {
       return;
     }
 
+    const duration = parseInt(this.getAttribute('part-transition-duration')) || 500;
     container.style.transition = 'none';
     
     if (type === 'fade') {
       if (direction === 'out') {
         container.style.opacity = '1';
         setTimeout(() => {
-          container.style.transition = 'opacity 0.5s ease-out';
+          container.style.transition = `opacity ${duration}ms ease-out`;
           container.style.opacity = '0';
-          setTimeout(callback, 500);
+          setTimeout(callback, duration);
         }, 10);
       } else {
         container.style.opacity = '0';
         setTimeout(() => {
-          container.style.transition = 'opacity 0.5s ease-in';
+          container.style.transition = `opacity ${duration}ms ease-in`;
           container.style.opacity = '1';
-          setTimeout(callback, 500);
+          setTimeout(callback, duration);
         }, 10);
       }
     } else if (type === 'slide') {
@@ -638,13 +644,13 @@ class SliderShow extends HTMLElement {
         setTimeout(() => {
           container.classList.remove('slide-out');
           callback();
-        }, 500);
+        }, duration);
       } else {
         container.classList.add('slide-in');
         setTimeout(() => {
           container.classList.remove('slide-in');
           callback();
-        }, 500);
+        }, duration);
       }
     } else {
       callback();
@@ -671,11 +677,19 @@ class SliderShow extends HTMLElement {
           }
           
           // 生成結果 HTML
+          const getIconHTML = (val, fallback) => {
+            if (!val) return fallback;
+            if (/^bi-[\w-]+$/.test(val.trim())) return `<i class="bi ${val.trim()}"></i>`;
+            return val;
+          };
+          const correctIconHTML = getIconHTML(this.getAttribute('quiz-icon-correct'), '✓');
+          const incorrectIconHTML = getIconHTML(this.getAttribute('quiz-icon-incorrect'), '✗');
+
           let resultsHTML = '';
           quizResults.forEach((quizResult, quizIndex) => {
             resultsHTML += '<div class="quiz-result-group">';
             quizResult.forEach((item, index) => {
-              const statusIcon = item.isCorrect ? '✓' : '✗';
+              const statusIcon = item.isCorrect ? correctIconHTML : incorrectIconHTML;
               const statusClass = item.isCorrect ? 'correct' : 'incorrect';
               resultsHTML += `
                 <div class="quiz-result-item ${statusClass}">
@@ -712,23 +726,61 @@ class SliderShow extends HTMLElement {
       });
     }
 
-    // 更新頁碼導航
+    // 更新頁碼導航 — 底片縮圖群組
     const pageNumbersContainer = this.container?.querySelector('.page-numbers-container');
     const showPageNumbers = this.getAttribute('show-page-numbers') === 'true';
     if (pageNumbersContainer && showPageNumbers) {
       pageNumbersContainer.innerHTML = '';
-      const allSlides = Array.from(this.querySelectorAll('[slide]'));
-      const currentGlobalIndex = this.getGlobalSlideIndex();
-      
-      allSlides.forEach((_, index) => {
-        const pageBtn = document.createElement('button');
-        pageBtn.className = `page-number ${index === currentGlobalIndex ? 'active' : ''}`;
-        pageBtn.textContent = index + 1;
-        pageBtn.addEventListener('click', () => {
-          this.jumpToGlobalSlide(index);
+      const allPartKeys = Object.keys(this.partsData).sort((a, b) => parseInt(a) - parseInt(b));
+
+      allPartKeys.forEach(partKey => {
+        const partNum = parseInt(partKey);
+        const slidesInPart = this.partsData[partKey];
+        const isActivePart = partNum === this.currentPart;
+
+        // 計算此 Part 第一張在全局中的起始 index
+        let partStartGlobal = 0;
+        for (const pk of allPartKeys) {
+          if (parseInt(pk) < partNum) partStartGlobal += this.partsData[pk].length;
+        }
+
+        // 解析自訂標籤 "導論,實作,總結"
+        const labelList = (this.getAttribute('filmstrip-label-format') || '')
+          .split(',').map(s => s.trim()).filter(Boolean);
+        const partLabel_text = labelList[partNum - 1] || `P${partNum}`;
+
+        // Part 群組外框
+        const partGroup = document.createElement('div');
+        partGroup.className = `part-group${isActivePart ? ' active-part' : ''}`;
+
+        // 群組標籤
+        const partLabel = document.createElement('div');
+        partLabel.className = 'part-group-label';
+        partLabel.textContent = partLabel_text;
+        partGroup.appendChild(partLabel);
+
+        // 縮圖橫排
+        const slidesRow = document.createElement('div');
+        slidesRow.className = 'part-group-slides';
+
+        slidesInPart.forEach((_, slideIndex) => {
+          const isActiveSlide = isActivePart && slideIndex === this.currentSlideInPart;
+          const globalIndex = partStartGlobal + slideIndex;
+
+          const thumb = document.createElement('button');
+          thumb.className = `film-strip-thumb${isActiveSlide ? ' active' : ''}`;
+          thumb.textContent = slideIndex + 1;
+          thumb.title = `Part ${partNum}・第 ${slideIndex + 1} 張`;
+          thumb.addEventListener('click', () => {
+            this.jumpToGlobalSlide(globalIndex);
+          });
+          slidesRow.appendChild(thumb);
         });
-        pageNumbersContainer.appendChild(pageBtn);
+
+        partGroup.appendChild(slidesRow);
+        pageNumbersContainer.appendChild(partGroup);
       });
+
       pageNumbersContainer.style.display = 'flex';
     } else if (pageNumbersContainer) {
       pageNumbersContainer.style.display = 'none';
@@ -737,7 +789,12 @@ class SliderShow extends HTMLElement {
     const partIndicator = this.container?.querySelector('.part-indicator');
     const showPartIndicator = this.getAttribute('show-part-indicator') !== 'false';
     if (partIndicator && showPartIndicator) {
-      partIndicator.textContent = `Part ${this.currentPart} / ${this.getTotalParts()}`;
+      const indicatorFormat = this.getAttribute('part-indicator-format') || 'Part {part} / {total}';
+      partIndicator.textContent = indicatorFormat
+        .replace('{part}', this.currentPart)
+        .replace('{total}', this.getTotalParts())
+        .replace('{slide}', this.currentSlideInPart + 1)
+        .replace('{part-slides}', slides.length);
       partIndicator.style.display = 'block';
     } else if (partIndicator) {
       partIndicator.style.display = 'none';
@@ -855,8 +912,17 @@ class SliderShow extends HTMLElement {
     }
 
     document.addEventListener('keydown', (e) => {
+      const keyboardNav = this.getAttribute('keyboard-nav') !== 'false';
+      if (!keyboardNav) return;
+
       if (e.key === 'ArrowLeft') this.prevSlide();
       if (e.key === 'ArrowRight') this.nextSlide();
+
+      const keyboardPartNav = this.getAttribute('keyboard-part-nav') === 'true';
+      if (keyboardPartNav) {
+        if (e.key === 'PageUp')   { e.preventDefault(); this.prevPart(); }
+        if (e.key === 'PageDown') { e.preventDefault(); this.nextPart(); }
+      }
     });
   }
 
@@ -893,6 +959,25 @@ class SliderShow extends HTMLElement {
     const fontColorFooter = this.parseColor(this.getAttribute('fontcolor-footer')) || this.parseColor('sky');
     
     const extraNoteHoverColor = this.parseColor(this.getAttribute('extra-note-hover-color')) || this.parseColor('special');
+
+    // 底片縮圖尺寸
+    const thumbSize = this.getAttribute('filmstrip-thumb-size') || '24x30';
+    const thumbParts = thumbSize.toLowerCase().split('x');
+    const thumbW = parseInt(thumbParts[0]) || 24;
+    const thumbH = parseInt(thumbParts[1]) || 30;
+    const showHoles = this.getAttribute('filmstrip-show-holes') !== 'false';
+
+    // 投影片內容 padding
+    const slideContentPadding = this.getAttribute('slide-content-padding') || '30';
+
+    // Part 切換動畫時間
+    const partTransDuration = parseInt(this.getAttribute('part-transition-duration')) || 500;
+
+    this.style.setProperty('--filmstrip-thumb-w', `${thumbW}px`);
+    this.style.setProperty('--filmstrip-thumb-h', `${thumbH}px`);
+    this.style.setProperty('--filmstrip-holes-display', showHoles ? 'block' : 'none');
+    this.style.setProperty('--slide-content-padding', `${slideContentPadding}px`);
+    this.style.setProperty('--part-transition-duration', `${partTransDuration}ms`);
 
     // 使用 CSS 變數設定此元件的顏色
     this.style.setProperty('--theme-color', themeColor);
@@ -968,7 +1053,7 @@ class SliderShow extends HTMLElement {
           display: flex;
           flex-direction: column;
           gap: 20px;
-          padding: 30px;
+          padding: var(--slide-content-padding, 30px);
           background: #333333;
           border-radius: 8px;
           height: 100%;
@@ -1188,47 +1273,119 @@ class SliderShow extends HTMLElement {
           font-weight: 600;
         }
         
-        /* 頁碼導航樣式 */
+        /* 頁碼導航 — 底片縮圖群組樣式 */
         slider-show .page-numbers-container {
           display: none;
           flex-wrap: wrap;
           justify-content: center;
-          align-items: center;
-          gap: 4px;
-          margin-top: 8px;
+          align-items: flex-end;
+          gap: 8px;
+          margin-top: 10px;
           margin-bottom: 4px;
           padding: 0 10px;
         }
-        
-        slider-show .page-number {
-          width: 18px;
-          height: 18px;
-          border: none;
-          background: rgba(51, 51, 51, 0.6);
-          color: rgba(198, 199, 189, 0.7);
+
+        /* Part 群組外框 */
+        slider-show .part-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 5px;
+          padding: 6px 8px 5px;
+          border: 1.5px solid rgba(198, 199, 189, 0.12);
+          border-radius: 7px;
+          background: rgba(12, 13, 12, 0.55);
+          transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+        }
+
+        slider-show .part-group.active-part {
+          border-color: var(--theme-color, #c6c7bd);
+          background: rgba(51, 51, 51, 0.4);
+          box-shadow: 0 0 8px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(198,199,189,0.06);
+        }
+
+        /* Part 群組標籤 */
+        slider-show .part-group-label {
+          font-size: 0.58rem;
+          font-weight: 700;
+          color: rgba(198, 199, 189, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          user-select: none;
+          line-height: 1;
+          transition: color 0.25s;
+        }
+
+        slider-show .part-group.active-part .part-group-label {
+          color: var(--theme-color, #c6c7bd);
+        }
+
+        /* 縮圖橫排 */
+        slider-show .part-group-slides {
+          display: flex;
+          gap: 3px;
+          align-items: center;
+        }
+
+        /* 單張縮圖按鈕（底片格風格） */
+        slider-show .film-strip-thumb {
+          position: relative;
+          width: var(--filmstrip-thumb-w, 24px);
+          height: var(--filmstrip-thumb-h, 30px);
+          border: 1px solid rgba(198, 199, 189, 0.1);
+          background: rgba(51, 51, 51, 0.65);
+          color: rgba(198, 199, 189, 0.45);
           border-radius: 3px;
-          font-size: 0.65rem;
-          font-weight: 500;
+          font-size: 0.58rem;
+          font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.18s ease;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 0;
           user-select: none;
+          overflow: hidden;
         }
-        
-        slider-show .page-number:hover {
-          background: rgba(51, 51, 51, 0.9);
+
+        /* 底片打孔裝飾 */
+        slider-show .film-strip-thumb::before,
+        slider-show .film-strip-thumb::after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 7px;
+          height: 3px;
+          background: rgba(12, 13, 12, 0.75);
+          border-radius: 1px;
+          pointer-events: none;
+          display: var(--filmstrip-holes-display, block);
+        }
+        slider-show .film-strip-thumb::before { top: 2px; }
+        slider-show .film-strip-thumb::after  { bottom: 2px; }
+
+        slider-show .film-strip-thumb:hover {
+          background: rgba(80, 80, 80, 0.9);
           color: #c6c7bd;
-          transform: scale(1.15);
+          border-color: rgba(198, 199, 189, 0.3);
+          transform: scaleY(1.08);
+          z-index: 1;
         }
-        
-        slider-show .page-number.active {
+
+        slider-show .film-strip-thumb.active {
           background: var(--theme-color, #c6c7bd);
           color: #0c0d0c;
-          font-weight: 600;
-          transform: scale(1.1);
+          border-color: transparent;
+          font-weight: 700;
+          transform: scaleY(1.12);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+          z-index: 2;
+        }
+
+        slider-show .film-strip-thumb.active::before,
+        slider-show .film-strip-thumb.active::after {
+          background: rgba(12, 13, 12, 0.45);
         }
         
         slider-show .controls { 
@@ -1336,10 +1493,10 @@ class SliderShow extends HTMLElement {
           to { transform: translateX(0); opacity: 1; } 
         }
         slider-show .slide-out { 
-          animation: slideOutLeft 0.5s ease-out forwards; 
+          animation: slideOutLeft var(--part-transition-duration, 500ms) ease-out forwards; 
         }
         slider-show .slide-in { 
-          animation: slideInRight 0.5s ease-out forwards; 
+          animation: slideInRight var(--part-transition-duration, 500ms) ease-out forwards; 
         }
       `;
       document.head.appendChild(style);
