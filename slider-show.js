@@ -57,6 +57,9 @@ class SliderShow extends HTMLElement {
       } else {
         this.render();
         this.setupEventListeners();
+        // render() 重建 DOM 後必須重新分析並還原顯示狀態
+        this.analyzeParts();
+        this.updateDisplay();
       }
     }
   }
@@ -69,14 +72,14 @@ class SliderShow extends HTMLElement {
       'fill': '#333333',
       'shell': '#c6c7bd',
       'lavender': '#C3A5E5',
-      'special': '#b9c971',
-      'warning': '#d98079',
+      'special': '#C8DD5A',
+      'warning': '#F08080',
       'salmon': '#E5C3B3',
-      'attention': '#E5E5A6',
       'sky': '#04b5a3',
-      'safe': '#73d192',
-      'brown': '#d9c5b2',
-      'info': '#6495e3',
+      'safe': '#81E6D9',
+      'yellow': '#D4B440',
+      'info': '#90CDF4',
+      'stone': '#7090A8',
       'pink': '#FFB3D9',
       'orange': '#f69653'
     };
@@ -486,7 +489,6 @@ class SliderShow extends HTMLElement {
         this.currentPart = partNum;
         this.currentSlideInPart = globalIndex - currentIndex;
         this.updateDisplay();
-        this.updatePartButtons();
         return;
       }
       
@@ -708,6 +710,9 @@ class SliderShow extends HTMLElement {
       }
     }
     
+    // 先把所有 Part 的所有投影片都隱藏，避免跨 Part 切換時舊投影片殘留
+    Array.from(this.querySelectorAll('[slide]')).forEach(s => { s.style.display = 'none'; });
+
     slides.forEach((slide, index) => {
       slide.style.display = index === this.currentSlideInPart ? 'block' : 'none';
     });
@@ -1109,9 +1114,9 @@ class SliderShow extends HTMLElement {
         }
         
         .extra-note-trigger:hover {
-          text-decoration-color: var(--extra-note-hover-color, #b9c971);
+          text-decoration-color: var(--extra-note-hover-color, #C8DD5A);
           text-decoration-thickness: 3px;
-          color: var(--extra-note-hover-color, #b9c971);
+          color: var(--extra-note-hover-color, #C8DD5A);
         }
         
         .extra-note-content {
@@ -1130,7 +1135,7 @@ class SliderShow extends HTMLElement {
         }
         
         .extra-note-content strong {
-          color: #b9c971;
+          color: #C8DD5A;
         }
         
         .spoiler-mask {
@@ -1250,11 +1255,11 @@ class SliderShow extends HTMLElement {
         }
         
         .quiz-result-item.correct .quiz-result-icon {
-          color: #73d192;
+          color: #81E6D9;
         }
         
         .quiz-result-item.incorrect .quiz-result-icon {
-          color: #d98079;
+          color: #F08080;
         }
         
         .quiz-result-label {
@@ -1269,7 +1274,7 @@ class SliderShow extends HTMLElement {
         
         .quiz-result-user strong,
         .quiz-result-correct strong {
-          color: #b9c971;
+          color: #C8DD5A;
           font-weight: 600;
         }
         
@@ -1472,11 +1477,11 @@ class SliderShow extends HTMLElement {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); 
         }
         slider-show .finish-btn { 
-          background: var(--finish-btn-bg, #73d192); 
+          background: var(--finish-btn-bg, #81E6D9); 
           color: var(--finish-btn-color, #333333); 
         }
         slider-show .restart-btn { 
-          background: var(--restart-btn-bg, #6495e3); 
+          background: var(--restart-btn-bg, #90CDF4); 
           color: var(--restart-btn-color, #e0e0e0); 
         }
         
