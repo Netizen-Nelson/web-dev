@@ -1061,8 +1061,11 @@
   if (!customElements.get('flow-content'))
     customElements.define('flow-content', class extends HTMLElement {});
 
-  /* StepTutor：透過 data-step-tutor 屬性自動初始化 */
-  document.addEventListener('DOMContentLoaded', function () {
+  /* ── 暴露到全域，讓外部可直接 new StepTutor() ── */
+  window.StepTutor = StepTutor;
+
+  /* StepTutor auto-init（相容 DOMContentLoaded 已觸發的情況）*/
+  function _stepTutorAutoInit() {
     document.querySelectorAll('[data-step-tutor]').forEach(container => {
       const d = container.dataset;
       const o = {};
@@ -1169,6 +1172,13 @@
 
       container.stepTutorInstance = new StepTutor(container.id, o);
     });
-  });
+  }
+
+  /* 若 DOM 已解析完畢則立即執行，否則等事件 */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _stepTutorAutoInit);
+  } else {
+    _stepTutorAutoInit();
+  }
 
 })();
