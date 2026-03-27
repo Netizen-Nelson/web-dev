@@ -1,54 +1,29 @@
-// ========== Grid Table Web Component ==========
-// 使用方式：
-// <grid-table theme="safe">
-//   <grid-table-group title="基本設定">
-//     <grid-table-item type="text" label="名稱" name="username"></grid-table-item>
-//   </grid-table-group>
-// </grid-table>
-
-// ========== 預設常數配置 ==========
 const GRID_TABLE_DEFAULTS = {
-    // 尺寸常數
     VERTICAL_LABEL_WIDTH: 40,
     DEFAULT_RATIO: [3, 7],
     GROUP_HEADER_HEIGHT: 32,
     TEXTAREA_ROWS_DEFAULT: 9,
-    
-    // 間距常數
     CELL_PADDING_V: 8,
     CELL_PADDING_H: 12,
     GROUP_MARGIN_BOTTOM: 16,
     GROUP_SPACING: 12,
-    
-    // 邊框常數
     BORDER_WIDTH: 1,
     BORDER_STYLE: 'solid',
     INPUT_BORDER_WIDTH: 1,
     INPUT_BORDER_STYLE: 'solid',
-    
-    // 字體常數
     LABEL_FONT_SIZE: 0.875,
     INPUT_FONT_SIZE: 0.875,
     GROUP_TITLE_FONT_SIZE: 1,
     VERTICAL_LABEL_FONT_SIZE: 0.875,
-    
-    // 圓角常數
     INPUT_BORDER_RADIUS: 4,
     GROUP_BORDER_RADIUS: 6,
-    
-    // 折疊圖示常數
     TOGGLE_ICON_SIZE: 8,
     TOGGLE_ICON_MARGIN: 8,
-    
-    // 預設主題
     THEMES: {
         default: {
-            // 基礎色
             bgBase: '#0c0d0c',
             bgArea: '#333333',
             textMain: '#c6c7bd',
-            
-            // 功能色
             lavender: '#C3A5E5',
             special: '#b9c971',
             warning: '#d98079',
@@ -60,8 +35,6 @@ const GRID_TABLE_DEFAULTS = {
             info: '#6495e3',
             pink: '#FFB3D9',
             orange: '#f69653',
-            
-            // 衍生色
             borderColor: '#555555',
             borderColorLight: '#444444',
             groupHeaderBg: '#2a2a2a',
@@ -69,8 +42,6 @@ const GRID_TABLE_DEFAULTS = {
             inputBorder: '#555555',
             inputFocus: '#b9c971'
         },
-        
-        // 明亮主題：經典白底
         'classic-daytime': {
             bgBase: '#f5f5f5',
             bgArea: '#ffffff',
@@ -87,7 +58,6 @@ const GRID_TABLE_DEFAULTS = {
             info: '#4a7bc8',
             pink: '#e889c2',
             orange: '#e67a3a',
-            
             borderColor: '#d0d0d0',
             borderColorLight: '#e5e5e5',
             groupHeaderBg: '#f8f8f8',
@@ -95,8 +65,6 @@ const GRID_TABLE_DEFAULTS = {
             inputBorder: '#c0c0c0',
             inputFocus: '#7a9d3f'
         },
-        
-        // 明亮主題：淡紫色調
         'lavender-daytime': {
             bgBase: '#f8f6fb',
             bgArea: '#ffffff',
@@ -113,7 +81,6 @@ const GRID_TABLE_DEFAULTS = {
             info: '#6b8bd9',
             pink: '#d96bb8',
             orange: '#d9996b',
-            
             borderColor: '#d8d0e3',
             borderColorLight: '#ebe6f2',
             groupHeaderBg: '#f3eff8',
@@ -121,13 +88,10 @@ const GRID_TABLE_DEFAULTS = {
             inputBorder: '#c8bdd9',
             inputFocus: '#9b6fd9'
         },
-        
-        // 明亮主題：天空藍調
         'sky-daytime': {
             bgBase: '#f0f7fb',
             bgArea: '#ffffff',
             textMain: '#2d4052',
-            
             lavender: '#8ba3d9',
             special: '#5b9abd',
             warning: '#d97a6b',
@@ -139,7 +103,6 @@ const GRID_TABLE_DEFAULTS = {
             info: '#4a8bd9',
             pink: '#d96bb8',
             orange: '#d9996b',
-            
             borderColor: '#c5dce8',
             borderColorLight: '#e0eef5',
             groupHeaderBg: '#e8f4f9',
@@ -147,13 +110,10 @@ const GRID_TABLE_DEFAULTS = {
             inputBorder: '#b5d4e5',
             inputFocus: '#3d9cbd'
         },
-        
-        // 明亮主題：自然綠色調
         'nature-daytime': {
             bgBase: '#f5faf6',
             bgArea: '#ffffff',
             textMain: '#2d4033',
-            
             lavender: '#9ba8d9',
             special: '#6b9d5b',
             warning: '#d97a6b',
@@ -165,7 +125,6 @@ const GRID_TABLE_DEFAULTS = {
             info: '#5b8bd9',
             pink: '#d96bb8',
             orange: '#d9996b',
-            
             borderColor: '#cfe5d3',
             borderColorLight: '#e5f2e8',
             groupHeaderBg: '#edf7ef',
@@ -173,13 +132,10 @@ const GRID_TABLE_DEFAULTS = {
             inputBorder: '#bfd9c5',
             inputFocus: '#6b9d5b'
         },
-        
-        // 明亮主題：暖色調
         'warm-daytime': {
             bgBase: '#faf7f3',
             bgArea: '#ffffff',
             textMain: '#3d362d',
-            
             lavender: '#b89dd9',
             special: '#b89d5b',
             warning: '#d9756b',
@@ -191,7 +147,6 @@ const GRID_TABLE_DEFAULTS = {
             info: '#6b9bd9',
             pink: '#d98bb8',
             orange: '#d9996b',
-            
             borderColor: '#e5ddd0',
             borderColorLight: '#f0ebe3',
             groupHeaderBg: '#f5f0e8',
@@ -199,13 +154,10 @@ const GRID_TABLE_DEFAULTS = {
             inputBorder: '#d9ccb5',
             inputFocus: '#b89d5b'
         },
-        
-        // 明亮主題：柔和粉色
         'soft-pink-daytime': {
             bgBase: '#fdf8fa',
             bgArea: '#ffffff',
             textMain: '#3d2d35',
-            
             lavender: '#d99bc8',
             special: '#d9a38f',
             warning: '#d96b6b',
@@ -217,7 +169,6 @@ const GRID_TABLE_DEFAULTS = {
             info: '#9bb8d9',
             pink: '#d98bb8',
             orange: '#d9a68f',
-            
             borderColor: '#f0d9e3',
             borderColorLight: '#f7ebf0',
             groupHeaderBg: '#faf0f5',
@@ -228,10 +179,8 @@ const GRID_TABLE_DEFAULTS = {
     }
 };
 
-// 全局配置
 let GRID_TABLE_GLOBAL_CONFIG = JSON.parse(JSON.stringify(GRID_TABLE_DEFAULTS));
 
-// ========== 基礎樣式注入 ==========
 const GRID_TABLE_BASE_STYLES = `
     grid-table {
         display: block;
@@ -418,7 +367,6 @@ const GRID_TABLE_BASE_STYLES = `
     }
 `;
 
-// 注入基礎樣式
 if (!document.getElementById('grid-table-base-styles')) {
     const styleElement = document.createElement('style');
     styleElement.id = 'grid-table-base-styles';
@@ -426,7 +374,6 @@ if (!document.getElementById('grid-table-base-styles')) {
     document.head.appendChild(styleElement);
 }
 
-// ========== Grid Table Item 元件 ==========
 class GridTableItem extends HTMLElement {
     constructor() {
         super();
@@ -452,7 +399,6 @@ class GridTableItem extends HTMLElement {
     }
 }
 
-// ========== Grid Table Group 元件 ==========
 class GridTableGroup extends HTMLElement {
     constructor() {
         super();
@@ -475,7 +421,6 @@ class GridTableGroup extends HTMLElement {
     }
 }
 
-// ========== Grid Table 主元件 ==========
 class GridTable extends HTMLElement {
     constructor() {
         super();
@@ -497,28 +442,23 @@ class GridTable extends HTMLElement {
             return;
         }
 
-        // 讀取群組資料
         const groups = Array.from(this.querySelectorAll(':scope > grid-table-group'));
         this.data = groups.map(group => group.getConfig());
-        
-        // 讀取配置
+
         this.config = this.getConfigFromAttributes();
-        
-        // 渲染
+
         this.render();
         this.classList.add('grid-table-initialized');
     }
 
     getConfigFromAttributes() {
         let config = JSON.parse(JSON.stringify(GRID_TABLE_GLOBAL_CONFIG));
-        
-        // 讀取 theme
+
         const themeName = this.getAttribute('theme');
         if (themeName) {
             if (config.THEMES[themeName]) {
                 config.THEME = config.THEMES[themeName];
             } else {
-                // 嘗試使用主題中的顏色
                 const themeColor = config.THEMES.default[themeName];
                 if (themeColor) {
                     config.THEME = { ...config.THEMES.default, inputFocus: themeColor };
@@ -527,16 +467,14 @@ class GridTable extends HTMLElement {
         } else {
             config.THEME = config.THEMES.default;
         }
-        
-        // 讀取比例設定
+
         if (this.hasAttribute('ratio')) {
             const ratio = this.getAttribute('ratio').split(':').map(Number);
             if (ratio.length === 2) {
                 config.DEFAULT_RATIO = ratio;
             }
         }
-        
-        // 讀取尺寸設定
+
         if (this.hasAttribute('vertical-label-width')) {
             config.VERTICAL_LABEL_WIDTH = parseInt(this.getAttribute('vertical-label-width'));
         }
@@ -960,8 +898,6 @@ class GridTable extends HTMLElement {
         this.appendChild(this.styleElement);
     }
 
-    // ========== API 方法 ==========
-    
     getValue(fieldName) {
         const field = this.fields.get(fieldName);
         return field ? field.value : null;
@@ -1048,7 +984,6 @@ class GridTable extends HTMLElement {
         this.groups.clear();
     }
 
-    // ========== 靜態方法：設定全局配置 ==========
     static setGlobalConfig(config) {
         GRID_TABLE_GLOBAL_CONFIG = JSON.parse(JSON.stringify(GRID_TABLE_DEFAULTS));
         
