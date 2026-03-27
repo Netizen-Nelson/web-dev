@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>元件 bp-graph 產生器</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-styles.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0d0c; --area:#1a1b1a; --area2:#242524; --border:#2e2f2e;
+  --shell:#c6c7bd; --dim:#5a5b58; --sky:#04b5a3; --lavender:#C3A5E5;
+  --special:#C8DD5A; --warning:#F08080; --orange:#f69653;
+  --fs:.875rem; --fs-sm:.78rem; --fs-xs:.72rem;
+  --rad:6px; --rad-sm:4px;
+}
+html,body{height:100%;background:var(--bg);color:var(--shell);font-family:'Segoe UI','Noto Sans TC',sans-serif;font-size:var(--fs)}
+/* ── Layout ── */
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#header{
+  display:flex;align-items:center;gap:14px;
+  padding:10px 16px;background:#111211;border-bottom:1px solid var(--border);
+  flex-shrink:0;z-index:100;
+}
+#header h1{font-size:.95rem;color:var(--lavender);white-space:nowrap;font-weight:700;letter-spacing:.02em}
+/* ── Search ── */
+#search-wrap{flex:1;max-width:480px;position:relative}
+#search-input{
+  width:100%;padding:7px 12px 7px 34px;
+  background:var(--area2);border:1px solid var(--border);border-radius:var(--rad);
+  color:var(--shell);font-size:var(--fs);font-family:inherit;outline:none;
+  transition:border-color .15s;
+}
+#search-input:focus{border-color:var(--sky)}
+#search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:.85rem;pointer-events:none}
+#search-clear{
+  display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--dim);cursor:pointer;font-size:.8rem;padding:2px 4px;
+}
+#search-clear:hover{color:var(--shell)}
+#search-drop{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--area2);border:1px solid var(--border);border-radius:var(--rad);
+  box-shadow:0 12px 32px rgba(0,0,0,.6);z-index:999;max-height:360px;overflow-y:auto;
+}
+.sr-comp-header{padding:5px 12px 3px;font-size:var(--fs-xs);color:var(--dim);text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--border)}
+.sr-comp-header:first-child{border-top:none}
+.sr-item{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;
+  transition:background .12s;border-left:2px solid transparent;
+}
+.sr-item:hover,.sr-item.focused{background:rgba(4,181,163,.1);border-left-color:var(--sky)}
+.sr-item-comp{font-size:var(--fs-xs);color:var(--sky);background:rgba(4,181,163,.12);
+  padding:1px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.sr-item-group{font-size:var(--fs-xs);color:var(--dim);flex-shrink:0}
+.sr-item-label{flex:1;min-width:0}
+.sr-item-attr{font-size:var(--fs-xs);color:var(--dim);font-family:monospace;margin-left:auto;flex-shrink:0}
+.sr-no-result{padding:14px 16px;color:var(--dim);font-size:var(--fs-sm);text-align:center}
+mark{background:rgba(200,221,90,.28);color:var(--special);border-radius:2px;padding:0 1px}
+/* ── Tabs ── */
+#tabs{
+  display:flex;gap:2px;padding:8px 16px 0;
+  background:#111211;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.tab-btn{
+  padding:7px 16px;background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--dim);font-size:var(--fs);font-family:inherit;cursor:pointer;border-radius:4px 4px 0 0;
+  transition:color .15s,border-color .15s,background .15s;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--shell);background:rgba(255,255,255,.04)}
+.tab-btn.active{color:var(--sky);border-bottom-color:var(--sky)}
+.tab-badge{
+  display:inline-block;font-size:.65rem;padding:1px 5px;border-radius:3px;
+  background:rgba(4,181,163,.18);color:var(--sky);margin-left:5px;vertical-align:middle;
+}
+/* ── Main split ── */
+#main{display:flex;flex:1;overflow:hidden}
+/* ── Form panel ── */
+#form-panel{
+  width:360px;min-width:280px;flex-shrink:0;overflow-y:auto;
+  border-right:1px solid var(--border);background:var(--area);
+  scrollbar-width:thin;scrollbar-color:#333 transparent;
+}
+/* ── Group ── */
+.form-group{border-bottom:1px solid var(--border)}
+.group-header{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  cursor:pointer;user-select:none;
+  background:rgba(0,0,0,.2);
+  transition:background .12s;
+}
+.group-header:hover{background:rgba(255,255,255,.04)}
+.group-chevron{color:var(--dim);font-size:.7rem;transition:transform .2s;flex-shrink:0}
+.group-header.open .group-chevron{transform:rotate(90deg)}
+.group-label{font-size:var(--fs-sm);color:var(--shell);font-weight:600;flex:1}
+.group-count{font-size:var(--fs-xs);color:var(--dim);background:var(--area2);
+  padding:1px 6px;border-radius:10px}
+.group-body{display:none;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.group-body.collapsed{display:none!important}
+/* ── Field ── */
+.field{display:flex;flex-direction:column;gap:3px;padding:6px;border-radius:var(--rad);
+  transition:background .3s;border:1px solid transparent}
+.field.highlighted{animation:fhl 1.6s ease}
+@keyframes fhl{0%{background:rgba(4,181,163,.22);border-color:rgba(4,181,163,.5)}100%{background:transparent;border-color:transparent}}
+.field-row{display:flex;align-items:center;gap:6px}
+.field-label{font-size:var(--fs-sm);color:var(--shell);flex:1;min-width:0}
+.field-attr{font-size:var(--fs-xs);color:var(--dim);font-family:monospace}
+.field-desc{font-size:var(--fs-xs);color:var(--dim);line-height:1.5;margin-top:1px}
+/* ── Inputs ── */
+input[type=text],input[type=number],select,textarea{
+  width:100%;padding:5px 9px;
+  background:var(--area2);border:1px solid var(--border);border-radius:var(--rad-sm);
+  color:var(--shell);font-size:var(--fs-sm);font-family:inherit;outline:none;
+  transition:border-color .15s;
+}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--sky)}
+select{cursor:pointer;appearance:auto}
+select option{background:#1e1f1e}
+textarea{resize:vertical;min-height:60px;line-height:1.5}
+/* toggle */
+.toggle-wrap{display:flex;align-items:center;gap:8px}
+.toggle{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:#3a3b3a;border-radius:20px;cursor:pointer;
+  transition:background .2s;
+}
+.toggle-slider::before{
+  content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;
+  background:var(--dim);border-radius:50%;transition:transform .2s,background .2s;
+}
+.toggle input:checked+.toggle-slider{background:rgba(4,181,163,.3)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(16px);background:var(--sky)}
+/* color picker */
+.color-field{display:flex;gap:5px;align-items:center}
+.color-swatch{
+  width:24px;height:24px;border-radius:4px;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.15);cursor:pointer;
+}
+.color-input-wrap{flex:1;position:relative}
+.color-drop{
+  display:none;position:absolute;top:calc(100%+4px);left:0;right:0;
+  background:var(--area2);border:1px solid var(--border);border-radius:var(--rad);
+  box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:200;padding:8px;
+  display:none;
+}
+.color-drop.open{display:block}
+.palette-grid{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.palette-chip{
+  width:22px;height:22px;border-radius:4px;cursor:pointer;
+  border:2px solid transparent;transition:transform .1s,border-color .1s;
+  flex-shrink:0;
+}
+.palette-chip:hover{transform:scale(1.15)}
+.palette-chip.selected{border-color:#fff}
+/* ── Children section ── */
+.children-section{padding:10px 14px;border-top:1px solid var(--border)}
+.children-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+}
+.children-title{font-size:var(--fs-sm);font-weight:700;color:var(--shell)}
+.btn-add{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  background:rgba(4,181,163,.12);border:1px solid rgba(4,181,163,.3);
+  border-radius:var(--rad-sm);color:var(--sky);font-size:var(--fs-xs);
+  cursor:pointer;transition:background .15s;
+}
+.btn-add:hover{background:rgba(4,181,163,.22)}
+.btn-add:disabled{opacity:.4;cursor:not-allowed}
+/* radar note list */
+.note-list{display:flex;flex-direction:column;gap:5px}
+.note-item{
+  display:flex;align-items:center;gap:6px;padding:6px 8px;
+  background:var(--area2);border:1px solid var(--border);border-radius:var(--rad-sm);
+}
+.note-item input{flex:1;min-width:0}
+.note-val{width:60px!important;text-align:right}
+.note-del{
+  background:none;border:none;color:var(--dim);cursor:pointer;font-size:.85rem;padding:2px;
+  border-radius:3px;flex-shrink:0;transition:color .12s;
+}
+.note-del:hover{color:var(--warning)}
+.note-drag{color:var(--dim);font-size:.8rem;cursor:grab;padding:2px;flex-shrink:0}
+/* flow content cards */
+.fc-cards{display:flex;flex-direction:column;gap:8px}
+.fc-card-item{
+  background:var(--area2);border:1px solid var(--border);border-radius:var(--rad);
+  overflow:hidden;
+}
+.fc-card-hdr{
+  display:flex;align-items:center;gap:6px;padding:7px 10px;cursor:pointer;
+  background:rgba(0,0,0,.15);user-select:none;
+}
+.fc-card-hdr:hover{background:rgba(255,255,255,.04)}
+.fc-card-num{
+  font-size:var(--fs-xs);background:rgba(4,181,163,.2);color:var(--sky);
+  padding:1px 6px;border-radius:10px;
+}
+.fc-card-preview{flex:1;font-size:var(--fs-xs);color:var(--dim);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fc-card-body{padding:10px;display:none;flex-direction:column;gap:7px}
+.fc-card-body.open{display:flex}
+.fc-field-row{display:grid;grid-template-columns:80px 1fr;align-items:center;gap:6px;font-size:var(--fs-sm)}
+.fc-field-row label{color:var(--dim)}
+/* ── Output panel ── */
+#output-panel{flex:1;overflow:hidden;display:flex;flex-direction:column}
+#preview-wrap{
+  flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:var(--bg);border-bottom:1px solid var(--border);min-height:0;
+}
+#preview-inner{width:100%;max-width:600px;overflow:auto}
+.no-preview{color:var(--dim);font-size:var(--fs-sm);text-align:center}
+.no-preview i{font-size:2rem;display:block;margin-bottom:8px;opacity:.4}
+#code-wrap{flex:0 0 auto;max-height:45%;overflow:hidden;display:flex;flex-direction:column}
+#code-toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 14px;background:var(--area);border-bottom:1px solid var(--border);flex-shrink:0;
+}
+#code-toolbar span{font-size:var(--fs-xs);color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.btn-copy{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
+  background:rgba(4,181,163,.12);border:1px solid rgba(4,181,163,.3);
+  border-radius:var(--rad-sm);color:var(--sky);font-size:var(--fs-xs);
+  cursor:pointer;transition:background .15s;
+}
+.btn-copy:hover{background:rgba(4,181,163,.22)}
+.btn-copy.copied{background:rgba(129,230,217,.15);border-color:rgba(129,230,217,.4);color:#81E6D9}
+#code-output{
+  flex:1;overflow:auto;padding:14px 16px;
+  font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:.75rem;
+  line-height:1.75;color:var(--special);background:var(--bg);
+  white-space:pre;scrollbar-width:thin;scrollbar-color:#333 transparent;
+}
+/* ── Reset btn ── */
+.btn-reset{
+  background:none;border:none;color:var(--dim);cursor:pointer;font-size:.75rem;
+  padding:2px 6px;border-radius:3px;transition:color .12s;
+}
+.btn-reset:hover{color:var(--warning)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <div id="header">
+    <h1><i class="bi bi-lightning-charge-fill" style="color:var(--special)"></i> bp-graph 產生器</h1>
+    <div id="search-wrap">
+      <i class="bi bi-search" id="search-icon"></i>
+      <input id="search-input" type="text" placeholder="搜尋屬性名稱或說明…" autocomplete="off" spellcheck="false">
+      <button id="search-clear" title="清除"><i class="bi bi-x"></i></button>
+      <div id="search-drop"></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div id="tabs">
+    <button class="tab-btn active" data-tab="radar">
+      <i class="bi bi-pentagon"></i> bp-radar
+      <span class="tab-badge">即時預覽</span>
+    </button>
+    <button class="tab-btn" data-tab="flow">
+      <i class="bi bi-layout-three-columns"></i> flow-card
+      <span class="tab-badge">即時預覽</span>
+    </button>
+    <button class="tab-btn" data-tab="tutor">
+      <i class="bi bi-mortarboard"></i> StepTutor
+    </button>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="form-panel"></div>
+    <div id="output-panel">
+      <div id="preview-wrap"><div id="preview-inner"></div></div>
+      <div id="code-wrap">
+        <div id="code-toolbar">
+          <span>產生的程式碼</span>
+          <button class="btn-copy" id="copy-btn"><i class="bi bi-clipboard"></i> 複製</button>
+        </div>
+        <pre id="code-output"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-graph.js"></script>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════
+   §1  常數
+════════════════════════════════════════════════════ */
+const PAL = {
+  sky:'#04b5a3',lavender:'#C3A5E5',special:'#C8DD5A',warning:'#F08080',
+  salmon:'#E5C3B3',safe:'#81E6D9',yellow:'#D4B440',info:'#90CDF4',
+  stone:'#7090A8',pink:'#FFB3D9',orange:'#f69653',shell:'#c6c7bd',
+  fuchsia:'#ed1cd8',region:'#333333',bg:'#0c0d0c'
+};
+const PAL_KEYS = Object.keys(PAL);
+
+const GRAD_KEYS = ['special-sky','lavender-pink','warning-orange','safe-sky','yellow-special'];
+
+/* ════════════════════════════════════════════════════
+   §2  Schema 定義
+════════════════════════════════════════════════════ */
+const SCHEMAS = {
+
+  /* ── bp-radar ── */
+  radar: {
+    id:'radar', tag:'bp-radar', label:'bp-radar', icon:'bi-pentagon',
+    preview: true,
+    groups: [
+      { id:'color', label:'顏色', open:true, attrs:[
+        { a:'color-fill',  lbl:'填充色',    type:'color',  def:'sky',   desc:'雷達圖資料區填充色' },
+        { a:'color-label', lbl:'標籤色',    type:'color',  def:'shell', desc:'軸標籤與標題顏色' },
+        { a:'color-web',   lbl:'網格色',    type:'color',  def:'stone', desc:'蜘蛛網格線顏色' },
+      ]},
+      { id:'scale', label:'刻度與資料', open:true, attrs:[
+        { a:'min-scale',   lbl:'最小值',    type:'number', def:'0',    desc:'刻度最小值' },
+        { a:'max-scale',   lbl:'最大值',    type:'number', def:'10',   desc:'刻度最大值' },
+        { a:'levels',      lbl:'層數',      type:'number', def:'5',    desc:'同心多邊形層數（2–10）' },
+        { a:'show-values', lbl:'顯示數值',  type:'bool',   def:'true', desc:'是否在標籤旁顯示實際數值' },
+      ]},
+      { id:'style', label:'線條與動畫', open:false, attrs:[
+        { a:'stroke-width',lbl:'資料線粗',  type:'number', def:'2',     desc:'資料多邊形邊框粗細（px）' },
+        { a:'web-width',   lbl:'網格線粗',  type:'number', def:'0.75',  desc:'蜘蛛網格線粗細（px）' },
+        { a:'animate',     lbl:'淡入動畫',  type:'bool',   def:'true',  desc:'載入時淡入效果' },
+      ]},
+      { id:'title', label:'標題', open:false, attrs:[
+        { a:'title',       lbl:'標題文字',  type:'text',   def:'',      desc:'顯示在圖表頂部的標題' },
+      ]},
+      { id:'font', label:'字體大小', open:false, attrs:[
+        { a:'root-font',   lbl:'基準字體',  type:'number', def:'14',    desc:'px，其他字體依比例計算' },
+        { a:'font-title',  lbl:'標題字體',  type:'number', def:'',      desc:'空白 = 自動依基準計算' },
+        { a:'font-label',  lbl:'標籤字體',  type:'number', def:'',      desc:'空白 = 自動依基準計算' },
+        { a:'font-value',  lbl:'數值字體',  type:'number', def:'',      desc:'空白 = 自動依基準計算' },
+        { a:'font-tick',   lbl:'刻度字體',  type:'number', def:'',      desc:'空白 = 自動依基準計算' },
+      ]},
+    ],
+    children: {
+      tag:'radar-note', lbl:'資料點', min:3, max:12,
+      fields:[
+        { k:'text',  lbl:'標籤',  type:'text',   def:'項目', ph:'標籤文字' },
+        { k:'value', lbl:'數值',  type:'number', def:'5' },
+      ],
+      defaults:[
+        {text:'技術',value:'8'},{text:'設計',value:'7'},{text:'溝通',value:'6'},
+        {text:'執行',value:'7'},{text:'創意',value:'5'},
+      ],
+    },
+  },
+
+  /* ── flow-card ── */
+  flow: {
+    id:'flow', tag:'flow-card', label:'flow-card', icon:'bi-layout-three-columns',
+    preview: true,
+    groups: [
+      { id:'theme', label:'整體外觀', open:true, attrs:[
+        { a:'theme',          lbl:'主題色',     type:'color',  def:'sky',    desc:'圓形圖示的預設顏色' },
+        { a:'card-bg',        lbl:'卡片背景',   type:'color',  def:'region', desc:'卡片背景色' },
+        { a:'card-radius',    lbl:'圓角',       type:'number', def:'12',     desc:'卡片圓角 px' },
+        { a:'card-padding',   lbl:'卡片內距',   type:'number', def:'20',     desc:'卡片 padding px' },
+        { a:'text-align',     lbl:'文字對齊',   type:'select', def:'center', opts:['center','left','right'] },
+        { a:'animate',        lbl:'進場動畫',   type:'bool',   def:'true',   desc:'卡片依序淡入' },
+      ]},
+      { id:'icon', label:'圖示圓圈', open:true, attrs:[
+        { a:'icon-size',      lbl:'圓圈大小',   type:'number', def:'80',     desc:'圓形圖示直徑 px' },
+        { a:'icon-font',      lbl:'圖示字體',   type:'number', def:'32',     desc:'Bootstrap Icon 字體大小 px' },
+        { a:'icon-shadow',    lbl:'陰影',       type:'bool',   def:'true',   desc:'圓形圖示是否有陰影' },
+      ]},
+      { id:'connector', label:'連接器', open:true, attrs:[
+        { a:'connector',      lbl:'連接文字',   type:'text',   def:'VS',     desc:'卡片間的連接文字，如 VS、→' },
+        { a:'connector-icon', lbl:'連接圖示',   type:'text',   def:'',       desc:'Bootstrap Icon class，設定後取代連接文字' },
+        { a:'connector-color',lbl:'連接器色',   type:'color',  def:'salmon', desc:'連接器背景色' },
+        { a:'connector-size', lbl:'連接器大小', type:'number', def:'36',     desc:'連接器圓圈直徑 px' },
+        { a:'connector-overlap',lbl:'重疊量',   type:'number', def:'0.1',    desc:'連接器與卡片的重疊比例 0–1' },
+      ]},
+      { id:'font', label:'字體大小', open:false, attrs:[
+        { a:'root-font',      lbl:'基準字體',   type:'number', def:'14',     desc:'px 基準，其他依比例' },
+        { a:'font-title',     lbl:'標題字體',   type:'number', def:'',       desc:'空白 = 自動' },
+        { a:'font-body',      lbl:'內文字體',   type:'number', def:'',       desc:'空白 = 自動' },
+        { a:'font-connector', lbl:'連接器字體', type:'number', def:'',       desc:'空白 = 自動（連接器大小×0.36）' },
+      ]},
+    ],
+    children: {
+      tag:'flow-content', lbl:'卡片項目', min:2, max:5,
+      fields:[
+        { k:'icon',          lbl:'圖示',          type:'text',  def:'bi-circle',  ph:'bi-star' },
+        { k:'icon-color',    lbl:'圖示色',         type:'color', def:'' },
+        { k:'title',         lbl:'標題',           type:'text',  def:'標題',       ph:'卡片標題' },
+        { k:'connector',     lbl:'此前連接文字',   type:'text',  def:'',           ph:'覆寫全域設定' },
+        { k:'connector-icon',lbl:'此前連接圖示',   type:'text',  def:'',           ph:'bi-arrow-right' },
+        { k:'body',          lbl:'內文 HTML',      type:'textarea', def:'',        ph:'<p>說明文字</p>' },
+      ],
+      defaults:[
+        {icon:'bi-star-fill',    'icon-color':'sky',     title:'步驟一', body:'<p>第一個階段的說明。</p>'},
+        {icon:'bi-lightning',    'icon-color':'special', title:'步驟二', body:'<p>第二個階段的說明。</p>'},
+        {icon:'bi-check-circle', 'icon-color':'safe',    title:'步驟三', body:'<p>第三個階段的說明。</p>'},
+      ],
+    },
+  },
+
+  /* ── StepTutor ── */
+  tutor: {
+    id:'tutor', tag:'StepTutor', label:'StepTutor', icon:'bi-mortarboard',
+    preview: false,
+    groups: [
+      { id:'button', label:'主按鈕', open:true, attrs:[
+        { a:'buttonTheme',        lbl:'按鈕主題',    type:'select', def:'special',
+          opts:['special','sky','lavender','warning','orange','pink','safe','info','stone'],
+          desc:'決定按鈕顏色的主題名稱' },
+        { a:'buttonText',         lbl:'按鈕文字',    type:'text',   def:'顯示下一步', desc:'點擊按鈕的文字' },
+        { a:'buttonCompleteText', lbl:'完成文字',    type:'text',   def:'所有步驟已顯示', desc:'全部步驟揭示後按鈕顯示的文字' },
+        { a:'buttonSize',         lbl:'按鈕大小',    type:'select', def:'large', opts:['small','large'] },
+        { a:'buttonBorderRadius', lbl:'按鈕圓角',    type:'text',   def:'4px' },
+      ]},
+      { id:'step', label:'步驟卡片外觀', open:true, attrs:[
+        { a:'borderStyle',    lbl:'邊框樣式', type:'select', def:'solid', opts:['solid','dashed','dotted','none'] },
+        { a:'borderPosition', lbl:'邊框位置', type:'select', def:'left',  opts:['left','top','bottom','full'],
+          desc:'強調線的位置' },
+        { a:'borderWidth',    lbl:'邊框粗細', type:'text',   def:'2px' },
+        { a:'stepBorderColor',lbl:'邊框顏色', type:'color',  def:'lavender' },
+        { a:'highlightColor', lbl:'強調色',   type:'color',  def:'lavender', desc:'步驟標記的強調色' },
+        { a:'stepBgColor',    lbl:'步驟背景', type:'text',   def:'rgba(195,165,229,0.1)' },
+        { a:'stepPadding',    lbl:'步驟內距', type:'text',   def:'12px' },
+        { a:'animationDuration',lbl:'動畫時長',type:'text',  def:'0.3s' },
+        { a:'animationEasing',  lbl:'動畫緩動',type:'select',def:'ease', opts:['ease','ease-in','ease-out','ease-in-out','linear'] },
+      ]},
+      { id:'progress', label:'進度顯示', open:true, attrs:[
+        { a:'showProgress',       lbl:'顯示進度文字',  type:'bool', def:'true' },
+        { a:'progressText',       lbl:'進度格式',      type:'text', def:'已顯示步驟 {current} / {total}',
+          desc:'{current}、{total} 為佔位符' },
+        { a:'progressPosition',   lbl:'進度位置',      type:'select', def:'bottom', opts:['top','bottom'] },
+        { a:'showProgressBar',    lbl:'顯示進度條',    type:'bool', def:'false' },
+        { a:'progressBarGradient',lbl:'進度條漸層',    type:'select', def:'special-sky', opts:GRAD_KEYS },
+        { a:'progressBarHeight',  lbl:'進度條高度',    type:'text', def:'20px' },
+        { a:'progressBarBorderRadius',lbl:'進度條圓角',type:'text', def:'4px' },
+      ]},
+      { id:'autoplay', label:'自動播放', open:false, attrs:[
+        { a:'autoPlay',            lbl:'自動播放',      type:'bool',   def:'false' },
+        { a:'autoPlayDelay',       lbl:'間隔 ms',       type:'number', def:'2000' },
+        { a:'showAutoPlayButton',  lbl:'顯示播放按鈕',  type:'bool',   def:'false' },
+        { a:'autoPlayButtonText',  lbl:'播放按鈕文字',  type:'text',   def:'▶ 自動播放' },
+        { a:'autoPlayPauseText',   lbl:'暫停按鈕文字',  type:'text',   def:'⏸ 暫停' },
+        { a:'autoPlayButtonTheme', lbl:'播放按鈕主題',  type:'select', def:'stone',
+          opts:['special','sky','lavender','warning','orange','pink','safe','info','stone'] },
+      ]},
+      { id:'indicator', label:'步驟指示器', open:false, attrs:[
+        { a:'showIndicator',        lbl:'顯示指示器',   type:'bool',   def:'true' },
+        { a:'indicatorFormat',      lbl:'指示器格式',   type:'text',   def:'步驟 {current}', desc:'{current} 為佔位符' },
+        { a:'showTotalSteps',       lbl:'顯示總步驟數', type:'bool',   def:'true' },
+        { a:'indicatorBgColor',     lbl:'指示器背景',   type:'color',  def:'special' },
+        { a:'indicatorTextColor',   lbl:'指示器文字',   type:'color',  def:'bg' },
+        { a:'indicatorFontSize',    lbl:'指示器字體',   type:'text',   def:'0.8rem' },
+        { a:'indicatorBorderRadius',lbl:'指示器圓角',   type:'text',   def:'4px' },
+      ]},
+      { id:'revealall', label:'顯示全部按鈕', open:false, attrs:[
+        { a:'showRevealAllButton',    lbl:'啟用',         type:'bool',   def:'false' },
+        { a:'revealAllButtonText',    lbl:'按鈕文字',     type:'text',   def:'顯示全部' },
+        { a:'revealAllButtonTheme',   lbl:'按鈕主題',     type:'select', def:'stone',
+          opts:['special','sky','lavender','warning','orange','pink','safe','info','stone'] },
+        { a:'revealAllButtonSize',    lbl:'按鈕大小',     type:'select', def:'small', opts:['small','large'] },
+      ]},
+      { id:'misc', label:'版面與滾動', open:false, attrs:[
+        { a:'contentPosition', lbl:'步驟位置',   type:'select', def:'top',   opts:['top','bottom'],
+          desc:'步驟列表在按鈕的上方或下方' },
+        { a:'autoScroll',      lbl:'自動滾動',   type:'bool',   def:'true',  desc:'揭示步驟時自動滾動到可見範圍' },
+        { a:'scrollOffset',    lbl:'滾動偏移',   type:'number', def:'100',   desc:'px，從頂部留的空間' },
+        { a:'targetMode',      lbl:'Target 模式',type:'select', def:'replace', opts:['replace','append','prepend'],
+          desc:'步驟 target 的插入方式' },
+        { a:'restart',         lbl:'顯示重啟鈕', type:'bool',   def:'true' },
+      ]},
+    ],
+    children: null,
+  },
+};
+
+/* ════════════════════════════════════════════════════
+   §3  State
+════════════════════════════════════════════════════ */
+let currentTab = 'radar';
+
+// formState[tabId][attr] = value
+const formState = {};
+// childState[tabId] = array of objects
+const childState = {};
+
+function initState(tabId) {
+  if (formState[tabId]) return;
+  const s = {};
+  SCHEMAS[tabId].groups.forEach(g => g.attrs.forEach(a => { s[a.a] = a.def; }));
+  formState[tabId] = s;
+
+  const c = SCHEMAS[tabId].children;
+  if (c) {
+    childState[tabId] = c.defaults.slice(0, c.min > c.defaults.length ? c.min : c.defaults.length)
+      .map(d => ({ ...d }));
+  }
+}
+['radar','flow','tutor'].forEach(initState);
+
+/* ════════════════════════════════════════════════════
+   §4  搜尋索引
+════════════════════════════════════════════════════ */
+const SEARCH_INDEX = [];
+Object.values(SCHEMAS).forEach(schema => {
+  schema.groups.forEach(g => {
+    g.attrs.forEach(a => {
+      SEARCH_INDEX.push({
+        tabId:   schema.id,
+        tabLbl:  schema.label,
+        groupId: g.id,
+        groupLbl:g.label,
+        attr:    a.a,
+        lbl:     a.lbl,
+        desc:    a.desc || '',
+        fieldId: `f-${schema.id}-${a.a}`,
+      });
+    });
+  });
+});
+
+function doSearch(q) {
+  if (!q) return [];
+  const lq = q.toLowerCase();
+  return SEARCH_INDEX.filter(e =>
+    e.attr.toLowerCase().includes(lq) ||
+    e.lbl.toLowerCase().includes(lq) ||
+    e.desc.toLowerCase().includes(lq)
+  ).slice(0, 10);
+}
+
+function highlight(str, q) {
+  if (!q) return str;
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return str.replace(re, '<mark>$1</mark>');
+}
+
+/* ════════════════════════════════════════════════════
+   §5  DOM helpers
+════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const el = (tag, cls, html) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html !== undefined) e.innerHTML = html;
+  return e;
+};
+
+/* ════════════════════════════════════════════════════
+   §6  Color picker helper
+════════════════════════════════════════════════════ */
+function makeColorField(tabId, attr, value, onChange) {
+  const wrap = el('div','color-field');
+  const swatch = el('div','color-swatch');
+  swatch.title = 'Click to pick palette color';
+
+  const inputWrap = el('div','color-input-wrap');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = value;
+  input.placeholder = 'sky / #hex';
+
+  const drop = el('div','color-drop');
+  const grid = el('div','palette-grid');
+  PAL_KEYS.forEach(name => {
+    const chip = el('div','palette-chip');
+    chip.style.background = PAL[name];
+    chip.title = name;
+    chip.dataset.name = name;
+    chip.addEventListener('click', e => {
+      e.stopPropagation();
+      input.value = name;
+      updateSwatch(name);
+      drop.classList.remove('open');
+      onChange(name);
+    });
+    grid.appendChild(chip);
+  });
+  drop.appendChild(grid);
+
+  const hexInput = document.createElement('input');
+  hexInput.type = 'text';
+  hexInput.placeholder = '#hex 自訂';
+  hexInput.addEventListener('input', () => {
+    const v = hexInput.value.trim();
+    if (v.match(/^#[0-9a-fA-F]{3,6}$/)) {
+      swatch.style.background = v;
+      onChange(v);
+    }
+  });
+  drop.appendChild(hexInput);
+
+  inputWrap.appendChild(input);
+  inputWrap.appendChild(drop);
+
+  const updateSwatch = (v) => {
+    const hex = PAL[v] || (v.startsWith('#') ? v : null);
+    swatch.style.background = hex || '#555';
+    // mark selected
+    grid.querySelectorAll('.palette-chip').forEach(c =>
+      c.classList.toggle('selected', c.dataset.name === v));
+  };
+  updateSwatch(value);
+
+  swatch.addEventListener('click', e => {
+    e.stopPropagation();
+    drop.classList.toggle('open');
+    hexInput.value = '';
+  });
+  input.addEventListener('input', () => {
+    const v = input.value.trim();
+    updateSwatch(v);
+    onChange(v);
+  });
+  document.addEventListener('click', () => drop.classList.remove('open'), { passive: true });
+
+  wrap.appendChild(swatch);
+  wrap.appendChild(inputWrap);
+  return wrap;
+}
+
+/* ════════════════════════════════════════════════════
+   §7  Form rendering
+════════════════════════════════════════════════════ */
+function renderForm(tabId) {
+  const panel = $('form-panel');
+  panel.innerHTML = '';
+  const schema = SCHEMAS[tabId];
+
+  schema.groups.forEach(g => {
+    const groupEl = el('div', 'form-group');
+    groupEl.id = `grp-${tabId}-${g.id}`;
+
+    const hdr = el('div', 'group-header' + (g.open ? ' open' : ''));
+    hdr.innerHTML = `<i class="bi bi-caret-right-fill group-chevron"></i>
+      <span class="group-label">${g.label}</span>
+      <span class="group-count">${g.attrs.length}</span>`;
+
+    const body = el('div', 'group-body' + (!g.open ? ' collapsed' : ''));
+
+    g.attrs.forEach(a => {
+      body.appendChild(makeField(tabId, a));
+    });
+
+    hdr.addEventListener('click', () => {
+      const open = hdr.classList.toggle('open');
+      body.classList.toggle('collapsed', !open);
+    });
+
+    groupEl.appendChild(hdr);
+    groupEl.appendChild(body);
+    panel.appendChild(groupEl);
+  });
+
+  // Children section
+  if (schema.children) {
+    panel.appendChild(makeChildrenSection(tabId));
+  }
+
+  // Reset button
+  const resetWrap = el('div', '', '');
+  resetWrap.style.cssText = 'padding:10px 14px;border-top:1px solid var(--border)';
+  const resetBtn = el('button', 'btn-reset', '<i class="bi bi-arrow-counterclockwise"></i> 重設所有屬性');
+  resetBtn.addEventListener('click', () => {
+    delete formState[tabId];
+    if (schema.children) delete childState[tabId];
+    initState(tabId);
+    renderForm(tabId);
+    update();
+  });
+  resetWrap.appendChild(resetBtn);
+  panel.appendChild(resetWrap);
+}
+
+function makeField(tabId, a) {
+  const wrap = el('div', 'field');
+  wrap.id = `f-${tabId}-${a.a}`;
+
+  const row = el('div', 'field-row');
+  const lbl = el('label', 'field-label', a.lbl);
+  lbl.title = a.a;
+  row.appendChild(lbl);
+
+  const attrSpan = el('span', 'field-attr', a.a);
+  row.appendChild(attrSpan);
+  wrap.appendChild(row);
+
+  if (a.desc) wrap.appendChild(el('div', 'field-desc', a.desc));
+
+  const val = formState[tabId][a.a] ?? a.def;
+  let input;
+
+  if (a.type === 'color') {
+    input = makeColorField(tabId, a.a, val, v => {
+      formState[tabId][a.a] = v;
+      update();
+    });
+  } else if (a.type === 'bool') {
+    const tw = el('div', 'toggle-wrap');
+    const lbl2 = el('label', 'toggle');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = val === 'true' || val === true;
+    const slider = el('div', 'toggle-slider');
+    lbl2.appendChild(cb);
+    lbl2.appendChild(slider);
+    const valLbl = el('span', '', cb.checked ? '開' : '關');
+    valLbl.style.cssText = 'font-size:.72rem;color:var(--dim)';
+    cb.addEventListener('change', () => {
+      formState[tabId][a.a] = String(cb.checked);
+      valLbl.textContent = cb.checked ? '開' : '關';
+      update();
+    });
+    tw.appendChild(lbl2);
+    tw.appendChild(valLbl);
+    input = tw;
+  } else if (a.type === 'select') {
+    const sel = document.createElement('select');
+    (a.opts || []).forEach(opt => {
+      const o = document.createElement('option');
+      o.value = o.textContent = opt;
+      if (opt === val) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => {
+      formState[tabId][a.a] = sel.value;
+      update();
+    });
+    input = sel;
+  } else if (a.type === 'number') {
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.value = val;
+    inp.placeholder = a.ph || '';
+    inp.addEventListener('input', () => {
+      formState[tabId][a.a] = inp.value;
+      update();
+    });
+    input = inp;
+  } else {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = val;
+    inp.placeholder = a.ph || '';
+    inp.addEventListener('input', () => {
+      formState[tabId][a.a] = inp.value;
+      update();
+    });
+    input = inp;
+  }
+
+  wrap.appendChild(input);
+  return wrap;
+}
+
+/* ════════════════════════════════════════════════════
+   §8  Children sections
+════════════════════════════════════════════════════ */
+function makeChildrenSection(tabId) {
+  const schema = SCHEMAS[tabId];
+  const c = schema.children;
+  const sec = el('div', 'children-section');
+
+  const hdr = el('div', 'children-header');
+  const title = el('div', 'children-title',
+    `<i class="bi bi-list-ul" style="margin-right:5px"></i>${c.lbl}`);
+  const addBtn = el('button', 'btn-add',
+    `<i class="bi bi-plus"></i> 新增`);
+  addBtn.id = `add-child-${tabId}`;
+  hdr.appendChild(title);
+  hdr.appendChild(addBtn);
+  sec.appendChild(hdr);
+
+  const list = el('div', tabId === 'radar' ? 'note-list' : 'fc-cards');
+  list.id = `children-list-${tabId}`;
+  sec.appendChild(list);
+
+  addBtn.addEventListener('click', () => {
+    if (childState[tabId].length >= c.max) return;
+    const item = {};
+    c.fields.forEach(f => { item[f.k] = f.def; });
+    childState[tabId].push(item);
+    renderChildren(tabId);
+    update();
+  });
+
+  renderChildren(tabId);
+  return sec;
+}
+
+function renderChildren(tabId) {
+  const schema = SCHEMAS[tabId];
+  const c = schema.children;
+  const items = childState[tabId];
+  const list = $(`children-list-${tabId}`);
+  const addBtn = $(`add-child-${tabId}`);
+  if (!list) return;
+  list.innerHTML = '';
+  if (addBtn) addBtn.disabled = items.length >= c.max;
+
+  if (tabId === 'radar') {
+    items.forEach((item, i) => {
+      const row = el('div', 'note-item');
+      row.innerHTML = `<i class="bi bi-grip-vertical note-drag" title="拖曳排序"></i>`;
+
+      const textIn = document.createElement('input');
+      textIn.type = 'text';
+      textIn.value = item.text || '';
+      textIn.placeholder = '標籤';
+      textIn.addEventListener('input', () => { items[i].text = textIn.value; update(); });
+
+      const valIn = document.createElement('input');
+      valIn.type = 'number';
+      valIn.className = 'note-val';
+      valIn.value = item.value || 5;
+      valIn.min = 0; valIn.max = 100;
+      valIn.addEventListener('input', () => { items[i].value = valIn.value; update(); });
+
+      const del = el('button', 'note-del', '<i class="bi bi-trash3"></i>');
+      del.title = '刪除';
+      del.disabled = items.length <= c.min;
+      del.addEventListener('click', () => {
+        if (items.length <= c.min) return;
+        items.splice(i, 1);
+        renderChildren(tabId);
+        update();
+      });
+
+      row.appendChild(textIn);
+      row.appendChild(valIn);
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+  } else {
+    // flow-card
+    items.forEach((item, i) => {
+      const card = el('div', 'fc-card-item');
+      const preview = item.title || item.icon || `卡片 ${i+1}`;
+
+      const hdr = el('div', 'fc-card-hdr');
+      hdr.innerHTML = `<span class="fc-card-num">${i+1}</span>
+        <span class="fc-card-preview">${preview}</span>
+        <i class="bi bi-chevron-down" style="color:var(--dim);font-size:.7rem"></i>`;
+      if (i > 0) {
+        const delBtn = el('button', 'note-del', '<i class="bi bi-trash3"></i>');
+        delBtn.title = '刪除此卡片';
+        delBtn.style.marginLeft = '6px';
+        delBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          if (items.length <= c.min) return;
+          items.splice(i, 1);
+          renderChildren(tabId);
+          update();
+        });
+        hdr.appendChild(delBtn);
+      }
+
+      const body = el('div', 'fc-card-body' + (i === 0 ? ' open' : ''));
+
+      c.fields.forEach(f => {
+        const row = el('div', 'fc-field-row');
+        row.innerHTML = `<label>${f.lbl}</label>`;
+
+        let inp;
+        if (f.type === 'color') {
+          inp = makeColorField(tabId, `child-${i}-${f.k}`, item[f.k] || '', v => {
+            items[i][f.k] = v;
+            update();
+          });
+        } else if (f.type === 'textarea') {
+          inp = document.createElement('textarea');
+          inp.rows = 3;
+          inp.value = item[f.k] || '';
+          inp.placeholder = f.ph || '';
+          inp.addEventListener('input', () => { items[i][f.k] = inp.value; update(); });
+        } else {
+          inp = document.createElement('input');
+          inp.type = 'text';
+          inp.value = item[f.k] || '';
+          inp.placeholder = f.ph || '';
+          inp.addEventListener('input', () => {
+            items[i][f.k] = inp.value;
+            // 更新 header preview
+            hdr.querySelector('.fc-card-preview').textContent = items[i].title || items[i].icon || `卡片 ${i+1}`;
+            update();
+          });
+        }
+        row.appendChild(inp);
+        body.appendChild(row);
+      });
+
+      hdr.addEventListener('click', () => {
+        const isOpen = body.classList.toggle('open');
+        hdr.querySelector('.bi-chevron-down').style.transform = isOpen ? 'rotate(180deg)' : '';
+      });
+
+      card.appendChild(hdr);
+      card.appendChild(body);
+      list.appendChild(card);
+    });
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   §9  Code generation
+════════════════════════════════════════════════════ */
+function generateCode() {
+  const tabId = currentTab;
+  const schema = SCHEMAS[tabId];
+  const state = formState[tabId];
+
+  if (tabId === 'tutor') return generateTutorCode();
+
+  // Build attrs string (only non-default)
+  const attrLines = [];
+  schema.groups.forEach(g => {
+    g.attrs.forEach(a => {
+      const v = state[a.a];
+      if (v !== '' && v !== null && v !== undefined && v !== a.def) {
+        attrLines.push(`  ${a.a}="${v}"`);
+      }
+    });
+  });
+
+  // Build children
+  let childLines = '';
+  const c = schema.children;
+  if (c) {
+    const items = childState[tabId];
+    if (tabId === 'radar') {
+      childLines = items.map(it =>
+        `  <radar-note value="${it.value}">${it.text}</radar-note>`
+      ).join('\n');
+    } else {
+      childLines = items.map(it => {
+        const attrs = c.fields
+          .filter(f => f.type !== 'textarea' && it[f.k] && it[f.k] !== f.def)
+          .map(f => `\n      ${f.k}="${it[f.k]}"`)
+          .join('');
+        const body = it.body ? `\n    ${it.body}\n  ` : '';
+        return `  <flow-content${attrs}>${body}</flow-content>`;
+      }).join('\n');
+    }
+  }
+
+  const tag = schema.tag;
+  const inner = childLines ? `\n${childLines}\n` : '';
+  const attrStr = attrLines.length ? '\n' + attrLines.join('\n') : '';
+  return `<${tag}${attrStr}>${inner}</${tag}>`;
+}
+
+function generateTutorCode() {
+  const state = formState['tutor'];
+  const schema = SCHEMAS['tutor'];
+
+  // Build data-* attrs (only non-default)
+  const dataAttrs = [];
+  schema.groups.forEach(g => {
+    g.attrs.forEach(a => {
+      const v = state[a.a];
+      if (v !== '' && v !== null && v !== undefined && v !== a.def) {
+        // camelCase → kebab-case for data attr
+        const key = a.a.replace(/([A-Z])/g, m => '-' + m.toLowerCase());
+        dataAttrs.push(`  data-${key}="${v}"`);
+      }
+    });
+  });
+
+  const attrsStr = dataAttrs.length ? '\n' + dataAttrs.join('\n') + '\n' : ' ';
+  return `<!-- HTML 結構 -->
+<div id="myTutor" data-step-tutor${attrsStr}>
+
+  <!-- 步驟項目，加入 data-step 屬性 -->
+  <div data-step="1">
+    <p>第一個步驟的內容</p>
+  </div>
+  <div data-step="2">
+    <p>第二個步驟的內容</p>
+  </div>
+  <div data-step="3">
+    <p>第三個步驟的內容</p>
+  </div>
+
+</div>
+
+<!-- 自動初始化（需引入 bp-graph.js） -->
+<!-- 或手動初始化 -->
+<script>
+// 手動初始化範例
+const tutor = new StepTutor('myTutor', {
+${schema.groups.map(g => g.attrs.map(a => {
+  const v = state[a.a];
+  if (v === '' || v === null || v === undefined || v === a.def) return null;
+  const qv = isNaN(v) && v !== 'true' && v !== 'false' ? `'${v}'` : v;
+  return `  ${a.a}: ${qv},`;
+}).filter(Boolean).join('\n')).filter(s=>s).join('\n')}
+});
+<\/script>`;
+}
+
+/* ════════════════════════════════════════════════════
+   §10  Live preview
+════════════════════════════════════════════════════ */
+function updatePreview() {
+  const inner = $('preview-inner');
+  const tabId = currentTab;
+  const schema = SCHEMAS[tabId];
+
+  if (!schema.preview) {
+    inner.innerHTML = `<div class="no-preview">
+      <i class="bi bi-code-slash"></i>
+      StepTutor 需要 JS 初始化，請複製程式碼後在頁面中使用
+    </div>`;
+    return;
+  }
+
+  const state = formState[tabId];
+  const code = generateCode();
+
+  // 直接 innerHTML 更新：Custom Elements 的 attributeChangedCallback 會觸發
+  inner.innerHTML = code;
+
+  // 確保子元素樣式隱藏（bp-graph 已處理，但以防萬一）
+  inner.querySelectorAll('radar-note, flow-content').forEach(e => e.style.display = 'none');
+}
+
+/* ════════════════════════════════════════════════════
+   §11  全局更新
+════════════════════════════════════════════════════ */
+function update() {
+  const code = generateCode();
+  $('code-output').textContent = code;
+  updatePreview();
+}
+
+/* ════════════════════════════════════════════════════
+   §12  Search UI
+════════════════════════════════════════════════════ */
+let searchResults = [];
+let focusedIdx = -1;
+
+function renderSearchDrop(q) {
+  const drop = $('search-drop');
+  const results = doSearch(q);
+  searchResults = results;
+  focusedIdx = -1;
+
+  if (!q || !results.length) {
+    drop.style.display = q ? 'block' : 'none';
+    drop.innerHTML = q ? `<div class="sr-no-result"><i class="bi bi-search" style="margin-right:5px"></i>找不到符合的屬性</div>` : '';
+    return;
+  }
+
+  drop.style.display = 'block';
+  drop.innerHTML = '';
+
+  // Group by component
+  const byTab = {};
+  results.forEach(r => {
+    if (!byTab[r.tabId]) byTab[r.tabId] = [];
+    byTab[r.tabId].push(r);
+  });
+
+  let idx = 0;
+  Object.entries(byTab).forEach(([tabId, items]) => {
+    const hdr = el('div', 'sr-comp-header', SCHEMAS[tabId].label);
+    drop.appendChild(hdr);
+    items.forEach(r => {
+      const item = el('div', 'sr-item');
+      item.dataset.idx = idx++;
+      item.innerHTML =
+        `<span class="sr-item-group">${r.groupLbl}</span>
+         <span class="sr-item-label">${highlight(r.lbl, q)}</span>
+         <span class="sr-item-attr">${highlight(r.attr, q)}</span>`;
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        navigateToField(r);
+        closeSearch();
+      });
+      drop.appendChild(item);
+    });
+  });
+}
+
+function navigateToField(r) {
+  // Switch tab if needed
+  if (r.tabId !== currentTab) {
+    switchTab(r.tabId);
+  }
+
+  requestAnimationFrame(() => {
+    // Open group
+    const grpEl = $(`grp-${r.tabId}-${r.groupId}`);
+    if (grpEl) {
+      const hdr = grpEl.querySelector('.group-header');
+      const body = grpEl.querySelector('.group-body');
+      if (!hdr.classList.contains('open')) {
+        hdr.classList.add('open');
+        body.classList.remove('collapsed');
+      }
+    }
+
+    // Scroll to field and highlight
+    const fieldEl = $(r.fieldId);
+    if (fieldEl) {
+      fieldEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      fieldEl.classList.remove('highlighted');
+      void fieldEl.offsetWidth;
+      fieldEl.classList.add('highlighted');
+      // Focus first input
+      const inp = fieldEl.querySelector('input,select,textarea');
+      if (inp) setTimeout(() => inp.focus(), 400);
+    }
+  });
+}
+
+function closeSearch() {
+  $('search-drop').style.display = 'none';
+  $('search-input').value = '';
+  $('search-clear').style.display = 'none';
+  searchResults = [];
+  focusedIdx = -1;
+}
+
+function updateFocus() {
+  $('search-drop').querySelectorAll('.sr-item').forEach((el, i) =>
+    el.classList.toggle('focused', i === focusedIdx));
+}
+
+/* ════════════════════════════════════════════════════
+   §13  Tab switching
+════════════════════════════════════════════════════ */
+function switchTab(tabId) {
+  currentTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tabId));
+  renderForm(tabId);
+  update();
+}
+
+/* ════════════════════════════════════════════════════
+   §14  Init & Events
+════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+
+  // Tab clicks
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // Search input
+  const searchInp = $('search-input');
+  const searchClear = $('search-clear');
+  const searchDrop = $('search-drop');
+
+  searchInp.addEventListener('input', () => {
+    const q = searchInp.value.trim();
+    searchClear.style.display = q ? 'block' : 'none';
+    renderSearchDrop(q);
+  });
+
+  searchInp.addEventListener('keydown', e => {
+    if (!searchResults.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedIdx = Math.min(focusedIdx + 1, searchResults.length - 1);
+      updateFocus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedIdx = Math.max(focusedIdx - 1, 0);
+      updateFocus();
+    } else if (e.key === 'Enter' && focusedIdx >= 0) {
+      e.preventDefault();
+      navigateToField(searchResults[focusedIdx]);
+      closeSearch();
+    } else if (e.key === 'Escape') {
+      closeSearch();
+    }
+  });
+
+  searchInp.addEventListener('blur', () => {
+    setTimeout(() => { searchDrop.style.display = 'none'; }, 150);
+  });
+  searchInp.addEventListener('focus', () => {
+    if (searchInp.value.trim()) renderSearchDrop(searchInp.value.trim());
+  });
+
+  searchClear.addEventListener('click', closeSearch);
+
+  // Copy button
+  $('copy-btn').addEventListener('click', () => {
+    const code = $('code-output').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = $('copy-btn');
+      btn.classList.add('copied');
+      btn.innerHTML = '<i class="bi bi-check2"></i> 已複製';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<i class="bi bi-clipboard"></i> 複製';
+      }, 2000);
+    });
+  });
+
+  // Initial render
+  renderForm('radar');
+  update();
+});
+</script>
+</body>
+</html>
