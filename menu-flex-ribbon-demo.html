@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>menu-flex — Ribbon 展示</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      background:#0c0d0c; color:#c6c7bd;
+      font-family:'Segoe UI','Noto Sans TC',sans-serif;
+      padding:32px 24px 80px;
+    }
+    h1  { color:#C3A5E5; font-size:1.4rem; margin-bottom:4px; }
+    .sub { color:#7090A8; font-size:.85rem; margin-bottom:36px; }
+    h2  { color:#04b5a3; font-size:.97rem; margin:30px 0 10px;
+          border-bottom:1px solid #252525; padding-bottom:6px; }
+
+    .card {
+      background:#181918; border:1px solid #282828;
+      border-radius:10px; padding:18px 20px; margin-bottom:24px;
+    }
+    .card p { font-size:.82rem; color:#7090A8; margin-bottom:12px; line-height:1.7; }
+
+    /* ── 展示容器 ── */
+    .demo-box {
+      width:100%; height:320px;
+      border:1px solid #2e2f2e; border-radius:8px;
+      background:#111211; overflow:hidden;
+    }
+
+    /* ── 內容頁樣式 ── */
+    .vp { padding:22px 28px; line-height:1.7; }
+    .vp h3 { font-size:.95rem; color:#C3A5E5; margin-bottom:10px;
+             display:flex; align-items:center; gap:8px; }
+    .vp p  { font-size:.83rem; color:#9a9b93; }
+    .vp .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .vp .chip  {
+      font-size:.72rem; padding:2px 10px; border-radius:20px;
+      background:#252625; color:#04b5a3; border:1px solid #333;
+    }
+
+    code {
+      display:block; background:#141514; border:1px solid #252525;
+      border-radius:6px; padding:13px 15px; font-size:.77rem;
+      color:#C8DD5A; line-height:1.85; overflow-x:auto; white-space:pre;
+      margin-top:12px;
+    }
+    .hl { color:#04b5a3; }
+    .cm { color:#444; }
+    hr  { border:none; border-top:1px solid #1e1e1e; margin:30px 0; }
+
+    /* ── 速度對比 grid ── */
+    .sp-grid {
+      display:grid; grid-template-columns:80px 1fr;
+      gap:14px 16px; align-items:center;
+    }
+    .sp-lbl {
+      font-family:monospace; font-size:.76rem;
+      padding:2px 9px; border-radius:4px; text-align:center; white-space:nowrap;
+    }
+    .sl-normal { background:#1a2a1a; color:#81E6D9; border:1px solid #2a4a3a; }
+    .sl-quick  { background:#2a1e10; color:#f69653; border:1px solid #4a3a20; }
+
+    table { width:100%; border-collapse:collapse; font-size:.82rem; margin-top:6px; }
+    th { color:#7090A8; font-weight:500; border-bottom:1px solid #252525;
+         padding:7px 10px; text-align:left; }
+    td { padding:7px 10px; border-bottom:1px solid #1c1c1c; }
+    td:first-child { font-family:monospace; color:#C8DD5A; white-space:nowrap; }
+    tr:last-child td { border-bottom:none; }
+  </style>
+</head>
+<body>
+
+<menu-flex-cfg default-theme="sky" default-anim-speed="normal"></menu-flex-cfg>
+
+<!-- ══════════ 內容源（全部隱藏） ══════════ -->
+<div id="v-home"     style="display:none"><div class="vp"><h3><i class="bi bi-house"></i> 首頁</h3><p>這是首頁內容。</p><div class="chips"><span class="chip">今日訪客 1,248</span><span class="chip">文章 86</span></div></div></div>
+<div id="v-new"      style="display:none"><div class="vp"><h3><i class="bi bi-plus-circle"></i> 新增文章</h3><p>在此填寫標題與內文，完成後按下儲存即可發布。</p></div></div>
+<div id="v-list"     style="display:none"><div class="vp"><h3><i class="bi bi-list-ul"></i> 文章列表</h3><p>共有 86 篇文章，點擊標題可進行編輯。</p></div></div>
+<div id="v-draft"    style="display:none"><div class="vp"><h3><i class="bi bi-pencil-square"></i> 草稿箱</h3><p>目前有 3 篇草稿尚未發布。</p></div></div>
+<div id="v-media"    style="display:none"><div class="vp"><h3><i class="bi bi-images"></i> 媒體庫</h3><p>已上傳 247 個媒體檔案。</p></div></div>
+<div id="v-upload"   style="display:none"><div class="vp"><h3><i class="bi bi-cloud-arrow-up"></i> 上傳檔案</h3><p>支援 JPG、PNG、GIF、PDF，單檔上限 20MB。</p></div></div>
+<div id="v-users"    style="display:none"><div class="vp"><h3><i class="bi bi-people"></i> 會員列表</h3><p>系統共有 512 位會員。</p></div></div>
+<div id="v-invite"   style="display:none"><div class="vp"><h3><i class="bi bi-person-plus"></i> 邀請新會員</h3><p>輸入 Email 以發送邀請。</p></div></div>
+<div id="v-roles"    style="display:none"><div class="vp"><h3><i class="bi bi-shield-lock"></i> 權限設定</h3><p>管理員、編輯者、一般會員的角色設定。</p></div></div>
+<div id="v-appear"   style="display:none"><div class="vp"><h3><i class="bi bi-palette"></i> 外觀</h3><p>調整主題色、字型與佈局。</p></div></div>
+<div id="v-general"  style="display:none"><div class="vp"><h3><i class="bi bi-gear"></i> 一般設定</h3><p>網站名稱、時區、語言。</p></div></div>
+<div id="v-backup"   style="display:none"><div class="vp"><h3><i class="bi bi-database"></i> 備份</h3><p>上次備份：2026-03-26 03:00。</p></div></div>
+<div id="v-paste"    style="display:none"><div class="vp"><h3><i class="bi bi-clipboard"></i> 貼上</h3><p>已從剪貼簿貼上內容。</p></div></div>
+<div id="v-copy"     style="display:none"><div class="vp"><h3><i class="bi bi-copy"></i> 複製</h3><p>已複製到剪貼簿。</p></div></div>
+<div id="v-cut"      style="display:none"><div class="vp"><h3><i class="bi bi-scissors"></i> 剪下</h3><p>已剪下選取內容。</p></div></div>
+<div id="v-bold"     style="display:none"><div class="vp"><h3><i class="bi bi-type-bold"></i> 粗體</h3><p>套用粗體格式。</p></div></div>
+<div id="v-italic"   style="display:none"><div class="vp"><h3><i class="bi bi-type-italic"></i> 斜體</h3><p>套用斜體格式。</p></div></div>
+<div id="v-underline"style="display:none"><div class="vp"><h3><i class="bi bi-type-underline"></i> 底線</h3><p>套用底線格式。</p></div></div>
+<div id="v-left"     style="display:none"><div class="vp"><h3><i class="bi bi-text-left"></i> 靠左</h3><p>段落靠左對齊。</p></div></div>
+<div id="v-center"   style="display:none"><div class="vp"><h3><i class="bi bi-text-center"></i> 置中</h3><p>段落置中對齊。</p></div></div>
+<div id="v-right"    style="display:none"><div class="vp"><h3><i class="bi bi-text-right"></i> 靠右</h3><p>段落靠右對齊。</p></div></div>
+<div id="v-table"    style="display:none"><div class="vp"><h3><i class="bi bi-table"></i> 插入表格</h3><p>插入一個 3×3 的預設表格。</p></div></div>
+<div id="v-image"    style="display:none"><div class="vp"><h3><i class="bi bi-image"></i> 插入圖片</h3><p>從媒體庫選擇或上傳圖片。</p></div></div>
+<div id="v-link"     style="display:none"><div class="vp"><h3><i class="bi bi-link-45deg"></i> 插入連結</h3><p>輸入連結網址與顯示文字。</p></div></div>
+
+
+<!-- ══════════════════════════════════════════
+     展示 1：Ribbon 模式（完整範例）
+══════════════════════════════════════════ -->
+<h1>🎀 menu-flex — Ribbon 模式</h1>
+<p class="sub">mode="ribbon" · <menu-group label="..."> · size="large | small" · 浮在 content 上方</p>
+
+<h2>① 完整 Ribbon — 多群組、大小按鈕混搭</h2>
+<div class="card">
+  <p>點擊 Tab 展開 Ribbon 面板，面板浮在內容上方不壓縮空間；再點同一 Tab 收合。</p>
+  <div id="app-ribbon" class="demo-box"></div>
+</div>
+
+<menu-flex attach-to="app-ribbon" theme="sky" mode="ribbon" anim-speed="normal">
+
+  <menu-item text="常用" icon="bi-star-fill">
+    <menu-group label="剪貼簿">
+      <menu-subitem text="貼上"   icon="bi-clipboard-check" on-click="v-paste"     size="large"></menu-subitem>
+      <menu-subitem text="複製"   icon="bi-copy"            on-click="v-copy"      size="small"></menu-subitem>
+      <menu-subitem text="剪下"   icon="bi-scissors"        on-click="v-cut"       size="small"></menu-subitem>
+    </menu-group>
+    <menu-group label="字型">
+      <menu-subitem text="粗體"   icon="bi-type-bold"       on-click="v-bold"      size="small"></menu-subitem>
+      <menu-subitem text="斜體"   icon="bi-type-italic"     on-click="v-italic"    size="small"></menu-subitem>
+      <menu-subitem text="底線"   icon="bi-type-underline"  on-click="v-underline" size="small"></menu-subitem>
+    </menu-group>
+    <menu-group label="段落">
+      <menu-subitem text="靠左"   icon="bi-text-left"       on-click="v-left"      size="small"></menu-subitem>
+      <menu-subitem text="置中"   icon="bi-text-center"     on-click="v-center"    size="small"></menu-subitem>
+      <menu-subitem text="靠右"   icon="bi-text-right"      on-click="v-right"     size="small"></menu-subitem>
+    </menu-group>
+    <menu-group label="插入">
+      <menu-subitem text="表格"   icon="bi-table"           on-click="v-table"     size="large"></menu-subitem>
+      <menu-subitem text="圖片"   icon="bi-image"           on-click="v-image"     size="large"></menu-subitem>
+      <menu-subitem text="連結"   icon="bi-link-45deg"      on-click="v-link"      size="large"></menu-subitem>
+    </menu-group>
+  </menu-item>
+
+  <menu-item text="文章" icon="bi-file-earmark-text">
+    <menu-group label="文章管理">
+      <menu-subitem text="新增文章" icon="bi-plus-circle"     on-click="v-new"     size="large"></menu-subitem>
+      <menu-subitem text="文章列表" icon="bi-list-ul"         on-click="v-list"    size="large"></menu-subitem>
+      <menu-subitem text="草稿箱"   icon="bi-pencil-square"   on-click="v-draft"   size="large"></menu-subitem>
+    </menu-group>
+    <menu-group label="媒體">
+      <menu-subitem text="媒體庫"   icon="bi-images"          on-click="v-media"   size="large"></menu-subitem>
+      <menu-subitem text="上傳"     icon="bi-cloud-arrow-up"  on-click="v-upload"  size="small"></menu-subitem>
+    </menu-group>
+  </menu-item>
+
+  <menu-item text="會員" icon="bi-people">
+    <menu-group label="會員">
+      <menu-subitem text="會員列表" icon="bi-people"          on-click="v-users"   size="large"></menu-subitem>
+      <menu-subitem text="邀請"     icon="bi-person-plus"     on-click="v-invite"  size="small"></menu-subitem>
+      <menu-subitem text="權限"     icon="bi-shield-lock"     on-click="v-roles"   size="small"></menu-subitem>
+    </menu-group>
+  </menu-item>
+
+  <menu-item text="設定" icon="bi-gear">
+    <menu-group label="外觀">
+      <menu-subitem text="外觀"     icon="bi-palette"         on-click="v-appear"  size="large"></menu-subitem>
+    </menu-group>
+    <menu-group label="系統">
+      <menu-subitem text="一般設定" icon="bi-gear"            on-click="v-general" size="large"></menu-subitem>
+      <menu-subitem text="備份"     icon="bi-database"        on-click="v-backup"  size="large"></menu-subitem>
+    </menu-group>
+  </menu-item>
+
+</menu-flex>
+
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     展示 2：同頁混用 dropdown + ribbon
+══════════════════════════════════════════ -->
+<h2>② 同頁混用：Dropdown（左）與 Ribbon（右）</h2>
+<div class="card">
+  <p>兩個容器獨立掛載，各自設定 mode。</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div id="app-drop2" class="demo-box"></div>
+    <div id="app-rib2"  class="demo-box"></div>
+  </div>
+</div>
+
+<menu-flex attach-to="app-drop2" theme="lavender" mode="dropdown">
+  <menu-item text="文章" icon="bi-file-earmark-text">
+    <menu-subitem text="新增"     icon="bi-plus-circle"   on-click="v-new"></menu-subitem>
+    <menu-subitem text="列表"     icon="bi-list-ul"       on-click="v-list"></menu-subitem>
+    <menu-subitem text="---"></menu-subitem>
+    <menu-subitem text="草稿"     icon="bi-pencil-square" on-click="v-draft"></menu-subitem>
+  </menu-item>
+  <menu-item text="會員" icon="bi-people">
+    <menu-subitem text="會員列表" icon="bi-people"        on-click="v-users"></menu-subitem>
+    <menu-subitem text="權限"     icon="bi-shield-lock"   on-click="v-roles"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+<menu-flex attach-to="app-rib2" theme="orange" mode="ribbon">
+  <menu-item text="格式" icon="bi-type">
+    <menu-group label="字型">
+      <menu-subitem text="粗體"   icon="bi-type-bold"      on-click="v-bold"      size="small"></menu-subitem>
+      <menu-subitem text="斜體"   icon="bi-type-italic"    on-click="v-italic"    size="small"></menu-subitem>
+      <menu-subitem text="底線"   icon="bi-type-underline" on-click="v-underline" size="small"></menu-subitem>
+    </menu-group>
+    <menu-group label="插入">
+      <menu-subitem text="圖片"   icon="bi-image"          on-click="v-image"     size="large"></menu-subitem>
+      <menu-subitem text="連結"   icon="bi-link-45deg"     on-click="v-link"      size="large"></menu-subitem>
+    </menu-group>
+  </menu-item>
+</menu-flex>
+
+
+<hr>
+
+<!-- ══════════════════════════════════════════
+     屬性表
+══════════════════════════════════════════ -->
+<h2>③ 新增屬性一覽</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>元件</th><th>屬性</th><th>說明</th></tr></thead>
+    <tbody>
+      <tr><td>&lt;menu-flex-cfg&gt;</td>   <td>default-mode</td>   <td>全域預設模式</td></tr>
+      <tr><td>&lt;menu-flex&gt;</td>        <td>mode</td>           <td>dropdown（預設）| ribbon</td></tr>
+      <tr><td>&lt;menu-group&gt;</td>       <td>label</td>          <td>群組底部標籤（ribbon 模式）</td></tr>
+      <tr><td>&lt;menu-subitem&gt;</td>     <td>size</td>           <td>large（預設）| small（ribbon 模式）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<code><span class="cm">&lt;!-- Ribbon 模式完整範例 --&gt;</span>
+<span class="hl">&lt;menu-flex</span> attach-to="app" theme="sky" <span class="hl">mode="ribbon"</span>&gt;
+
+  &lt;menu-item text="常用" icon="bi-star"&gt;
+
+    <span class="hl">&lt;menu-group</span> label="剪貼簿"&gt;
+      &lt;menu-subitem text="貼上" icon="bi-clipboard" on-click="v1" <span class="hl">size="large"</span>&gt;&lt;/menu-subitem&gt;
+      &lt;menu-subitem text="複製" icon="bi-copy"      on-click="v2" <span class="hl">size="small"</span>&gt;&lt;/menu-subitem&gt;
+      &lt;menu-subitem text="剪下" icon="bi-scissors"  on-click="v3" <span class="hl">size="small"</span>&gt;&lt;/menu-subitem&gt;
+      <span class="cm">&lt;!-- size="small" 每欄最多 3 個，超過自動換欄 --&gt;</span>
+    <span class="hl">&lt;/menu-group&gt;</span>
+
+    &lt;menu-group label="插入"&gt;
+      &lt;menu-subitem text="表格" icon="bi-table"      on-click="v4" size="large"&gt;&lt;/menu-subitem&gt;
+      &lt;menu-subitem text="圖片" icon="bi-image"      on-click="v5" size="large"&gt;&lt;/menu-subitem&gt;
+    &lt;/menu-group&gt;
+
+  &lt;/menu-item&gt;
+
+<span class="hl">&lt;/menu-flex&gt;</span></code>
+
+<script src="menu-flex.js"></script>
+</body>
+</html>
