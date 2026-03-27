@@ -11,10 +11,14 @@ class BrandColors {
     attention:    '#E5E5A6',
     sky:          '#04b5a3',
     safe:         '#81E6D9',
-    brown:        '#d9b375',
+    yellow:       '#D4B440',
+    stone:        '#7090A8',
     info:         '#90CDF4',
     pink:         '#FFB3D9',
     orange:       '#f69653',
+    // 別名：保留 brown/fuchsia 相容舊代碼
+    brown:        '#D4B440',   // → yellow（保留相容）
+    fuchsia:      '#ed1cd8',
     floatBg:      '#1e1f1e',
     floatBg2:     '#242524',
     floatBg3:     '#2a2b2a',
@@ -34,10 +38,13 @@ class BrandColors {
     attention:    '#70700a',
     sky:          '#027a6c',
     safe:         '#1a7a6e',
-    brown:        '#7a5010',
+    yellow:       '#7a5010',
+    stone:        '#4a6070',
     info:         '#1a5fa0',
     pink:         '#b5005a',
     orange:       '#b54a00',
+    brown:        '#7a5010',   // → yellow（保留相容）
+    fuchsia:      '#9a00a0',
     floatBg:      '#ffffff',
     floatBg2:     '#f8f8f6',
     floatBg3:     '#f0f0ec',
@@ -58,10 +65,13 @@ class BrandColors {
     attention:    '--color-attention',
     sky:          '--color-sky',
     safe:         '--color-safe',
-    brown:        '--color-brown',
+    yellow:       '--color-yellow',
+    stone:        '--color-stone',
+    brown:        '--color-brown',    // 相容舊代碼
     info:         '--color-info',
     pink:         '--color-pink',
     orange:       '--color-orange',
+    fuchsia:      '--color-fuchsia',
     floatBg:      '--color-float-bg',
     floatBg2:     '--color-float-bg-2',
     floatBg3:     '--color-float-bg-3',
@@ -2051,7 +2061,8 @@ function applyFontSizes(titleEl, bodyEl, titleFs, bodyFs) {
 // ── WordFlip 元件 ───────────────────────────────────────────────
 class WordFlip extends HTMLElement {
   static get observedAttributes() {
-    return ['data-content','data-color','mode','trigger-style','title','prefix','postfix','icon','box-width','box-height','title-fontsize','body-fontsize'];
+    return ['data-content','data-color','mode','trigger-style','title','prefix','postfix','icon',
+            'box-width','box-height','title-fontsize','body-fontsize','data-read-mark-size','data-read-mark','data-read-mark-color'];
   }
   connectedCallback() {
     if (this._initialized) return;
@@ -2060,7 +2071,14 @@ class WordFlip extends HTMLElement {
     this._flipTimeout = null; this._open = false; this._closeFloat = null;
     this._applyConfig(); this._applyTriggerStyle(); this._attachEvents();
   }
-  attributeChangedCallback() { if (this._initialized) this._applyTriggerStyle(); }
+  attributeChangedCallback(name) {
+    if (!this._initialized) return;
+    if (['data-read-mark-size','data-read-mark','data-read-mark-color'].includes(name)) {
+      this._applyReadMark();
+    } else {
+      this._applyTriggerStyle();
+    }
+  }
   get _opt() {
     return {
       contentSource : this.getAttribute('data-content') || this.getAttribute('source') || '',
@@ -2084,13 +2102,19 @@ class WordFlip extends HTMLElement {
   _applyConfig() {
     if (!this.hasAttribute('data-color')) this.setAttribute('data-color', WF_CONFIG.defaultColor);
     if (!this.hasAttribute('data-auto-back') && WF_CONFIG.autoFlipBack > 0) this.setAttribute('data-auto-back', WF_CONFIG.autoFlipBack);
+    this._applyReadMark();
+  }
+  _applyReadMark() {
     const readMark      = this.getAttribute('data-read-mark')       || WF_CONFIG.readMark;
     const readMarkColor = this.getAttribute('data-read-mark-color') || WF_CONFIG.readMarkColor;
-    const readMarkSize  = this.getAttribute('data-read-mark-size')  || WF_CONFIG.readMarkSize;
+    // 優先讀元素屬性，其次 WF_CONFIG，確保 word-flip-config 先後順序無關
+    const rawSize       = this.getAttribute('data-read-mark-size');
+    const readMarkSize  = rawSize !== null ? parseFloat(rawSize) : WF_CONFIG.readMarkSize;
     const readMarkIcon  = this.getAttribute('data-read-mark-icon')  || WF_CONFIG.readMarkIcon;
     if (readMark !== 'none') {
       this.setAttribute('data-read-mark', readMark);
       this.setAttribute('data-read-mark-color', readMarkColor);
+      // 直接寫入 px 值，避免 number + 'px' 雙重 px 問題
       this.style.setProperty('--wf-read-size', readMarkSize + 'px');
       if (readMark === 'icon' && readMarkIcon) { this.setAttribute('data-read-mark-icon', readMarkIcon); this._applyBootstrapIcon(readMarkIcon); }
     }
@@ -2303,8 +2327,13 @@ class WordTrigger extends HTMLElement {
     if (!this.hasAttribute('data-color')) this.setAttribute('data-color', WF_CONFIG.defaultColor);
     const readMark      = this.getAttribute('data-read-mark')       || WF_CONFIG.readMark;
     const readMarkColor = this.getAttribute('data-read-mark-color') || WF_CONFIG.readMarkColor;
-    const readMarkSize  = this.getAttribute('data-read-mark-size')  || WF_CONFIG.readMarkSize;
-    if (readMark !== 'none') { this.setAttribute('data-read-mark', readMark); this.setAttribute('data-read-mark-color', readMarkColor); this.style.setProperty('--wf-read-size', readMarkSize + 'px'); }
+    const rawSize       = this.getAttribute('data-read-mark-size');
+    const readMarkSize  = rawSize !== null ? parseFloat(rawSize) : WF_CONFIG.readMarkSize;
+    if (readMark !== 'none') {
+      this.setAttribute('data-read-mark', readMark);
+      this.setAttribute('data-read-mark-color', readMarkColor);
+      this.style.setProperty('--wf-read-size', readMarkSize + 'px');
+    }
   }
   _handleTrigger() {
     const targetId = this.getAttribute('for');
@@ -2402,6 +2431,14 @@ class WordFlipConfig extends HTMLElement {
         else WF_CONFIG[key] = val;
       }
     }
+    // word-flip-config 更新後，補套已初始化的 word-flip/word-trigger 元素
+    // 解決 word-flip-config 放在 word-flip 之後時 size 不更新的問題
+    document.querySelectorAll('word-flip').forEach(el => {
+      if (el._initialized) el._applyReadMark?.();
+    });
+    document.querySelectorAll('word-trigger').forEach(el => {
+      if (el._initialized) el._applyConfig?.();
+    });
   }
 }
 
