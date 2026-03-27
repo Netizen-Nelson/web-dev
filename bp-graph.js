@@ -39,6 +39,7 @@
     stone:    '#7090A8',
     pink:     '#FFB3D9',
     orange:   '#f69653',
+    fuchsia:  '#ed1cd8',  // 電氣洋紅，最高優先級強調色
     region:   '#333333',
     bg:       '#0c0d0c',
   };
