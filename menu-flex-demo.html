@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>menu-flex 元件展示</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0c0d0c;
+      color: #c6c7bd;
+      font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+      padding: 32px 24px 80px;
+    }
+
+    h1  { color: #C3A5E5; font-size: 1.4rem; margin-bottom: 4px; }
+    .sub { color: #7090A8; font-size: .85rem; margin-bottom: 36px; }
+    h2  { color: #04b5a3; font-size: .98rem; margin: 32px 0 12px;
+          border-bottom: 1px solid #252525; padding-bottom: 6px; }
+
+    .card {
+      background: #181918;
+      border: 1px solid #282828;
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+    }
+
+    /* ── 展示容器 ── */
+    #app-main {
+      width: 100%;
+      height: 340px;
+      border: 1px solid #2e2f2e;
+      border-radius: 8px;
+      background: #111211;
+      overflow: hidden;
+    }
+
+    #app-secondary {
+      width: 100%;
+      height: 280px;
+      border: 1px solid #2e2f2e;
+      border-radius: 8px;
+      background: #111211;
+      overflow: hidden;
+    }
+
+    /* ── 各頁面內容（隱藏原始，顯示在 mfx-content） ── */
+    .view-src { display: none; }
+
+    /* 頁面通用樣式（注入進 content 後生效） */
+    .view-page {
+      padding: 24px 28px;
+      line-height: 1.7;
+    }
+    .view-page h3 {
+      font-size: 1rem;
+      color: #C3A5E5;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .view-page p  { font-size: .875rem; color: #9a9b93; margin-bottom: 10px; }
+    .view-page ul { font-size: .875rem; color: #9a9b93; padding-left: 20px; }
+    .view-page li { margin-bottom: 4px; }
+
+    .view-page .tag {
+      display: inline-block;
+      font-size: .72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #252625;
+      color: #04b5a3;
+      border: 1px solid #333;
+      margin-right: 5px;
+      margin-bottom: 6px;
+    }
+
+    code {
+      display: block; background: #141514;
+      border: 1px solid #252525; border-radius: 6px;
+      padding: 13px 15px; font-size: .78rem;
+      color: #C8DD5A; line-height: 1.8;
+      overflow-x: auto; white-space: pre; margin-top: 12px;
+    }
+    .hl { color: #04b5a3; }
+    .cm { color: #444; }
+    hr  { border: none; border-top: 1px solid #1e1e1e; margin: 30px 0; }
+
+    /* 屬性表 */
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th { color: #7090A8; font-weight: 500; border-bottom: 1px solid #252525;
+         padding: 7px 10px; text-align: left; }
+    td { padding: 7px 10px; border-bottom: 1px solid #1e1e1e; }
+    td:first-child { font-family: monospace; color: #C8DD5A; }
+    tr:last-child td { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     全域配置
+════════════════════════════════════════════════ -->
+<menu-flex-cfg
+  default-theme="sky"
+  default-anim-speed="normal">
+</menu-flex-cfg>
+
+
+<!-- ══════════════════════════════════════════════
+     展示頁面資料（隱藏 div 作為內容源）
+════════════════════════════════════════════════ -->
+<div id="view-dashboard" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-speedometer2"></i> 儀表板</h3>
+    <p>歡迎回來！這裡是系統概覽。</p>
+    <span class="tag">今日訪客：1,248</span>
+    <span class="tag">文章數：86</span>
+    <span class="tag">留言：342</span>
+    <p>目前系統運行正常，所有服務狀態良好。</p>
+  </div>
+</div>
+
+<div id="view-new" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-plus-circle"></i> 新增文章</h3>
+    <p>在此填寫新文章的標題與內容，完成後按下儲存即可發布。</p>
+    <ul>
+      <li>支援 Markdown 格式</li>
+      <li>可上傳最多 10 張圖片</li>
+      <li>設定分類與標籤</li>
+    </ul>
+  </div>
+</div>
+
+<div id="view-list" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-list-ul"></i> 文章列表</h3>
+    <p>共有 86 篇文章。點擊標題可進行編輯，右側操作欄提供快速刪除與預覽功能。</p>
+  </div>
+</div>
+
+<div id="view-draft" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-pencil-square"></i> 草稿箱</h3>
+    <p>目前有 3 篇草稿尚未發布。</p>
+  </div>
+</div>
+
+<div id="view-users" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-people"></i> 會員管理</h3>
+    <p>系統共有 512 位會員，其中 42 位為本月新加入。</p>
+  </div>
+</div>
+
+<div id="view-roles" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-shield-lock"></i> 權限設定</h3>
+    <p>可設定管理員、編輯者、一般會員等不同角色的操作權限。</p>
+  </div>
+</div>
+
+<div id="view-appearance" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-palette"></i> 外觀設定</h3>
+    <p>調整網站主題色、字型與佈局方式。</p>
+  </div>
+</div>
+
+<div id="view-general" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-gear"></i> 一般設定</h3>
+    <p>網站名稱、時區、語言等基本設定。</p>
+  </div>
+</div>
+
+<div id="view-backup" class="view-src">
+  <div class="view-page">
+    <h3><i class="bi bi-cloud-arrow-up"></i> 備份與還原</h3>
+    <p>上次備份時間：2026-03-26 03:00。建議每週執行完整備份。</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     選單定義（可放在頁面任何位置）
+════════════════════════════════════════════════ -->
+<menu-flex attach-to="app-main" theme="sky" anim-speed="normal">
+  <menu-item text="總覽" icon="bi-house">
+    <menu-subitem text="儀表板"   icon="bi-speedometer2"   on-click="view-dashboard"></menu-subitem>
+  </menu-item>
+  <menu-item text="文章" icon="bi-file-earmark-text">
+    <menu-subitem text="新增文章" icon="bi-plus-circle"    on-click="view-new"></menu-subitem>
+    <menu-subitem text="文章列表" icon="bi-list-ul"        on-click="view-list"></menu-subitem>
+    <menu-subitem text="---"></menu-subitem>
+    <menu-subitem text="草稿箱"   icon="bi-pencil-square"  on-click="view-draft"></menu-subitem>
+  </menu-item>
+  <menu-item text="會員" icon="bi-people">
+    <menu-subitem text="會員管理" icon="bi-people"         on-click="view-users"></menu-subitem>
+    <menu-subitem text="權限設定" icon="bi-shield-lock"    on-click="view-roles"></menu-subitem>
+  </menu-item>
+  <menu-item text="設定" icon="bi-gear">
+    <menu-subitem text="外觀設定" icon="bi-palette"        on-click="view-appearance"></menu-subitem>
+    <menu-subitem text="一般設定" icon="bi-gear"           on-click="view-general"></menu-subitem>
+    <menu-subitem text="---"></menu-subitem>
+    <menu-subitem text="備份與還原" icon="bi-cloud-arrow-up" on-click="view-backup"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════════════
+     頁面開始
+════════════════════════════════════════════════ -->
+<h1>📋 menu-flex 元件展示</h1>
+<p class="sub">將選單列貼齊目標容器頂部，點擊子項目後在容器內顯示對應內容</p>
+
+<h2>① 完整展示（attach-to="app-main"）</h2>
+<div class="card">
+  <p style="font-size:.82rem;color:#7090A8;margin-bottom:14px;">
+    點擊上方選單，例如「文章 → 文章列表」，內容區會顯示對應畫面。
+  </p>
+  <!-- 目標容器 -->
+  <div id="app-main"></div>
+
+  <code><span class="hl">&lt;menu-flex</span> <span class="hl">attach-to="app-main"</span> theme="sky" anim-speed="normal"&gt;
+
+  &lt;menu-item text="文章" icon="bi-file-earmark-text"&gt;
+    &lt;menu-subitem text="新增文章" icon="bi-plus-circle"  <span class="hl">on-click="view-new"</span>&gt;&lt;/menu-subitem&gt;
+    &lt;menu-subitem text="文章列表" icon="bi-list-ul"      on-click="view-list"&gt;&lt;/menu-subitem&gt;
+    &lt;menu-subitem <span class="hl">text="---"</span>&gt;&lt;/menu-subitem&gt;  <span class="cm">&lt;!-- 分隔線 --&gt;</span>
+    &lt;menu-subitem text="草稿箱"   icon="bi-pencil-square" on-click="view-draft"&gt;&lt;/menu-subitem&gt;
+  &lt;/menu-item&gt;
+
+<span class="hl">&lt;/menu-flex&gt;</span>
+
+<span class="cm">&lt;!-- 內容源（隱藏，點擊後 innerHTML 注入容器） --&gt;</span>
+&lt;div id="view-new" style="display:none"&gt;
+  ...HTML 內容...
+&lt;/div&gt;</code>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     展示二：不同主題
+════════════════════════════════════════════════ -->
+<hr>
+<h2>② 主題 lavender + 速度 quick</h2>
+<div class="card">
+  <div id="app-secondary"></div>
+</div>
+
+<menu-flex attach-to="app-secondary" theme="lavender" anim-speed="quick">
+  <menu-item text="總覽"   icon="bi-house">
+    <menu-subitem text="儀表板"   icon="bi-speedometer2" on-click="view-dashboard"></menu-subitem>
+  </menu-item>
+  <menu-item text="設定"   icon="bi-gear">
+    <menu-subitem text="外觀設定" icon="bi-palette"      on-click="view-appearance"></menu-subitem>
+    <menu-subitem text="一般設定" icon="bi-gear"         on-click="view-general"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<hr>
+<!-- ══════════════════════════════════════════════
+     屬性表
+════════════════════════════════════════════════ -->
+<h2>③ 屬性一覽</h2>
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>元件</th><th>屬性</th><th>說明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>&lt;menu-flex-cfg&gt;</td>   <td>default-theme</td>       <td>全域主題色預設</td></tr>
+      <tr><td></td>                         <td>default-anim-speed</td>  <td>全域速度預設</td></tr>
+      <tr><td>&lt;menu-flex&gt;</td>        <td>attach-to (必填)</td>    <td>目標容器 id</td></tr>
+      <tr><td></td>                         <td>theme</td>               <td>sky / lavender / special / warning…</td></tr>
+      <tr><td></td>                         <td>anim-speed</td>          <td>slow / normal / quick / speedy</td></tr>
+      <tr><td>&lt;menu-item&gt;</td>        <td>text</td>                <td>頂層項目文字</td></tr>
+      <tr><td></td>                         <td>icon</td>                <td>Bootstrap icon class</td></tr>
+      <tr><td>&lt;menu-subitem&gt;</td>     <td>text</td>                <td>子項目文字；"---" 渲染分隔線</td></tr>
+      <tr><td></td>                         <td>icon</td>                <td>Bootstrap icon class</td></tr>
+      <tr><td></td>                         <td>on-click</td>            <td>點擊後顯示的目標 div id</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script src="menu-flex.js"></script>
+</body>
+</html>

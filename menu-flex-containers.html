@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>menu-flex — 容器類型展示</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0c0d0c;
+      color: #c6c7bd;
+      font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+      padding: 32px 24px 80px;
+    }
+
+    h1   { color: #C3A5E5; font-size: 1.4rem; margin-bottom: 4px; }
+    .sub { color: #7090A8; font-size: .85rem; margin-bottom: 36px; }
+    h2   { color: #04b5a3; font-size: .97rem; margin: 30px 0 10px;
+           border-bottom: 1px solid #252525; padding-bottom: 6px; }
+    p    { font-size: .84rem; color: #7090A8; margin-bottom: 12px; line-height: 1.7; }
+
+    /* ── 通用 card ── */
+    .card {
+      background: #181918;
+      border: 1px solid #282828;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+
+    /* ── 容器標籤 badge ── */
+    .tag-row   { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .el-badge  {
+      font-family: monospace; font-size: .75rem;
+      padding: 2px 10px; border-radius: 4px;
+      background: #1e2030; color: #90CDF4; border: 1px solid #2a3a5a;
+    }
+    .el-badge.ok     { background:#1a2a1a; color:#81E6D9; border-color:#2a4a3a; }
+    .el-badge.warn   { background:#2a1a1a; color:#F08080; border-color:#4a2a2a; }
+    .el-badge.note   { background:#2a2a1a; color:#D4B440; border-color:#4a3a1a; }
+
+    /* ── 目標容器通用樣式 ── */
+    .demo-box {
+      width: 100%;
+      height: 240px;
+      border: 1px solid #2e2f2e;
+      border-radius: 6px;
+      background: #111211;
+      overflow: hidden;
+    }
+
+    /* ── 各元素原本可能帶的預設樣式，示意頁刻意保留 ── */
+    section.demo-box { /* section 無特殊預設 */ }
+    article.demo-box { /* article 無特殊預設 */ }
+    main.demo-box    { display: block; } /* main 預設 display:block，不影響 */
+    aside.demo-box   { }
+    nav.demo-box     { }
+    details.demo-box {
+      /* details 預設 display:block，但 summary 是其子節點 */
+      /* 我們的選單會 prepend 進去，summary 會排在選單之後 */
+    }
+    dialog.demo-box  {
+      /* dialog 需要額外打開，這裡直接 display:flex */
+      display: flex; flex-direction: column;
+      position: relative; /* 取消 UA dialog 的絕對定位 */
+    }
+
+    /* ── 內容頁共用樣式（注入進 mfx-content 後生效） ── */
+    .vp { padding: 20px 24px; }
+    .vp h3 { font-size: .95rem; color: #C3A5E5; margin-bottom: 10px;
+             display: flex; align-items: center; gap: 7px; }
+    .vp p  { font-size: .83rem; color: #9a9b93; line-height: 1.65; }
+
+    /* ── code block ── */
+    code {
+      display: block; background: #141514; border: 1px solid #252525;
+      border-radius: 6px; padding: 13px 15px; font-size: .77rem;
+      color: #C8DD5A; line-height: 1.85; overflow-x: auto; white-space: pre;
+      margin-top: 12px;
+    }
+    .hl { color: #04b5a3; }
+    .cm { color: #444; }
+
+    /* ── 容器支援表 ── */
+    table { width:100%; border-collapse:collapse; font-size:.82rem; margin-top:6px; }
+    th { color:#7090A8; font-weight:500; border-bottom:1px solid #252525;
+         padding:7px 10px; text-align:left; }
+    td { padding:7px 10px; border-bottom:1px solid #1c1c1c; color:#c6c7bd; vertical-align:top; }
+    td:first-child { font-family:monospace; white-space:nowrap; }
+    tr:last-child td { border-bottom:none; }
+    .ok   { color: #81E6D9; }
+    .warn { color: #F08080; }
+    .note { color: #D4B440; }
+
+    hr { border: none; border-top: 1px solid #1e1e1e; margin: 30px 0; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     全域設定
+══════════════════════════════════════ -->
+<menu-flex-cfg default-theme="sky" default-anim-speed="normal"></menu-flex-cfg>
+
+<!-- ══════════════════════════════════════
+     內容源（全部隱藏）
+══════════════════════════════════════ -->
+<div id="v-home"    style="display:none"><div class="vp"><h3><i class="bi bi-house"></i> 首頁</h3><p>這是首頁內容，掛載在各種不同類型的 HTML 容器元素上。</p></div></div>
+<div id="v-about"   style="display:none"><div class="vp"><h3><i class="bi bi-info-circle"></i> 關於</h3><p>menu-flex 元件可以掛載到任何能包含子節點的 HTML 元素。</p></div></div>
+<div id="v-article" style="display:none"><div class="vp"><h3><i class="bi bi-newspaper"></i> 文章</h3><p>&lt;article&gt; 語意上代表獨立的內容區塊，非常適合用來承載有導覽的內容。</p></div></div>
+<div id="v-nav"     style="display:none"><div class="vp"><h3><i class="bi bi-map"></i> 導覽</h3><p>&lt;nav&gt; 通常用於頁面的導覽區域，掛載選單後形成雙層導覽結構。</p></div></div>
+<div id="v-aside"   style="display:none"><div class="vp"><h3><i class="bi bi-layout-sidebar"></i> 側邊欄</h3><p>&lt;aside&gt; 語意上代表與主內容相關但非主線的補充資訊。</p></div></div>
+<div id="v-details" style="display:none"><div class="vp"><h3><i class="bi bi-caret-right-square"></i> 詳細資訊</h3><p>&lt;details&gt; 原生支援展開折疊，與 menu-flex 一起使用可形成雙層展開機制。</p></div></div>
+<div id="v-figure"  style="display:none"><div class="vp"><h3><i class="bi bi-image"></i> 圖說</h3><p>&lt;figure&gt; 通常包含圖片與圖說，也可以是程式碼區塊或引用內容的容器。</p></div></div>
+<div id="v-dialog"  style="display:none"><div class="vp"><h3><i class="bi bi-window"></i> 對話框</h3><p>&lt;dialog&gt; 可做為 modal 的容器，配合 menu-flex 後形成含選單列的面板。</p></div></div>
+<div id="v-main"    style="display:none"><div class="vp"><h3><i class="bi bi-grid-1x2"></i> 主內容</h3><p>&lt;main&gt; 代表頁面的主要內容區，每頁建議只出現一次。</p></div></div>
+
+
+<h1>📦 menu-flex — 各種容器類型</h1>
+<p class="sub">只要不是 void element，任何 HTML 容器都可以作為 attach-to 目標</p>
+
+
+<!-- ══════════════════════════════════════
+     ① div（基礎對照）
+══════════════════════════════════════ -->
+<h2>① &lt;div&gt; — 最常見的容器</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge ok">&lt;div&gt;</span>
+    <span style="font-size:.78rem;color:#81E6D9;">✓ 完全支援</span>
+  </div>
+  <div id="c-div" class="demo-box"></div>
+</div>
+
+<menu-flex attach-to="c-div" theme="sky">
+  <menu-item text="首頁" icon="bi-house">
+    <menu-subitem text="概覽" icon="bi-house" on-click="v-home"></menu-subitem>
+    <menu-subitem text="關於" icon="bi-info-circle" on-click="v-about"></menu-subitem>
+  </menu-item>
+  <menu-item text="內容" icon="bi-file-earmark-text">
+    <menu-subitem text="文章" icon="bi-newspaper" on-click="v-article"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ② section
+══════════════════════════════════════ -->
+<h2>② &lt;section&gt; — 語意分區</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge ok">&lt;section&gt;</span>
+    <span style="font-size:.78rem;color:#81E6D9;">✓ 完全支援</span>
+    <span style="font-size:.78rem;color:#7090A8;">代表頁面中某個主題的獨立區塊</span>
+  </div>
+  <section id="c-section" class="demo-box"></section>
+</div>
+
+<menu-flex attach-to="c-section" theme="lavender">
+  <menu-item text="關於" icon="bi-info-circle">
+    <menu-subitem text="概覽"  icon="bi-house"        on-click="v-home"></menu-subitem>
+    <menu-subitem text="關於"  icon="bi-info-circle"  on-click="v-about"></menu-subitem>
+  </menu-item>
+  <menu-item text="文章" icon="bi-newspaper">
+    <menu-subitem text="最新"  icon="bi-newspaper"    on-click="v-article"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ③ article
+══════════════════════════════════════ -->
+<h2>③ &lt;article&gt; — 獨立內容</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge ok">&lt;article&gt;</span>
+    <span style="font-size:.78rem;color:#81E6D9;">✓ 完全支援</span>
+    <span style="font-size:.78rem;color:#7090A8;">代表可獨立散佈的內容（部落格文章、新聞等）</span>
+  </div>
+  <article id="c-article" class="demo-box"></article>
+</div>
+
+<menu-flex attach-to="c-article" theme="special">
+  <menu-item text="閱讀" icon="bi-book">
+    <menu-subitem text="文章" icon="bi-newspaper" on-click="v-article"></menu-subitem>
+    <menu-subitem text="---"></menu-subitem>
+    <menu-subitem text="關於" icon="bi-info-circle" on-click="v-about"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ④ main
+══════════════════════════════════════ -->
+<h2>④ &lt;main&gt; — 主內容區</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge ok">&lt;main&gt;</span>
+    <span style="font-size:.78rem;color:#81E6D9;">✓ 完全支援</span>
+    <span style="font-size:.78rem;color:#7090A8;">一頁建議只用一個</span>
+  </div>
+  <main id="c-main" class="demo-box"></main>
+</div>
+
+<menu-flex attach-to="c-main" theme="safe">
+  <menu-item text="主頁" icon="bi-grid-1x2">
+    <menu-subitem text="主內容" icon="bi-grid-1x2"   on-click="v-main"></menu-subitem>
+    <menu-subitem text="首頁"   icon="bi-house"       on-click="v-home"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ⑤ aside
+══════════════════════════════════════ -->
+<h2>⑤ &lt;aside&gt; — 側欄補充</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge ok">&lt;aside&gt;</span>
+    <span style="font-size:.78rem;color:#81E6D9;">✓ 完全支援</span>
+    <span style="font-size:.78rem;color:#7090A8;">補充資訊、工具欄、widget 的理想容器</span>
+  </div>
+  <aside id="c-aside" class="demo-box"></aside>
+</div>
+
+<menu-flex attach-to="c-aside" theme="yellow">
+  <menu-item text="工具" icon="bi-tools">
+    <menu-subitem text="側欄"   icon="bi-layout-sidebar" on-click="v-aside"></menu-subitem>
+    <menu-subitem text="導覽"   icon="bi-map"             on-click="v-nav"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ⑥ nav
+══════════════════════════════════════ -->
+<h2>⑥ &lt;nav&gt; — 導覽區塊</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge ok">&lt;nav&gt;</span>
+    <span style="font-size:.78rem;color:#81E6D9;">✓ 完全支援</span>
+    <span style="font-size:.78rem;color:#7090A8;">形成選單選單的「雙層導覽」結構</span>
+  </div>
+  <nav id="c-nav" class="demo-box"></nav>
+</div>
+
+<menu-flex attach-to="c-nav" theme="orange">
+  <menu-item text="導覽" icon="bi-map">
+    <menu-subitem text="導覽頁" icon="bi-map"      on-click="v-nav"></menu-subitem>
+    <menu-subitem text="首頁"   icon="bi-house"     on-click="v-home"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ⑦ figure
+══════════════════════════════════════ -->
+<h2>⑦ &lt;figure&gt; — 圖文容器</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge ok">&lt;figure&gt;</span>
+    <span style="font-size:.78rem;color:#81E6D9;">✓ 完全支援</span>
+    <span style="font-size:.78rem;color:#7090A8;">圖片、程式碼區塊、引用的語意容器</span>
+  </div>
+  <figure id="c-figure" class="demo-box"></figure>
+</div>
+
+<menu-flex attach-to="c-figure" theme="pink">
+  <menu-item text="媒體" icon="bi-image">
+    <menu-subitem text="圖說頁" icon="bi-image"   on-click="v-figure"></menu-subitem>
+    <menu-subitem text="首頁"   icon="bi-house"    on-click="v-home"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ⑧ details（特殊：原生含 summary）
+══════════════════════════════════════ -->
+<h2>⑧ &lt;details&gt; — 原生折疊</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge note">&lt;details&gt;</span>
+    <span style="font-size:.78rem;color:#D4B440;">⚠ 可用，但原生 summary 會排在選單下方</span>
+  </div>
+  <p>選單列會 <code style="display:inline;padding:1px 5px;font-size:.8em;border:none;background:#252525;">prepend</code> 進去排在最前，原有的 <code style="display:inline;padding:1px 5px;font-size:.8em;border:none;background:#252525;">&lt;summary&gt;</code> 子節點會往後移。</p>
+  <details id="c-details" class="demo-box" open>
+    <summary style="display:none">（原生摘要，已隱藏）</summary>
+  </details>
+</div>
+
+<menu-flex attach-to="c-details" theme="stone">
+  <menu-item text="詳細" icon="bi-caret-right-square">
+    <menu-subitem text="詳細資訊" icon="bi-caret-right-square" on-click="v-details"></menu-subitem>
+    <menu-subitem text="首頁"     icon="bi-house"               on-click="v-home"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<!-- ══════════════════════════════════════
+     ⑨ dialog（CSS 開啟的 modal 面板）
+══════════════════════════════════════ -->
+<h2>⑨ &lt;dialog&gt; — Modal 面板</h2>
+<div class="card">
+  <div class="tag-row">
+    <span class="el-badge note">&lt;dialog&gt;</span>
+    <span style="font-size:.78rem;color:#D4B440;">⚠ 可用，需用 CSS 開啟（取消 UA 預設 display:none）</span>
+  </div>
+  <p>原生 <code style="display:inline;padding:1px 5px;font-size:.8em;border:none;background:#252525;">&lt;dialog&gt;</code> 預設被瀏覽器隱藏，需透過 <code style="display:inline;padding:1px 5px;font-size:.8em;border:none;background:#252525;">dialog { display:flex; }</code> 或 JS <code style="display:inline;padding:1px 5px;font-size:.8em;border:none;background:#252525;">.showModal()</code> 開啟。此展示直接用 CSS 覆寫。</p>
+  <dialog id="c-dialog" class="demo-box" style="display:flex;flex-direction:column;position:relative;inset:auto;max-width:100%;max-height:100%;background:#111211;color:#c6c7bd;border:1px solid #2e2f2e;border-radius:6px;padding:0;"></dialog>
+</div>
+
+<menu-flex attach-to="c-dialog" theme="info">
+  <menu-item text="面板" icon="bi-window">
+    <menu-subitem text="對話框頁" icon="bi-window"      on-click="v-dialog"></menu-subitem>
+    <menu-subitem text="首頁"     icon="bi-house"        on-click="v-home"></menu-subitem>
+  </menu-item>
+</menu-flex>
+
+
+<hr>
+
+<!-- ══════════════════════════════════════
+     支援度總表
+══════════════════════════════════════ -->
+<h2>⑩ 容器支援度總表</h2>
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>元素</th><th>語意用途</th><th>支援狀態</th><th>注意事項</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>&lt;div&gt;</td>      <td>通用容器</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;section&gt;</td>  <td>主題分區</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;article&gt;</td>  <td>獨立內容</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;main&gt;</td>     <td>主內容區</td>             <td class="ok">✓ 完全支援</td>   <td>一頁建議只用一個</td></tr>
+      <tr><td>&lt;aside&gt;</td>    <td>側欄補充</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;nav&gt;</td>      <td>導覽區塊</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;header&gt;</td>   <td>頁首區塊</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;footer&gt;</td>   <td>頁尾區塊</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;figure&gt;</td>   <td>圖文容器</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;form&gt;</td>     <td>表單容器</td>             <td class="ok">✓ 完全支援</td>   <td>—</td></tr>
+      <tr><td>&lt;details&gt;</td>  <td>折疊容器</td>             <td class="note">⚠ 可用</td>     <td>原有 &lt;summary&gt; 子節點會排在選單後面</td></tr>
+      <tr><td>&lt;dialog&gt;</td>   <td>Modal 面板</td>           <td class="note">⚠ 可用</td>     <td>需用 CSS 或 JS 開啟，並覆寫 UA 樣式</td></tr>
+      <tr><td>&lt;table&gt;</td>    <td>表格</td>                 <td class="warn">✗ 不建議</td>   <td>瀏覽器對 table 子元素限制嚴格，會破壞結構</td></tr>
+      <tr><td>&lt;img&gt; 等 void</td><td>自閉合元素</td>         <td class="warn">✗ 不支援</td>   <td>無法包含子節點；元件會輸出 console.warn 並跳過</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<code><span class="cm">&lt;!-- ✓ 任何可包含子節點的元素 --&gt;</span>
+<span class="hl">&lt;section</span> id="my-panel"&gt;&lt;/section&gt;
+<span class="hl">&lt;article</span> id="my-article"&gt;&lt;/article&gt;
+<span class="hl">&lt;aside</span>   id="my-sidebar"&gt;&lt;/aside&gt;
+
+&lt;menu-flex <span class="hl">attach-to="my-panel"</span> theme="sky"&gt;
+  &lt;menu-item text="選單" icon="bi-list"&gt;
+    &lt;menu-subitem text="選項" icon="bi-dot" on-click="view-id"&gt;&lt;/menu-subitem&gt;
+  &lt;/menu-item&gt;
+&lt;/menu-flex&gt;
+
+<span class="cm">&lt;!-- ✗ void element 會觸發 console.warn，不做任何操作 --&gt;</span>
+&lt;img id="bad" src="..."&gt;
+&lt;menu-flex attach-to="bad"&gt;...&lt;/menu-flex&gt;</code>
+
+<script src="menu-flex.js"></script>
+</body>
+</html>
