@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>icon-btn 展示 v3</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0c0d0c;
+      color: #c6c7bd;
+      font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+      padding: 40px 24px 80px;
+    }
+    h1  { color: #C3A5E5; font-size: 1.4rem; margin-bottom: 5px; }
+    .sub { color: #7090A8; font-size: .85rem; margin-bottom: 36px; }
+    h2  { color: #04b5a3; font-size: .98rem; margin: 32px 0 13px;
+          border-bottom: 1px solid #252525; padding-bottom: 6px; }
+
+    .card {
+      background: #181918;
+      border: 1px solid #282828;
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 20px;
+    }
+
+    .speed-grid {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 14px 16px;
+      align-items: center;
+    }
+    .speed-label {
+      font-size: .78rem;
+      font-family: monospace;
+      padding: 3px 9px;
+      border-radius: 5px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .sl-slow   { background:#1e2030; color:#90CDF4; border:1px solid #2a3a5a; }
+    .sl-normal { background:#1a2a1a; color:#81E6D9; border:1px solid #2a4a3a; }
+    .sl-quick  { background:#2a1e10; color:#f69653; border:1px solid #4a3a20; }
+    .sl-speedy { background:#2a1a1a; color:#F08080; border:1px solid #4a2a2a; }
+
+    .replay-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+    .replay-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 6px;
+      border: 1px solid #333; background: #222;
+      color: #888; font-size: .75rem; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .replay-btn:hover { border-color: #04b5a3; color: #04b5a3; }
+
+    table { width:100%; border-collapse:collapse; font-size:.82rem; margin-top:10px; }
+    th { color:#7090A8; font-weight:500; border-bottom:1px solid #252525;
+         padding:6px 10px; text-align:left; }
+    td { padding:6px 10px; border-bottom:1px solid #1e1e1e; color:#c6c7bd; }
+    td:first-child { font-family:monospace; color:#C8DD5A; }
+    tr:last-child td { border-bottom: none; }
+
+    code {
+      display:block; background:#141514; border:1px solid #252525;
+      border-radius:6px; padding:13px 15px; font-size:.78rem;
+      color:#C8DD5A; line-height:1.8; overflow-x:auto; white-space:pre;
+      margin-top:13px;
+    }
+    .hl { color:#04b5a3; }
+    .cm { color:#484848; }
+    hr  { border:none; border-top:1px solid #1e1e1e; margin:32px 0; }
+  </style>
+</head>
+<body>
+
+<icon-btn-cfg
+  api-url="icon-btn-api.php"
+  default-theme="sky"
+  default-font-size="1rem"
+  default-slide-from="left"
+  default-anim-speed="normal">
+</icon-btn-cfg>
+
+<h1>⚡ icon-btn — 動畫速度展示</h1>
+<p class="sub">slow · normal · quick · speedy，四種預設一次對比</p>
+
+<h2>① 入場動畫速度對比（slide-from="left"）</h2>
+<div class="card">
+  <div class="speed-grid">
+
+    <span class="speed-label sl-slow">slow</span>
+    <div class="replay-row">
+      <icon-btn id="sp-slow" theme="info" slide-from="left" anim-speed="slow">
+        <btn-item icon="bi-heart"       text="喜愛" value="8"></btn-item>
+        <btn-item icon="bi-fire"        text="熱門" value="3"></btn-item>
+        <btn-item icon="bi-emoji-laugh" text="有趣" value="1"></btn-item>
+      </icon-btn>
+      <button class="replay-btn" onclick="replay('sp-slow')">
+        <i class="bi bi-arrow-counterclockwise"></i> 重播
+      </button>
+    </div>
+
+    <span class="speed-label sl-normal">normal</span>
+    <div class="replay-row">
+      <icon-btn id="sp-normal" theme="sky" slide-from="left" anim-speed="normal">
+        <btn-item icon="bi-heart"       text="喜愛" value="8"></btn-item>
+        <btn-item icon="bi-fire"        text="熱門" value="3"></btn-item>
+        <btn-item icon="bi-emoji-laugh" text="有趣" value="1"></btn-item>
+      </icon-btn>
+      <button class="replay-btn" onclick="replay('sp-normal')">
+        <i class="bi bi-arrow-counterclockwise"></i> 重播
+      </button>
+    </div>
+
+    <span class="speed-label sl-quick">quick</span>
+    <div class="replay-row">
+      <icon-btn id="sp-quick" theme="orange" slide-from="left" anim-speed="quick">
+        <btn-item icon="bi-heart"       text="喜愛" value="8"></btn-item>
+        <btn-item icon="bi-fire"        text="熱門" value="3"></btn-item>
+        <btn-item icon="bi-emoji-laugh" text="有趣" value="1"></btn-item>
+      </icon-btn>
+      <button class="replay-btn" onclick="replay('sp-quick')">
+        <i class="bi bi-arrow-counterclockwise"></i> 重播
+      </button>
+    </div>
+
+    <span class="speed-label sl-speedy">speedy</span>
+    <div class="replay-row">
+      <icon-btn id="sp-speedy" theme="warning" slide-from="left" anim-speed="speedy">
+        <btn-item icon="bi-heart"       text="喜愛" value="8"></btn-item>
+        <btn-item icon="bi-fire"        text="熱門" value="3"></btn-item>
+        <btn-item icon="bi-emoji-laugh" text="有趣" value="1"></btn-item>
+      </icon-btn>
+      <button class="replay-btn" onclick="replay('sp-speedy')">
+        <i class="bi bi-arrow-counterclockwise"></i> 重播
+      </button>
+    </div>
+
+  </div>
+  <code><span class="hl">&lt;icon-btn</span> id="..." theme="sky" slide-from="left" <span class="hl">anim-speed="normal"</span>&gt;
+  <span class="cm">&lt;!-- slow | normal | quick | speedy --&gt;</span>
+<span class="hl">&lt;/icon-btn&gt;</span></code>
+</div>
+
+<h2>② 收合 / 展開速度對比（collapsible）</h2>
+<div class="card">
+  <div class="speed-grid">
+
+    <span class="speed-label sl-slow">slow</span>
+    <icon-btn id="col-slow" theme="info" slide-from="left" anim-speed="slow" collapsible>
+      <btn-item icon="bi-hand-thumbs-up" text="讚"   value="5"></btn-item>
+      <btn-item icon="bi-star"           text="收藏" value="2"></btn-item>
+      <btn-item icon="bi-gem"            text="精華" value="1"></btn-item>
+    </icon-btn>
+
+    <span class="speed-label sl-normal">normal</span>
+    <icon-btn id="col-normal" theme="sky" slide-from="left" anim-speed="normal" collapsible>
+      <btn-item icon="bi-hand-thumbs-up" text="讚"   value="5"></btn-item>
+      <btn-item icon="bi-star"           text="收藏" value="2"></btn-item>
+      <btn-item icon="bi-gem"            text="精華" value="1"></btn-item>
+    </icon-btn>
+
+    <span class="speed-label sl-quick">quick</span>
+    <icon-btn id="col-quick" theme="orange" slide-from="left" anim-speed="quick" collapsible>
+      <btn-item icon="bi-hand-thumbs-up" text="讚"   value="5"></btn-item>
+      <btn-item icon="bi-star"           text="收藏" value="2"></btn-item>
+      <btn-item icon="bi-gem"            text="精華" value="1"></btn-item>
+    </icon-btn>
+
+    <span class="speed-label sl-speedy">speedy</span>
+    <icon-btn id="col-speedy" theme="warning" slide-from="left" anim-speed="speedy" collapsible>
+      <btn-item icon="bi-hand-thumbs-up" text="讚"   value="5"></btn-item>
+      <btn-item icon="bi-star"           text="收藏" value="2"></btn-item>
+      <btn-item icon="bi-gem"            text="精華" value="1"></btn-item>
+    </icon-btn>
+
+  </div>
+</div>
+
+<hr>
+
+<h2>③ 速度參數一覽（單位 ms）</h2>
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>anim-speed</th><th>enterDur</th><th>enterStagger</th>
+        <th>exitDur</th><th>exitStagger</th><th>popDur</th><th>chevron</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>slow</td>  <td>600</td><td>120</td><td>440</td><td>95</td><td>500</td><td>0.60s</td></tr>
+      <tr><td>normal</td><td>360</td><td>68</td> <td>260</td><td>55</td><td>300</td><td>0.35s</td></tr>
+      <tr><td>quick</td> <td>200</td><td>38</td> <td>150</td><td>30</td><td>170</td><td>0.20s</td></tr>
+      <tr><td>speedy</td><td>95</td> <td>16</td> <td>75</td> <td>12</td><td>90</td> <td>0.10s</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<h2>④ 全域設定範例</h2>
+<div class="card">
+<code><span class="hl">&lt;icon-btn-cfg</span>
+  api-url="icon-btn-api.php"
+  default-theme="sky"
+  default-slide-from="left"
+  <span class="hl">default-anim-speed="normal"</span>&gt;
+<span class="hl">&lt;/icon-btn-cfg&gt;</span>
+
+<span class="cm">&lt;!-- 個別元件可覆寫 --&gt;</span>
+<span class="hl">&lt;icon-btn</span> id="article-1" theme="sky" <span class="hl">anim-speed="speedy"</span>&gt;
+  &lt;btn-item icon="bi-heart" text="喜愛" value="0"&gt;&lt;/btn-item&gt;
+<span class="hl">&lt;/icon-btn&gt;</span></code>
+</div>
+
+<script src="icon-btn.js"></script>
+<script>
+function replay(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const parent = el.parentNode;
+  const next   = el.nextSibling;
+  parent.removeChild(el);
+  el.querySelectorAll('.ikb-btn, .ikb-track').forEach(n => n.remove());
+  parent.insertBefore(el, next);
+}
+</script>
+</body>
+</html>
