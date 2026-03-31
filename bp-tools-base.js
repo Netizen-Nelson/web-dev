@@ -8,10 +8,10 @@ class BrandColors {
     special:      '#C8DD5A',
     warning:      '#F08080',
     salmon:       '#E5C3B3',
-    attention:    '#E5E5A6',
+    yellow:       '#D4B440',
     sky:          '#04b5a3',
     safe:         '#81E6D9',
-    brown:        '#d9b375',
+    stone:        '#7090A8',
     info:         '#90CDF4',
     pink:         '#FFB3D9',
     orange:       '#f69653',
@@ -31,10 +31,10 @@ class BrandColors {
     special:      '#5a6e00',
     warning:      '#b53030',
     salmon:       '#8B4A30',
-    attention:    '#70700a',
+    yellow:       '#7a6000',
     sky:          '#027a6c',
     safe:         '#1a7a6e',
-    brown:        '#7a5010',
+    stone:        '#2a5070',
     info:         '#1a5fa0',
     pink:         '#b5005a',
     orange:       '#b54a00',
@@ -55,10 +55,10 @@ class BrandColors {
     special:      '--color-special',
     warning:      '--color-warning',
     salmon:       '--color-salmon',
-    attention:    '--color-attention',
+    yellow:       '--color-yellow',
     sky:          '--color-sky',
     safe:         '--color-safe',
-    brown:        '--color-brown',
+    stone:        '--color-stone',
     info:         '--color-info',
     pink:         '--color-pink',
     orange:       '--color-orange',
@@ -159,7 +159,7 @@ class DualCell {
 
     this.options = {
       theme,
-      cols:      parseInt(options.cols) || 2,
+      cols:      parseInt(options.cols, 10) || 2,
       colWidths: options.colWidths || null,
       cellMinHeight:     options.cellMinHeight   || '40px',
       cellPadding:       options.cellPadding     || '8px 12px',
@@ -188,9 +188,9 @@ class DualCell {
       menuButtonIconShowNext:       options.menuButtonIconShowNext       || null,
       targetId: options.targetId || null,
       overlay1Text:  options.overlay1Text  || null,
-      overlay1Color: R(options.overlay1Color) || tc.menuButtonColor || BrandColors.get('attention'),
+      overlay1Color: R(options.overlay1Color) || tc.menuButtonColor || BrandColors.get('yellow'),
       overlay2Text:  options.overlay2Text  || null,
-      overlay2Color: R(options.overlay2Color) || tc.menuButtonColor || BrandColors.get('attention'),
+      overlay2Color: R(options.overlay2Color) || tc.menuButtonColor || BrandColors.get('yellow'),
       overlayInvert: options.overlayInvert || false,
       accentColor:   tc.menuButtonColor || R(options.menuButtonColor) || BrandColors.get('special'),
       groupTitleFontSize: options.groupTitleFontSize || '1.125rem',
@@ -200,13 +200,13 @@ class DualCell {
       groupIconSize:      options.groupIconSize        || '1rem',
       groupCollapsedIcon: options.groupCollapsedIcon   || null,
       groupExpandedIcon:  options.groupExpandedIcon    || null,
-      carouselInterval:        parseInt(options.carouselInterval)   || 4000,
+      carouselInterval:        parseInt(options.carouselInterval, 10)   || 4000,
       carouselIndicator:       options.carouselIndicator       !== false,
-      autoRevealInterval:      parseInt(options.autoRevealInterval) || 0,
+      autoRevealInterval:      parseInt(options.autoRevealInterval, 10) || 0,
       carouselIndicatorColor:  R(options.carouselIndicatorColor) || tc.menuButtonColor || BrandColors.get('special'),
       carouselIndicatorHeight: options.carouselIndicatorHeight || '3px',
       barSide:  options.barSide  || null,
-      barWidth: parseInt(options.barWidth) || 4,
+      barWidth: parseInt(options.barWidth, 10) || 4,
       barColor: R(options.barColor) || null,
       onCellClick:   options.onCellClick   || null,
       onMenuClick:   options.onMenuClick   || null,
@@ -233,10 +233,10 @@ class DualCell {
       safe:      { borderColor:'#81E6D9', cellBgColor:'#1f2e24', hoverBgColor:'#2d4335', textColor:'#e0f5e8', menuButtonColor:'#81E6D9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#81E6D9' },
       info:      { borderColor:'#90CDF4', cellBgColor:'#1e2636', hoverBgColor:'#2d3a4d', textColor:'#e0ebf9', menuButtonColor:'#90CDF4', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#90CDF4' },
       salmon:    { borderColor:'#E5C3B3', cellBgColor:'#2e2824', hoverBgColor:'#443d36', textColor:'#f5ede8', menuButtonColor:'#E5C3B3', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#E5C3B3' },
-      attention: { borderColor:'#E5E5A6', cellBgColor:'#2e2e22', hoverBgColor:'#434333', textColor:'#f5f5e0', menuButtonColor:'#E5E5A6', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#E5E5A6' },
+      yellow:    { borderColor:'#D4B440', cellBgColor:'#2b2a18', hoverBgColor:'#3e3d28', textColor:'#f5eec0', menuButtonColor:'#D4B440', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#D4B440' },
       pink:      { borderColor:'#FFB3D9', cellBgColor:'#2e2228', hoverBgColor:'#44323d', textColor:'#ffe8f5', menuButtonColor:'#FFB3D9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#FFB3D9' },
       orange:    { borderColor:'#f69653', cellBgColor:'#2e2519', hoverBgColor:'#443726', textColor:'#f5ebe0', menuButtonColor:'#f69653', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#f69653' },
-      brown:     { borderColor:'#d9b375', cellBgColor:'#2b2621', hoverBgColor:'#3f3931', textColor:'#f2ebe3', menuButtonColor:'#d9b375', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#d9b375' },
+      stone:     { borderColor:'#7090A8', cellBgColor:'#1c2830', hoverBgColor:'#293640', textColor:'#d8e8f0', menuButtonColor:'#7090A8', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#7090A8' },
       default:   { borderColor:'#c6c7bd', cellBgColor:'#333333', hoverBgColor:'#404040', textColor:'#c6c7bd', menuButtonColor:'#c6c7bd', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#c6c7bd' },
     };
 
@@ -248,10 +248,10 @@ class DualCell {
       safe:      { borderColor:'#1a7a6e', cellBgColor:'#eaf7f4', hoverBgColor:'#d5f0ea', textColor:'#083830', menuButtonColor:'#1a7a6e', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#1a7a6e' },
       info:      { borderColor:'#1a5fa0', cellBgColor:'#eaf2fa', hoverBgColor:'#d5e8f5', textColor:'#0a2848', menuButtonColor:'#1a5fa0', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#1a5fa0' },
       salmon:    { borderColor:'#8B4A30', cellBgColor:'#faf2ee', hoverBgColor:'#f2e4dc', textColor:'#3a1808', menuButtonColor:'#8B4A30', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#8B4A30' },
-      attention: { borderColor:'#70700a', cellBgColor:'#f8f8e8', hoverBgColor:'#eeeecb', textColor:'#303000', menuButtonColor:'#70700a', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#70700a' },
+      yellow:    { borderColor:'#7a6000', cellBgColor:'#f8f4e0', hoverBgColor:'#f0eccc', textColor:'#2a2000', menuButtonColor:'#7a6000', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#7a6000' },
       pink:      { borderColor:'#b5005a', cellBgColor:'#faeef5', hoverBgColor:'#f2dde8', textColor:'#3a0020', menuButtonColor:'#b5005a', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#b5005a' },
       orange:    { borderColor:'#b54a00', cellBgColor:'#faf2ea', hoverBgColor:'#f2e4d5', textColor:'#3a1800', menuButtonColor:'#b54a00', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#b54a00' },
-      brown:     { borderColor:'#7a5010', cellBgColor:'#f8f2e8', hoverBgColor:'#f0e6d0', textColor:'#2a1800', menuButtonColor:'#7a5010', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#7a5010' },
+      stone:     { borderColor:'#2a5070', cellBgColor:'#eaf0f5', hoverBgColor:'#d5e5f0', textColor:'#0a1e30', menuButtonColor:'#2a5070', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#2a5070' },
       default:   { borderColor:'#1e1f1e', cellBgColor:'#e2e3dc', hoverBgColor:'#d5d6d0', textColor:'#1e1f1e', menuButtonColor:'#1e1f1e', groupTitleColor:'#f4f4f0', groupTitleBgColor:'#1e1f1e' },
     };
 
@@ -332,7 +332,7 @@ class DualCell {
     return {
       type: 'row', cols, slotContent, slotCols,
       hidden:          rowEl?.hasAttribute('hidden')              || false,
-      autoRevealDelay: parseInt(rowEl?.getAttribute('auto-reveal-delay')) || 0,
+      autoRevealDelay: parseInt(rowEl?.getAttribute('auto-reveal-delay'), 10) || 0,
     };
   }
 
@@ -349,13 +349,13 @@ class DualCell {
       ? el.getAttribute('overlay-invert') === 'true' : O.overlayInvert;
     const itemEls       = Array.from(el.querySelectorAll(':scope > dual-item, :scope > [data-item]'));
     const carouselItems = itemEls.length > 1 ? itemEls.map(i => i.innerHTML) : null;
-    const ciInterval  = a('carousel-interval') !== null ? parseInt(a('carousel-interval')) : null;
+    const ciInterval  = a('carousel-interval') !== null ? parseInt(a('carousel-interval'), 10) : null;
     const ciIndicator = el.hasAttribute('carousel-indicator')
       ? el.getAttribute('carousel-indicator') !== 'false' : null;
     const ciColor  = R(a('carousel-indicator-color'));
     const ciHeight = a('carousel-indicator-height');
     return {
-      content:     carouselItems ? carouselItems[0] : el.innerHTML,
+      content:     carouselItems ? carouselItems[0] : (itemEls.length === 1 ? itemEls[0].innerHTML : el.innerHTML),
       width:       a('width'), spanAll: el.getAttribute('span') === 'all',
       padding:     a('padding'), showMenu: el.getAttribute('show-menu') !== 'false',
       menuAction:  a('menu-action') || 'push', menuTarget: a('target'),
@@ -367,7 +367,7 @@ class DualCell {
       carouselIndicator: ciIndicator, carouselIndicatorColor: ciColor,
       carouselIndicatorHeight: ciHeight, flex: 1,
       barSide:    a('bar-side')  || this.options.barSide  || null,
-      barWidth:   a('bar-width') !== null ? parseInt(a('bar-width')) : this.options.barWidth,
+      barWidth:   a('bar-width') !== null ? parseInt(a('bar-width'), 10) : this.options.barWidth,
       barColor:   R(a('bar-color')) || this.options.barColor || null,
       hoverTip:   a('hover-tip')    || null,
       hoverTipSrc:a('hover-tip-src')|| null,
@@ -748,8 +748,10 @@ class DualCell {
       barEl.style.animation = `dc-shrink ${interval}ms linear forwards`;
     };
     const advance = () => {
+      if (!cellEl.isConnected) return;   // 容器已移除，停止遞迴避免記憶體洩漏
       contentEl.classList.add('dc-car-exit');
       setTimeout(() => {
+        if (!cellEl.isConnected) return;
         idx = (idx + 1) % items.length;
         contentEl.innerHTML = items[idx];
         contentEl.classList.remove('dc-car-exit');
@@ -772,11 +774,11 @@ class DualCell {
       if (btn) {
         e.stopPropagation();
         const { action, rowIdx, colIdx, target } = btn.dataset;
-        this.handleMenuAction(action, target || null, parseInt(rowIdx), parseInt(colIdx), btn);
+        this.handleMenuAction(action, target || null, parseInt(rowIdx, 10), parseInt(colIdx, 10), btn);
         return;
       }
       if (cell && this.options.onCellClick)
-        this.options.onCellClick(parseInt(cell.dataset.rowIdx), parseInt(cell.dataset.colIdx));
+        this.options.onCellClick(parseInt(cell.dataset.rowIdx, 10), parseInt(cell.dataset.colIdx, 10));
     });
     // ── 共用 tooltip DOM ─────────────────────────────────────
     const tipEl = document.createElement('div');
@@ -821,7 +823,7 @@ class DualCell {
       if (!cell) return;
 
       // 現有 hover-source/hover-target 行為（更新持久元素）
-      const col = this.getColData(parseInt(cell.dataset.rowIdx), parseInt(cell.dataset.colIdx));
+      const col = this.getColData(parseInt(cell.dataset.rowIdx, 10), parseInt(cell.dataset.colIdx, 10));
       if (col?.hoverSource && col?.hoverTarget) {
         const src = document.getElementById(col.hoverSource);
         const tgt = document.getElementById(col.hoverTarget);
@@ -876,7 +878,7 @@ class DualCell {
   }
 
   handleOverlayClick(overlayEl, cellEl) {
-    const layer      = parseInt(overlayEl.dataset.layer);
+    const layer      = parseInt(overlayEl.dataset.layer, 10);
     const contentDiv = cellEl.querySelector('.dc-content');
     overlayEl.remove();
     if (layer === 1) {
@@ -965,7 +967,7 @@ class DualCell {
     if (!rowContainer || rowContainer.style.display !== 'none') return;
     rowContainer.style.display = '';
     rowContainer.classList.add('dc-reveal-row');
-    const delay = parseInt(rowContainer.dataset.autoRevealDelay) || 0;
+    const delay = parseInt(rowContainer.dataset.autoRevealDelay, 10) || 0;
     if (delay > 0) {
       setTimeout(() => {
         const next = this._nextHiddenRow(rowContainer);
@@ -1012,6 +1014,8 @@ class DualCellElement extends HTMLElement {
   connectedCallback() {
     if (this._initialized) return;
     this._initialized = true;
+    // 若未設 id，自動補一個，避免 getElementById('') 回傳 null
+    if (!this.id) this.id = 'dc-auto-' + Math.random().toString(36).slice(2, 8);
     // 延遲到子元素（dual-col / dual-row 等）全部解析完畢後再初始化，
     // 避免 connectedCallback 在開頭標籤觸發時 children 尚未插入的問題。
     setTimeout(() => { this.dualCellInstance = new DualCell(this.id, this._buildOptions()); }, 0);
@@ -1162,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hDur = cfg.horizontalAnimDur + 'ms';
 
     // 顏色 variants：使用 CSS 變數，自動跟隨主題
-    const colorKeys = ['shell','lavender','special','warning','salmon','attention','sky','safe','brown','info','pink','orange'];
+    const colorKeys = ['shell','lavender','special','warning','salmon','yellow','sky','safe','stone','info','pink','orange'];
 
     const irColorVariants = colorKeys.map(name =>
       `info-region[active="true"][color="${name}"] { border-left-color: var(--color-${name}); }`
@@ -1722,6 +1726,12 @@ function wfResolveColor(val) {
   return BrandColors.resolve(val) ?? val;
 }
 
+/** HTML 特殊字元跳脫，防止 title 屬性注入 */
+function wfEscape(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function wfContrastColor(hex) {
   if (!hex) return BrandColors.get('shell');
   const c = hex.replace('#', '');
@@ -1761,10 +1771,10 @@ function wfRenderFix(val) {
   --wf-color-special:   var(--color-special,   #C8DD5A);
   --wf-color-warning:   var(--color-warning,   #F08080);
   --wf-color-salmon:    var(--color-salmon,    #E5C3B3);
-  --wf-color-attention: var(--color-attention, #E5E5A6);
+  --wf-color-yellow:    var(--color-yellow,    #D4B440);
   --wf-color-sky:       var(--color-sky,       #04b5a3);
   --wf-color-safe:      var(--color-safe,      #81E6D9);
-  --wf-color-brown:     var(--color-brown,     #d9b375);
+  --wf-color-stone:     var(--color-stone,     #7090A8);
   --wf-color-info:      var(--color-info,      #90CDF4);
   --wf-color-pink:      var(--color-pink,      #FFB3D9);
   --wf-color-orange:    var(--color-orange,    #f69653);
@@ -1878,14 +1888,14 @@ word-flip[data-color="warning"],word-trigger[data-color="warning"]  { --wf-accen
 flip-card[data-color="warning"]  { --wf-accent:var(--wf-color-warning); }
 word-flip[data-color="salmon"],word-trigger[data-color="salmon"]   { --wf-accent:var(--wf-color-salmon);   --wf-accent-alpha:rgba(229,195,179,0.12); }
 flip-card[data-color="salmon"]   { --wf-accent:var(--wf-color-salmon); }
-word-flip[data-color="attention"],word-trigger[data-color="attention"]{ --wf-accent:var(--wf-color-attention);--wf-accent-alpha:rgba(229,229,166,0.12); }
-flip-card[data-color="attention"] { --wf-accent:var(--wf-color-attention); }
+word-flip[data-color="yellow"],word-trigger[data-color="yellow"]    { --wf-accent:var(--wf-color-yellow);   --wf-accent-alpha:rgba(212,180,64,0.12); }
+flip-card[data-color="yellow"]   { --wf-accent:var(--wf-color-yellow); }
 word-flip[data-color="sky"],word-trigger[data-color="sky"]       { --wf-accent:var(--wf-color-sky);      --wf-accent-alpha:rgba(4,181,163,0.12); }
 flip-card[data-color="sky"]      { --wf-accent:var(--wf-color-sky); }
 word-flip[data-color="safe"],word-trigger[data-color="safe"]      { --wf-accent:var(--wf-color-safe);     --wf-accent-alpha:rgba(129,230,217,0.12); }
 flip-card[data-color="safe"]     { --wf-accent:var(--wf-color-safe); }
-word-flip[data-color="brown"],word-trigger[data-color="brown"]     { --wf-accent:var(--wf-color-brown);    --wf-accent-alpha:rgba(217,179,117,0.12); }
-flip-card[data-color="brown"]    { --wf-accent:var(--wf-color-brown); }
+word-flip[data-color="stone"],word-trigger[data-color="stone"]     { --wf-accent:var(--wf-color-stone);    --wf-accent-alpha:rgba(112,144,168,0.12); }
+flip-card[data-color="stone"]    { --wf-accent:var(--wf-color-stone); }
 word-flip[data-color="info"],word-trigger[data-color="info"]      { --wf-accent:var(--wf-color-info);     --wf-accent-alpha:rgba(144,205,244,0.12); }
 flip-card[data-color="info"]     { --wf-accent:var(--wf-color-info); }
 word-flip[data-color="pink"],word-trigger[data-color="pink"]      { --wf-accent:var(--wf-color-pink);     --wf-accent-alpha:rgba(255,179,217,0.12); }
@@ -1898,10 +1908,10 @@ word-flip[data-read-mark-color="lavender"] ,word-trigger[data-read-mark-color="l
 word-flip[data-read-mark-color="special"]  ,word-trigger[data-read-mark-color="special"]  { --wf-read-color:var(--wf-color-special); }
 word-flip[data-read-mark-color="warning"]  ,word-trigger[data-read-mark-color="warning"]  { --wf-read-color:var(--wf-color-warning); }
 word-flip[data-read-mark-color="salmon"]   ,word-trigger[data-read-mark-color="salmon"]   { --wf-read-color:var(--wf-color-salmon); }
-word-flip[data-read-mark-color="attention"],word-trigger[data-read-mark-color="attention"]{ --wf-read-color:var(--wf-color-attention); }
+word-flip[data-read-mark-color="yellow"]   ,word-trigger[data-read-mark-color="yellow"]   { --wf-read-color:var(--wf-color-yellow); }
 word-flip[data-read-mark-color="sky"]      ,word-trigger[data-read-mark-color="sky"]      { --wf-read-color:var(--wf-color-sky); }
 word-flip[data-read-mark-color="safe"]     ,word-trigger[data-read-mark-color="safe"]     { --wf-read-color:var(--wf-color-safe); }
-word-flip[data-read-mark-color="brown"]    ,word-trigger[data-read-mark-color="brown"]    { --wf-read-color:var(--wf-color-brown); }
+word-flip[data-read-mark-color="stone"]    ,word-trigger[data-read-mark-color="stone"]    { --wf-read-color:var(--wf-color-stone); }
 word-flip[data-read-mark-color="info"]     ,word-trigger[data-read-mark-color="info"]     { --wf-read-color:var(--wf-color-info); }
 word-flip[data-read-mark-color="pink"]     ,word-trigger[data-read-mark-color="pink"]     { --wf-read-color:var(--wf-color-pink); }
 word-flip[data-read-mark-color="orange"]   ,word-trigger[data-read-mark-color="orange"]   { --wf-read-color:var(--wf-color-orange); }
@@ -2095,7 +2105,7 @@ class WordFlip extends HTMLElement {
       boxHeight     : this.getAttribute('box-height')     || WF_CONFIG.boxHeight,
       titleFontsize : this.getAttribute('title-fontsize') || WF_CONFIG.titleFontsize,
       bodyFontsize  : this.getAttribute('body-fontsize')  || WF_CONFIG.bodyFontsize,
-      autoFlipBack  : parseInt(this.getAttribute('data-auto-back')) || WF_CONFIG.autoFlipBack || 0,
+      autoFlipBack  : parseInt(this.getAttribute('data-auto-back'), 10) || WF_CONFIG.autoFlipBack || 0,
     };
   }
   _applyConfig() {
@@ -2166,6 +2176,7 @@ class WordFlip extends HTMLElement {
           variables[attr.name.substring(5)] = attr.value;
       });
       const content = getContentFromSource(o.contentSource, variables);
+      if (!content?.trim()) { console.warn(`word-flip: data-content "${o.contentSource}" 解析後為空`); return; }
       this._flipToBack(content);
     } else { this._flipToFront(); }
   }
@@ -2183,6 +2194,7 @@ class WordFlip extends HTMLElement {
     }, 250);
   }
   _flipToFront() {
+    if (!this._flipped) return;
     if (this._flipTimeout) { clearTimeout(this._flipTimeout); this._flipTimeout = null; }
     this.classList.add('wf-animating'); this.style.opacity = '0'; this.style.transform = 'scale(0.95)';
     setTimeout(() => {
@@ -2227,7 +2239,7 @@ class WordFlip extends HTMLElement {
   _showPopover(o, color, contentHTML, registerClose) {
     const box = document.createElement('div');
     box.className = 'wf-popover-box'; box.style.setProperty('--wf-float-color', color);
-    const titleText = o.title || this.textContent.trim().slice(0, 30);
+    const titleText = wfEscape(o.title || this.textContent.trim().slice(0, 30));
     box.innerHTML = `
       <div class="wf-popover-header">
         <span class="wf-popover-title">${titleText}</span>
@@ -2248,8 +2260,8 @@ class WordFlip extends HTMLElement {
   _showModal(o, color, contentHTML, registerClose) {
     const overlay = document.createElement('div');
     overlay.className = 'wf-modal-overlay'; overlay.style.setProperty('--wf-float-color', color);
-    const titleText = o.title || this.textContent.trim().slice(0, 40);
-    const titleIcon = o.icon ? `<i class="bi bi-${o.icon}"></i>` : '';
+    const titleText = wfEscape(o.title || this.textContent.trim().slice(0, 40));
+    const titleIcon = o.icon ? `<i class="bi bi-${wfEscape(o.icon)}"></i>` : '';
     overlay.innerHTML = `
       <div class="wf-modal-box">
         <div class="wf-modal-header">
@@ -2278,8 +2290,8 @@ class WordFlip extends HTMLElement {
     overlay.className = 'wf-drawer-overlay'; overlay.style.setProperty('--wf-float-color', color);
     const panel = document.createElement('div');
     panel.className = 'wf-drawer-panel'; panel.style.setProperty('--wf-float-color', color);
-    const titleText = o.title || this.textContent.trim().slice(0, 40);
-    const titleIcon = o.icon ? `<i class="bi bi-${o.icon}"></i>` : '';
+    const titleText = wfEscape(o.title || this.textContent.trim().slice(0, 40));
+    const titleIcon = o.icon ? `<i class="bi bi-${wfEscape(o.icon)}"></i>` : '';
     panel.innerHTML = `
       <div class="wf-drawer-header">
         <div class="wf-drawer-title">${titleIcon}${titleText}</div>
@@ -2369,7 +2381,7 @@ class FlipCard extends HTMLElement {
   _flipToBack() {
     if (this._flipped) return; this.classList.add('wf-flipped'); this._flipped = true;
     this.dispatchEvent(new CustomEvent('wf:flip-to-back', { bubbles: true }));
-    const autoBack = parseInt(this.getAttribute('data-auto-back')) || WF_CONFIG.autoFlipBack;
+    const autoBack = parseInt(this.getAttribute('data-auto-back'), 10) || WF_CONFIG.autoFlipBack;
     if (autoBack > 0) this._flipTimeout = setTimeout(() => this._flipToFront(), autoBack * 1000);
   }
   _flipToFront() {
@@ -2419,7 +2431,7 @@ class WordFlipConfig extends HTMLElement {
       if (this.hasAttribute(attr)) {
         const val = this.getAttribute(attr);
         if (['focusMode','hoverTrigger','toggle','closeOnOverlay'].includes(key)) WF_CONFIG[key] = val !== 'false';
-        else if (['autoFlipBack','readMarkSize','borderWidth','barWidth'].includes(key)) WF_CONFIG[key] = parseInt(val) || WF_DEFAULT_CONFIG[key];
+        else if (['autoFlipBack','readMarkSize','borderWidth','barWidth'].includes(key)) WF_CONFIG[key] = parseInt(val, 10) || WF_DEFAULT_CONFIG[key];
         else WF_CONFIG[key] = val;
       }
     }
