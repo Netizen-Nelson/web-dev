@@ -1009,7 +1009,13 @@ class DualCell {
 
 // ── DualCell Custom Elements ────────────────────────────────────
 class DualCellElement extends HTMLElement {
-  connectedCallback() { this.dualCellInstance = new DualCell(this.id, this._buildOptions()); }
+  connectedCallback() {
+    if (this._initialized) return;
+    this._initialized = true;
+    // 延遲到子元素（dual-col / dual-row 等）全部解析完畢後再初始化，
+    // 避免 connectedCallback 在開頭標籤觸發時 children 尚未插入的問題。
+    setTimeout(() => { this.dualCellInstance = new DualCell(this.id, this._buildOptions()); }, 0);
+  }
   _buildOptions() {
     const opts = {};
     const boolAttrs = new Set(['show-menu-button','border-follow-theme','overlay-invert','carousel-indicator']);
@@ -2334,11 +2340,15 @@ class FlipCard extends HTMLElement {
   connectedCallback() {
     if (this._initialized) return; this._initialized = true;
     this._flipped = false; this._flipTimeout = null; this._cardInner = null;
-    this._applyConfig(); this._wrapContent();
-    if (this.hasAttribute('data-click-to-flip')) {
-      this.style.cursor = 'pointer';
-      this.addEventListener('click', () => { this._flipped ? this._flipToFront() : this._flipToBack(); });
-    }
+    this._applyConfig();
+    // 延遲到 card-front / card-back 子元素解析完畢
+    setTimeout(() => {
+      this._wrapContent();
+      if (this.hasAttribute('data-click-to-flip')) {
+        this.style.cursor = 'pointer';
+        this.addEventListener('click', () => { this._flipped ? this._flipToFront() : this._flipToBack(); });
+      }
+    }, 0);
   }
   _applyConfig() {
     if (!this.hasAttribute('data-color')) this.setAttribute('data-color', WF_CONFIG.defaultColor);
