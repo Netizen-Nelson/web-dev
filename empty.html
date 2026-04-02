@@ -20,9 +20,51 @@ body {
 </head>
 <body class="bp-text-shell bp-bg-0">
 
+<div id="dc-phrases" data-dual-cell
+      data-cols="2"
+      data-col-widths="2:3"
+      data-border-color="yellow"
+      data-cell-bg-color="#161716"
+      data-hover-bg-color="#1e1f1e"
+      data-text-color="shell"
+      data-font-size="1rem"
+      data-cell-padding="9px 12px"
+      data-show-menu-button="true"
+      data-menu-button-color="yellow"
+      data-menu-button-icon-push="bi-arrow-right-square"
+      data-menu-button-icon-copy="bi-clipboard"
+      data-menu-button-icon-toggle="bi-chevron-down"
+      data-menu-button-icon-toggle-expanded="bi-chevron-up"
+      data-target-id="dc-target"
+      data-overlay-1-text="完成後解鎖"
+      data-overlay-1-color="#7090A8"
+      data-group-title-bg-color="#7090A8"
+      data-group-title-color="#0c0d0c"
+      data-group-title-font-size="1rem"
+      data-group-title-padding="9px"
+      data-group-expanded-icon="bi-chevron-down"
+      data-group-collapsed-icon="bi-chevron-right">
+      <dual-group title="Weather" title-icon="bi-cloud">
+        <dual-row>
+          <dual-col on-link="intro:done"
+            hover-tip="最安全的英式開場，語調上揚更自然。聽到對方回應後立刻接話。"
+          ><strong>Opener</strong></dual-col>
+          <dual-col menu-action="push" on-link="intro:done"
+            bar-side="left" bar-color="info" bar-width="3"
+          >"Lovely weather, isn't it?"</dual-col>
+        </dual-row>
+        <dual-row>
+          <dual-col on-link="intro:done" hover-tip="帶有驚訝的語氣，容易讓對方也有感而發。">
+            <strong>Surprise</strong>
+          </dual-col>
+          <dual-col menu-action="copy" on-link="intro:done">
+            "Can you believe this weather?"
+          </dual-col>
+        </dual-row>
+      </dual-group>
+	</div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-tools-base.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-tools-up.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-graph.js"></script>
