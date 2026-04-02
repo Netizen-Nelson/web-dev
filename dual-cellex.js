@@ -33,7 +33,7 @@ class DualCell {
 
       showMenuButton:               options.showMenuButton !== false,
       menuButtonPosition:           options.menuButtonPosition  || 'right',
-      menuButtonColor:              R(options.menuButtonColor)  || tc.menuButtonColor || '#b9c971',
+      menuButtonColor:              R(options.menuButtonColor)  || tc.menuButtonColor || '#C8DD5A',
       menuButtonSize:               options.menuButtonSize      || '1.25rem',
       menuButtonIconPush:           options.menuButtonIconPush           || null,
       menuButtonIconPull:           options.menuButtonIconPull           || null,
@@ -47,15 +47,15 @@ class DualCell {
       targetId: options.targetId || null,
 
       overlay1Text:  options.overlay1Text  || null,
-      overlay1Color: R(options.overlay1Color) || tc.menuButtonColor || '#E5E5A6',
+      overlay1Color: R(options.overlay1Color) || tc.menuButtonColor || '#C8DD5A',
       overlay2Text:  options.overlay2Text  || null,
-      overlay2Color: R(options.overlay2Color) || tc.menuButtonColor || '#E5E5A6',
+      overlay2Color: R(options.overlay2Color) || tc.menuButtonColor || '#C8DD5A',
       overlayInvert: options.overlayInvert || false,
-      accentColor:   tc.menuButtonColor || R(options.menuButtonColor) || '#b9c971',
+      accentColor:   tc.menuButtonColor || R(options.menuButtonColor) || '#C8DD5A',
 
       groupTitleFontSize: options.groupTitleFontSize || '1.125rem',
       groupTitleColor:    R(options.groupTitleColor)   || tc.groupTitleColor   || '#1C1C1E',
-      groupTitleBgColor:  R(options.groupTitleBgColor) || tc.groupTitleBgColor || '#b9c971',
+      groupTitleBgColor:  R(options.groupTitleBgColor) || tc.groupTitleBgColor || '#C8DD5A',
       groupTitlePadding:  options.groupTitlePadding    || '10px 12px',
       groupIconSize:      options.groupIconSize        || '1rem',
       groupCollapsedIcon: options.groupCollapsedIcon   || null,
@@ -84,16 +84,16 @@ class DualCell {
   static getThemeConfig(name) {
     const T = {
       lavender:  { borderColor:'#C3A5E5', cellBgColor:'#2a2435', hoverBgColor:'#3d344a', textColor:'#e8dff5', menuButtonColor:'#C3A5E5', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C3A5E5' },
-      special:   { borderColor:'#b9c971', cellBgColor:'#2a2e23', hoverBgColor:'#3d4333', textColor:'#e8ead9', menuButtonColor:'#b9c971', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#b9c971' },
+      special:   { borderColor:'#C8DD5A', cellBgColor:'#252a1c', hoverBgColor:'#38402a', textColor:'#edf0d5', menuButtonColor:'#C8DD5A', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C8DD5A' },
       warning:   { borderColor:'#F08080', cellBgColor:'#2e2422', hoverBgColor:'#443532', textColor:'#f5e8e6', menuButtonColor:'#F08080', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#F08080' },
       sky:       { borderColor:'#04b5a3', cellBgColor:'#1a2e2c', hoverBgColor:'#274440', textColor:'#d9f5f2', menuButtonColor:'#04b5a3', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#04b5a3' },
       safe:      { borderColor:'#81E6D9', cellBgColor:'#1f2e24', hoverBgColor:'#2d4335', textColor:'#e0f5e8', menuButtonColor:'#81E6D9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#81E6D9' },
       info:      { borderColor:'#90CDF4', cellBgColor:'#1e2636', hoverBgColor:'#2d3a4d', textColor:'#e0ebf9', menuButtonColor:'#90CDF4', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#90CDF4' },
       salmon:    { borderColor:'#E5C3B3', cellBgColor:'#2e2824', hoverBgColor:'#443d36', textColor:'#f5ede8', menuButtonColor:'#E5C3B3', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#E5C3B3' },
-      attention: { borderColor:'#E5E5A6', cellBgColor:'#2e2e22', hoverBgColor:'#434333', textColor:'#f5f5e0', menuButtonColor:'#E5E5A6', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#E5E5A6' },
+      yellow:    { borderColor:'#D4B440', cellBgColor:'#2b2715', hoverBgColor:'#3e3820', textColor:'#f5eecf', menuButtonColor:'#D4B440', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#D4B440' },
+      stone:     { borderColor:'#7090A8', cellBgColor:'#1e2630', hoverBgColor:'#2c3a47', textColor:'#dce8f0', menuButtonColor:'#7090A8', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#7090A8' },
       pink:      { borderColor:'#FFB3D9', cellBgColor:'#2e2228', hoverBgColor:'#44323d', textColor:'#ffe8f5', menuButtonColor:'#FFB3D9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#FFB3D9' },
       orange:    { borderColor:'#f69653', cellBgColor:'#2e2519', hoverBgColor:'#443726', textColor:'#f5ebe0', menuButtonColor:'#f69653', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#f69653' },
-      brown:     { borderColor:'#d9b375', cellBgColor:'#2b2621', hoverBgColor:'#3f3931', textColor:'#f2ebe3', menuButtonColor:'#d9b375', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#d9b375' },
       default:   { borderColor:'#c6c7bd', cellBgColor:'#333333', hoverBgColor:'#404040', textColor:'#c6c7bd', menuButtonColor:'#c6c7bd', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#c6c7bd' },
     };
     return T[name?.toLowerCase()] || T.default;
@@ -102,9 +102,9 @@ class DualCell {
   static resolveColor(color) {
     if (!color) return null;
     const M = {
-      shell:'#c6c7bd', lavender:'#C3A5E5', special:'#b9c971', warning:'#F08080',
-      salmon:'#E5C3B3', attention:'#E5E5A6', sky:'#04b5a3', safe:'#81E6D9',
-      brown:'#d9b375', info:'#90CDF4', pink:'#FFB3D9', orange:'#f69653',
+      shell:'#c6c7bd', lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
+      salmon:'#E5C3B3', sky:'#04b5a3', safe:'#81E6D9',
+      yellow:'#D4B440', stone:'#7090A8', info:'#90CDF4', pink:'#FFB3D9', orange:'#f69653',
       bg:'#0c0d0c', area:'#333333',
     };
     return M[color.toLowerCase()] || color;
@@ -823,7 +823,7 @@ class DualCell {
       const ta = document.createElement('textarea');
       ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch (e) {}
+      try { document.execCommand('copy'); } catch {}
       document.body.removeChild(ta);
     }
   }
