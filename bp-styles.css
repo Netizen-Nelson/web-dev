@@ -1,55 +1,3 @@
-:root {
-    --bp-color-0: #0c0d0c;    /* 底層背景色 */
-    --bp-color-1: #333333;    /* 區域填充 */
-    --bp-color-1h: #3a3a3a;   /* 區域填充 hover */
-    --bp-color-2: #c6c7bd;    /* 文字主色 */
-    --bp-color-3: #C3A5E5;    /* 薰衣草色 */
-    --bp-color-4: #b9c971;    /* 特殊標記 */
-    --bp-color-5: #F08080;    /* 警告色 */
-    --bp-color-6: #E5C3B3;    /* 柔和色 */
-    --bp-color-7: #E5E5A6;    /* 注意色 */
-    --bp-color-8: #04b5a3;    /* 天空藍 */
-    --bp-color-9: #81E6D9;    /* 安全色 */
-    --bp-color-10: #d9b375;   /* 棕色 */
-    --bp-color-11: #90CDF4;   /* 資訊色 */
-    --bp-color-12: #FFB3D9;   /* 粉紅色 */
-    --bp-color-13: #f69653;   /* 橘色 */
-	--bp-color-14: #4A4A4D;   /* 灰色 */
-}
- 
-
-.bp-c-0 { color: #0c0d0c; }
-.bp-c-1 { color: #333333; }
-.bp-c-1h { color: #3a3a3a; }
-.bp-c-2 { color: #c6c7bd; }
-.bp-c-3 { color: #C3A5E5; }
-.bp-c-4 { color: #b9c971; }
-.bp-c-5 { color: #F08080; }
-.bp-c-6 { color: #E5C3B3; }
-.bp-c-7 { color: #E5E5A6; }
-.bp-c-8 { color: #04b5a3; }
-.bp-c-9 { color: #81E6D9; }
-.bp-c-10 { color: #d9b375; }
-.bp-c-11 { color: #90CDF4; }
-.bp-c-12 { color: #FFB3D9; }
-.bp-c-13 { color: #f69653; }
-
-.bp-bg-0 { background-color: #0c0d0c; }
-.bp-bg-1 { background-color: #333333; }
-.bp-bg-1h { background-color: #3a3a3a; }
-.bp-bg-2 { background-color: #c6c7bd; }
-.bp-bg-3 { background-color: #C3A5E5; }
-.bp-bg-4 { background-color: #b9c971; }
-.bp-bg-5 { background-color: #F08080; }
-.bp-bg-6 { background-color: #E5C3B3; }
-.bp-bg-7 { background-color: #E5E5A6; }
-.bp-bg-8 { background-color: #04b5a3; }
-.bp-bg-9 { background-color: #81E6D9; }
-.bp-bg-10 { background-color: #d9b375; }
-.bp-bg-11 { background-color: #90CDF4; }
-.bp-bg-12 { background-color: #FFB3D9; }
-.bp-bg-13 { background-color: #f69653; }
-
 .bp-text-base { color: #0c0d0c; }
 .bp-text-fill { color: #333333; }
 .bp-text-fill-hover { color: #3a3a3a; }
@@ -58,7 +6,6 @@
 .bp-text-special { color: #C8DD5A; }
 .bp-text-warning { color: #F08080; }
 .bp-text-salmon { color: #E5C3B3; }
-.bp-text-attention { color: #E5E5A6; }
 .bp-text-sky { color: #04b5a3; }
 .bp-text-safe { color: #81E6D9; }
 .bp-text-yellow { color: #d4b440; }
@@ -76,7 +23,6 @@
 .bp-bg-special { background-color: #b9c971; }
 .bp-bg-warning { background-color: #F08080; }
 .bp-bg-salmon { background-color: #E5C3B3; }
-.bp-bg-attention { background-color: #E5E5A6; }
 .bp-bg-sky { background-color: #04b5a3; }
 .bp-bg-safe { background-color: #81E6D9; }
 .bp-bg-yellow { background-color: #d4b440; }
@@ -93,7 +39,6 @@
 .bp-border-special { border: 1px solid #b9c971; }
 .bp-border-warning { border: 1px solid #F08080; }
 .bp-border-salmon { border: 1px solid #E5C3B3; }
-.bp-border-attention { border: 1px solid #E5E5A6; }
 .bp-border-sky { border: 1px solid #04b5a3; }
 .bp-border-safe { border: 1px solid #81E6D9; }
 .bp-border-yellow { border: 1px solid #d4b440; }
@@ -101,7 +46,8 @@
 .bp-border-pink { border: 1px solid #FFB3D9; }
 .bp-border-orange { border: 1px solid #f69653; }
 
-.fs-xlarge {font-size: 3rem;}
+.fs-extralarge {font-size: 3.2rem;}
+.fs-xlarge {font-size: 2.8rem;}
 .fs-larger {font-size: 2.25rem;}
 .fs-large {font-size: 1.5rem;}
 .fs-regular {font-size: 1rem;}
@@ -115,6 +61,7 @@
 .w-60 {width: 60%;}
 .w-40 {width: 40%;}
 .w-30 {width: 33%;}
+.w-20 {width: 20%;}
 
 .m-6 { margin: 4rem !important; }
 .mt-6, .my-6 { margin-top: 4rem !important; }
