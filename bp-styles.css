@@ -99,6 +99,11 @@
 .ps-8, .px-8 { padding-left: 8rem !important; }
 .pe-8, .px-8 { padding-right: 8rem !important; }
 
+bp-ind-1 {text-indent: 0.8rem;}
+bp-ind-2 {text-indent: 1rem;}
+bp-ind-3 {text-indent: 1.2rem;}
+bp-ind-4 {text-indent: 1.5rem;}
+bp-ind-5 {text-indent: 1.8rem;}
 
 blockquote {
     margin: 16px 0px;
