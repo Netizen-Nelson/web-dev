@@ -13,7 +13,6 @@
 .bp-text-stone {color: #7090A8; }
 .bp-text-pink { color: #FFB3D9; }
 .bp-text-orange { color: #f69653; }
-.bp-text-carbon { color: #4A4A4D; }
 
 .bp-bg-background { background-color: #0c0d0c; }
 .bp-bg-base { background-color: #0c0d0c; }
@@ -47,12 +46,12 @@
 .bp-border-pink { border: 1px solid #FFB3D9; }
 .bp-border-orange { border: 1px solid #f69653; }
 
-.fs-extralarge {font-size: 3.2rem;}
+.fs-extralarge {font-size: 3.3rem;}
 .fs-xlarge {font-size: 2.8rem;}
-.fs-larger {font-size: 2.25rem;}
-.fs-large {font-size: 1.5rem;}
+.fs-larger {font-size: 1.8rem;}
+.fs-large {font-size: 1.35rem;}
 .fs-regular {font-size: 1rem;}
-.fs-small, .fs-6 {font-size: 0.88rem;}
+.fs-small, .fs-6 {font-size: 0.85rem;}
 .fs-smaller, .fs-7 {font-size: 0.75rem;}
 .fs-xsmall, .fs-8 {font-size: 0.65rem;}
 .fs-extrasmall, .fs-9 {font-size: 0.5rem;}
