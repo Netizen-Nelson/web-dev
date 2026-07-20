@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bp-callout</title>
+<style>
+  :root {
+    --bg:#0c0d0c;--shell:#c6c7bd;--lavender:#C3A5E5;--special:#C8DD5A;
+    --warning:#F08080;--salmon:#E5C3B3;--sky:#08a9d1;--safe:#40c99a;
+    --yellow:#DECA4B;--info:#5fafed;--stone:#7090A8;--pink:#FFB3D9;--orange:#eda109;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--shell);font-family:'Segoe UI',system-ui,sans-serif;font-size:1rem;line-height:1.7;padding-bottom:80px}
+  p{margin:.6em 0}
+  strong{color:var(--shell)}
+  code{font-family:'Consolas','Fira Code',monospace;font-size:.85em;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:4px;color:var(--lavender)}
+  ul,ol{padding-left:1.4em;margin:.5em 0}
+  li{margin:.25em 0}
+  table.vocab{width:100%;border-collapse:collapse;font-size:.88rem}
+  table.vocab th{text-align:left;padding:7px 12px;background:rgba(255,255,255,.04);color:var(--stone);font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.1)}
+  table.vocab td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+  table.vocab tr:last-child td{border:none}
+
+  .page-header{background:linear-gradient(135deg,rgba(64,201,154,.08),rgba(8,169,209,.06));border-bottom:1px solid rgba(64,201,154,.15);padding:44px 40px 32px}
+  .page-header h1{font-size:1.85rem;font-weight:700;color:var(--safe);letter-spacing:-.02em}
+  .page-header h1 span{color:var(--special)}
+  .page-header p{opacity:.7;margin-top:6px;font-size:.92rem}
+
+  .container{max-width:860px;margin:0 auto;padding:0 40px}
+  .section{margin-top:52px}
+  .eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-bottom:4px}
+  .section-title{font-size:1.22rem;font-weight:600;color:var(--shell);margin-bottom:4px}
+  .section-desc{font-size:.87rem;color:var(--shell);opacity:.58;margin-bottom:24px}
+  hr.div{border:none;border-top:1px solid rgba(198,199,189,.09);margin:52px 0 0}
+
+  /* Card grid for flash cards */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px}
+
+  /* Attr table */
+  .attr-table{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:16px}
+  .attr-table th{text-align:left;padding:9px 14px;background:rgba(255,255,255,.04);color:var(--stone);font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.1)}
+  .attr-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;color:var(--shell)}
+  .attr-table tr:last-child td{border:none}
+  .attr-table code{font-size:.8rem}
+  .attr-table .v{color:var(--special);font-size:.8rem}
+  .attr-table .d{opacity:.65}
+
+  /* Code block */
+  .code-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:20px 22px;font-family:'Consolas','Fira Code',monospace;font-size:.82rem;line-height:1.65;color:var(--shell);overflow-x:auto;margin-top:16px}
+  .c-tag{color:var(--sky)} .c-attr{color:var(--lavender)} .c-val{color:var(--special)} .c-cmnt{color:var(--stone);opacity:.65;font-style:italic}
+
+  /* Alert area for events */
+  .event-log{min-height:32px;margin-top:12px}
+  .event-msg{display:inline-block;padding:5px 12px;border-radius:6px;font-size:.8rem;font-weight:500;animation:fadein .2s ease}
+  .event-msg.back{background:rgba(195,165,229,.12);border:1px solid rgba(195,165,229,.3);color:var(--lavender)}
+  .event-msg.front{background:rgba(64,201,154,.12);border:1px solid rgba(64,201,154,.3);color:var(--safe)}
+  .event-msg.auto{background:rgba(222,202,75,.12);border:1px solid rgba(222,202,75,.3);color:var(--yellow)}
+  @keyframes fadein{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="container">
+    <h1>bp-callout <span>v1.2</span> — 翻牌功能</h1>
+    <p>正面 / 背面各自支援完整 HTML · 自動翻回正面 · 倒數計時條 · CSS Grid 高度自適應 · Hover 邊框發光</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ══ 1. 基本翻牌 ════════════════════════════════ -->
+  <div class="section">
+    <div class="eyebrow">Section 01</div>
+    <div class="section-title">基本翻牌（無自動翻回）</div>
+    <div class="section-desc">點擊卡片翻到背面，再次點擊翻回正面。鍵盤：Enter / Space 同樣有效。</div>
+
+    <div class="card-grid">
+
+      <!-- 單字卡 -->
+      <aside class="bp-callout" data-flip>
+        <div class="bpc-front" data-type="example" data-title="單字">
+          <p style="font-size:1.6rem;font-weight:700;letter-spacing:.02em;margin:.3em 0">ephemeral</p>
+          <p style="opacity:.6;font-size:.85rem">/ ɪˈfem.ər.əl /　adj.</p>
+        </div>
+        <div class="bpc-back" data-type="tip" data-title="釋義">
+          <p><strong>lasting for only a short time</strong></p>
+          <p style="opacity:.75;margin-top:8px">短暫的；轉瞬即逝的</p>
+          <p style="margin-top:10px;font-style:italic;font-size:.88rem;opacity:.7">
+            "The beauty of cherry blossoms is <strong>ephemeral</strong>."
+          </p>
+        </div>
+      </aside>
+
+      <!-- 文法翻牌 -->
+      <aside class="bp-callout" data-flip>
+        <div class="bpc-front" data-type="explanation" data-title="文法問題">
+          <p>下列哪句話是<strong>正確</strong>的？</p>
+          <ul>
+            <li>A. She don't know the answer.</li>
+            <li>B. She doesn't know the answer.</li>
+            <li>C. She not know the answer.</li>
+          </ul>
+        </div>
+        <div class="bpc-back" data-type="safe" data-title="正確答案">
+          <p>✓ &nbsp;<strong>B. She doesn't know the answer.</strong></p>
+          <p style="margin-top:8px;opacity:.75;font-size:.9rem">
+            第三人稱單數現在式否定句，助動詞用 <code>does not</code>（縮寫 <code>doesn't</code>），
+            主要動詞用原形 <code>know</code>。
+          </p>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- ══ 2. 自動翻回（含倒數計時）════════════════════ -->
+  <hr class="div">
+  <div class="section">
+    <div class="eyebrow">Section 02</div>
+    <div class="section-title">自動翻回正面（data-flip-delay）</div>
+    <div class="section-desc">翻到背面後，底部出現倒數計時條和秒數，時間到自動翻回。點擊可立即翻回並取消計時。</div>
+
+    <div class="card-grid">
+
+      <!-- 5 秒自動翻回 -->
+      <aside class="bp-callout" data-flip data-flip-delay="5">
+        <div class="bpc-front" data-type="memory" data-title="記憶卡">
+          <p style="font-size:1.1rem;font-weight:600">Present Perfect 用法</p>
+          <p style="opacity:.7;font-size:.88rem;margin-top:6px">點擊查看，5 秒後自動翻回</p>
+        </div>
+        <div class="bpc-back" data-type="insight" data-title="重點整理">
+          <p>用於以下情境：</p>
+          <ul>
+            <li>過去發生、現在仍有影響的動作</li>
+            <li>人生經驗（<em>I have visited Paris</em>）</li>
+            <li>剛剛完成的動作（<em>I have just eaten</em>）</li>
+            <li>持續到現在的狀態（搭配 for / since）</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- 富有 HTML 內容的正背面 -->
+      <aside class="bp-callout" data-flip data-flip-delay="6">
+        <div class="bpc-front" data-type="goal" data-title="詞彙測驗">
+          <p>以下詞彙，哪些是<strong>正式用語</strong>？</p>
+          <table class="vocab">
+            <tr><th>詞彙</th><th>類別？</th></tr>
+            <tr><td><em>commence</em></td><td>？</td></tr>
+            <tr><td><em>start</em></td><td>？</td></tr>
+            <tr><td><em>purchase</em></td><td>？</td></tr>
+            <tr><td><em>buy</em></td><td>？</td></tr>
+          </table>
+        </div>
+        <div class="bpc-back" data-type="contrast" data-title="正式 vs 非正式">
+          <table class="vocab">
+            <tr><th>詞彙</th><th>類別</th></tr>
+            <tr><td><em>commence</em></td><td>✓ 正式</td></tr>
+            <tr><td><em>start</em></td><td>日常用語</td></tr>
+            <tr><td><em>purchase</em></td><td>✓ 正式</td></tr>
+            <tr><td><em>buy</em></td><td>日常用語</td></tr>
+          </table>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- ══ 3. 自訂速度與樣式 ══════════════════════════ -->
+  <hr class="div">
+  <div class="section">
+    <div class="eyebrow">Section 03</div>
+    <div class="section-title">自訂翻轉速度與個別屬性</div>
+    <div class="section-desc"><code>data-flip-speed</code> 控制動畫速度；正背面各自可設不同 <code>data-type</code>、<code>data-color</code>、<code>data-bg</code>。</div>
+
+    <div class="card-grid">
+
+      <!-- 慢速 1.2s -->
+      <aside class="bp-callout" data-flip data-flip-speed="1.2s" data-flip-delay="4">
+        <div class="bpc-front" data-type="warning" data-title="常見錯誤">
+          <p>「我昨天有去圖書館」</p>
+          <p style="margin-top:6px;opacity:.65;font-size:.88rem">翻到背面看正確英文（慢速 1.2s）</p>
+        </div>
+        <div class="bpc-back" data-type="tip" data-title="正確翻譯">
+          <p>✓ &nbsp;<em>"I went to the library yesterday."</em></p>
+          <p style="margin-top:8px;opacity:.75;font-size:.88rem">
+            不需要 <code>have</code>——有明確的過去時間副詞（yesterday）時，
+            用<strong>過去簡單式</strong>而非現在完成式。
+          </p>
+        </div>
+      </aside>
+
+      <!-- 自訂顏色 -->
+      <aside class="bp-callout" data-flip data-flip-delay="5" data-flip-hint="🔄">
+        <div class="bpc-front"
+             data-type="note"
+             data-title="Phrasal Verb"
+             data-color="#DECA4B"
+             data-bg="rgba(222,202,75,0.08)">
+          <p style="font-size:1.4rem;font-weight:700">give up</p>
+          <p style="opacity:.65;font-size:.85rem;margin-top:4px">點擊 🔄 查看解釋</p>
+        </div>
+        <div class="bpc-back"
+             data-type="note"
+             data-title="解釋"
+             data-color="#FFB3D9"
+             data-bg="rgba(255,179,217,0.08)">
+          <p>to stop trying; to quit</p>
+          <p style="margin-top:8px;font-style:italic;opacity:.8;font-size:.9rem">
+            "Don't <strong>give up</strong> — you're almost there!"
+          </p>
+          <p style="margin-top:6px;font-size:.85rem;opacity:.65">
+            同義詞：abandon / quit / stop trying
+          </p>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- ══ 4. 事件監聽示範 ════════════════════════════ -->
+  <hr class="div">
+  <div class="section">
+    <div class="eyebrow">Section 04</div>
+    <div class="section-title">事件監聽</div>
+    <div class="section-desc">翻牌動作觸發 <code>bpc:flip-back</code> / <code>bpc:flip-front</code> 自訂事件，<code>detail.isAuto</code> 標記是否為自動翻回。</div>
+
+    <aside class="bp-callout" data-flip data-flip-delay="4" id="event-demo">
+      <div class="bpc-front" data-type="example" data-title="互動示範">
+        <p>點擊此卡片，觀察下方事件日誌。</p>
+        <p style="opacity:.6;font-size:.88rem;margin-top:6px">4 秒後自動翻回正面，日誌會標示 <code>isAuto: true</code>。</p>
+      </div>
+      <div class="bpc-back" data-type="safe" data-title="背面">
+        <p>事件 <code>bpc:flip-back</code> 已觸發。</p>
+        <p style="opacity:.7;font-size:.88rem;margin-top:6px">等待 4 秒後自動翻回…</p>
+      </div>
+    </aside>
+
+    <div class="event-log" id="event-log"></div>
+  </div>
+
+  <!-- ══ 5. 與其他功能組合使用 ══════════════════════ -->
+  <hr class="div">
+  <div class="section">
+    <div class="eyebrow">Section 05</div>
+    <div class="section-title">翻牌 + 其他 bp-callout 功能混搭</div>
+    <div class="section-desc">翻牌卡片與一般 callout 框可以在同一頁面混搭使用，各自獨立運作。</div>
+
+    <aside class="bp-callout" data-type="goal">
+      <p>本課學習目標：掌握 <strong>Present Perfect vs. Simple Past</strong> 的使用時機。</p>
+    </aside>
+
+    <aside class="bp-callout" data-flip data-flip-delay="5">
+      <div class="bpc-front" data-type="explanation" data-title="時態比較">
+        <p>點擊翻面，查看兩種時態的核心差異。</p>
+      </div>
+      <div class="bpc-back" data-type="contrast" data-title="核心差異">
+        <table class="vocab">
+          <tr><th>Present Perfect</th><th>Simple Past</th></tr>
+          <tr><td>I <em>have seen</em> that film.</td><td>I <em>saw</em> that film last week.</td></tr>
+          <tr><td>強調結果 / 經驗</td><td>強調特定時間點</td></tr>
+          <tr><td>無明確時間副詞</td><td>有明確時間副詞</td></tr>
+        </table>
+      </div>
+    </aside>
+
+    <aside class="bp-callout" data-type="warning">
+      <p>有 <code>yesterday</code>、<code>last year</code>、<code>in 2019</code> 等明確時間詞時，
+      <strong>不可以</strong>使用 Present Perfect，必須用 Simple Past。</p>
+    </aside>
+
+    <aside class="bp-callout" data-type="example" data-collapsible>
+      <p>✕ &nbsp;<em>"I have seen him yesterday."</em></p>
+      <p>✓ &nbsp;<em>"I saw him yesterday."</em></p>
+      <p>✕ &nbsp;<em>"She went to London three times."</em>（若未指定時間，應用 Present Perfect）</p>
+      <p>✓ &nbsp;<em>"She has been to London three times."</em></p>
+    </aside>
+  </div>
+
+  <!-- ══ 6. 屬性參考 ════════════════════════════════ -->
+  <hr class="div">
+  <div class="section">
+    <div class="eyebrow">Section 06</div>
+    <div class="section-title">翻牌屬性參考</div>
+
+    <table class="attr-table">
+      <thead>
+        <tr><th>屬性</th><th>套用在</th><th>預設值</th><th>說明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>data-flip</code></td><td class="v">&lt;aside&gt;</td><td class="v">—</td><td class="d">啟用翻牌模式（布林屬性）</td></tr>
+        <tr><td><code>data-flip-delay</code></td><td class="v">&lt;aside&gt;</td><td class="v">0（不自動）</td><td class="d">翻到背面後 N 秒自動翻回，0 或省略表示不自動</td></tr>
+        <tr><td><code>data-flip-speed</code></td><td class="v">&lt;aside&gt;</td><td class="v">"0.55s"</td><td class="d">3D 翻轉動畫時長（CSS time value）</td></tr>
+        <tr><td><code>data-flip-hint</code></td><td class="v">&lt;aside&gt;</td><td class="v">"↻"</td><td class="d">正面右側的翻面提示符號</td></tr>
+        <tr><td><code>data-flip-back-label</code></td><td class="v">&lt;aside&gt;</td><td class="v">"背面"</td><td class="d">背面標頭右側的標籤文字</td></tr>
+        <tr><td><code>data-type</code></td><td class="v">.bpc-front / .bpc-back</td><td class="v">"note"</td><td class="d">各面獨立設定 15 種語意型別</td></tr>
+        <tr><td><code>data-title</code></td><td class="v">.bpc-front / .bpc-back</td><td class="v">（型別預設）</td><td class="d">各面獨立標題</td></tr>
+        <tr><td><code>data-icon</code></td><td class="v">.bpc-front / .bpc-back</td><td class="v">（型別預設）</td><td class="d">各面獨立圖示</td></tr>
+        <tr><td><code>data-color</code></td><td class="v">.bpc-front / .bpc-back</td><td class="v">（型別預設）</td><td class="d">各面獨立左邊線 + 標題色</td></tr>
+        <tr><td><code>data-bg</code></td><td class="v">.bpc-front / .bpc-back</td><td class="v">（型別預設）</td><td class="d">各面獨立背景色</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-block" style="margin-top:24px;">
+<span class="c-cmnt">&lt;!-- 基本翻牌 --&gt;</span>
+<span class="c-tag">&lt;aside</span> <span class="c-attr">class</span>=<span class="c-val">"bp-callout"</span> <span class="c-attr">data-flip</span><span class="c-tag">&gt;</span>
+  <span class="c-tag">&lt;div</span> <span class="c-attr">class</span>=<span class="c-val">"bpc-front"</span> <span class="c-attr">data-type</span>=<span class="c-val">"example"</span> <span class="c-attr">data-title</span>=<span class="c-val">"問題"</span><span class="c-tag">&gt;</span>
+    &lt;p&gt;正面 HTML 內容&lt;/p&gt;
+  <span class="c-tag">&lt;/div&gt;</span>
+  <span class="c-tag">&lt;div</span> <span class="c-attr">class</span>=<span class="c-val">"bpc-back"</span> <span class="c-attr">data-type</span>=<span class="c-val">"tip"</span> <span class="c-attr">data-title</span>=<span class="c-val">"答案"</span><span class="c-tag">&gt;</span>
+    &lt;p&gt;背面 HTML 內容&lt;/p&gt;
+  <span class="c-tag">&lt;/div&gt;</span>
+<span class="c-tag">&lt;/aside&gt;</span>
+
+<span class="c-cmnt">&lt;!-- 5 秒後自動翻回 --&gt;</span>
+<span class="c-tag">&lt;aside</span> <span class="c-attr">class</span>=<span class="c-val">"bp-callout"</span> <span class="c-attr">data-flip</span> <span class="c-attr">data-flip-delay</span>=<span class="c-val">"5"</span><span class="c-tag">&gt;</span>
+  ...
+<span class="c-tag">&lt;/aside&gt;</span>
+
+<span class="c-cmnt">&lt;!-- 事件監聽 --&gt;</span>
+el.addEventListener(<span class="c-val">'bpc:flip-back'</span>,  e =&gt; console.log(<span class="c-val">'翻到背面'</span>));
+el.addEventListener(<span class="c-val">'bpc:flip-front'</span>, e =&gt; console.log(<span class="c-val">'翻回正面'</span>, e.detail.isAuto));
+
+<span class="c-cmnt">&lt;!-- 全域設定 --&gt;</span>
+BPCallout.defaults.flipDelay = <span class="c-val">5</span>;      <span class="c-cmnt">// 全部翻牌卡預設 5 秒翻回</span>
+BPCallout.defaults.flipHint  = <span class="c-val">'🔄'</span>;   <span class="c-cmnt">// 全域提示符號</span>
+    </div>
+  </div>
+
+
+  <!-- ══ 新增：Hover 發光效果展示 ═══════════════════ -->
+  <hr class="div">
+  <div class="section">
+    <div class="eyebrow">Section 07（v1.2 新增）</div>
+    <div class="section-title">Hover 邊框發光效果</div>
+    <div class="section-desc">滑鼠移上任一卡片查看效果。發光色自動對應各型別品牌色，透過 <code>data-glow</code> 控制強度。</div>
+
+    <p style="font-size:.85rem;opacity:.65;margin-bottom:14px">預設強度（normal）：</p>
+
+    <div class="card-grid">
+      <aside class="bp-callout" data-type="tip">
+        <p>safe 綠色發光（data-type="tip"）</p>
+      </aside>
+      <aside class="bp-callout" data-type="definition">
+        <p>sky 藍色發光（data-type="definition"）</p>
+      </aside>
+      <aside class="bp-callout" data-type="mistake">
+        <p>warning 紅色發光（data-type="mistake"）</p>
+      </aside>
+      <aside class="bp-callout" data-type="insight">
+        <p>pink 粉色發光（data-type="insight"）</p>
+      </aside>
+      <aside class="bp-callout" data-type="contrast">
+        <p>special 黃綠發光（data-type="contrast"）</p>
+      </aside>
+      <aside class="bp-callout" data-type="exception">
+        <p>yellow 金色發光（data-type="exception"）</p>
+      </aside>
+    </div>
+
+    <p style="font-size:.85rem;opacity:.65;margin:24px 0 14px">三種強度對比：</p>
+
+    <aside class="bp-callout" data-type="explanation" data-glow="subtle">
+      <p><code>data-glow="subtle"</code> — 最輕柔，僅外擴光暈，無邊框描邊</p>
+    </aside>
+    <aside class="bp-callout" data-type="explanation">
+      <p>預設（normal）— 1px 邊框描邊 + 中等光暈</p>
+    </aside>
+    <aside class="bp-callout" data-type="explanation" data-glow="strong">
+      <p><code>data-glow="strong"</code> — 2px 邊框 + 強光暈 + 內層光芒</p>
+    </aside>
+    <aside class="bp-callout" data-type="warning" data-glow="false">
+      <p><code>data-glow="false"</code> — 關閉此卡的發光效果</p>
+    </aside>
+
+    <p style="font-size:.85rem;opacity:.65;margin:24px 0 14px">翻牌卡 Hover 發光（正面/背面各自亮各自的品牌色）：</p>
+
+    <div class="card-grid">
+      <aside class="bp-callout" data-flip data-glow="strong">
+        <div class="bpc-front" data-type="example" data-title="正面（lavender）">
+          <p>Hover 時亮 lavender 紫色</p>
+          <p style="opacity:.65;font-size:.85rem;margin-top:6px">點擊翻面，背面亮不同色</p>
+        </div>
+        <div class="bpc-back" data-type="safe" data-title="背面（safe）">
+          <p>背面亮 safe 綠色</p>
+          <p style="opacity:.65;font-size:.85rem;margin-top:6px">兩面用同一個 CSS 變數繼承機制，零額外 JS</p>
+        </div>
+      </aside>
+
+      <aside class="bp-callout" data-flip data-glow="strong">
+        <div class="bpc-front" data-type="warning" data-title="Question">
+          <p>What causes "it" in "It's raining" to be a dummy subject?</p>
+        </div>
+        <div class="bpc-back" data-type="tip" data-title="Answer">
+          <p>English requires every sentence to have a grammatical subject. When no real subject exists (like impersonal weather verbs), we use a <strong>dummy</strong> or <strong>expletive subject</strong> — <em>it</em> — which carries no semantic meaning.</p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="code-block" style="margin-top:24px;">
+<span class="c-cmnt">&lt;!-- 預設 normal（所有卡片內建開啟）--&gt;</span>
+<span class="c-tag">&lt;aside</span> <span class="c-attr">class</span>=<span class="c-val">"bp-callout"</span> <span class="c-attr">data-type</span>=<span class="c-val">"tip"</span><span class="c-tag">&gt;</span>...<span class="c-tag">&lt;/aside&gt;</span>
+
+<span class="c-tag">&lt;aside</span> <span class="c-attr">class</span>=<span class="c-val">"bp-callout"</span> <span class="c-attr">data-type</span>=<span class="c-val">"tip"</span> <span class="c-attr">data-glow</span>=<span class="c-val">"subtle"</span><span class="c-tag">&gt;</span>...<span class="c-tag">&lt;/aside&gt;</span>
+<span class="c-tag">&lt;aside</span> <span class="c-attr">class</span>=<span class="c-val">"bp-callout"</span> <span class="c-attr">data-type</span>=<span class="c-val">"tip"</span> <span class="c-attr">data-glow</span>=<span class="c-val">"strong"</span><span class="c-tag">&gt;</span>...<span class="c-tag">&lt;/aside&gt;</span>
+<span class="c-tag">&lt;aside</span> <span class="c-attr">class</span>=<span class="c-val">"bp-callout"</span> <span class="c-attr">data-type</span>=<span class="c-val">"tip"</span> <span class="c-attr">data-glow</span>=<span class="c-val">"false"</span><span class="c-tag">&gt;</span>...<span class="c-tag">&lt;/aside&gt;</span>
+
+<span class="c-cmnt">// 全域關閉所有卡片的發光效果</span>
+BPCallout.defaults.glow = <span class="c-val">false</span>;  <span class="c-cmnt">// 需在頁面載入前設定</span>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script src="bp-callout.js"></script>
+<script>
+  /* 事件示範 */
+  const demoEl  = document.getElementById('event-demo');
+  const logArea = document.getElementById('event-log');
+
+  function showEvent(text, cls) {
+    const msg = document.createElement('span');
+    msg.className = 'event-msg ' + cls;
+    msg.textContent = text;
+    logArea.innerHTML = '';
+    logArea.appendChild(msg);
+    setTimeout(() => msg.remove(), 5000);
+  }
+
+  demoEl.addEventListener('bpc:flip-back',  e => showEvent('bpc:flip-back 已觸發 → 翻到背面', 'back'));
+  demoEl.addEventListener('bpc:flip-front', e => {
+    const label = e.detail.isAuto ? '自動翻回 (isAuto: true)' : '手動翻回 (isAuto: false)';
+    showEvent(`bpc:flip-front → ${label}`, e.detail.isAuto ? 'auto' : 'front');
+  });
+</script>
+</body>
+</html>
