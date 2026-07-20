@@ -1,7 +1,7 @@
 /**
  * bp-stepper.js  v2.0
  * 橫向／縱向步驟流程元件
- * ✔ 品牌色彩整合  ✔ 九種預設主題  ✔ 四種步驟狀態
+ * ✔ 品牌色彩整合  ✔ 十種預設主題  ✔ 四種步驟狀態
  * ✔ 彈性全域設定  ✔ 虛線連接線    ✔ 縱向版型
  *
  * ─────────────────────────────────────────
@@ -37,7 +37,7 @@
  * ─────────────────────────────────────────
  * 主題（data-theme）
  *   lavender / sky / safe / special /
- *   warning  / salmon / stone / pink / orange
+ *   warning  / salmon / stone / pink / orange / shell
  *
  * ─────────────────────────────────────────
  * 全域設定（頁面載入前執行）
@@ -75,18 +75,13 @@
   };
 
   /* ═══════════════════════════════════════════
-     主題包（九種）
+     主題包（十種）
   ═══════════════════════════════════════════ */
   const THEMES = {
     lavender: {
       color: BRAND.lavender, colorActive: BRAND.special,
       colorDone: BRAND.safe, titleColor: BRAND.lavender,
       badgeBg: 'rgba(195,165,229,0.15)',
-    },
-    shell: {
-      color: BRAND.shell,  colorActive: BRAND.shell,
-      colorDone: BRAND.safe, titleColor: BRAND.shell,
-      badgeBg: 'rgba(8,169,209,0.12)',
     },
     sky: {
       color: BRAND.sky,  colorActive: BRAND.info,
@@ -127,6 +122,11 @@
       color: BRAND.orange,  colorActive: BRAND.yellow,
       colorDone: BRAND.safe, titleColor: BRAND.orange,
       badgeBg: 'rgba(237,161,9,0.12)',
+    },
+    shell: {
+      color: BRAND.shell,   colorActive: BRAND.info,
+      colorDone: BRAND.safe, titleColor: BRAND.shell,
+      badgeBg: 'rgba(198,199,189,0.13)',
     },
   };
 
