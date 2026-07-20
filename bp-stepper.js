@@ -83,6 +83,11 @@
       colorDone: BRAND.safe, titleColor: BRAND.lavender,
       badgeBg: 'rgba(195,165,229,0.15)',
     },
+    shell: {
+      color: BRAND.shell,  colorActive: BRAND.shell,
+      colorDone: BRAND.safe, titleColor: BRAND.shell,
+      badgeBg: 'rgba(8,169,209,0.12)',
+    },
     sky: {
       color: BRAND.sky,  colorActive: BRAND.info,
       colorDone: BRAND.safe, titleColor: BRAND.sky,
