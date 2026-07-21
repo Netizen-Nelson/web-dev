@@ -53,6 +53,7 @@
     badgeFontSize:  '0.82rem',
     connectorStyle: 'solid',
     arrowSize:      '6px',
+    arrowMinLen:    '0px',
     padTop:         '32px',
     padBottom:      '32px',
     padX:           '12px',
@@ -66,7 +67,7 @@ bp-stepper {
   display: flex;
   overflow-x: auto;
   align-items: stretch;
-  gap: var(--bps-gap);
+  gap: var(--bps-effective-gap);
   padding-top:    var(--bps-pad-top);
   padding-bottom: var(--bps-pad-bottom);
   padding-left:   var(--bps-pad-x);
@@ -93,6 +94,8 @@ bp-stepper {
   --bps-width:          220px;
   --bps-padding:        16px 18px;
   --bps-gap:            36px;
+  --bps-arrow-min-len:  0px;
+  --bps-effective-gap:  max(var(--bps-gap), var(--bps-arrow-min-len));
   --bps-badge-sz:       28px;
   --bps-fs:             0.9rem;
   --bps-title-fs:       1rem;
@@ -110,7 +113,7 @@ bp-stepper[data-wrapped] {
 .bps-row {
   display: flex;
   align-items: stretch;
-  gap: var(--bps-gap);
+  gap: var(--bps-effective-gap);
 }
 
 .bps-row + .bps-row {
@@ -118,7 +121,7 @@ bp-stepper[data-wrapped] {
 }
 
 .bps-u-turn {
-  height: var(--bps-gap);
+  height: var(--bps-effective-gap);
   border-right:  var(--bps-stroke) solid var(--bps-connector-color, var(--bps-color));
   border-bottom: var(--bps-stroke) solid var(--bps-connector-color, var(--bps-color));
   box-sizing: border-box;
@@ -247,9 +250,9 @@ bp-step-content {
 bp-step:not(:last-child)::after {
   content:          '';
   position:         absolute;
-  right:            calc(-1 * var(--bps-gap));
+  right:            calc(-1 * var(--bps-effective-gap));
   top:              50%;
-  width:            var(--bps-gap);
+  width:            var(--bps-effective-gap);
   height:           var(--bps-stroke);
   background-color: var(--bps-color);
   transform:        translateY(-50%);
@@ -259,7 +262,7 @@ bp-step:not(:last-child)::after {
 bp-step:not(:last-child)::before {
   content:       '';
   position:      absolute;
-  right:         calc(-1 * var(--bps-gap));
+  right:         calc(-1 * var(--bps-effective-gap));
   top:           50%;
   transform:     translateY(-50%);
   border-left:   calc(var(--bps-arrow) * 1.5) solid var(--bps-color);
@@ -338,7 +341,7 @@ bp-stepper[data-layout="vertical"] > bp-step:not(:last-child)::after {
   left:             calc(var(--bps-badge-sz) / 2 - var(--bps-stroke) / 2);
   top:              100%;
   width:            var(--bps-stroke);
-  height:           var(--bps-gap);
+  height:           var(--bps-effective-gap);
   transform:        none;
   background-color: var(--bps-color);
 }
@@ -350,7 +353,7 @@ bp-stepper[data-layout="vertical"] > bp-step:not(:last-child)::before {
   right:         auto;
   left:          calc(var(--bps-badge-sz) / 2 - var(--bps-arrow));
   top:           auto;
-  bottom:        calc(-1 * var(--bps-gap));
+  bottom:        calc(-1 * var(--bps-effective-gap));
   transform:     none;
   border-left:   var(--bps-arrow) solid transparent;
   border-right:  var(--bps-arrow) solid transparent;
@@ -422,6 +425,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     titleSize:     '--bps-title-fs',
     badgeFontSize: '--bps-badge-fs',
     arrowSize:     '--bps-arrow',
+    arrowMinLen:   '--bps-arrow-min-len',
     padTop:        '--bps-pad-top',
     padBottom:     '--bps-pad-bottom',
     padX:          '--bps-pad-x',
