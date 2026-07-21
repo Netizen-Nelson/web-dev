@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bp-stepper 元件說明書</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#0c0d0c; --shell:#c6c7bd; --lavender:#C3A5E5; --special:#C8DD5A;
+    --warning:#F08080; --salmon:#E5C3B3; --sky:#08a9d1; --safe:#40c99a;
+    --yellow:#DECA4B; --info:#5fafed; --stone:#7090A8; --pink:#FFB3D9;
+    --orange:#eda109; --surface:#141514; --surface2:#1c1d1c; --border:#2a2b2a;
+  }
+  html { scroll-behavior: smooth; }
+  body { background:var(--bg); color:var(--shell); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:1rem; line-height:1.65; display:flex; min-height:100vh; }
+
+  nav#sidebar { width:240px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; background:var(--surface); border-right:1px solid var(--border); padding:32px 0 48px; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  nav#sidebar .nav-brand { padding:0 24px 24px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+  nav#sidebar .nav-brand span { display:block; font-family:monospace; font-size:1.05rem; color:var(--lavender); font-weight:700; }
+  nav#sidebar .nav-brand small { font-size:0.78rem; color:var(--stone); }
+  nav#sidebar a { display:block; padding:6px 24px; color:var(--stone); text-decoration:none; font-size:0.88rem; border-left:2px solid transparent; transition:color .18s, border-color .18s; }
+  nav#sidebar a:hover, nav#sidebar a.active { color:var(--lavender); border-left-color:var(--lavender); }
+  nav#sidebar .nav-group { margin-top:20px; padding:0 24px 4px; font-size:0.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--stone); }
+
+  main { flex:1; max-width:860px; padding:56px 48px 120px; min-width:0; }
+  section { margin-bottom:72px; scroll-margin-top:32px; }
+  h1 { font-size:2rem; color:var(--lavender); font-weight:700; margin-bottom:8px; }
+  h1 small { display:block; font-size:1rem; color:var(--stone); font-weight:400; margin-top:4px; }
+  h2 { font-size:1.35rem; color:var(--lavender); font-weight:600; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+  h3 { font-size:1.05rem; color:var(--special); font-weight:600; margin:28px 0 10px; }
+  p { margin-bottom:14px; color:var(--shell); }
+  ul { padding-left:20px; margin-bottom:14px; }
+  li { margin-bottom:6px; }
+
+  code { font-family:'Cascadia Code','Fira Code','Consolas',monospace; font-size:0.88em; background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; color:var(--salmon); }
+  pre { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:20px 24px; overflow-x:auto; margin:16px 0 24px; font-family:'Cascadia Code','Fira Code','Consolas',monospace; font-size:0.875rem; line-height:1.7; scrollbar-width:thin; }
+  pre code { background:none; border:none; padding:0; font-size:inherit; color:var(--shell); }
+  .hl-tag{color:var(--sky)} .hl-attr{color:var(--lavender)} .hl-val{color:var(--special)}
+  .hl-cmt{color:var(--stone);font-style:italic} .hl-kw{color:var(--pink)}
+  .hl-fn{color:var(--info)} .hl-str{color:var(--salmon)} .hl-num{color:var(--orange)}
+
+  .demo { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:24px; margin:16px 0 8px; overflow-x:auto; }
+  .demo-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--stone); margin-bottom:8px; }
+
+  table { width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:0.9rem; }
+  th { text-align:left; padding:10px 14px; background:var(--surface2); color:var(--lavender); font-weight:600; border-bottom:1px solid var(--border); }
+  td { padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  td code { font-size:0.82rem; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+
+  .badge { display:inline-block; font-size:0.75rem; padding:2px 8px; border-radius:99px; font-weight:600; }
+  .badge-info    { background:rgba(95,175,237,.15);  color:var(--info);    border:1px solid rgba(95,175,237,.3);  }
+  .badge-special { background:rgba(200,221,90,.12);  color:var(--special); border:1px solid rgba(200,221,90,.3);  }
+  .badge-stone   { background:rgba(112,144,168,.12); color:var(--stone);   border:1px solid rgba(112,144,168,.3); }
+  .badge-safe    { background:rgba(64,201,154,.12);  color:var(--safe);    border:1px solid rgba(64,201,154,.3);  }
+
+  .alert { border-radius:8px; padding:14px 18px; margin:16px 0; font-size:0.92rem; }
+  .alert-info    { background:rgba(95,175,237,.08);  border-left:3px solid var(--info);    color:var(--shell); }
+  .alert-special { background:rgba(200,221,90,.07);  border-left:3px solid var(--special); color:var(--shell); }
+  .alert-warning { background:rgba(240,128,128,.07); border-left:3px solid var(--warning); color:var(--shell); }
+
+  #event-log { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-family:monospace; font-size:0.82rem; min-height:60px; max-height:120px; overflow-y:auto; margin-top:12px; color:var(--safe); }
+  #event-log .log-entry { margin-bottom:2px; }
+  #event-log .log-complete { color:var(--special); }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="nav-brand">
+    <span>&lt;bp-stepper&gt;</span>
+    <small>元件說明書 v2.2</small>
+  </div>
+  <a class="nav-group">起步</a>
+  <a href="#install">安裝</a>
+  <a href="#basic">基本結構</a>
+  <a class="nav-group">功能</a>
+  <a href="#states">步驟狀態</a>
+  <a href="#autonumber">自動編號</a>
+  <a href="#connector">連接線樣式</a>
+  <a href="#layout">排列方向</a>
+  <a href="#wrap">多列換行</a>
+  <a href="#padding">間距控制</a>
+  <a href="#clickable">可點擊步驟</a>
+  <a class="nav-group">整合</a>
+  <a href="#api">JavaScript API</a>
+  <a href="#events">自訂事件</a>
+  <a href="#global">全域預設</a>
+  <a class="nav-group">參考</a>
+  <a href="#attrs">屬性速查表</a>
+</nav>
+
+<main>
+
+  <section id="intro">
+    <h1>bp-stepper
+      <small>以 Custom Element 語法驅動的步驟指示元件</small>
+    </h1>
+    <p>支援橫向與縱向排版、多列換行、三種連接線樣式、十種色彩主題、可點擊互動與 Custom Events，所有視覺細節皆可透過 <code>data-*</code> 屬性調整。</p>
+  </section>
+
+  <section id="install">
+    <h2>安裝</h2>
+    <p>將 <code>bp-stepper.js</code> 放在專案目錄，於 HTML 中引入一次即可。</p>
+<pre><code><span class="hl-tag">&lt;script</span> <span class="hl-attr">src</span>=<span class="hl-val">"bp-stepper.js"</span><span class="hl-tag">&gt;&lt;/script&gt;</span></code></pre>
+    <div class="alert alert-info">不依賴任何外部函式庫，可與 Bootstrap 或其他 CSS 框架共存。</div>
+  </section>
+
+  <section id="basic">
+    <h2>基本結構</h2>
+    <table>
+      <tr><th>元素</th><th>角色</th><th>必填</th></tr>
+      <tr><td><code>&lt;bp-stepper&gt;</code></td><td>容器，掛載所有 <code>data-*</code> 設定屬性</td><td><span class="badge badge-info">必填</span></td></tr>
+      <tr><td><code>&lt;bp-step&gt;</code></td><td>單一步驟卡片，直接子元素</td><td><span class="badge badge-info">必填</span></td></tr>
+      <tr><td><code>&lt;bp-step-title&gt;</code></td><td>步驟標題，顯示於徽章下方</td><td><span class="badge badge-stone">可選</span></td></tr>
+      <tr><td><code>&lt;bp-step-content&gt;</code></td><td>步驟說明文字</td><td><span class="badge badge-stone">可選</span></td></tr>
+    </table>
+
+    <div class="demo">
+      <div class="demo-label">預覽</div>
+      <bp-stepper data-theme="lavender" data-pad-top="12px" data-pad-bottom="12px">
+        <bp-step data-state="done"><bp-step-title>建立帳號</bp-step-title><bp-step-content>填寫電子信箱與密碼</bp-step-content></bp-step>
+        <bp-step data-state="active"><bp-step-title>驗證身份</bp-step-title><bp-step-content>檢查收件匣的驗證信</bp-step-content></bp-step>
+        <bp-step><bp-step-title>完成設定</bp-step-title><bp-step-content>選擇偏好與方案</bp-step-content></bp-step>
+      </bp-stepper>
+    </div>
+
+<pre><code><span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-theme</span>=<span class="hl-val">"lavender"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"done"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;bp-step-title&gt;</span>建立帳號<span class="hl-tag">&lt;/bp-step-title&gt;</span>
+    <span class="hl-tag">&lt;bp-step-content&gt;</span>填寫電子信箱與密碼<span class="hl-tag">&lt;/bp-step-content&gt;</span>
+  <span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"active"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;bp-step-title&gt;</span>驗證身份<span class="hl-tag">&lt;/bp-step-title&gt;</span>
+  <span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step&gt;</span>
+    <span class="hl-tag">&lt;bp-step-title&gt;</span>完成設定<span class="hl-tag">&lt;/bp-step-title&gt;</span>
+  <span class="hl-tag">&lt;/bp-step&gt;</span>
+<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+
+    <h3>圖示（可選）</h3>
+    <p>在 <code>&lt;bp-step&gt;</code> 內加入 class <code>bp-step-icon</code> 的元素，顯示於徽章上方。</p>
+<pre><code><span class="hl-tag">&lt;bp-step&gt;</span>
+  <span class="hl-tag">&lt;span</span> <span class="hl-attr">class</span>=<span class="hl-val">"bp-step-icon"</span><span class="hl-tag">&gt;</span>📦<span class="hl-tag">&lt;/span&gt;</span>
+  <span class="hl-tag">&lt;bp-step-title&gt;</span>出貨<span class="hl-tag">&lt;/bp-step-title&gt;</span>
+<span class="hl-tag">&lt;/bp-step&gt;</span></code></pre>
+  </section>
+
+  <section id="states">
+    <h2>步驟狀態</h2>
+    <table>
+      <tr><th>data-state 值</th><th>意義</th><th>徽章</th></tr>
+      <tr><td>（無屬性）</td><td>待處理，預設外觀</td><td>數字</td></tr>
+      <tr><td><code>active</code></td><td>目前進行中，主色高亮</td><td>數字</td></tr>
+      <tr><td><code>done</code></td><td>已完成，完成色邊框</td><td>✓</td></tr>
+      <tr><td><code>error</code></td><td>發生錯誤，警告色邊框</td><td>!</td></tr>
+    </table>
+    <div class="demo">
+      <div class="demo-label">四種狀態對照</div>
+      <bp-stepper data-theme="sky" data-card-width="170px" data-pad-top="12px" data-pad-bottom="12px">
+        <bp-step><bp-step-title>待處理</bp-step-title></bp-step>
+        <bp-step data-state="active"><bp-step-title>進行中</bp-step-title></bp-step>
+        <bp-step data-state="done"><bp-step-title>已完成</bp-step-title></bp-step>
+        <bp-step data-state="error"><bp-step-title>錯誤</bp-step-title></bp-step>
+      </bp-stepper>
+    </div>
+<pre><code><span class="hl-tag">&lt;bp-step&gt;</span>待處理<span class="hl-tag">&lt;/bp-step&gt;</span>
+<span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"active"</span><span class="hl-tag">&gt;</span>進行中<span class="hl-tag">&lt;/bp-step&gt;</span>
+<span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"done"</span><span class="hl-tag">&gt;</span>已完成<span class="hl-tag">&lt;/bp-step&gt;</span>
+<span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"error"</span><span class="hl-tag">&gt;</span>錯誤<span class="hl-tag">&lt;/bp-step&gt;</span></code></pre>
+  </section>
+
+  <section id="autonumber">
+    <h2>自動編號</h2>
+    <p>預設開啟。元件初始化時插入 <code>&lt;span class="bp-step-badge"&gt;</code>，依序顯示 1、2、3⋯。狀態切換時自動更新為 ✓ 或 !。</p>
+    <p>設定 <code>data-auto-number="false"</code> 關閉。關閉後需自行放置 <code>&lt;span class="bp-step-badge"&gt;</code>，或不放置（無徽章）。</p>
+<pre><code><span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-auto-number</span>=<span class="hl-val">"false"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;bp-step&gt;</span>
+    <span class="hl-tag">&lt;span</span> <span class="hl-attr">class</span>=<span class="hl-val">"bp-step-badge"</span><span class="hl-tag">&gt;</span>A<span class="hl-tag">&lt;/span&gt;</span>
+    <span class="hl-tag">&lt;bp-step-title&gt;</span>選項 A<span class="hl-tag">&lt;/bp-step-title&gt;</span>
+  <span class="hl-tag">&lt;/bp-step&gt;</span>
+<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+  </section>
+
+  <section id="connector">
+    <h2>連接線樣式</h2>
+    <p><code>data-connector</code> 改變連接線外觀。換行的 ∪ 形連接器會自動套用相同樣式。</p>
+    <table>
+      <tr><th>值</th><th>外觀</th></tr>
+      <tr><td>（預設）</td><td>實線</td></tr>
+      <tr><td><code>dashed</code></td><td>長虛線</td></tr>
+      <tr><td><code>dotted</code></td><td>點線</td></tr>
+    </table>
+    <div class="demo">
+      <div class="demo-label">dashed</div>
+      <bp-stepper data-theme="safe" data-connector="dashed" data-card-width="160px" data-pad-top="12px" data-pad-bottom="12px">
+        <bp-step data-state="done"><bp-step-title>步驟一</bp-step-title></bp-step>
+        <bp-step data-state="active"><bp-step-title>步驟二</bp-step-title></bp-step>
+        <bp-step><bp-step-title>步驟三</bp-step-title></bp-step>
+      </bp-stepper>
+    </div>
+<pre><code><span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-connector</span>=<span class="hl-val">"dashed"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-stepper&gt;</span>
+<span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-connector</span>=<span class="hl-val">"dotted"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+  </section>
+
+  <section id="layout">
+    <h2>排列方向</h2>
+    <p>預設橫向。設定 <code>data-layout="vertical"</code> 切換縱向，連接線與箭頭方向自動調整。</p>
+    <div class="demo" style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap;">
+      <div>
+        <div class="demo-label">vertical</div>
+        <bp-stepper data-theme="pink" data-layout="vertical" data-card-width="200px" data-pad-top="12px" data-pad-bottom="12px" data-pad-x="4px">
+          <bp-step data-state="done"><bp-step-title>收到訂單</bp-step-title></bp-step>
+          <bp-step data-state="active"><bp-step-title>備貨中</bp-step-title></bp-step>
+          <bp-step><bp-step-title>出貨</bp-step-title></bp-step>
+          <bp-step><bp-step-title>已送達</bp-step-title></bp-step>
+        </bp-stepper>
+      </div>
+    </div>
+<pre><code><span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-layout</span>=<span class="hl-val">"vertical"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+    <div class="alert alert-warning"><code>data-layout="vertical"</code> 與 <code>data-wrap</code> 不可同時使用。</div>
+  </section>
+
+  <section id="wrap">
+    <h2>多列換行</h2>
+    <p>設定 <code>data-wrap="N"</code>，前 N 個步驟排在第一列，第 N+1 個起排在第二列（靠左對齊）。兩列之間由 ∪ 形連接器橋接，箭頭指示流向。最多支援兩列。</p>
+    <p>第一列最後一步的狀態會同步到 ∪ 形連接器的顏色。</p>
+
+    <div class="demo">
+      <div class="demo-label">data-wrap="4"，共七個步驟，點擊可切換狀態</div>
+      <bp-stepper id="demo-wrap" data-theme="special" data-wrap="4" data-clickable="true" data-card-width="160px" data-pad-top="16px" data-pad-bottom="16px">
+        <bp-step data-state="done"><bp-step-title>需求訪談</bp-step-title></bp-step>
+        <bp-step data-state="done"><bp-step-title>競品分析</bp-step-title></bp-step>
+        <bp-step data-state="done"><bp-step-title>資訊架構</bp-step-title></bp-step>
+        <bp-step data-state="active"><bp-step-title>視覺設計</bp-step-title></bp-step>
+        <bp-step><bp-step-title>原型測試</bp-step-title></bp-step>
+        <bp-step><bp-step-title>開發交付</bp-step-title></bp-step>
+        <bp-step><bp-step-title>上線驗收</bp-step-title></bp-step>
+      </bp-stepper>
+    </div>
+
+<pre><code><span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-wrap</span>=<span class="hl-val">"4"</span> <span class="hl-attr">data-theme</span>=<span class="hl-val">"special"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"done"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"done"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"done"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step</span> <span class="hl-attr">data-state</span>=<span class="hl-val">"active"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;bp-step&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+
+    <h3>DOM 重組說明</h3>
+    <p>元件初始化時會自動把 HTML 裡的 <code>&lt;bp-step&gt;</code> 重新分組，建立以下結構：</p>
+<pre><code><span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-wrapped</span><span class="hl-tag">&gt;</span>           <span class="hl-cmt">&lt;!-- data-wrapped 由元件自動加上 --&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"bps-row"</span><span class="hl-tag">&gt;</span>          <span class="hl-cmt">&lt;!-- 第一列：步驟 1..N --&gt;</span>
+    <span class="hl-tag">&lt;bp-step&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"bps-u-turn"</span><span class="hl-tag">&gt;&lt;/div&gt;</span>  <span class="hl-cmt">&lt;!-- ∪ 形連接器 --&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"bps-row"</span><span class="hl-tag">&gt;</span>          <span class="hl-cmt">&lt;!-- 第二列：步驟 N+1.. --&gt;</span>
+    <span class="hl-tag">&lt;bp-step&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+
+    <h3>∪ 形連接器顏色</h3>
+    <p>∪ 形連接器的顏色跟隨第一列最後一步（第 N 步）的狀態，由 <code>setActive</code>、<code>setError</code>、<code>resetStates</code> 自動同步。</p>
+    <table>
+      <tr><th>第 N 步狀態</th><th>∪ 形連接器顏色</th></tr>
+      <tr><td>（預設）</td><td>主色 <code>--bps-color</code></td></tr>
+      <tr><td><code>active</code></td><td>進行中強調色 <code>--bps-color-active</code></td></tr>
+      <tr><td><code>done</code></td><td>完成色 <code>--bps-color-done</code></td></tr>
+      <tr><td><code>error</code></td><td>錯誤色 <code>--bps-color-error</code></td></tr>
+    </table>
+
+    <h3>步驟數不足時</h3>
+    <p>若總步驟數 ≤ N，換行不會觸發，元件以正常單列橫向呈現。</p>
+
+    <div class="alert alert-warning">
+      <code>data-wrap</code> 與 <code>data-layout="vertical"</code> 不可同時使用。<br>
+      <code>bp-stepper[data-wrapped]</code> 的寬度由 CSS 設定為 <code>fit-content</code>，若父元素有明確寬度限制，請在外層加一個 <code>overflow-x: auto</code> 的容器。
+    </div>
+  </section>
+
+  <section id="padding">
+    <h2>間距控制</h2>
+    <p>容器的 padding 拆成三個獨立屬性，讓標題和步驟器可以緊貼。</p>
+    <table>
+      <tr><th>屬性</th><th>控制對象</th><th>預設值</th></tr>
+      <tr><td><code>data-pad-top</code></td><td>容器上方留白</td><td><code>32px</code></td></tr>
+      <tr><td><code>data-pad-bottom</code></td><td>容器下方留白</td><td><code>32px</code></td></tr>
+      <tr><td><code>data-pad-x</code></td><td>容器左右留白</td><td><code>12px</code></td></tr>
+    </table>
+<pre><code><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"fs-4 fw-bold"</span><span class="hl-tag">&gt;</span>How was your weekend?<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;bp-stepper</span>
+  <span class="hl-attr">data-theme</span>=<span class="hl-val">"shell"</span>
+  <span class="hl-attr">data-auto-number</span>=<span class="hl-val">"false"</span>
+  <span class="hl-attr">data-pad-top</span>=<span class="hl-val">"8px"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;bp-step&gt;</span>…<span class="hl-tag">&lt;/bp-step&gt;</span>
+<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+  </section>
+
+  <section id="clickable">
+    <h2>可點擊步驟</h2>
+    <p>設定 <code>data-clickable="true"</code>，點擊步驟後立即更新狀態。搭配 <code>data-wrap</code> 時，兩列的步驟皆可點擊，∪ 形連接器顏色同步更新。</p>
+    <p>鍵盤：<kbd>Tab</kbd> 移動焦點，<kbd>Enter</kbd> 或 <kbd>Space</kbd> 觸發。</p>
+    <div class="demo">
+      <div class="demo-label">點擊任一步驟</div>
+      <bp-stepper id="demo-clickable" data-theme="special" data-clickable="true" data-pad-top="12px" data-pad-bottom="12px">
+        <bp-step><bp-step-title>規劃</bp-step-title><bp-step-content>需求與時程</bp-step-content></bp-step>
+        <bp-step><bp-step-title>設計</bp-step-title><bp-step-content>原型與評審</bp-step-content></bp-step>
+        <bp-step><bp-step-title>開發</bp-step-title><bp-step-content>實作與測試</bp-step-content></bp-step>
+        <bp-step><bp-step-title>上線</bp-step-title><bp-step-content>部署與監控</bp-step-content></bp-step>
+      </bp-stepper>
+    </div>
+<pre><code><span class="hl-tag">&lt;bp-stepper</span> <span class="hl-attr">data-clickable</span>=<span class="hl-val">"true"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/bp-stepper&gt;</span></code></pre>
+  </section>
+
+  <section id="api">
+    <h2>JavaScript API</h2>
+    <p>所有方法掛載在 <code>window.BPStepper</code>。啟用 <code>data-wrap</code> 時，index 仍以所有步驟的扁平順序計算。</p>
+
+    <h3>BPStepper.setActive(el, index)</h3>
+    <p>將指定步驟設為 <code>active</code>，前方自動 <code>done</code>，後方清除狀態。<code>index</code> 從 <code>0</code> 起算。<code>index &gt;= 步驟數</code> 時全部設為 <code>done</code> 並觸發 <code>bps:complete</code>。</p>
+<pre><code><span class="hl-kw">const</span> el = document.<span class="hl-fn">querySelector</span>(<span class="hl-str">'bp-stepper'</span>);
+BPStepper.<span class="hl-fn">setActive</span>(el, <span class="hl-num">1</span>);   <span class="hl-cmt">// 第二步設為 active</span>
+BPStepper.<span class="hl-fn">setActive</span>(el, <span class="hl-num">99</span>);  <span class="hl-cmt">// 全部完成</span></code></pre>
+
+    <h3>BPStepper.setError(el, index)</h3>
+    <p>將指定步驟設為 <code>error</code>，不影響其他步驟。∪ 形連接器同步更新。</p>
+<pre><code>BPStepper.<span class="hl-fn">setError</span>(el, <span class="hl-num">2</span>);</code></pre>
+
+    <h3>BPStepper.resetStates(el)</h3>
+    <p>清除所有步驟狀態，徽章恢復數字，∪ 形連接器恢復主色。</p>
+<pre><code>BPStepper.<span class="hl-fn">resetStates</span>(el);</code></pre>
+
+    <h3>BPStepper.init(root)</h3>
+    <p>對 <code>root</code>（或 document）內所有 <code>&lt;bp-stepper&gt;</code> 重新初始化。用於動態插入 HTML 的場合。</p>
+<pre><code>container.innerHTML = <span class="hl-str">`&lt;bp-stepper data-wrap="3"&gt;…&lt;/bp-stepper&gt;`</span>;
+BPStepper.<span class="hl-fn">init</span>(container);</code></pre>
+    <div class="alert alert-info">正常插入 DOM 的 <code>&lt;bp-stepper&gt;</code> 會透過 <code>connectedCallback</code> 自動初始化，通常不需要手動呼叫 <code>init()</code>。</div>
+  </section>
+
+  <section id="events">
+    <h2>自訂事件</h2>
+    <table>
+      <tr><th>事件名稱</th><th>觸發時機</th><th>detail 內容</th></tr>
+      <tr><td><code>bps:change</code></td><td>每次 <code>setActive</code> 切換步驟</td><td><code>{ index, prevIndex, el }</code></td></tr>
+      <tr><td><code>bps:complete</code></td><td>所有步驟變為 done</td><td><code>{ el }</code></td></tr>
+    </table>
+    <div class="demo">
+      <div class="demo-label">點擊步驟觀察事件</div>
+      <bp-stepper id="demo-events" data-theme="orange" data-clickable="true" data-pad-top="12px" data-pad-bottom="8px">
+        <bp-step><bp-step-title>步驟一</bp-step-title></bp-step>
+        <bp-step><bp-step-title>步驟二</bp-step-title></bp-step>
+        <bp-step><bp-step-title>步驟三</bp-step-title></bp-step>
+      </bp-stepper>
+      <div id="event-log"><span style="color:var(--stone)">等待事件…</span></div>
+    </div>
+<pre><code><span class="hl-kw">const</span> el = document.<span class="hl-fn">querySelector</span>(<span class="hl-str">'bp-stepper'</span>);
+
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'bps:change'</span>, (e) => {
+  <span class="hl-kw">const</span> { index, prevIndex } = e.detail;
+  console.<span class="hl-fn">log</span>(<span class="hl-str">`從 ${prevIndex} → ${index}`</span>);
+});
+
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'bps:complete'</span>, () => {
+  console.<span class="hl-fn">log</span>(<span class="hl-str">'全部完成！'</span>);
+});</code></pre>
+  </section>
+
+  <section id="global">
+    <h2>全域預設</h2>
+    <p>在 <code>bp-stepper.js</code> 載入後、HTML 解析前修改 <code>BPStepper.defaults</code>，即影響整頁所有步驟器。</p>
+<pre><code>BPStepper.defaults.padTop    = <span class="hl-str">'8px'</span>;
+BPStepper.defaults.theme     = <span class="hl-str">'shell'</span>;
+BPStepper.defaults.cardWidth = <span class="hl-str">'260px'</span>;</code></pre>
+    <div class="alert alert-warning">全域預設只影響尚未初始化的步驟器。建議在 <code>&lt;script src="bp-stepper.js"&gt;</code> 之後立即修改，早於頁面內容。</div>
+<pre><code>BPStepper.BRAND.lavender   <span class="hl-cmt">// '#C3A5E5'</span>
+BPStepper.THEMES.shell     <span class="hl-cmt">// { color, colorActive, colorDone, … }</span></code></pre>
+  </section>
+
+  <section id="attrs">
+    <h2>屬性速查表</h2>
+    <p>所有屬性設定在 <code>&lt;bp-stepper&gt;</code> 上，以 <code>data-</code> 前綴加 kebab-case 書寫。</p>
+
+    <h3>色彩與主題</h3>
+    <table>
+      <tr><th>屬性</th><th>說明</th><th>預設值</th></tr>
+      <tr><td><code>data-theme</code></td><td>套用內建主題</td><td>—</td></tr>
+      <tr><td><code>data-color</code></td><td>主色（邊框、徽章、連接線）</td><td><code>#C3A5E5</code></td></tr>
+      <tr><td><code>data-color-active</code></td><td>進行中強調色</td><td><code>#C8DD5A</code></td></tr>
+      <tr><td><code>data-color-done</code></td><td>完成色</td><td><code>#40c99a</code></td></tr>
+      <tr><td><code>data-color-error</code></td><td>錯誤色</td><td><code>#F08080</code></td></tr>
+      <tr><td><code>data-text-color</code></td><td>說明文字色</td><td><code>#c6c7bd</code></td></tr>
+      <tr><td><code>data-title-color</code></td><td>標題文字色</td><td><code>#C3A5E5</code></td></tr>
+      <tr><td><code>data-badge-bg</code></td><td>徽章背景色</td><td><code>rgba(195,165,229,0.15)</code></td></tr>
+      <tr><td><code>data-card-bg</code></td><td>卡片底色</td><td><code>rgba(12,13,12,0.55)</code></td></tr>
+      <tr><td><code>data-card-bg-active</code></td><td>active 卡片底色</td><td><code>rgba(200,221,90,0.07)</code></td></tr>
+      <tr><td><code>data-card-bg-done</code></td><td>done 卡片底色</td><td><code>rgba(64,201,154,0.07)</code></td></tr>
+      <tr><td><code>data-card-bg-error</code></td><td>error 卡片底色</td><td><code>rgba(240,128,128,0.07)</code></td></tr>
+    </table>
+
+    <h3>尺寸與間距</h3>
+    <table>
+      <tr><th>屬性</th><th>說明</th><th>預設值</th></tr>
+      <tr><td><code>data-card-width</code></td><td>每張卡片的固定寬度</td><td><code>220px</code></td></tr>
+      <tr><td><code>data-card-padding</code></td><td>卡片內部 padding</td><td><code>16px 18px</code></td></tr>
+      <tr><td><code>data-gap</code></td><td>步驟間距（連接線長度）</td><td><code>36px</code></td></tr>
+      <tr><td><code>data-pad-top</code></td><td>容器頂部 padding</td><td><code>32px</code></td></tr>
+      <tr><td><code>data-pad-bottom</code></td><td>容器底部 padding</td><td><code>32px</code></td></tr>
+      <tr><td><code>data-pad-x</code></td><td>容器左右 padding</td><td><code>12px</code></td></tr>
+      <tr><td><code>data-radius</code></td><td>卡片圓角</td><td><code>12px</code></td></tr>
+      <tr><td><code>data-stroke</code></td><td>邊框與連接線粗細</td><td><code>2px</code></td></tr>
+      <tr><td><code>data-arrow-size</code></td><td>箭頭大小</td><td><code>6px</code></td></tr>
+      <tr><td><code>data-badge-size</code></td><td>徽章直徑</td><td><code>28px</code></td></tr>
+    </table>
+
+    <h3>字型大小</h3>
+    <table>
+      <tr><th>屬性</th><th>說明</th><th>預設值</th></tr>
+      <tr><td><code>data-font-size</code></td><td>說明文字大小</td><td><code>0.9rem</code></td></tr>
+      <tr><td><code>data-title-size</code></td><td>標題文字大小</td><td><code>1rem</code></td></tr>
+      <tr><td><code>data-badge-font-size</code></td><td>徽章數字大小</td><td><code>0.82rem</code></td></tr>
+    </table>
+
+    <h3>行為</h3>
+    <table>
+      <tr><th>屬性</th><th>說明</th><th>預設值</th></tr>
+      <tr><td><code>data-auto-number</code></td><td>自動插入序號徽章</td><td><code>true</code></td></tr>
+      <tr><td><code>data-clickable</code></td><td>步驟可點擊，觸發狀態切換與事件</td><td>—</td></tr>
+      <tr><td><code>data-connector</code></td><td>連接線樣式：<code>dashed</code> / <code>dotted</code></td><td>實線</td></tr>
+      <tr><td><code>data-layout</code></td><td>排列方向：<code>vertical</code>（與 data-wrap 不相容）</td><td>橫向</td></tr>
+      <tr><td><code>data-wrap</code></td><td>每列步驟數，超過時換第二列</td><td>—</td></tr>
+    </table>
+
+    <h3>可用主題名稱（data-theme）</h3>
+    <p><code>lavender</code>、<code>sky</code>、<code>safe</code>、<code>special</code>、<code>warning</code>、<code>salmon</code>、<code>stone</code>、<code>pink</code>、<code>orange</code>、<code>shell</code></p>
+  </section>
+
+</main>
+
+<script src="bp-stepper.js"></script>
+<script>
+  const evtEl  = document.getElementById('demo-events');
+  const logEl  = document.getElementById('event-log');
+  let   logged = false;
+  evtEl.addEventListener('bps:change', (e) => {
+    if (!logged) { logEl.innerHTML = ''; logged = true; }
+    const { index, prevIndex } = e.detail;
+    const line = document.createElement('div');
+    line.className = 'log-entry';
+    line.textContent = `bps:change  prevIndex=${prevIndex}  index=${index}`;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  });
+  evtEl.addEventListener('bps:complete', () => {
+    const line = document.createElement('div');
+    line.className = 'log-entry log-complete';
+    line.textContent = 'bps:complete  ✓ 全部完成';
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  });
+
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('#sidebar a[href]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`#sidebar a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

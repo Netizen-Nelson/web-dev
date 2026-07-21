@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Carousel — 元件示範</title>
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="card-carousel.js"></script>
+
+  <style>
+    /* ── Brand base ──────────────────────────────────── */
+    :root {
+      --bg:       #0c0d0c;
+      --shell:    #c6c7bd;
+      --lavender: #C3A5E5;
+      --special:  #C8DD5A;
+      --warning:  #F08080;
+      --salmon:   #E5C3B3;
+      --sky:      #08a9d1;
+      --safe:     #40c99a;
+      --yellow:   #DECA4B;
+      --info:     #5fafed;
+      --stone:    #7090A8;
+      --pink:     #FFB3D9;
+      --orange:   #eda109;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--shell);
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      padding: 0 0 80px;
+    }
+
+    /* ── Page header ─────────────────────────────────── */
+    .page-header {
+      padding: 52px 48px 40px;
+      border-bottom: 1px solid #1e201e;
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      color: var(--shell);
+    }
+    .page-header h1 span { color: var(--lavender); }
+    .badge-version {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: #1c1e1c;
+      color: var(--stone);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .page-header p {
+      margin-top: 8px;
+      color: var(--stone);
+      font-size: 0.95rem;
+      max-width: 520px;
+    }
+
+    /* ── Section ─────────────────────────────────────── */
+    section {
+      padding: 52px 48px 0;
+    }
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--stone);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--shell);
+      margin-bottom: 6px;
+    }
+    .section-desc {
+      font-size: 0.9rem;
+      color: var(--stone);
+      margin-bottom: 36px;
+      max-width: 560px;
+    }
+
+    /* ── Demo row ────────────────────────────────────── */
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 56px 64px;
+      align-items: flex-start;
+    }
+
+    .demo-item {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .demo-item-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    /* ── Divider ─────────────────────────────────────── */
+    .divider {
+      margin: 52px 48px 0;
+      border: none;
+      border-top: 1px solid #1e201e;
+    }
+
+    /* ── Code block ──────────────────────────────────── */
+    .code-section {
+      padding: 52px 48px 0;
+    }
+    .code-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .code-block {
+      background: #111311;
+      border: 1px solid #252725;
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-size: 0.82rem;
+      line-height: 1.65;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      color: var(--shell);
+      min-width: 340px;
+      flex: 1;
+      overflow-x: auto;
+    }
+    .code-block .kw  { color: var(--lavender); }
+    .code-block .at  { color: var(--sky); }
+    .code-block .val { color: var(--special); }
+    .code-block .cm  { color: var(--stone); }
+    .code-block .fn  { color: var(--orange); }
+    .code-block .str { color: var(--safe); }
+    .code-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--stone);
+      margin-bottom: 12px;
+    }
+
+    /* ── Live switcher ────────────────────────────────── */
+    .switcher-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .sw-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #2c2e2c;
+      background: #141614;
+      color: var(--stone);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: border-color 150ms, color 150ms, background 150ms;
+    }
+    .sw-btn:hover { border-color: var(--sky); color: var(--sky); }
+    .sw-btn.active {
+      border-color: var(--lavender);
+      color: var(--lavender);
+      background: #1a1520;
+    }
+    .sw-variant-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #2c2e2c;
+      background: #141614;
+      color: var(--stone);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: border-color 150ms, color 150ms, background 150ms;
+    }
+    .sw-variant-btn:hover { border-color: var(--sky); color: var(--sky); }
+    .sw-variant-btn.active {
+      border-color: var(--safe);
+      color: var(--safe);
+      background: #0e1a15;
+    }
+
+    .live-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .live-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .ctrl-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--stone);
+      letter-spacing: .06em;
+      min-width: 64px;
+    }
+
+    /* ── API table ───────────────────────────────────── */
+    .api-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      color: var(--shell);
+    }
+    .api-table th {
+      text-align: left;
+      padding: 8px 16px;
+      font-size: 0.72rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--stone);
+      font-weight: 600;
+      border-bottom: 1px solid #252725;
+    }
+    .api-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #1a1c1a;
+      vertical-align: top;
+    }
+    .api-table td:first-child {
+      font-family: monospace;
+      color: var(--sky);
+      font-size: 0.85rem;
+    }
+    .api-table td:nth-child(2) {
+      color: var(--special);
+      font-family: monospace;
+      font-size: 0.82rem;
+    }
+    .api-table td:last-child { color: var(--stone); }
+    .api-wrap {
+      background: #111311;
+      border: 1px solid #252725;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 700px) {
+      section, .code-section, .divider { padding-left: 20px; padding-right: 20px; }
+      .page-header { padding: 32px 20px 28px; }
+      .demo-row { gap: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  PAGE HEADER                                              -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<header class="page-header">
+  <div>
+    <h1><span>&lt;card-carousel&gt;</span> 元件示範</h1>
+    <p>堆疊視差輪轉卡片，支援 fill / invert 雙 variant、全品牌主題色、
+       鍵盤與 Touch 操作，零 Shadow DOM。</p>
+  </div>
+  <span class="badge-version">v1.0</span>
+</header>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1 — Live 互動示範                                -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-label">Section 01</div>
+  <div class="section-title">即時切換主題 &amp; Variant</div>
+  <div class="section-desc">
+    從下方選擇主題色和顯示模式，元件會即時更新屬性反映效果。
+  </div>
+
+  <div class="live-controls">
+    <div class="live-controls-row">
+      <span class="ctrl-label">Theme</span>
+      <div class="switcher-row" id="themePicker">
+        <button class="sw-btn active" data-theme="lavender">lavender</button>
+        <button class="sw-btn" data-theme="sky">sky</button>
+        <button class="sw-btn" data-theme="safe">safe</button>
+        <button class="sw-btn" data-theme="special">special</button>
+        <button class="sw-btn" data-theme="salmon">salmon</button>
+        <button class="sw-btn" data-theme="orange">orange</button>
+        <button class="sw-btn" data-theme="pink">pink</button>
+        <button class="sw-btn" data-theme="info">info</button>
+        <button class="sw-btn" data-theme="yellow">yellow</button>
+        <button class="sw-btn" data-theme="warning">warning</button>
+        <button class="sw-btn" data-theme="stone">stone</button>
+      </div>
+    </div>
+    <div class="live-controls-row">
+      <span class="ctrl-label">Variant</span>
+      <div class="switcher-row" id="variantPicker">
+        <button class="sw-variant-btn active" data-variant="invert">invert</button>
+        <button class="sw-variant-btn" data-variant="fill">fill</button>
+      </div>
+    </div>
+  </div>
+
+  <card-carousel id="liveDemo" theme="lavender" variant="invert" card-width="440px">
+    <carousel-card icon="bi-person-fill"       name="Gillian Gardner"  sub="New York City, NY"></carousel-card>
+    <carousel-card icon="bi-star-fill"          name="Fabio Franklin"   sub="Jacksonville, FL"></carousel-card>
+    <carousel-card icon="bi-heart-fill"         name="Elira Eloise"     sub="Oakland, CA"></carousel-card>
+    <carousel-card icon="bi-lightning-charge-fill" name="Benny Davis"  sub="Chicago, IL"></carousel-card>
+    <carousel-card icon="bi-gem"                name="Kira Nakamura"    sub="Seattle, WA"></carousel-card>
+  </card-carousel>
+</section>
+
+<hr class="divider">
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2 — Fill vs Invert 對比                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-label">Section 02</div>
+  <div class="section-title">Fill vs Invert — 相同主題，雙樣貌</div>
+  <div class="section-desc">
+    <b>invert</b>：深底色 + 主題色邊框/文字。
+    <b>fill</b>：主題色底色 + sky (#08a9d1) 邊框/文字。
+  </div>
+
+  <div class="demo-row">
+
+    <div class="demo-item">
+      <span class="demo-item-label" style="color:var(--lavender)">lavender · invert</span>
+      <card-carousel theme="lavender" variant="invert" card-width="400px">
+        <carousel-card icon="bi-person-fill"   name="Alice Marlowe"  sub="San Francisco, CA"></carousel-card>
+        <carousel-card icon="bi-camera-fill"   name="Ben Tanaka"     sub="Portland, OR"></carousel-card>
+        <carousel-card icon="bi-music-note-beamed" name="Clara Voss" sub="Austin, TX"></carousel-card>
+      </card-carousel>
+    </div>
+
+    <div class="demo-item">
+      <span class="demo-item-label" style="color:var(--lavender)">lavender · fill</span>
+      <card-carousel theme="lavender" variant="fill" card-width="400px">
+        <carousel-card icon="bi-person-fill"   name="Alice Marlowe"  sub="San Francisco, CA"></carousel-card>
+        <carousel-card icon="bi-camera-fill"   name="Ben Tanaka"     sub="Portland, OR"></carousel-card>
+        <carousel-card icon="bi-music-note-beamed" name="Clara Voss" sub="Austin, TX"></carousel-card>
+      </card-carousel>
+    </div>
+
+    <div class="demo-item">
+      <span class="demo-item-label" style="color:var(--safe)">safe · invert</span>
+      <card-carousel theme="safe" variant="invert" card-width="400px">
+        <carousel-card icon="bi-shield-fill-check" name="Dana Park"   sub="Boston, MA"></carousel-card>
+        <carousel-card icon="bi-lock-fill"         name="Evan Ramos"  sub="Miami, FL"></carousel-card>
+        <carousel-card icon="bi-fingerprint"       name="Fiona Lee"   sub="Denver, CO"></carousel-card>
+      </card-carousel>
+    </div>
+
+    <div class="demo-item">
+      <span class="demo-item-label" style="color:var(--safe)">safe · fill</span>
+      <card-carousel theme="safe" variant="fill" card-width="400px">
+        <carousel-card icon="bi-shield-fill-check" name="Dana Park"   sub="Boston, MA"></carousel-card>
+        <carousel-card icon="bi-lock-fill"         name="Evan Ramos"  sub="Miami, FL"></carousel-card>
+        <carousel-card icon="bi-fingerprint"       name="Fiona Lee"   sub="Denver, CO"></carousel-card>
+      </card-carousel>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3 — 單張覆寫 & 自訂圖示大小                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-label">Section 03</div>
+  <div class="section-title">單張覆寫主題 &amp; 自訂圖示尺寸</div>
+  <div class="section-desc">
+    每張 <code style="color:var(--sky)">&lt;carousel-card&gt;</code> 可各自設定
+    <code style="color:var(--sky)">theme</code> / <code style="color:var(--sky)">variant</code>，
+    覆蓋父層設定。右側展示大圖示版本（<code style="color:var(--sky)">icon-size="3rem"</code>）。
+  </div>
+
+  <div class="demo-row">
+
+    <!-- 單張各自不同主題 -->
+    <div class="demo-item">
+      <span class="demo-item-label" style="color:var(--special)">父層 orange · invert，各卡覆寫</span>
+      <card-carousel theme="orange" variant="invert" card-width="420px">
+        <carousel-card icon="bi-robot"         name="Model A"   sub="分析引擎"   theme="sky"      variant="invert"></carousel-card>
+        <carousel-card icon="bi-cpu-fill"      name="Model B"   sub="推論核心"   theme="safe"     variant="fill"></carousel-card>
+        <carousel-card icon="bi-lightning-fill" name="Model C"  sub="快取加速"   theme="lavender" variant="invert"></carousel-card>
+        <carousel-card icon="bi-database-fill" name="Model D"   sub="向量資料庫" theme="orange"   variant="fill"></carousel-card>
+      </card-carousel>
+    </div>
+
+    <!-- 大圖示 -->
+    <div class="demo-item">
+      <span class="demo-item-label" style="color:var(--pink)">大圖示 icon-size=3rem</span>
+      <card-carousel theme="pink" variant="invert" card-width="420px" icon-size="3rem" icon-radius="50%">
+        <carousel-card icon="bi-person-hearts"    name="Sophia Chen"   sub="產品設計師"></carousel-card>
+        <carousel-card icon="bi-pen-fill"         name="Liam Torres"   sub="技術文件撰寫"></carousel-card>
+        <carousel-card icon="bi-code-slash"       name="Maya Patel"    sub="全端工程師"></carousel-card>
+      </card-carousel>
+    </div>
+
+    <!-- 只有 2 張，visible-back=1 -->
+    <div class="demo-item">
+      <span class="demo-item-label" style="color:var(--yellow)">visible-back=1，2 張卡片</span>
+      <card-carousel theme="yellow" variant="invert" card-width="380px" visible-back="1">
+        <carousel-card icon="bi-sun-fill"         name="Day Mode"   sub="白天主題"></carousel-card>
+        <carousel-card icon="bi-moon-fill"        name="Night Mode" sub="夜間主題"></carousel-card>
+      </card-carousel>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4 — 動態新增卡片                                -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section>
+  <div class="section-label">Section 04</div>
+  <div class="section-title">動態新增 / 移除卡片</div>
+  <div class="section-desc">
+    透過 JS 操作 DOM 即可新增或移除 <code style="color:var(--sky)">&lt;carousel-card&gt;</code>，
+    MutationObserver 自動偵測並更新。
+  </div>
+
+  <div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap;">
+    <button class="sw-btn" id="btnAddCard" style="border-color:var(--safe);color:var(--safe)">
+      <i class="bi bi-plus-circle"></i> 新增卡片
+    </button>
+    <button class="sw-btn" id="btnRemoveCard" style="border-color:var(--warning);color:var(--warning)">
+      <i class="bi bi-dash-circle"></i> 移除末張
+    </button>
+  </div>
+
+  <card-carousel id="dynamicDemo" theme="info" variant="invert" card-width="420px">
+    <carousel-card icon="bi-1-circle-fill" name="Card One"   sub="第一張"></carousel-card>
+    <carousel-card icon="bi-2-circle-fill" name="Card Two"   sub="第二張"></carousel-card>
+    <carousel-card icon="bi-3-circle-fill" name="Card Three" sub="第三張"></carousel-card>
+  </card-carousel>
+</section>
+
+<hr class="divider">
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5 — 程式碼說明                                  -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section class="code-section">
+  <div class="section-label">Section 05</div>
+  <div class="section-title">使用方式</div>
+  <div class="section-desc">引入 Bootstrap Icons CSS 與 card-carousel.js 即可。</div>
+
+  <div class="code-wrap">
+
+    <!-- 基本 HTML -->
+    <div>
+      <div class="code-title">HTML — 基本使用</div>
+      <div class="code-block"><span class="cm">&lt;!-- 1. 引入相依 --&gt;</span>
+<span class="kw">&lt;link</span> <span class="at">rel</span>=<span class="val">"stylesheet"</span>
+  <span class="at">href</span>=<span class="val">"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;script</span> <span class="at">src</span>=<span class="val">"card-carousel.js"</span><span class="kw">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- 2. 宣告元件 --&gt;</span>
+<span class="kw">&lt;card-carousel</span>
+  <span class="at">theme</span>=<span class="val">"lavender"</span>
+  <span class="at">variant</span>=<span class="val">"invert"</span>
+  <span class="at">card-width</span>=<span class="val">"420px"</span>
+  <span class="at">icon-size</span>=<span class="val">"2.2rem"</span>
+  <span class="at">visible-back</span>=<span class="val">"2"</span><span class="kw">&gt;</span>
+
+  <span class="kw">&lt;carousel-card</span>
+    <span class="at">icon</span>=<span class="val">"bi-person-fill"</span>
+    <span class="at">name</span>=<span class="val">"Gillian Gardner"</span>
+    <span class="at">sub</span>=<span class="val">"New York City, NY"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;/carousel-card&gt;</span>
+
+  <span class="cm">&lt;!-- 單張覆寫主題 --&gt;</span>
+  <span class="kw">&lt;carousel-card</span>
+    <span class="at">icon</span>=<span class="val">"bi-star-fill"</span>
+    <span class="at">name</span>=<span class="val">"Fabio Franklin"</span>
+    <span class="at">sub</span>=<span class="val">"Jacksonville, FL"</span>
+    <span class="at">theme</span>=<span class="val">"sky"</span>
+    <span class="at">variant</span>=<span class="val">"fill"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;/carousel-card&gt;</span>
+
+<span class="kw">&lt;/card-carousel&gt;</span></div>
+    </div>
+
+    <!-- 全域設定 -->
+    <div>
+      <div class="code-title">JS — 全域設定 &amp; 動態操作</div>
+      <div class="code-block"><span class="cm">// 覆寫全域預設（頁面載入時執行）</span>
+<span class="fn">CardCarousel</span>.<span class="fn">config</span>({
+  <span class="at">iconSize</span>:     <span class="val">'2.6rem'</span>,
+  <span class="at">iconPadding</span>:  <span class="val">'16px'</span>,
+  <span class="at">iconRadius</span>:   <span class="val">'50%'</span>,   <span class="cm">// 圓形圖示</span>
+  <span class="at">cardWidth</span>:    <span class="val">'480px'</span>,
+  <span class="at">cardRadius</span>:   <span class="val">'20px'</span>,
+  <span class="at">visibleBack</span>:  <span class="val">3</span>,
+  <span class="at">transitionMs</span>: <span class="val">400</span>,
+  <span class="at">stackOffsetY</span>: <span class="val">30</span>,
+  <span class="at">stackScale</span>:   <span class="val">0.06</span>,
+  <span class="at">stackBlur</span>:    <span class="val">2</span>,
+  <span class="at">stackOpacity</span>: <span class="val">0.25</span>,
+});
+
+<span class="cm">// 取得品牌色表</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">CardCarousel</span>.<span class="at">tokens</span>.<span class="at">lavender</span>); <span class="cm">// #C3A5E5</span>
+
+<span class="cm">// 動態新增卡片</span>
+<span class="kw">const</span> cc = document.<span class="fn">querySelector</span>(<span class="str">'card-carousel'</span>);
+<span class="kw">const</span> newCard = document.<span class="fn">createElement</span>(<span class="str">'carousel-card'</span>);
+newCard.<span class="fn">setAttribute</span>(<span class="str">'icon'</span>, <span class="str">'bi-gem'</span>);
+newCard.<span class="fn">setAttribute</span>(<span class="str">'name'</span>, <span class="str">'New Person'</span>);
+newCard.<span class="fn">setAttribute</span>(<span class="str">'sub'</span>,  <span class="str">'Chicago, IL'</span>);
+cc.<span class="fn">appendChild</span>(newCard); <span class="cm">// 自動偵測並更新</span>
+
+<span class="cm">// 即時切換主題</span>
+cc.<span class="fn">setAttribute</span>(<span class="str">'theme'</span>,   <span class="str">'sky'</span>);
+cc.<span class="fn">setAttribute</span>(<span class="str">'variant'</span>, <span class="str">'fill'</span>);</div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6 — API 屬性表                                  -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section style="padding-top:52px;">
+  <div class="section-label">Section 06</div>
+  <div class="section-title">屬性一覽</div>
+  <div class="section-desc" style="margin-bottom:24px;">
+    HTML 屬性可覆寫全域預設；<code style="color:var(--sky)">CardCarousel.config()</code> 設定對所有元件生效。
+  </div>
+
+  <div class="api-wrap">
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th>屬性 (HTML attr)</th>
+          <th>預設值</th>
+          <th>說明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>theme</td><td>lavender</td><td>主題色名稱，對應品牌色 Token</td></tr>
+        <tr><td>variant</td><td>invert</td><td>invert（深底）或 fill（色底）</td></tr>
+        <tr><td>card-width</td><td>420px</td><td>元件整體寬度</td></tr>
+        <tr><td>icon-size</td><td>2.2rem</td><td>Bootstrap Icon 字型大小</td></tr>
+        <tr><td>icon-radius</td><td>12px</td><td>Icon 槽圓角（設 50% 可做圓形）</td></tr>
+        <tr><td>visible-back</td><td>2</td><td>後方顯示幾張堆疊卡片</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:28px;" class="api-wrap">
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th>CardCarousel.config() 鍵</th>
+          <th>預設值</th>
+          <th>說明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>transitionMs</td><td>370</td><td>動畫時長（毫秒）</td></tr>
+        <tr><td>stackOffsetY</td><td>27</td><td>每層向上位移（px）</td></tr>
+        <tr><td>stackScale</td><td>0.07</td><td>每層縮放遞減量</td></tr>
+        <tr><td>stackBlur</td><td>1.8</td><td>每層模糊遞增量（px）</td></tr>
+        <tr><td>stackOpacity</td><td>0.22</td><td>每層透明度遞減量</td></tr>
+        <tr><td>iconPadding</td><td>13px</td><td>Icon 槽內距（影響槽大小）</td></tr>
+        <tr><td>cardRadius</td><td>18px</td><td>卡片圓角</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  SCRIPTS                                                  -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<script>
+  /* ── Live 主題 / Variant 切換 ─────────────────────── */
+  const liveDemo = document.getElementById('liveDemo');
+
+  document.getElementById('themePicker').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-theme]');
+    if (!btn) return;
+    document.querySelectorAll('#themePicker .sw-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    liveDemo.setAttribute('theme', btn.dataset.theme);
+  });
+
+  document.getElementById('variantPicker').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-variant]');
+    if (!btn) return;
+    document.querySelectorAll('#variantPicker .sw-variant-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    liveDemo.setAttribute('variant', btn.dataset.variant);
+  });
+
+  /* ── 動態新增 / 移除 ─────────────────────────────── */
+  const dynamicDemo = document.getElementById('dynamicDemo');
+  const iconPool    = ['bi-4-circle-fill','bi-5-circle-fill','bi-6-circle-fill',
+                       'bi-7-circle-fill','bi-8-circle-fill','bi-9-circle-fill'];
+  const namePool    = ['Card Four','Card Five','Card Six','Card Seven','Card Eight','Card Nine'];
+  let addCount      = 3; // 目前已有 3 張
+
+  document.getElementById('btnAddCard').addEventListener('click', () => {
+    if (addCount >= iconPool.length + 3) return;
+    const idx  = addCount - 3;
+    const card = document.createElement('carousel-card');
+    card.setAttribute('icon', iconPool[idx]);
+    card.setAttribute('name', namePool[idx]);
+    card.setAttribute('sub',  `第 ${addCount + 1} 張`);
+    dynamicDemo.appendChild(card);
+    addCount++;
+  });
+
+  document.getElementById('btnRemoveCard').addEventListener('click', () => {
+    const cards = dynamicDemo.querySelectorAll(':scope > carousel-card');
+    if (cards.length > 1) {
+      cards[cards.length - 1].remove();
+      if (addCount > 3) addCount--;
+    }
+  });
+</script>
+
+</body>
+</html>

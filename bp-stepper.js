@@ -62,7 +62,7 @@
 
   function buildCSS() {
     return `
-.bp-stepper {
+bp-stepper {
   display: flex;
   overflow-x: auto;
   align-items: stretch;
@@ -100,7 +100,57 @@
   --bps-arrow:          6px;
 }
 
-.bp-step {
+bp-stepper[data-wrapped] {
+  display: block;
+  overflow-x: visible;
+  overflow-y: visible;
+  width: fit-content;
+}
+
+.bps-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--bps-gap);
+}
+
+.bps-row + .bps-row {
+  margin-top: 0;
+}
+
+.bps-u-turn {
+  height: var(--bps-gap);
+  border-right:  var(--bps-stroke) solid var(--bps-connector-color, var(--bps-color));
+  border-bottom: var(--bps-stroke) solid var(--bps-connector-color, var(--bps-color));
+  box-sizing: border-box;
+  transition: border-color .28s;
+}
+
+.bps-last-in-row::after {
+  content: '';
+  position: absolute;
+  right:    calc(-1 * var(--bps-stroke) / 2);
+  top:      50%;
+  width:    var(--bps-stroke);
+  height:   calc(50% + 1px);
+  background: var(--bps-connector-color, var(--bps-color));
+  transform: none;
+  z-index:  0;
+  transition: background .28s;
+}
+
+.bps-entry-line {
+  position:   absolute;
+  left:       calc(-1 * var(--bps-stroke) / 2);
+  top:        0;
+  width:      var(--bps-stroke);
+  height:     50%;
+  background: var(--bps-connector-color, var(--bps-color));
+  pointer-events: none;
+  z-index:    0;
+  transition: background .28s;
+}
+
+bp-step {
   flex: 0 0 var(--bps-width);
   border: var(--bps-stroke) solid var(--bps-color);
   border-radius: var(--bps-radius);
@@ -116,41 +166,41 @@
   box-sizing: border-box;
 }
 
-.bp-step[data-state="active"] {
+bp-step[data-state="active"] {
   border-color: var(--bps-color-active);
   background:   var(--bps-card-bg-act);
   box-shadow:   0 0 16px -5px var(--bps-color-active);
 }
-.bp-step[data-state="active"] .bp-step-badge {
+bp-step[data-state="active"] .bp-step-badge {
   background:   var(--bps-color-active);
   border-color: var(--bps-color-active);
   color:        #0c0d0c;
 }
-.bp-step[data-state="active"] .bp-step-title { color: var(--bps-color-active); }
+bp-step[data-state="active"] bp-step-title { color: var(--bps-color-active); }
 
-.bp-step[data-state="done"] {
+bp-step[data-state="done"] {
   border-color: var(--bps-color-done);
   background:   var(--bps-card-bg-done);
 }
-.bp-step[data-state="done"] .bp-step-badge {
+bp-step[data-state="done"] .bp-step-badge {
   background:   var(--bps-color-done);
   border-color: var(--bps-color-done);
   color:        #0c0d0c;
 }
-.bp-step[data-state="done"] .bp-step-title { color: var(--bps-color-done); }
-.bp-step[data-state="done"] .bp-step-desc  { opacity: .65; }
+bp-step[data-state="done"] bp-step-title   { color: var(--bps-color-done); }
+bp-step[data-state="done"] bp-step-content { opacity: .65; }
 
-.bp-step[data-state="error"] {
+bp-step[data-state="error"] {
   border-color: var(--bps-color-error);
   background:   var(--bps-card-bg-err);
   box-shadow:   0 0 14px -5px var(--bps-color-error);
 }
-.bp-step[data-state="error"] .bp-step-badge {
+bp-step[data-state="error"] .bp-step-badge {
   background:   var(--bps-color-error);
   border-color: var(--bps-color-error);
   color:        #0c0d0c;
 }
-.bp-step[data-state="error"] .bp-step-title { color: var(--bps-color-error); }
+bp-step[data-state="error"] bp-step-title { color: var(--bps-color-error); }
 
 .bp-step-badge {
   display:         inline-flex;
@@ -169,7 +219,8 @@
   transition:      background .28s, color .28s, border-color .28s;
 }
 
-.bp-step-title {
+bp-step-title {
+  display:     block;
   font-size:   var(--bps-title-fs);
   font-weight: 600;
   color:       var(--bps-title);
@@ -177,7 +228,8 @@
   transition:  color .28s;
 }
 
-.bp-step-desc {
+bp-step-content {
+  display:     block;
   font-size:   var(--bps-fs);
   color:       var(--bps-text);
   opacity:     .82;
@@ -192,7 +244,7 @@
   user-select:   none;
 }
 
-.bp-step:not(:last-child)::after {
+bp-step:not(:last-child)::after {
   content:          '';
   position:         absolute;
   right:            calc(-1 * var(--bps-gap));
@@ -204,7 +256,7 @@
   z-index:          0;
   transition:       background-color .28s;
 }
-.bp-step:not(:last-child)::before {
+bp-step:not(:last-child)::before {
   content:       '';
   position:      absolute;
   right:         calc(-1 * var(--bps-gap));
@@ -217,53 +269,71 @@
   transition:    border-left-color .28s;
 }
 
-.bp-step[data-state="done"]:not(:last-child)::after    { background-color:  var(--bps-color-done);   }
-.bp-step[data-state="done"]:not(:last-child)::before   { border-left-color: var(--bps-color-done);   }
-.bp-step[data-state="active"]:not(:last-child)::after  { background-color:  var(--bps-color-active); }
-.bp-step[data-state="active"]:not(:last-child)::before { border-left-color: var(--bps-color-active); }
-.bp-step[data-state="error"]:not(:last-child)::after   { background-color:  var(--bps-color-error);  }
-.bp-step[data-state="error"]:not(:last-child)::before  { border-left-color: var(--bps-color-error);  }
+bp-step[data-state="done"]:not(:last-child)::after    { background-color:  var(--bps-color-done);   }
+bp-step[data-state="done"]:not(:last-child)::before   { border-left-color: var(--bps-color-done);   }
+bp-step[data-state="active"]:not(:last-child)::after  { background-color:  var(--bps-color-active); }
+bp-step[data-state="active"]:not(:last-child)::before { border-left-color: var(--bps-color-active); }
+bp-step[data-state="error"]:not(:last-child)::after   { background-color:  var(--bps-color-error);  }
+bp-step[data-state="error"]:not(:last-child)::before  { border-left-color: var(--bps-color-error);  }
 
-.bp-stepper[data-connector="dashed"] .bp-step:not(:last-child)::after {
+bp-stepper[data-connector="dashed"] > bp-step:not(:last-child)::after,
+bp-stepper[data-connector="dashed"] .bps-row > bp-step:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color) 0, var(--bps-color) 6px, transparent 6px, transparent 13px);
 }
-.bp-stepper[data-connector="dashed"] .bp-step[data-state="done"]:not(:last-child)::after {
+bp-stepper[data-connector="dashed"] > bp-step[data-state="done"]:not(:last-child)::after,
+bp-stepper[data-connector="dashed"] .bps-row > bp-step[data-state="done"]:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color-done) 0, var(--bps-color-done) 6px, transparent 6px, transparent 13px);
 }
-.bp-stepper[data-connector="dashed"] .bp-step[data-state="active"]:not(:last-child)::after {
+bp-stepper[data-connector="dashed"] > bp-step[data-state="active"]:not(:last-child)::after,
+bp-stepper[data-connector="dashed"] .bps-row > bp-step[data-state="active"]:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color-active) 0, var(--bps-color-active) 6px, transparent 6px, transparent 13px);
 }
-.bp-stepper[data-connector="dashed"] .bp-step[data-state="error"]:not(:last-child)::after {
+bp-stepper[data-connector="dashed"] > bp-step[data-state="error"]:not(:last-child)::after,
+bp-stepper[data-connector="dashed"] .bps-row > bp-step[data-state="error"]:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color-error) 0, var(--bps-color-error) 6px, transparent 6px, transparent 13px);
 }
+bp-stepper[data-connector="dashed"] .bps-u-turn {
+  border-right-style: dashed;
+  border-bottom-style: dashed;
+  border-left-style: dashed;
+}
 
-.bp-stepper[data-connector="dotted"] .bp-step:not(:last-child)::after {
+bp-stepper[data-connector="dotted"] > bp-step:not(:last-child)::after,
+bp-stepper[data-connector="dotted"] .bps-row > bp-step:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color) 0, var(--bps-color) 3px, transparent 3px, transparent 8px);
 }
-.bp-stepper[data-connector="dotted"] .bp-step[data-state="done"]:not(:last-child)::after {
+bp-stepper[data-connector="dotted"] > bp-step[data-state="done"]:not(:last-child)::after,
+bp-stepper[data-connector="dotted"] .bps-row > bp-step[data-state="done"]:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color-done) 0, var(--bps-color-done) 3px, transparent 3px, transparent 8px);
 }
-.bp-stepper[data-connector="dotted"] .bp-step[data-state="active"]:not(:last-child)::after {
+bp-stepper[data-connector="dotted"] > bp-step[data-state="active"]:not(:last-child)::after,
+bp-stepper[data-connector="dotted"] .bps-row > bp-step[data-state="active"]:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color-active) 0, var(--bps-color-active) 3px, transparent 3px, transparent 8px);
 }
-.bp-stepper[data-connector="dotted"] .bp-step[data-state="error"]:not(:last-child)::after {
+bp-stepper[data-connector="dotted"] > bp-step[data-state="error"]:not(:last-child)::after,
+bp-stepper[data-connector="dotted"] .bps-row > bp-step[data-state="error"]:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color-error) 0, var(--bps-color-error) 3px, transparent 3px, transparent 8px);
 }
+bp-stepper[data-connector="dotted"] .bps-u-turn {
+  border-right-style: dotted;
+  border-bottom-style: dotted;
+  border-left-style: dotted;
+}
 
-.bp-stepper[data-layout="vertical"] {
+bp-stepper[data-layout="vertical"] {
   flex-direction: column;
   overflow-x:     visible;
   overflow-y:     auto;
   align-items:    flex-start;
 }
-.bp-stepper[data-layout="vertical"] .bp-step {
+bp-stepper[data-layout="vertical"] > bp-step {
   flex:      0 0 auto;
   width:     100%;
   max-width: var(--bps-width);
   min-width: 180px;
 }
 
-.bp-stepper[data-layout="vertical"] .bp-step:not(:last-child)::after {
+bp-stepper[data-layout="vertical"] > bp-step:not(:last-child)::after {
   right:            auto;
   left:             calc(var(--bps-badge-sz) / 2 - var(--bps-stroke) / 2);
   top:              100%;
@@ -272,11 +342,11 @@
   transform:        none;
   background-color: var(--bps-color);
 }
-.bp-stepper[data-layout="vertical"] .bp-step[data-state="done"]:not(:last-child)::after   { background-color: var(--bps-color-done);   }
-.bp-stepper[data-layout="vertical"] .bp-step[data-state="active"]:not(:last-child)::after { background-color: var(--bps-color-active); }
-.bp-stepper[data-layout="vertical"] .bp-step[data-state="error"]:not(:last-child)::after  { background-color: var(--bps-color-error);  }
+bp-stepper[data-layout="vertical"] > bp-step[data-state="done"]:not(:last-child)::after   { background-color: var(--bps-color-done);   }
+bp-stepper[data-layout="vertical"] > bp-step[data-state="active"]:not(:last-child)::after { background-color: var(--bps-color-active); }
+bp-stepper[data-layout="vertical"] > bp-step[data-state="error"]:not(:last-child)::after  { background-color: var(--bps-color-error);  }
 
-.bp-stepper[data-layout="vertical"] .bp-step:not(:last-child)::before {
+bp-stepper[data-layout="vertical"] > bp-step:not(:last-child)::before {
   right:         auto;
   left:          calc(var(--bps-badge-sz) / 2 - var(--bps-arrow));
   top:           auto;
@@ -287,40 +357,43 @@
   border-top:    calc(var(--bps-arrow) * 1.5) solid var(--bps-color);
   border-bottom: none;
 }
-.bp-stepper[data-layout="vertical"] .bp-step[data-state="done"]:not(:last-child)::before   { border-top-color: var(--bps-color-done);   }
-.bp-stepper[data-layout="vertical"] .bp-step[data-state="active"]:not(:last-child)::before { border-top-color: var(--bps-color-active); }
-.bp-stepper[data-layout="vertical"] .bp-step[data-state="error"]:not(:last-child)::before  { border-top-color: var(--bps-color-error);  }
+bp-stepper[data-layout="vertical"] > bp-step[data-state="done"]:not(:last-child)::before   { border-top-color: var(--bps-color-done);   }
+bp-stepper[data-layout="vertical"] > bp-step[data-state="active"]:not(:last-child)::before { border-top-color: var(--bps-color-active); }
+bp-stepper[data-layout="vertical"] > bp-step[data-state="error"]:not(:last-child)::before  { border-top-color: var(--bps-color-error);  }
 
-.bp-stepper[data-layout="vertical"][data-connector="dashed"] .bp-step:not(:last-child)::after {
+bp-stepper[data-layout="vertical"][data-connector="dashed"] > bp-step:not(:last-child)::after {
   background: repeating-linear-gradient(to bottom, var(--bps-color) 0, var(--bps-color) 6px, transparent 6px, transparent 13px);
 }
-.bp-stepper[data-layout="vertical"][data-connector="dashed"] .bp-step[data-state="done"]:not(:last-child)::after {
+bp-stepper[data-layout="vertical"][data-connector="dashed"] > bp-step[data-state="done"]:not(:last-child)::after {
   background: repeating-linear-gradient(to bottom, var(--bps-color-done) 0, var(--bps-color-done) 6px, transparent 6px, transparent 13px);
 }
-.bp-stepper[data-layout="vertical"][data-connector="dashed"] .bp-step[data-state="active"]:not(:last-child)::after {
+bp-stepper[data-layout="vertical"][data-connector="dashed"] > bp-step[data-state="active"]:not(:last-child)::after {
   background: repeating-linear-gradient(to bottom, var(--bps-color-active) 0, var(--bps-color-active) 6px, transparent 6px, transparent 13px);
 }
-.bp-stepper[data-layout="vertical"][data-connector="dashed"] .bp-step[data-state="error"]:not(:last-child)::after {
+bp-stepper[data-layout="vertical"][data-connector="dashed"] > bp-step[data-state="error"]:not(:last-child)::after {
   background: repeating-linear-gradient(to bottom, var(--bps-color-error) 0, var(--bps-color-error) 6px, transparent 6px, transparent 13px);
 }
 
-.bp-stepper[data-layout="vertical"][data-connector="dotted"] .bp-step:not(:last-child)::after {
+bp-stepper[data-layout="vertical"][data-connector="dotted"] > bp-step:not(:last-child)::after {
   background: repeating-linear-gradient(to bottom, var(--bps-color) 0, var(--bps-color) 3px, transparent 3px, transparent 8px);
 }
 
-.bp-stepper[data-clickable="true"] .bp-step {
+bp-stepper[data-clickable="true"] > bp-step,
+bp-stepper[data-clickable="true"] .bps-row > bp-step {
   cursor: pointer;
   user-select: none;
 }
-.bp-stepper[data-clickable="true"] .bp-step:not([data-state="active"]):hover {
+bp-stepper[data-clickable="true"] > bp-step:not([data-state="active"]):hover,
+bp-stepper[data-clickable="true"] .bps-row > bp-step:not([data-state="active"]):hover {
   border-color: var(--bps-color);
   box-shadow:   0 0 12px -4px var(--bps-color);
   transform:    translateY(-2px);
 }
-.bp-stepper[data-layout="vertical"][data-clickable="true"] .bp-step:not([data-state="active"]):hover {
+bp-stepper[data-layout="vertical"][data-clickable="true"] > bp-step:not([data-state="active"]):hover {
   transform: translateX(3px);
 }
-.bp-stepper[data-clickable="true"] .bp-step:focus-visible {
+bp-stepper[data-clickable="true"] > bp-step:focus-visible,
+bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
   outline:        2px solid var(--bps-color);
   outline-offset: 3px;
 }
@@ -362,6 +435,64 @@
     document.head.appendChild(s);
   }
 
+  function getSteps(el) {
+    if (el.hasAttribute('data-wrapped')) {
+      return el.querySelectorAll('.bps-row > bp-step');
+    }
+    return el.querySelectorAll(':scope > bp-step');
+  }
+
+  function syncWrapConnector(el) {
+    if (!el.hasAttribute('data-wrapped')) return;
+    const wrapN = parseInt(el.dataset.wrap, 10);
+    const steps = getSteps(el);
+    const pivot = steps[wrapN - 1];
+    if (!pivot) return;
+    const state = pivot.dataset.state;
+    const colorVal = state === 'done'   ? 'var(--bps-color-done)'
+                   : state === 'active' ? 'var(--bps-color-active)'
+                   : state === 'error'  ? 'var(--bps-color-error)'
+                   : null;
+    if (colorVal) {
+      el.style.setProperty('--bps-connector-color', colorVal);
+    } else {
+      el.style.removeProperty('--bps-connector-color');
+    }
+  }
+
+  function applyWrap(el) {
+    const wrapN = parseInt(el.dataset.wrap, 10);
+    if (!wrapN || wrapN < 1) return;
+    const allSteps = [...el.querySelectorAll(':scope > bp-step')];
+    if (allSteps.length <= wrapN) return;
+
+    const row1Steps = allSteps.slice(0, wrapN);
+    const row2Steps = allSteps.slice(wrapN);
+
+    row1Steps[row1Steps.length - 1].classList.add('bps-last-in-row');
+
+    const entryLine = document.createElement('span');
+    entryLine.className = 'bps-entry-line';
+    row2Steps[0].insertBefore(entryLine, row2Steps[0].firstChild);
+
+    const row1 = document.createElement('div');
+    row1.className = 'bps-row';
+    row1Steps.forEach(s => row1.appendChild(s));
+
+    const uTurn = document.createElement('div');
+    uTurn.className = 'bps-u-turn';
+
+    const row2 = document.createElement('div');
+    row2.className = 'bps-row';
+    row2Steps.forEach(s => row2.appendChild(s));
+
+    el.appendChild(row1);
+    el.appendChild(uTurn);
+    el.appendChild(row2);
+    el.setAttribute('data-wrapped', '');
+    syncWrapConnector(el);
+  }
+
   function initEl(el) {
     const cfg = Object.assign({}, defaults);
     const theme = el.dataset.theme || cfg.theme;
@@ -382,7 +513,7 @@
       : cfg.autoNumber;
 
     if (autoNum) {
-      el.querySelectorAll('.bp-step').forEach((step, i) => {
+      el.querySelectorAll(':scope > bp-step').forEach((step, i) => {
         if (step.querySelector('.bp-step-badge')) return;
         const badge = document.createElement('span');
         badge.className = 'bp-step-badge';
@@ -396,7 +527,7 @@
     }
 
     if (el.dataset.clickable === 'true') {
-      el.querySelectorAll('.bp-step').forEach((step, i) => {
+      el.querySelectorAll(':scope > bp-step').forEach((step, i) => {
         step.setAttribute('tabindex', '0');
         step.addEventListener('click', () => setActive(el, i));
         step.addEventListener('keydown', (e) => {
@@ -407,14 +538,16 @@
         });
       });
     }
+
+    if (el.dataset.wrap) applyWrap(el);
   }
 
   function init(root) {
-    (root || document).querySelectorAll('.bp-stepper').forEach(initEl);
+    (root || document).querySelectorAll('bp-stepper').forEach(initEl);
   }
 
   function setActive(el, index) {
-    const steps = el.querySelectorAll('.bp-step');
+    const steps = getSteps(el);
     const prevIndex = [...steps].findIndex(s => s.dataset.state === 'active');
 
     if (index >= steps.length) {
@@ -423,6 +556,7 @@
         const badge = step.querySelector('.bp-step-badge');
         if (badge) badge.textContent = '✓';
       });
+      syncWrapConnector(el);
       el.dispatchEvent(new CustomEvent('bps:complete', {
         bubbles: true,
         detail: { el },
@@ -444,6 +578,8 @@
       }
     });
 
+    syncWrapConnector(el);
+
     el.dispatchEvent(new CustomEvent('bps:change', {
       bubbles: true,
       detail: { index, prevIndex, el },
@@ -451,28 +587,32 @@
   }
 
   function setError(el, index) {
-    const steps = el.querySelectorAll('.bp-step');
+    const steps = getSteps(el);
     if (!steps[index]) return;
     steps[index].dataset.state = 'error';
     const badge = steps[index].querySelector('.bp-step-badge');
     if (badge) badge.textContent = '!';
+    syncWrapConnector(el);
   }
 
   function resetStates(el) {
-    el.querySelectorAll('.bp-step').forEach((step, i) => {
+    getSteps(el).forEach((step, i) => {
       delete step.dataset.state;
       const badge = step.querySelector('.bp-step-badge');
       if (badge) badge.textContent = String(i + 1);
     });
+    syncWrapConnector(el);
   }
+
+  customElements.define('bp-stepper', class extends HTMLElement {
+    connectedCallback() { setTimeout(() => initEl(this), 0); }
+  });
+  customElements.define('bp-step',         class extends HTMLElement {});
+  customElements.define('bp-step-title',   class extends HTMLElement {});
+  customElements.define('bp-step-content', class extends HTMLElement {});
 
   window.BPStepper = { defaults, BRAND, THEMES, init, setActive, setError, resetStates };
 
   injectCSS();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => init());
-  } else {
-    init();
-  }
 
 })();
