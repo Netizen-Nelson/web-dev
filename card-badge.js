@@ -42,20 +42,22 @@ class CardBadge extends HTMLElement {
 
   getBrandColors() {
     return {
-      'background': '#1C1C1E',
-      'fill': '#242426',
+      'background': '#0c0d0c',
+      'fill': '#1a1b1a',
       'shell': '#c6c7bd',
       'lavender': '#C3A5E5',
-      'special': '#b9c971',
-      'warning': '#E5A6A6',
+      'special': '#C8DD5A',
+      'warning': '#F08080',
       'salmon': '#E5C3B3',
-      'attention': '#E5E5A6',
-      'sky': '#04b5a3',
-      'safe': '#84c498',
-      'brown': '#d9b375',
-      'info': '#6f99D6',
+      'sky': '#08a9d1',
+      'safe': '#40c99a',
+      'vanilla': '#FDF6ED',
+      'yellow': '#DECA4B',
+      'info': '#5fafed',
+      'stone': '#95BDD7',
       'pink': '#FFB3D9',
-      'orange': '#f69653'
+      'orange': '#eda109',
+      'attention': '#DECA4B'  // 向後相容，對應 yellow
     };
   }
 
@@ -76,7 +78,7 @@ class CardBadge extends HTMLElement {
     const b = parseInt(color.substr(4, 2), 16);
     
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.5 ? '#1C1C1E' : '#e0e0e0';
+    return luminance > 0.5 ? '#0c0d0c' : '#e0e0e0';
   }
 
   hexToRgba(hex, alpha = 1) {
