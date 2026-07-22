@@ -2,18 +2,31 @@ class CardToggle extends HTMLElement {
     constructor() {
         super();
         this._originalContent = '';
-        this._attempts = 0;
-        this._inputId = '';
+        this._originalColor   = null;
+        this._attempts        = 0;
+        this._inputId         = '';
+        this._autoFlipTimer   = null;
+        this._isFlipped       = false;
+        this._clickBound      = false;
+        this._snapshotTaken   = false;
     }
 
     connectedCallback() {
-        this._originalContent = this.innerHTML;
-        
+        this._originalColor = this.getAttribute('color') || null;
+
         if (!document.getElementById('card-toggle-styles')) {
             this._injectStyles();
         }
-        
+
         this._initialize();
+    }
+
+    /* 取得正面快照（第一次點擊前呼叫，此時 DOM 一定已完整解析） */
+    _takeSnapshot() {
+        if (!this._snapshotTaken) {
+            this._originalContent = this.innerHTML;
+            this._snapshotTaken   = true;
+        }
     }
 
     _injectStyles() {
@@ -21,20 +34,22 @@ class CardToggle extends HTMLElement {
         style.id = 'card-toggle-styles';
         style.textContent = `
             :root {
-                --ct-bg-primary: #1C1C1E;
-                --ct-bg-secondary: #242426;
-                --ct-color-shell: #c6c7bd;
-                --ct-color-lavender: #C3A5E5;
-                --ct-color-special: #b9c971;
-                --ct-color-warning: #E5A6A6;
-                --ct-color-salmon: #E5C3B3;
-                --ct-color-attention: #E5E5A6;
-                --ct-color-sky: #04b5a3;
-                --ct-color-safe: #84c498;
-                --ct-color-brown: #d9c5b2;
-                --ct-color-info: #6f99D6;
-                --ct-color-pink: #FFB3D9;
-                --ct-color-orange: #f69653;
+                --ct-bg-primary:      #0c0d0c;
+                --ct-bg-secondary:    #140d14;
+                --ct-color-shell:     #c6c7bd;
+                --ct-color-lavender:  #C3A5E5;
+                --ct-color-special:   #C8DD5A;
+                --ct-color-warning:   #F08080;
+                --ct-color-salmon:    #E5C3B3;
+                --ct-color-attention: #DECA4B;
+                --ct-color-sky:       #08a9d1;
+                --ct-color-safe:      #40c99a;
+                --ct-color-vanilla:   #FDF6ED;
+                --ct-color-yellow:    #DECA4B;
+                --ct-color-info:      #5fafed;
+                --ct-color-stone:     #95BDD7;
+                --ct-color-pink:      #FFB3D9;
+                --ct-color-orange:    #eda109;
                 /* 預設動態顏色變數 */
                 --ct-active-color: var(--ct-color-special);
             }
@@ -78,12 +93,12 @@ class CardToggle extends HTMLElement {
                 cursor: default;
             }
 
-            card-toggle[replaced]:hover {
+            card-toggle[replaced]:not([toggle]):hover {
                 background-color: var(--ct-bg-secondary);
                 transform: none;
             }
 
-            card-toggle[replaced]::before {
+            card-toggle[replaced]:not([toggle])::before {
                 width: 4px;
             }
 
@@ -93,16 +108,17 @@ class CardToggle extends HTMLElement {
                 border-width: 2px;
             }
 
-            card-toggle[dashed][color="safe"] { border-color: rgba(132, 196, 152, 0.6); }
-            card-toggle[dashed][color="warning"] { border-color: rgba(229, 166, 166, 0.6); }
-            card-toggle[dashed][color="info"] { border-color: rgba(111, 153, 214, 0.6); }
-            card-toggle[dashed][color="special"] { border-color: rgba(185, 201, 113, 0.6); }
-            card-toggle[dashed][color="sky"] { border-color: rgba(4, 181, 163, 0.6); }
-            card-toggle[dashed][color="lavender"] { border-color: rgba(195, 165, 229, 0.6); }
-            card-toggle[dashed][color="attention"] { border-color: rgba(229, 229, 166, 0.6); }
-            card-toggle[dashed][color="salmon"] { border-color: rgba(229, 195, 179, 0.6); }
-            card-toggle[dashed][color="pink"] { border-color: rgba(255, 179, 217, 0.6); }
-            card-toggle[dashed][color="orange"] { border-color: rgba(246, 150, 83, 0.6); }
+            card-toggle[dashed][color="safe"]      { border-color: rgba(64,201,154,0.55); }
+            card-toggle[dashed][color="warning"]   { border-color: rgba(240,128,128,0.55); }
+            card-toggle[dashed][color="info"]      { border-color: rgba(95,175,237,0.55); }
+            card-toggle[dashed][color="special"]   { border-color: rgba(200,221,90,0.55); }
+            card-toggle[dashed][color="sky"]       { border-color: rgba(8,169,209,0.55); }
+            card-toggle[dashed][color="lavender"]  { border-color: rgba(195,165,229,0.55); }
+            card-toggle[dashed][color="attention"] { border-color: rgba(222,202,75,0.55); }
+            card-toggle[dashed][color="salmon"]    { border-color: rgba(229,195,179,0.55); }
+            card-toggle[dashed][color="pink"]      { border-color: rgba(255,179,217,0.55); }
+            card-toggle[dashed][color="orange"]    { border-color: rgba(237,161,9,0.55); }
+            card-toggle[dashed][color="stone"]     { border-color: rgba(149,189,215,0.55); }
 
             card-toggle[size="xsm"] {
                 padding: 3px 6px;
@@ -126,32 +142,32 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="safe"]::before { background-color: var(--ct-color-safe); }
             card-toggle[color="safe"]:hover {
-                background-color: rgba(132, 196, 152, 0.05);
-                box-shadow: 0 0 0 1px rgba(132, 196, 152, 0.2);
+                background-color: rgba(64, 201, 154, 0.05);
+                box-shadow: 0 0 0 1px rgba(64, 201, 154, 0.2);
             }
 
             card-toggle[color="warning"]::before { background-color: var(--ct-color-warning); }
             card-toggle[color="warning"]:hover {
-                background-color: rgba(229, 166, 166, 0.05);
-                box-shadow: 0 0 0 1px rgba(229, 166, 166, 0.2);
+                background-color: rgba(240, 128, 128, 0.05);
+                box-shadow: 0 0 0 1px rgba(240, 128, 128, 0.2);
             }
 
             card-toggle[color="info"]::before { background-color: var(--ct-color-info); }
             card-toggle[color="info"]:hover {
-                background-color: rgba(111, 153, 214, 0.05);
-                box-shadow: 0 0 0 1px rgba(111, 153, 214, 0.2);
+                background-color: rgba(95, 175, 237, 0.05);
+                box-shadow: 0 0 0 1px rgba(95, 175, 237, 0.2);
             }
 
             card-toggle[color="special"]::before { background-color: var(--ct-color-special); }
             card-toggle[color="special"]:hover {
-                background-color: rgba(185, 201, 113, 0.05);
-                box-shadow: 0 0 0 1px rgba(185, 201, 113, 0.2);
+                background-color: rgba(200, 221, 90, 0.05);
+                box-shadow: 0 0 0 1px rgba(200, 221, 90, 0.2);
             }
 
             card-toggle[color="sky"]::before { background-color: var(--ct-color-sky); }
             card-toggle[color="sky"]:hover {
-                background-color: rgba(4, 181, 163, 0.05);
-                box-shadow: 0 0 0 1px rgba(4, 181, 163, 0.2);
+                background-color: rgba(8, 169, 209, 0.05);
+                box-shadow: 0 0 0 1px rgba(8, 169, 209, 0.2);
             }
 
             card-toggle[color="lavender"]::before { background-color: var(--ct-color-lavender); }
@@ -162,20 +178,14 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="attention"]::before { background-color: var(--ct-color-attention); }
             card-toggle[color="attention"]:hover {
-                background-color: rgba(229, 229, 166, 0.05);
-                box-shadow: 0 0 0 1px rgba(229, 229, 166, 0.2);
+                background-color: rgba(222, 202, 75, 0.05);
+                box-shadow: 0 0 0 1px rgba(222, 202, 75, 0.2);
             }
 
             card-toggle[color="salmon"]::before { background-color: var(--ct-color-salmon); }
             card-toggle[color="salmon"]:hover {
                 background-color: rgba(229, 195, 179, 0.05);
                 box-shadow: 0 0 0 1px rgba(229, 195, 179, 0.2);
-            }
-
-            card-toggle[color="brown"]::before { background-color: var(--ct-color-brown); }
-            card-toggle[color="brown"]:hover {
-                background-color: rgba(217, 197, 178, 0.05);
-                box-shadow: 0 0 0 1px rgba(217, 197, 178, 0.2);
             }
 
             card-toggle[color="shell"]::before { background-color: var(--ct-color-shell); }
@@ -192,8 +202,14 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="orange"]::before { background-color: var(--ct-color-orange); }
             card-toggle[color="orange"]:hover {
-                background-color: rgba(246, 150, 83, 0.05);
-                box-shadow: 0 0 0 1px rgba(246, 150, 83, 0.2);
+                background-color: rgba(237, 161, 9, 0.05);
+                box-shadow: 0 0 0 1px rgba(237, 161, 9, 0.2);
+            }
+
+            card-toggle[color="stone"]::before { background-color: var(--ct-color-stone); }
+            card-toggle[color="stone"]:hover {
+                background-color: rgba(149, 189, 215, 0.05);
+                box-shadow: 0 0 0 1px rgba(149, 189, 215, 0.2);
             }
 
             @keyframes ct-fade-in {
@@ -265,7 +281,7 @@ class CardToggle extends HTMLElement {
             .ct-quiz-button:hover {
                 background-color: var(--ct-color-sky);
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(4, 181, 163, 0.3);
+                box-shadow: 0 4px 12px rgba(8, 169, 209, 0.3);
             }
 
             .ct-quiz-button:active {
@@ -462,13 +478,60 @@ class CardToggle extends HTMLElement {
                 color: var(--ct-color-lavender);
                 animation: ct-fade-in 0.3s ease;
             }
+
+            /* auto-flip 倒數進度條 */
+            .ct-countdown-bar {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background-color: rgba(198, 199, 189, 0.1);
+                border-radius: 0 0 8px 8px;
+                overflow: hidden;
+            }
+
+            .ct-countdown-inner {
+                height: 100%;
+                width: 100%;
+                background-color: var(--ct-color-sky);
+                transform-origin: left center;
+                animation: ct-countdown linear forwards;
+            }
+
+            @keyframes ct-countdown {
+                from { transform: scaleX(1); }
+                to   { transform: scaleX(0); }
+            }
+
+            /* toggle 模式：背面的「點擊翻回」提示標籤 */
+            .ct-toggle-hint {
+                display: inline-block;
+                margin-top: 10px;
+                font-size: 0.8rem;
+                color: var(--ct-color-stone);
+                opacity: 0.75;
+                user-select: none;
+            }
+
+            .ct-toggle-hint i {
+                margin-right: 4px;
+            }
+
+            /* toggle 模式背面 hover 效果 */
+            card-toggle[replaced][toggle]:hover {
+                background-color: rgba(198, 199, 189, 0.06);
+                cursor: pointer;
+            }
         `;
         document.head.appendChild(style);
     }
 
     _initialize() {
-        if (!this.hasAttribute('replaced')) {
+        // 統一綁定一個 click handler（toggle 模式需要在 replaced 狀態也能點擊）
+        if (!this._clickBound) {
             this.addEventListener('click', (event) => this._handleClick(event));
+            this._clickBound = true;
         }
 
         if (this.hasAttribute('number')) {
@@ -492,6 +555,21 @@ class CardToggle extends HTMLElement {
     }
 
     _handleClick(event) {
+        // 第一次點擊時才取快照，此時子節點一定已完整解析
+        this._takeSnapshot();
+
+        const isToggleMode = this.hasAttribute('toggle');
+
+        // toggle 模式：已翻到背面時，點擊可翻回正面
+        if (this.hasAttribute('replaced') && isToggleMode) {
+            const target = event.target;
+            const interactiveElements = ['INPUT', 'BUTTON', 'TEXTAREA', 'SELECT', 'A'];
+            if (interactiveElements.includes(target.tagName)) return;
+            if (target.closest('input, button, textarea, select, a')) return;
+            this._flipBack();
+            return;
+        }
+
         if (this.hasAttribute('replaced')) {
             return;
         }
@@ -608,16 +686,35 @@ class CardToggle extends HTMLElement {
 
     _replace(content, animation) {
         const colorAfter = this.getAttribute('color-after');
-        
+        const autoFlip  = this.getAttribute('auto-flip');   // ms，例如 "3000"
+        const isToggle  = this.hasAttribute('toggle');
+
+        const afterReplace = () => {
+            this._isFlipped = true;
+            if (colorAfter) this.setAttribute('color', colorAfter);
+
+            // toggle 模式：背面仍可點擊，改為 pointer 並顯示提示
+            if (isToggle) {
+                this.style.cursor = 'pointer';
+                this._injectToggleHint();
+            }
+
+            // auto-flip：倒數後翻回
+            if (autoFlip) {
+                const ms = parseInt(autoFlip);
+                if (!isNaN(ms) && ms > 0) {
+                    this._startAutoFlip(ms);
+                }
+            }
+        };
+
         if (animation === 'fade') {
             this.style.opacity = '0';
             setTimeout(() => {
                 this.innerHTML = content;
                 this.setAttribute('replaced', '');
-                if (colorAfter) {
-                    this.setAttribute('color', colorAfter);
-                }
                 this.style.opacity = '1';
+                afterReplace();
             }, 300);
         } else if (animation === 'slide') {
             this.style.transform = 'translateX(-20px)';
@@ -625,19 +722,131 @@ class CardToggle extends HTMLElement {
             setTimeout(() => {
                 this.innerHTML = content;
                 this.setAttribute('replaced', '');
-                if (colorAfter) {
-                    this.setAttribute('color', colorAfter);
-                }
                 this.style.transform = 'translateX(0)';
                 this.style.opacity = '1';
+                afterReplace();
             }, 300);
         } else {
             this.innerHTML = content;
             this.setAttribute('replaced', '');
-            if (colorAfter) {
-                this.setAttribute('color', colorAfter);
-            }
+            afterReplace();
         }
+    }
+
+    /* 注入「點擊翻回」提示標籤 */
+    _injectToggleHint() {
+        const existing = this.querySelector('.ct-toggle-hint');
+        if (existing) return;
+        const hint = document.createElement('div');
+        hint.className = 'ct-toggle-hint';
+        hint.innerHTML = '<i class="bi bi-arrow-repeat"></i> 點擊翻回';
+        this.appendChild(hint);
+    }
+
+    /* 啟動 auto-flip 倒數，並注入倒數條 */
+    /* 將 color 名稱解析為對應的 CSS 顏色值 */
+    _resolveColor(name) {
+        const map = {
+            shell:     'var(--ct-color-shell)',
+            lavender:  'var(--ct-color-lavender)',
+            special:   'var(--ct-color-special)',
+            warning:   'var(--ct-color-warning)',
+            salmon:    'var(--ct-color-salmon)',
+            attention: 'var(--ct-color-attention)',
+            sky:       'var(--ct-color-sky)',
+            safe:      'var(--ct-color-safe)',
+            vanilla:   'var(--ct-color-vanilla)',
+            yellow:    'var(--ct-color-yellow)',
+            info:      'var(--ct-color-info)',
+            stone:     'var(--ct-color-stone)',
+            pink:      'var(--ct-color-pink)',
+            orange:    'var(--ct-color-orange)',
+        };
+        if (!name) return null;
+        // 若是已知名稱就取 CSS var；否則當作直接色彩值（hex / rgb 等）
+        return map[name] || name;
+    }
+
+    _startAutoFlip(ms) {
+        // 清除舊計時器
+        if (this._autoFlipTimer) clearTimeout(this._autoFlipTimer);
+
+        // 插入倒數進度條
+        const existing = this.querySelector('.ct-countdown-bar');
+        if (existing) existing.remove();
+
+        const bar = document.createElement('div');
+        bar.className = 'ct-countdown-bar';
+        const inner = document.createElement('div');
+        inner.className = 'ct-countdown-inner';
+        inner.style.animationDuration = ms + 'ms';
+
+        // 倒數條顏色優先順序：
+        //   1. flip-bar-color 屬性（明確指定）
+        //   2. color-after 屬性（翻面後顏色）
+        //   3. color 屬性（正面顏色）
+        //   4. 預設 sky
+        const barColorName =
+            this.getAttribute('flip-bar-color') ||
+            this.getAttribute('color-after')    ||
+            this.getAttribute('color')          ||
+            'sky';
+        const barColor = this._resolveColor(barColorName);
+        if (barColor) inner.style.backgroundColor = barColor;
+
+        bar.appendChild(inner);
+        this.appendChild(bar);
+
+        this._autoFlipTimer = setTimeout(() => {
+            this._flipBack();
+        }, ms);
+    }
+
+    /* 翻回正面 */
+    _flipBack() {
+        if (this._autoFlipTimer) {
+            clearTimeout(this._autoFlipTimer);
+            this._autoFlipTimer = null;
+        }
+
+        const animation = this.getAttribute('animation') || 'fade';
+        const originalColor = this._originalColor || null;
+
+        if (animation === 'fade') {
+            this.style.opacity = '0';
+            setTimeout(() => {
+                this._restoreFront(originalColor);
+                this.style.opacity = '1';
+            }, 300);
+        } else if (animation === 'slide') {
+            this.style.transform = 'translateX(20px)';
+            this.style.opacity = '0';
+            setTimeout(() => {
+                this._restoreFront(originalColor);
+                this.style.transform = 'translateX(0)';
+                this.style.opacity = '1';
+            }, 300);
+        } else {
+            this._restoreFront(originalColor);
+        }
+    }
+
+    _restoreFront(originalColor) {
+        this.innerHTML = this._originalContent;
+        this.removeAttribute('replaced');
+        this._isFlipped = false;
+        this._attempts = 0;
+        this.style.cursor = '';
+
+        // 恢復原始 color
+        if (originalColor) {
+            this.setAttribute('color', originalColor);
+        } else {
+            this.removeAttribute('color');
+        }
+
+        // 重設快照旗標，讓下次翻面前重新記錄正確內容
+        this._originalContent = this.innerHTML;
     }
 
     _verifyAnswer() {
@@ -760,10 +969,26 @@ class CardToggle extends HTMLElement {
                 targetElement.innerHTML = '';
             }
         }
+
+        if (this._autoFlipTimer) {
+            clearTimeout(this._autoFlipTimer);
+            this._autoFlipTimer = null;
+        }
         
         this.innerHTML = this._originalContent;
         this.removeAttribute('replaced');
+        this._isFlipped = false;
         this._attempts = 0;
+        this.style.cursor = '';
+
+        // 快照與 color 同步
+        this._originalContent = this.innerHTML;
+        if (this._originalColor) {
+            this.setAttribute('color', this._originalColor);
+        } else {
+            this.removeAttribute('color');
+        }
+
         this._initialize();
     }
 }
