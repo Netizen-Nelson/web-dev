@@ -85,9 +85,10 @@
     salmon:   '#E5C3B3',
     sky:      '#08a9d1',
     safe:     '#40c99a',
+    vanilla:  '#FDF6ED',
     yellow:   '#DECA4B',
     info:     '#5fafed',
-    stone:    '#7090A8',
+    stone:    '#95BDD7',
     pink:     '#FFB3D9',
     orange:   '#eda109',
   };
@@ -96,7 +97,7 @@
      15 種語意型別設定
   ═══════════════════════════════════════════════════ */
   const TYPES = {
-    note:        { icon: '\u2139',  label: '說明',     color: '#7090A8', bg: 'rgba(112,144,168,0.09)' },
+    note:        { icon: '\u2139',  label: '說明',     color: '#95BDD7', bg: 'rgba(149,189,215,0.09)' },
     tip:         { icon: '💡', label: '技巧',     color: '#40c99a', bg: 'rgba(64,201,154,0.08)'  },
     warning:     { icon: '\u26a0',  label: '注意',     color: '#eda109', bg: 'rgba(237,161,9,0.09)'   },
     example:     { icon: '\u25c8',  label: '範例',     color: '#C3A5E5', bg: 'rgba(195,165,229,0.09)' },
@@ -110,7 +111,7 @@
     memory:      { icon: '\u25c6',  label: '記憶提示', color: '#C3A5E5', bg: 'rgba(195,165,229,0.09)' },
     goal:        { icon: '\u25ce',  label: '學習目標', color: '#C8DD5A', bg: 'rgba(200,221,90,0.08)'  },
     summary:     { icon: '\u2261',  label: '重點整理', color: '#40c99a', bg: 'rgba(64,201,154,0.08)'  },
-    quote:       { icon: '\u275d',  label: '引用',     color: '#7090A8', bg: 'rgba(112,144,168,0.07)' },
+    quote:       { icon: '\u275d',  label: '引用',     color: '#95BDD7', bg: 'rgba(149,189,215,0.07)' },
   };
 
   /* ═══════════════════════════════════════════════════
@@ -149,7 +150,7 @@
   display: block;
   border-left: var(--bpc-border-w, 4px) solid var(--bpc-color, ${BRAND.stone});
   border-radius: var(--bpc-radius, 8px);
-  background: var(--bpc-bg, rgba(112,144,168,0.09));
+  background: var(--bpc-bg, rgba(149,189,215,0.09));
   padding: 0;
   margin: 1.25em 0;
   overflow: hidden;
@@ -339,7 +340,7 @@ blockquote.bp-callout .bpc-body { font-style: italic; }
   -webkit-backface-visibility: hidden;
   border-left: var(--bpc-border-w, 4px) solid var(--bpc-color, ${BRAND.stone});
   border-radius: var(--bpc-radius, 8px);
-  background: var(--bpc-bg, rgba(112,144,168,0.09));
+  background: var(--bpc-bg, rgba(149,189,215,0.09));
   overflow: hidden;
   color: ${BRAND.shell};
   font-size: var(--bpc-fs, 0.92rem);
