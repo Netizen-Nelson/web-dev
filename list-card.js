@@ -6,13 +6,13 @@
     special : '#C8DD5A',
     warning : '#F08080',
     salmon  : '#E5C3B3',
-    sky     : '#08a9d1',
+    sky     : '#08A9D1',
     safe    : '#40c99a',
-    vanilla : '#FDF6ED',
+    vanilla : '#D4C5A9',
     yellow  : '#DECA4B',
     info    : '#4285EB',
     stone   : '#95BDD7',
-    vanilla : '#D4C5A9',
+    indigo  : '#7B6CF0',
     pink    : '#FFB3D9',
     orange  : '#eda109',
   }
@@ -29,17 +29,16 @@
         itemBg         : BG,
         textColor      : color,
         dividerColor   : color,
-        dividerHover   : BRAND.vanilla,   // 任何深底上都清晰
+        dividerHover   : BRAND.vanilla,
         dividerGlow    : color + '22',
       },
-      /* ── fill：品牌色底＋深色 ── */
       fill: {
         containerBg    : color,
         containerBorder: `1px solid ${BG}`,
         itemBg         : color,
         textColor      : BG,
         dividerColor   : BG,
-        dividerHover   : BG,              // glow 提供 hover 回饋
+        dividerHover   : BG,
         dividerGlow    : BG + '22',
       },
     }
@@ -49,8 +48,8 @@
     const map = {}
     Object.entries(THEME_COLORS).forEach(([name, color]) => {
       const pair = _mkTheme(color)
-      map[name]              = pair.default
-      map[`${name}-fill`]    = pair.fill
+      map[name]           = pair.default
+      map[`${name}-fill`] = pair.fill
     })
     /* 向後相容別名 */
     map['default'] = map['shell']
@@ -66,8 +65,10 @@
     radius       : '6px',
     itemPadding  : '10px 14px',
     dividerWidth : '16px',
+    hintWidth    : '12px',   // 新增：.lc-expand-hint 的寬度
     animDuration : '280ms',
     animEasing   : 'ease-out',
+    autoCollapse : 0,        // 新增：展開後幾秒自動收回（0 = 停用）
   }
 
   function getGlobal () {
@@ -99,7 +100,7 @@ list-card {
 
 /* ── card-item ── */
 card-item {
-  display: none;          /* JS 控制顯示 */
+  display: none;
   flex: 1;
   box-sizing: border-box;
   position: relative;
@@ -152,11 +153,11 @@ card-item.lc-animate {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 12px;
+  width: 12px;      /* 預設值；hint-width 屬性可覆蓋（inline style 優先） */
   height: 28px;
   background: var(--lc-divider-color, #C3A5E5);
   pointer-events: none;
-  transition: background 0.18s, opacity 0.18s, height 0.18s;
+  transition: background 0.18s, opacity 0.18s, height 0.18s, width 0.18s;
   flex-shrink: 0;
 }
 .lc-divider:hover .lc-expand-hint {
@@ -167,14 +168,8 @@ card-item.lc-animate {
 
 /* ── 動畫 ── */
 @keyframes lcSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 .lc-item-inner {
@@ -199,7 +194,6 @@ card-item.lc-animate {
     }
 
     connectedCallback () {
-      // 儲存原始 innerHTML（僅首次）
       if (this._originalHTML === null) {
         this._originalHTML = this.innerHTML
       }
@@ -207,14 +201,13 @@ card-item.lc-animate {
 
     /** 套用樣式（由 list-card 呼叫） */
     applyTheme (theme, config) {
-      const t       = THEMES[theme] || THEMES['shell']
+      const t      = THEMES[theme] || THEMES['shell']
       const padding = this.getAttribute('padding')    || config.itemPadding
       const bg      = this.getAttribute('bg')         || t.itemBg
       const align   = this.getAttribute('align')      || 'start'
       const fixedW  = this.getAttribute('data-width') || null
       const flex    = this.getAttribute('flex')       || '1'
 
-      // data-width 優先：固定寬度，不參與彈性分配
       if (fixedW) {
         this.style.flex     = `0 0 ${fixedW}`
         this.style.width    = fixedW
@@ -233,7 +226,6 @@ card-item.lc-animate {
       this.style.alignItems = align === 'center' ? 'center'
                             : align === 'end'    ? 'flex-end'
                             : 'flex-start'
-      // CSS 變數傳遞給子內容繼承
       this.style.setProperty('--lc-text', t.textColor)
     }
 
@@ -249,7 +241,6 @@ card-item.lc-animate {
           this.innerHTML = `<div class="lc-item-inner">${this._originalHTML || ''}</div>`
         }
       } else {
-        // 避免重複包裝
         if (!this.querySelector('.lc-item-inner')) {
           const html = this.innerHTML
           this.innerHTML = `<div class="lc-item-inner">${html}</div>`
@@ -270,34 +261,72 @@ card-item.lc-animate {
   class ListCard extends HTMLElement {
     constructor () {
       super()
-      this._items     = []
-      this._dividers  = []
-      this._expanded  = 1   // 目前顯示數量
-      this._built     = false
+      this._items         = []
+      this._dividers      = []
+      this._expanded      = 1
+      this._built         = false
+      this._collapseTimer = null   // 自動收回計時器 handle
     }
 
     connectedCallback () {
       injectGlobalCSS()
-      // 等子元素就緒
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this._build(), { once: true })
       } else {
-        // 微任務確保子元素已解析
         Promise.resolve().then(() => this._build())
       }
     }
 
+    disconnectedCallback () {
+      this._clearCollapseTimer()
+    }
+
     /* ── 設定讀取 ── */
     _cfg () {
-      const g = getGlobal()
+      const g      = getGlobal()
+      const acAttr = this.getAttribute('auto-collapse')
       return {
-        theme       : this.getAttribute('theme')        || g.theme        || 'default',
-        radius      : this.getAttribute('radius')       || g.radius       || '6px',
-        dividerWidth: this.getAttribute('divider-width')|| g.dividerWidth || '16px',
-        animDuration: g.animDuration,
-        animEasing  : g.animEasing,
-        itemPadding : g.itemPadding,
-        expandInit  : parseInt(this.getAttribute('expand') || '1', 10) || 1,
+        theme        : this.getAttribute('theme')         || g.theme        || 'default',
+        radius       : this.getAttribute('radius')        || g.radius       || '6px',
+        dividerWidth : this.getAttribute('divider-width') || g.dividerWidth || '16px',
+        hintWidth    : this.getAttribute('hint-width')    || g.hintWidth    || '12px',
+        animDuration : g.animDuration,
+        animEasing   : g.animEasing,
+        itemPadding  : g.itemPadding,
+        expandInit   : parseInt(this.getAttribute('expand') || '1', 10) || 1,
+        /* auto-collapse：元素屬性 > 全域 > 0（停用）
+           值為秒數（可為小數），0 或缺省表示不啟用   */
+        autoCollapse : acAttr !== null
+          ? (parseFloat(acAttr) || 0)
+          : (Number(g.autoCollapse) || 0),
+      }
+    }
+
+    /* ── 自動收回計時器管理 ── */
+    _clearCollapseTimer () {
+      if (this._collapseTimer !== null) {
+        clearTimeout(this._collapseTimer)
+        this._collapseTimer = null
+      }
+    }
+
+    /**
+     * 啟動（或重置）自動收回計時器
+     * @param {number} seconds  等待秒數（> 0 才啟動）
+     */
+    _scheduleCollapse (seconds) {
+      this._clearCollapseTimer()
+      if (seconds > 0) {
+        this._collapseTimer = setTimeout(() => {
+          this._collapseTimer = null
+          /* 直接操作，不再觸發 _scheduleCollapse，避免遞迴 */
+          this._expanded = 1
+          this._render(false)
+          this.dispatchEvent(new CustomEvent('card-auto-collapse', {
+            bubbles: true,
+            detail : { collapsedAfter: seconds }
+          }))
+        }, seconds * 1000)
       }
     }
 
@@ -309,10 +338,9 @@ card-item.lc-animate {
       const cfg = this._cfg()
       const t   = THEMES[cfg.theme] || THEMES['shell']
 
-      /* 容器樣式 */
       const border = this.getAttribute('border') || t.containerBorder
-      this.style.background = t.containerBg
-      this.style.border     = border
+      this.style.background   = t.containerBg
+      this.style.border       = border
       this.style.borderRadius = cfg.radius
       this.style.setProperty('--lc-divider-color', t.dividerColor)
       this.style.setProperty('--lc-divider-hover', t.dividerHover)
@@ -320,69 +348,64 @@ card-item.lc-animate {
       this.style.setProperty('--lc-anim-dur',       cfg.animDuration)
       this.style.setProperty('--lc-anim-ease',      cfg.animEasing)
 
-      /* 收集所有 card-item */
       this._items = Array.from(this.querySelectorAll(':scope > card-item'))
       if (!this._items.length) return
 
-      /* 初始化每個 item */
-      this._items.forEach((item, i) => {
+      this._items.forEach(item => {
         item.applyTheme(cfg.theme, cfg)
         item.resolveContent()
         item.classList.remove('lc-visible', 'lc-animate')
       })
 
-      /* 建構 DOM 結構：item + divider 交錯 */
-      const fragment = document.createDocumentFragment()
-      this._dividers = []
+      const fragment  = document.createDocumentFragment()
+      this._dividers  = []
 
       this._items.forEach((item, i) => {
         fragment.appendChild(item)
-
-        // 除了最後一個 item，每個後面加虛線
         if (i < this._items.length - 1) {
           const div = this._makeDivider(i, cfg)
           this._dividers.push(div)
           fragment.appendChild(div)
         } else {
-          this._dividers.push(null) // 最後一個無虛線
+          this._dividers.push(null)
         }
       })
 
-      // 清空並重組
       this.innerHTML = ''
       this.appendChild(fragment)
 
-      /* 套用初始展開數量 */
       this._expanded = Math.min(cfg.expandInit, this._items.length)
       this._render(false)
 
-      /* 通知就緒 */
+      /* 初始若已展開多格，也啟動自動收回 */
+      if (this._expanded > 1 && cfg.autoCollapse > 0) {
+        this._scheduleCollapse(cfg.autoCollapse)
+      }
+
       this.dispatchEvent(new CustomEvent('card-ready', {
         bubbles: true,
-        detail: { count: this._items.length, theme: cfg.theme }
+        detail : { count: this._items.length, theme: cfg.theme }
       }))
     }
 
     /* ── 建立虛線觸發器 ── */
     _makeDivider (afterIndex, cfg) {
       const div = document.createElement('div')
-      div.className = 'lc-divider'
+      div.className  = 'lc-divider'
       div.style.width = cfg.dividerWidth
 
       const hint = document.createElement('span')
       hint.className = 'lc-expand-hint'
-      // hint 為純色塊長方形，無文字
+      hint.style.width = cfg.hintWidth   // ← 自訂寬度（覆蓋 CSS 預設 12px）
       div.appendChild(hint)
 
       div.addEventListener('click', () => {
-        // 只有「當前最後一個可見 item 的虛線」才有作用
         const lastVisibleIndex = this._expanded - 1
         if (afterIndex === lastVisibleIndex && this._expanded < this._items.length) {
-          this._expanded++
-          this._render(true)
+          this.expandTo(this._expanded + 1)   // expandTo 統一處理計時
           this.dispatchEvent(new CustomEvent('card-expand', {
             bubbles: true,
-            detail: { index: this._expanded - 1, total: this._items.length }
+            detail : { index: this._expanded - 1, total: this._items.length }
           }))
         }
       })
@@ -393,14 +416,14 @@ card-item.lc-animate {
     /* ── 渲染可見狀態 ── */
     _render (animate) {
       this._items.forEach((item, i) => {
-        const visible = i < this._expanded
+        const visible    = i < this._expanded
         const wasVisible = item.classList.contains('lc-visible')
 
         if (visible) {
           item.classList.add('lc-visible')
           if (animate && !wasVisible) {
             item.classList.remove('lc-animate')
-            void item.offsetWidth // reflow
+            void item.offsetWidth   // reflow
             item.classList.add('lc-animate')
           }
         } else {
@@ -408,49 +431,51 @@ card-item.lc-animate {
         }
       })
 
-      // 虛線顯示邏輯
       this._dividers.forEach((div, i) => {
         if (!div) return
         const afterLastVisible = i === this._expanded - 1
-        const hasNext = this._expanded < this._items.length
+        const hasNext          = this._expanded < this._items.length
 
         if (i < this._expanded - 1) {
-          // item 之間已展開的虛線：顯示但不可互動（灰化）
-          div.style.display = 'flex'
-          div.style.opacity = '0.35'
-          div.style.cursor  = 'default'
+          div.style.display       = 'flex'
+          div.style.opacity       = '0.35'
+          div.style.cursor        = 'default'
           div.style.pointerEvents = 'none'
         } else if (afterLastVisible && hasNext) {
-          // 當前最後一個 item 的虛線：可點擊
-          div.style.display = 'flex'
-          div.style.opacity = '1'
-          div.style.cursor  = 'pointer'
+          div.style.display       = 'flex'
+          div.style.opacity       = '1'
+          div.style.cursor        = 'pointer'
           div.style.pointerEvents = 'auto'
         } else {
-          // 後面的虛線（尚未展開到此）
           div.style.display = 'none'
         }
       })
     }
 
-    /** 展開至第 n 個 item（1-based） */
     expandTo (n) {
       this._expanded = Math.min(Math.max(1, n), this._items.length)
       this._render(true)
+
+      const { autoCollapse } = this._cfg()
+      if (this._expanded > 1 && autoCollapse > 0) {
+        this._scheduleCollapse(autoCollapse)   // 每次展開都重設倒數
+      } else {
+        this._clearCollapseTimer()             // 收回至 1 時停止計時
+      }
     }
 
-    /** 展開全部 */
     expandAll () {
       this.expandTo(this._items.length)
     }
 
-    /** 收回至第一個 */
     reset () {
-      this.expandTo(1)
+      this._clearCollapseTimer()
+      this._expanded = 1
+      this._render(false)
     }
 
     setTheme (name) {
-      const cfg = this._cfg()
+      const cfg   = this._cfg()
       const theme = THEMES[name] || THEMES['shell']
       this.setAttribute('theme', name)
 
