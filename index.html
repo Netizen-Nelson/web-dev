@@ -1,833 +1,103 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bp-tools-patch.js 完整說明文件</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>啟動英語腦 Nelson English</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-styles.css">
+    <style>
+        :root {
+            font-size: 18px;
+        }
 
-:root {
-  --bg      : #0c0d0c;
-  --surface : #1a1b1a;
-  --region  : #242524;
-  --border  : #2a2b2a;
-  --shell   : #c6c7bd;
-  --dim     : #555;
-  --lavender: #C3A5E5;
-  --special : #C8DD5A;
-  --sky     : #04b5a3;
-  --safe    : #81E6D9;
-  --warning : #F08080;
-  --orange  : #f69653;
-  --info    : #90CDF4;
-  --pink    : #FFB3D9;
-  --brown   : #d9b375;
-}
-
-body {
-  background : var(--bg);
-  color      : var(--shell);
-  font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
-  font-size  : 16px;
-  line-height: 1.8;
-}
-
-/* ══ 側邊欄 ══ */
-#sidebar {
-  position   : fixed;
-  top        : 0; left: 0; bottom: 0;
-  width      : 220px;
-  background : var(--surface);
-  border-right: 1px solid var(--border);
-  overflow-y : auto;
-  z-index    : 200;
-  padding    : 24px 0 40px;
-}
-#sidebar::-webkit-scrollbar { width: 4px; }
-#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.sb-logo {
-  padding      : 0 20px 20px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 12px;
-}
-.sb-logo h1 { font-size: .9rem; font-weight: 700; color: var(--lavender); }
-.sb-logo p  { font-size: .7rem; color: var(--dim); margin-top: 2px; }
-
-.sb-group { padding: 8px 20px 4px; font-size: .64rem; letter-spacing: .14em;
-  text-transform: uppercase; color: #3a3b3a; }
-
-.sb-link {
-  display     : flex;
-  align-items : center;
-  gap         : 8px;
-  padding     : 6px 20px;
-  font-size   : .8rem;
-  color       : var(--dim);
-  text-decoration: none;
-  transition  : all .15s;
-  border-left : 2px solid transparent;
-}
-.sb-link:hover  { color: var(--shell); background: var(--region); }
-.sb-link.active { color: var(--lavender); border-left-color: var(--lavender); background: rgba(195,165,229,.06); }
-.sb-link i { font-size: .85rem; flex-shrink: 0; }
-
-/* ══ 主內容 ══ */
-#main {
-  margin-left : 220px;
-  min-height  : 100vh;
-}
-
-/* ══ 頂部 Hero ══ */
-#hero {
-  background   : linear-gradient(180deg, #111210 0%, var(--bg) 100%);
-  border-bottom: 1px solid var(--border);
-  padding      : 80px 60px 64px;
-  max-width    : 860px;
-}
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--region); border: 1px solid var(--border);
-  border-radius: 999px; padding: 3px 14px;
-  font-size: .72rem; color: var(--sky); letter-spacing: .1em;
-  margin-bottom: 20px;
-}
-#hero h2 {
-  font-size: 2.2rem; font-weight: 800; line-height: 1.2;
-  color: var(--shell); margin-bottom: 14px;
-}
-#hero h2 em { color: var(--lavender); font-style: normal; }
-#hero p.lead { color: var(--dim); font-size: .95rem; max-width: 520px; margin-bottom: 32px; }
-
-.load-block {
-  background: var(--region); border: 1px solid var(--border);
-  border-radius: 8px; padding: 16px 20px;
-  font-family: monospace; font-size: .82rem; color: #8a9070;
-  line-height: 1.9; max-width: 560px;
-}
-.load-block .cm { color: #3a3b3a; }
-.load-block .tg { color: var(--sky); }
-.load-block .at { color: var(--special); }
-.load-block .vl { color: #E5C3B3; }
-
-.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: var(--region); border: 1px solid var(--border);
-  border-radius: 5px; padding: 4px 11px;
-  font-size: .75rem; color: var(--dim);
-}
-
-/* ══ 文件區塊 ══ */
-.doc-section {
-  padding     : 64px 60px;
-  max-width   : 860px;
-  border-bottom: 1px solid var(--border);
-}
-
-.section-label {
-  display     : flex;
-  align-items : center;
-  gap         : 10px;
-  margin-bottom: 6px;
-}
-.section-badge {
-  font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 3px; font-weight: 700;
-}
-.badge-ir  { background: rgba(4,181,163,.15);    color: var(--sky);     }
-.badge-dc  { background: rgba(195,165,229,.15);  color: var(--lavender);}
-.badge-wf  { background: rgba(200,221,90,.15);   color: var(--special); }
-.badge-sl  { background: rgba(246,150,83,.15);   color: var(--orange);  }
-.badge-bp  { background: rgba(144,205,244,.15);  color: var(--info);    }
-.badge-ic  { background: rgba(129,230,217,.15);  color: var(--safe);    }
-.badge-bn  { background: rgba(240,128,128,.15);  color: var(--warning); }
-.badge-sn  { background: rgba(255,179,217,.15);  color: var(--pink);    }
-.badge-bus { background: rgba(217,179,117,.15);  color: var(--brown);   }
-
-.doc-section h2 {
-  font-size: 1.5rem; font-weight: 700; color: var(--shell); margin-bottom: 10px;
-}
-.doc-section h2 em { font-style: normal; }
-.doc-section h2 em.sky      { color: var(--sky);     }
-.doc-section h2 em.lavender { color: var(--lavender);}
-.doc-section h2 em.special  { color: var(--special); }
-.doc-section h2 em.orange   { color: var(--orange);  }
-.doc-section h2 em.info     { color: var(--info);    }
-.doc-section h2 em.safe     { color: var(--safe);    }
-.doc-section h2 em.warning  { color: var(--warning); }
-.doc-section h2 em.pink     { color: var(--pink);    }
-.doc-section h2 em.brown    { color: var(--brown);   }
-
-p.doc-desc { color: var(--dim); font-size: .88rem; margin-bottom: 28px; max-width: 600px; }
-
-/* ══ 程式碼區塊 ══ */
-.code-wrap {
-  background: #0a0b0a; border: 1px solid var(--border);
-  border-radius: 8px; overflow: hidden; margin: 16px 0 24px;
-}
-.code-head {
-  background: var(--region); border-bottom: 1px solid var(--border);
-  padding: 7px 14px; font-size: .7rem; color: var(--dim);
-  display: flex; align-items: center; gap: 8px;
-}
-.code-head i { color: var(--sky); }
-pre {
-  padding: 18px 22px; font-size: .79rem; color: #8a9070;
-  line-height: 1.85; margin: 0; overflow-x: auto;
-  font-family: 'Cascadia Code', 'Fira Code', monospace;
-}
-.cm { color: #3a3b3a; }
-.tg { color: var(--sky); }
-.at { color: var(--special); }
-.vl { color: #E5C3B3; }
-.kw { color: var(--lavender); }
-.fn { color: var(--safe); }
-.st { color: var(--orange); }
-
-/* ══ 屬性表格 ══ */
-.attr-table {
-  width: 100%; border-collapse: collapse;
-  font-size: .82rem; margin: 16px 0 24px;
-}
-.attr-table th {
-  text-align: left; color: #3a3b3a; font-weight: 400;
-  font-size: .68rem; letter-spacing: .1em;
-  padding: 8px 14px; border-bottom: 1px solid var(--border);
-}
-.attr-table td {
-  padding: 10px 14px; border-bottom: 1px solid #111;
-  vertical-align: top;
-}
-.attr-table td:first-child { color: var(--special); font-family: monospace; white-space: nowrap; }
-.attr-table td:nth-child(2){ color: var(--dim); font-family: monospace; white-space: nowrap; }
-.attr-table td:last-child  { color: #666; }
-.attr-table tr:hover td    { background: rgba(255,255,255,.015); }
-
-/* ══ API 卡片 ══ */
-.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 10px; margin: 16px 0 24px; }
-.api-card { background: var(--region); border: 1px solid var(--border); border-radius: 7px; padding: 14px 16px; }
-.api-card .sig  { color: var(--safe); font-family: monospace; font-size: .8rem; margin-bottom: 6px; }
-.api-card p     { color: #666; font-size: .8rem; line-height: 1.6; }
-
-/* ══ 色帶展示 ══ */
-.color-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 24px; }
-.color-swatch {
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
-}
-.color-dot { width: 36px; height: 36px; border-radius: 7px; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
-.color-swatch small { font-size: .62rem; color: var(--dim); }
-
-/* ══ 提示框 ══ */
-.tip {
-  background: var(--region); border-left: 3px solid var(--border);
-  border-radius: 0 6px 6px 0; padding: 12px 16px;
-  font-size: .84rem; color: #666; margin: 12px 0 20px; line-height: 1.7;
-}
-.tip.sky     { border-left-color: var(--sky);     }
-.tip.lavender{ border-left-color: var(--lavender);}
-.tip.special { border-left-color: var(--special); }
-.tip.warning { border-left-color: var(--warning); }
-.tip strong  { color: var(--shell); }
-
-/* ══ 標籤群 ══ */
-.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 20px; }
-.tag {
-  background: var(--region); border: 1px solid var(--border);
-  border-radius: 4px; padding: 3px 10px;
-  font-size: .75rem; color: var(--dim); font-family: monospace;
-}
-
-/* ══ 流程圖 ══ */
-.flow {
-  background: var(--region); border: 1px solid var(--border);
-  border-radius: 8px; padding: 20px 24px;
-  font-family: monospace; font-size: .8rem;
-  color: #666; line-height: 2.2; margin: 16px 0 24px;
-  white-space: pre-line;
-}
-.flow .ev  { color: var(--sky); }
-.flow .el  { color: var(--lavender); }
-.flow .ok  { color: var(--safe); }
-.flow .arr { color: var(--dim); }
-
-/* ══ 頁尾 ══ */
-#footer {
-  padding: 40px 60px; text-align: center;
-  font-size: .78rem; color: #333;
-  border-top: 1px solid var(--border);
-}
-#footer span { color: var(--lavender); }
-
-code {
-  background: var(--region); padding: 1px 6px; border-radius: 3px;
-  font-size: .82rem; color: var(--sky); font-family: monospace;
-}
-
-@media (max-width: 680px) {
-  #sidebar { display: none; }
-  #main    { margin-left: 0; }
-  .doc-section, #hero { padding: 40px 24px; }
-}
-</style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+    </style>
 </head>
-<body>
+<body class="bp-bg-background">
 
-<!-- ══ 側邊欄 ══ -->
-<nav id="sidebar">
-  <div class="sb-logo">
-    <h1>bp-tools-patch.js</h1>
-    <p>v2.1 完整說明文件</p>
+  <div class="card mx-3 mt-1 px-3 bp-bg-fill bp-text-shell">
+	<div class="fs-xlarge">Nelson English</div>
+	<div class="m-2">學英文沒十年也有六年，你有這個痛點嗎？遇到嗨咖接不住球、遇到省話王全場凍結<br>
+	這門課的目標是：讓你在半正式語境的各種場景，都能發揮<card-badge icon="bi-person-fill-gear" text="社交主導權" theme="yellow-outline" size="re"></div>
+	<dual-hr color-left="orange" color-right="safe" ratio="1:9" thickness="4px"></dual-hr>
+    <div class="m-2">
+      <div class="fs-3">半正式語境 Small Talk</div>
+	  <div class="fs-6">
+		無論是在展覽排隊時和旁人聊天、參加社區活動時的交流、與其他部門同事在茶水間閒談，或是在咖啡廳和鄰桌客人因為某個話題搭上話<br>
+		這些場合的共通點：你希望展現自己是個<card-badge icon="bi-lightbulb" text="有想法" theme="lavender-outline" size="re"></card-badge><card-badge icon="bi-chat-left-text" text="表達有條理" theme="info-outline" size="re"></card-badge>的人、<card-badge icon="bi-hand-thumbs-up" text="引發共鳴與認同" theme="safe-outline" size="re"></card-badge>，但又不想顯得正式拘謹<br>
+		<i class="bi bi-chevron-double-right fs-4"></i> <i class="bi bi-chevron-double-right fs-4"></i> <span class="fs-4 fw-bold">兼具親和力和涵養的人際互動</span>
+	  </div>
+	</div>
   </div>
+  <div class="m-3">
+<div class="my-4">
+  <div class="fs-4 fw-bold mb-3 text-white">What's your favorite drink?</div>
 
-  <div class="sb-group">載入</div>
-  <a href="#load"    class="sb-link"><i class="bi bi-box-arrow-in-down"></i>快速開始</a>
-  <a href="#bus"     class="sb-link"><i class="bi bi-diagram-3"></i>BPTools 匯流排</a>
-  <a href="#colors"  class="sb-link"><i class="bi bi-palette2"></i>品牌色系</a>
+  <!-- 使用 list-card：預設僅展開第 1 張卡片 (expand="1") -->
+  <list-card theme="default" divider-width="40px" expand="1" radius="8px" border="2px solid #2a2b2a">
+    <card-item data-width="400px" padding="16px" bg="#191012">
+      <div class="fs-4 mb-2 bp-text-shell">
+        My favorite drink is coffee.
+      </div>
+      <div class="fs-6 mb-2">
+        只是在「答題」，而不是在「跟活人聊天」
+      </div>
+      <div class="fs-6">
+        是「文法無誤，卻沒品質、沒魅力、更沒有影響力」的機械式回應。
+      </div>
+    </card-item>
+    <!-- ⭕ 實驗組：自然道地＋社交互動 (點擊中間虛線後滑入展開) -->
+    <card-item padding="16px" bg="#0d1b2a">
+      <div class="fs-5 fw-bold mb-2" style="color: #5fafed;">
+        自然道地 ＋ 社交互動
+      </div>
+      <div class="fs-6 lh-base mb-2 style="color: #e0e0e0;">
+        I'm a black coffee person through and through. A solid cup helps clear my head, especially on days when my schedule is completely packed. <span style="color: #5fafed;">Do you need caffeine to function as well?</span>
+      </div>
+      <div class="fs-6">
+        帶出個人風格、延伸背景情境，並以反問句將球輕鬆接回給對方。
+      </div>
+    </card-item>
 
-  <div class="sb-group">元件</div>
-  <a href="#ir"      class="sb-link"><i class="bi bi-play-circle"></i>InfoRegion</a>
-  <a href="#dc"      class="sb-link"><i class="bi bi-table"></i>DualCell</a>
-  <a href="#wf"      class="sb-link"><i class="bi bi-cursor-text"></i>WordFlip</a>
-  <a href="#ic"      class="sb-link"><i class="bi bi-input-cursor-text"></i>ir-challenge</a>
-  <a href="#sl"      class="sb-link"><i class="bi bi-collection-play"></i>bp-slide</a>
-  <a href="#bn"      class="sb-link"><i class="bi bi-megaphone"></i>bp-notice</a>
-  <a href="#sn"      class="sb-link"><i class="bi bi-sticky"></i>BpNote</a>
-
-  <div class="sb-group">進階</div>
-  <a href="#flow"    class="sb-link"><i class="bi bi-arrows-angle-expand"></i>連動流程</a>
-  <a href="#api"     class="sb-link"><i class="bi bi-braces"></i>公開 API</a>
-  <a href="#compat"  class="sb-link"><i class="bi bi-check2-all"></i>相容性</a>
-</nav>
-
-<!-- ══ 主內容 ══ -->
-<div id="main">
-
-<!-- ── Hero ── -->
-<section id="hero">
-  <div class="hero-eyebrow"><i class="bi bi-file-earmark-code"></i> bp-tools.js 擴充補丁</div>
-  <h2>bp-tools-patch.js<br><em>六個元件，一個補丁</em></h2>
-  <p class="lead">只需兩個 script 標籤，為任何網頁加入 InfoRegion、DualCell、WordFlip、bp-slide、bp-notice、BpNote 六大元件，並透過 BPTools 事件匯流排串接所有互動。</p>
-
-  <div class="load-block">
-    <span class="cm">&lt;!-- 1. Bootstrap Icons（部分元件需要）--&gt;</span><br>
-    <span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="vl">"stylesheet"</span> <span class="at">href</span>=<span class="vl">"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"</span><span class="tg">&gt;</span><br><br>
-    <span class="cm">&lt;!-- 2. 主工具庫（永遠不動）--&gt;</span><br>
-    <span class="tg">&lt;script</span> <span class="at">src</span>=<span class="vl">"bp-tools.js"</span><span class="tg">&gt;&lt;/script&gt;</span><br><br>
-    <span class="cm">&lt;!-- 3. 擴充補丁（所有新功能）--&gt;</span><br>
-    <span class="tg">&lt;script</span> <span class="at">src</span>=<span class="vl">"bp-tools-patch.js"</span><span class="tg">&gt;&lt;/script&gt;</span>
+  </list-card>
+</div>
   </div>
-
-  <div class="chip-row">
-    <span class="chip"><i class="bi bi-diagram-3" style="color:var(--brown)"></i>BPTools 匯流排</span>
-    <span class="chip"><i class="bi bi-play-circle" style="color:var(--sky)"></i>InfoRegion</span>
-    <span class="chip"><i class="bi bi-table" style="color:var(--lavender)"></i>DualCell</span>
-    <span class="chip"><i class="bi bi-cursor-text" style="color:var(--special)"></i>WordFlip</span>
-    <span class="chip"><i class="bi bi-input-cursor-text" style="color:var(--safe)"></i>ir-challenge</span>
-    <span class="chip"><i class="bi bi-collection-play" style="color:var(--orange)"></i>bp-slide</span>
-    <span class="chip"><i class="bi bi-megaphone" style="color:var(--warning)"></i>bp-notice</span>
-    <span class="chip"><i class="bi bi-sticky" style="color:var(--pink)"></i>BpNote</span>
-  </div>
-</section>
-
-<!-- ── 快速開始 ── -->
-<section class="doc-section" id="load">
-  <div class="section-label"><span class="section-badge badge-bus">基礎</span></div>
-  <h2>快速開始</h2>
-  <p class="doc-desc">頁面裡使用 BPTools 訂閱事件時，必須用輪詢寫法，確保 BPTools 建立完成後才執行。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 頁面自訂訂閱的正確寫法</div>
-    <pre><span class="cm">// ✓ 正確：輪詢等待</span>
-(<span class="kw">function</span> <span class="fn">wait</span>() {
-  <span class="kw">if</span> (<span class="kw">typeof</span> BPTools === <span class="vl">'undefined'</span>) { <span class="fn">setTimeout</span>(wait, <span class="vl">50</span>); <span class="kw">return</span>; }
-  BPTools.<span class="fn">on</span>(<span class="vl">'my:event'</span>, () => { <span class="cm">/* 你的邏輯 */</span> });
-})();
-
-<span class="cm">// ✗ 錯誤：DOMContentLoaded 不保證 BPTools 已就緒</span>
-document.<span class="fn">addEventListener</span>(<span class="vl">'DOMContentLoaded'</span>, () => {
-  BPTools.<span class="fn">on</span>(<span class="vl">'my:event'</span>, ...); <span class="cm">// 可能噴 BPTools is not defined</span>
-});</pre>
-  </div>
-
-  <div class="tip sky"><strong>全域設定</strong>：BpNote 和 bp-slide 支援在 patch 載入前定義 <code>window.StickyNotesConfig</code> 覆蓋預設值。各元件的設定方式詳見各自章節。</div>
-</section>
-
-<!-- ── BPTools ── -->
-<section class="doc-section" id="bus">
-  <div class="section-label"><span class="section-badge badge-bus">核心</span></div>
-  <h2><em class="brown">BPTools</em> 事件匯流排</h2>
-  <p class="doc-desc">六個元件的通訊中樞。發布端不知道誰在聽，訂閱端不知道誰觸發，靠事件名稱字串鬆散耦合。<code>_fired</code> 紀錄歷史，後來載入的元件也能知道事件是否已發過並立即解鎖。</p>
-
-  <div class="api-grid">
-    <div class="api-card"><div class="sig">BPTools.on(ev, fn)</div><p>訂閱事件。同一事件可訂閱多次，全部觸發。</p></div>
-    <div class="api-card"><div class="sig">BPTools.emit(ev, data)</div><p>發布事件。同時記入 _fired 歷史。</p></div>
-    <div class="api-card"><div class="sig">BPTools.off(ev, fn)</div><p>取消特定訂閱。</p></div>
-    <div class="api-card"><div class="sig">BPTools._fired</div><p>Set&lt;string&gt;，記錄所有曾發過的事件名稱。</p></div>
-  </div>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 一個事件同時觸發多件事</div>
-    <pre>BPTools.<span class="fn">on</span>(<span class="vl">'lesson:done'</span>, () => badge.style.display = <span class="vl">'block'</span>);
-BPTools.<span class="fn">on</span>(<span class="vl">'lesson:done'</span>, () => <span class="fn">fetch</span>(<span class="vl">'/api/progress'</span>, { method: <span class="vl">'POST'</span> }));
-BPTools.<span class="fn">on</span>(<span class="vl">'lesson:done'</span>, () => localStorage.<span class="fn">setItem</span>(<span class="vl">'done'</span>, <span class="vl">'1'</span>));</pre>
-  </div>
-
-  <div class="tip special"><strong>事件命名建議</strong>：用 <code>主體:動作</code> 格式，例如 <code>quiz:pass</code>、<code>lesson:done</code>、<code>slide:revealed</code>。描述「發生了什麼」而不是「要做什麼」。</div>
-</section>
-
-<!-- ── 品牌色 ── -->
-<section class="doc-section" id="colors">
-  <div class="section-label"><span class="section-badge badge-bus">基礎</span></div>
-  <h2>品牌色系</h2>
-  <p class="doc-desc">所有元件共用同一套色系，透過 <code>BrandColors</code> 統一管理。支援深色／淺色雙主題切換。</p>
-
-  <div class="color-grid">
-    <div class="color-swatch"><div class="color-dot" style="background:#c6c7bd"></div><small>shell</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#C3A5E5"></div><small>lavender</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#C8DD5A"></div><small>special</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#F08080"></div><small>warning</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#E5C3B3"></div><small>salmon</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#E5E5A6"></div><small>attention</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#04b5a3"></div><small>sky</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#81E6D9"></div><small>safe</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#d9b375"></div><small>brown</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#90CDF4"></div><small>info</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#FFB3D9"></div><small>pink</small></div>
-    <div class="color-swatch"><div class="color-dot" style="background:#f69653"></div><small>orange</small></div>
-  </div>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> BrandColors API</div>
-    <pre>BrandColors.<span class="fn">applyTheme</span>(<span class="vl">'light'</span>);        <span class="cm">// 切換主題，全頁自動更新</span>
-BrandColors.<span class="fn">get</span>(<span class="vl">'sky'</span>);               <span class="cm">// '#04b5a3'</span>
-BrandColors.<span class="fn">get</span>(<span class="vl">'sky'</span>, <span class="vl">'light'</span>);      <span class="cm">// '#027a6c'（淺色主題值）</span>
-BrandColors.<span class="fn">resolve</span>(<span class="vl">'sky'</span>);           <span class="cm">// 同 get，找不到時原值回傳</span></pre>
-  </div>
-</section>
-
-<!-- ── InfoRegion ── -->
-<section class="doc-section" id="ir">
-  <div class="section-label"><span class="section-badge badge-ir">元件</span></div>
-  <h2><em class="sky">InfoRegion</em> 步驟引導</h2>
-  <p class="doc-desc">逐步動畫顯示的說明區塊，支援自動播放、倒數、手動確認、全域進度條。patch 新增分支路徑與 link 事件發布。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 基本串接</div>
-    <pre><span class="tg">&lt;info-region-group</span> <span class="at">global-progress</span> <span class="at">progress-color</span>=<span class="vl">"sky"</span> <span class="at">show-percent</span>
-  <span class="at">start-label</span>=<span class="vl">"▶ 開始"</span> <span class="at">start-color</span>=<span class="vl">"sky"</span><span class="tg">&gt;</span>
-
-  <span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"s1"</span> <span class="at">color</span>=<span class="vl">"sky"</span> <span class="at">next</span>=<span class="vl">"s2"</span> <span class="at">countdown</span>=<span class="vl">"2000"</span><span class="tg">&gt;</span>
-    第一步，2 秒後自動前進。
-  <span class="tg">&lt;/info-region&gt;</span>
-
-  <span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"s2"</span> <span class="at">color</span>=<span class="vl">"lavender"</span>
-    <span class="at">manual</span> <span class="at">manual-label</span>=<span class="vl">"下一步 →"</span> <span class="at">link</span>=<span class="vl">"lesson:done"</span><span class="tg">&gt;</span>
-    第二步，手動確認，完成時發出 lesson:done 事件。
-  <span class="tg">&lt;/info-region&gt;</span>
-
-<span class="tg">&lt;/info-region-group&gt;</span></pre>
-  </div>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 分支路徑（patch 新增）</div>
-    <pre><span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"q1"</span> <span class="at">color</span>=<span class="vl">"lavender"</span> <span class="at">choice-align</span>=<span class="vl">"left"</span><span class="tg">&gt;</span>
-  &lt;p&gt;問題文字&lt;/p&gt;
-  <span class="tg">&lt;ir-choice</span> <span class="at">target</span>=<span class="vl">"ans-ok"</span>  <span class="at">color</span>=<span class="vl">"safe"</span>    <span class="at">icon</span>=<span class="vl">"check-circle"</span><span class="tg">&gt;</span>正確選項<span class="tg">&lt;/ir-choice&gt;</span>
-  <span class="tg">&lt;ir-choice</span> <span class="at">target</span>=<span class="vl">"ans-no"</span>  <span class="at">color</span>=<span class="vl">"warning"</span> <span class="at">icon</span>=<span class="vl">"x-circle"</span><span class="tg">&gt;</span>錯誤選項<span class="tg">&lt;/ir-choice&gt;</span>
-<span class="tg">&lt;/info-region&gt;</span>
-
-<span class="cm">&lt;!-- 答錯：next 指回題目，自動重置 --&gt;</span>
-<span class="tg">&lt;info-region</span> <span class="at">id</span>=<span class="vl">"ans-no"</span> <span class="at">color</span>=<span class="vl">"warning"</span> <span class="at">next</span>=<span class="vl">"q1"</span><span class="tg">&gt;</span>
-  ✗ 不對，再試一次。
-<span class="tg">&lt;/info-region&gt;</span></pre>
-  </div>
-
-  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px;margin-top:4px">patch 新增屬性</h3>
-  <table class="attr-table">
-    <tr><th>屬性（info-region）</th><th>預設</th><th>說明</th></tr>
-    <tr><td>link</td><td>—</td><td>啟動時向匯流排發出事件</td></tr>
-    <tr><th>屬性（ir-choice）</th><th></th><th></th></tr>
-    <tr><td>target</td><td>必填</td><td>點擊後跳往的 info-region id</td></tr>
-    <tr><td>color</td><td>父層色</td><td>按鈕品牌色</td></tr>
-    <tr><td>icon</td><td>—</td><td>Bootstrap Icon 類名（不含 bi-）</td></tr>
-    <tr><th>屬性（info-region，choice-align）</th><th></th><th></th></tr>
-    <tr><td>choice-align</td><td>left</td><td>選項按鈕對齊：left / center / right</td></tr>
-  </table>
-</section>
-
-<!-- ── DualCell ── -->
-<section class="doc-section" id="dc">
-  <div class="section-label"><span class="section-badge badge-dc">元件</span></div>
-  <h2><em class="lavender">DualCell</em> 多欄表格</h2>
-  <p class="doc-desc">語義化多欄表格，支援主題色、遮罩揭示、群組折疊、輪播等。patch 新增 <code>on-link</code>，訂閱事件後自動移除遮罩。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> on-link 解鎖遮罩（patch 新增）</div>
-    <pre><span class="tg">&lt;div</span> <span class="at">id</span>=<span class="vl">"t1"</span> <span class="at">data-dual-cell</span> <span class="at">data-cols</span>=<span class="vl">"2"</span> <span class="at">data-theme</span>=<span class="vl">"sky"</span>
-     <span class="at">data-show-menu-button</span>=<span class="vl">"false"</span><span class="tg">&gt;</span>
-
-  <span class="tg">&lt;div</span> <span class="at">data-col</span><span class="tg">&gt;</span>問題<span class="tg">&lt;/div&gt;</span>
-
-  <span class="cm">&lt;!-- on-link：監聽事件，事件發生後移除遮罩 --&gt;</span>
-  <span class="tg">&lt;div</span> <span class="at">data-col</span>
-       <span class="at">data-on-link</span>=<span class="vl">"quiz:pass"</span>
-       <span class="at">data-overlay-1-text</span>=<span class="vl">"答對後解鎖"</span><span class="tg">&gt;</span>
-    答案內容
-  <span class="tg">&lt;/div&gt;</span>
-
-<span class="tg">&lt;/div&gt;</span></pre>
-  </div>
-
-  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px">patch 新增屬性</h3>
-  <table class="attr-table">
-    <tr><th>屬性（data-col）</th><th>說明</th></tr>
-    <tr><td>data-on-link</td><td>事件名稱。事件發生時移除此格的所有遮罩，取消 blur。</td></tr>
-  </table>
-
-  <div class="tip lavender"><strong>主題色</strong>：data-theme 支援所有品牌色名稱：sky / lavender / special / safe / info / warning / salmon / attention / pink / orange / brown / default</div>
-</section>
-
-<!-- ── WordFlip ── -->
-<section class="doc-section" id="wf">
-  <div class="section-label"><span class="section-badge badge-wf">元件</span></div>
-  <h2><em class="special">WordFlip</em> 行內互動詞彙</h2>
-  <p class="doc-desc">夾在段落中的可點擊詞彙，點擊後展開說明。patch 新增四項擴充，並支援 12 種視覺樣式。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> patch 擴充屬性</div>
-    <pre><span class="cm">&lt;!-- link：翻開時發出事件 --&gt;</span>
-<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"sky"</span> <span class="at">link</span>=<span class="vl">"term:opened"</span>
-           <span class="at">data-content</span>=<span class="vl">"說明文字"</span><span class="tg">&gt;</span>詞彙<span class="tg">&lt;/word-flip&gt;</span>
-
-<span class="cm">&lt;!-- unlock-on：預設鎖定，事件發生後才可點擊 --&gt;</span>
-<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"safe"</span> <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span>
-           <span class="at">data-content</span>=<span class="vl">"解鎖後的說明"</span><span class="tg">&gt;</span>鎖定中<span class="tg">&lt;/word-flip&gt;</span>
-
-<span class="cm">&lt;!-- answer-src：從外部元素讀取 HTML 內容 --&gt;</span>
-<span class="tg">&lt;div</span> <span class="at">id</span>=<span class="vl">"my-detail"</span> <span class="at">style</span>=<span class="vl">"display:none"</span><span class="tg">&gt;</span>&lt;strong&gt;完整 HTML 說明&lt;/strong&gt;<span class="tg">&lt;/div&gt;</span>
-<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"lavender"</span> <span class="at">answer-src</span>=<span class="vl">"my-detail"</span><span class="tg">&gt;</span>詞彙<span class="tg">&lt;/word-flip&gt;</span>
-
-<span class="cm">&lt;!-- group：同組互斥，同時只展開一個 --&gt;</span>
-<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"sky"</span>     <span class="at">group</span>=<span class="vl">"terms"</span> <span class="at">data-content</span>=<span class="vl">"A 的說明"</span><span class="tg">&gt;</span>詞 A<span class="tg">&lt;/word-flip&gt;</span>
-<span class="tg">&lt;word-flip</span> <span class="at">data-color</span>=<span class="vl">"lavender"</span> <span class="at">group</span>=<span class="vl">"terms"</span> <span class="at">data-content</span>=<span class="vl">"B 的說明"</span><span class="tg">&gt;</span>詞 B<span class="tg">&lt;/word-flip&gt;</span></pre>
-  </div>
-
-  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px">全部 style-type 樣式</h3>
-  <div class="tag-row">
-    <span class="tag">badge</span><span class="tag">pill</span><span class="tag">highlight</span>
-    <span class="tag">tag</span><span class="tag">button</span><span class="tag">icon</span>
-    <span class="tag">underline</span><span class="tag">dotted</span>
-    <span class="tag" style="color:var(--lavender)">card ★</span>
-    <span class="tag" style="color:var(--sky)">glow ★</span>
-    <span class="tag" style="color:var(--pink)">neon ★</span>
-    <span class="tag" style="color:var(--special)">chip ★</span>
-    <span class="tag" style="color:var(--brown)">ribbon ★</span>
-    <span class="tag" style="color:var(--orange)">announce ★</span>
-  </div>
-  <p style="font-size:.75rem;color:var(--dim)">★ = patch 新增樣式</p>
-
-  <div class="tip warning"><strong>注意</strong>：bp-tools.js 原始元件的展開內容屬性是 <code>data-content</code>，不是 <code>answer</code>。</div>
-</section>
-
-<!-- ── ir-challenge ── -->
-<section class="doc-section" id="ic">
-  <div class="section-label"><span class="section-badge badge-ic">元件</span></div>
-  <h2><em class="safe">ir-challenge</em> 輸入驗證</h2>
-  <p class="doc-desc">答對才向匯流排發出事件，可連動解鎖任意訂閱同一事件的元件。支援多個正確答案。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 完整範例</div>
-    <pre><span class="tg">&lt;ir-challenge</span>
-  <span class="at">answer</span>=<span class="vl">"Cookie|cookie|COOKIE"</span>  <span class="cm">&lt;!-- | 分隔多個答案 --&gt;</span>
-  <span class="at">link</span>=<span class="vl">"q:correct"</span>             <span class="cm">&lt;!-- 答對後發出的事件 --&gt;</span>
-  <span class="at">color</span>=<span class="vl">"sky"</span>
-  <span class="at">placeholder</span>=<span class="vl">"輸入答案…"</span>
-  <span class="at">hint</span>=<span class="vl">"提示文字"</span>
-  <span class="at">btn-label</span>=<span class="vl">"確認"</span>
-  <span class="at">font-size</span>=<span class="vl">"1rem"</span>           <span class="cm">&lt;!-- 同時設定輸入框與按鈕 --&gt;</span>
-  <span class="at">btn-font-size</span>=<span class="vl">"0.9rem"</span>    <span class="cm">&lt;!-- 單獨設定按鈕 --&gt;</span>
-  <span class="at">input-font-size</span>=<span class="vl">"1rem"</span>   <span class="cm">&lt;!-- 單獨設定輸入框 --&gt;</span>
-  <span class="at">btn-padding</span>=<span class="vl">"8px 24px"</span>
-  <span class="at">case-sensitive</span><span class="tg">&gt;</span>           <span class="cm">&lt;!-- 加上此屬性則區分大小寫 --&gt;</span>
-<span class="tg">&lt;/ir-challenge&gt;</span></pre>
-  </div>
-
-  <table class="attr-table">
-    <tr><th>屬性</th><th>預設</th><th>說明</th></tr>
-    <tr><td>answer</td><td>必填</td><td>正確答案，<code>|</code> 分隔多個</td></tr>
-    <tr><td>link</td><td>—</td><td>答對後向匯流排發出的事件名稱</td></tr>
-    <tr><td>color</td><td>sky</td><td>品牌色（影響邊框、按鈕、focus 光暈）</td></tr>
-    <tr><td>placeholder</td><td>輸入答案…</td><td>輸入框提示</td></tr>
-    <tr><td>hint</td><td>—</td><td>輸入框下方灰色提示文字</td></tr>
-    <tr><td>btn-label</td><td>確認</td><td>按鈕文字</td></tr>
-    <tr><td>font-size</td><td>—</td><td>同時設定輸入框與按鈕字體</td></tr>
-    <tr><td>input-font-size</td><td>—</td><td>單獨設定輸入框字體</td></tr>
-    <tr><td>btn-font-size</td><td>—</td><td>單獨設定按鈕字體</td></tr>
-    <tr><td>btn-padding</td><td>7px 20px</td><td>按鈕 padding</td></tr>
-    <tr><td>case-sensitive</td><td>—</td><td>布林屬性，加上後區分大小寫</td></tr>
-  </table>
-</section>
-
-<!-- ── bp-slide ── -->
-<section class="doc-section" id="sl">
-  <div class="section-label"><span class="section-badge badge-sl">元件</span></div>
-  <h2><em class="orange">bp-slide</em> 投影片</h2>
-  <p class="doc-desc">原 slider-show.js 已整合進 patch，標籤改為 <code>&lt;bp-slide&gt;</code>。完整保留原有功能，新增四個匯流排連動屬性。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 連動屬性範例</div>
-    <pre><span class="tg">&lt;bp-slide</span>
-  <span class="at">theme</span>=<span class="vl">"orange"</span>
-  <span class="at">height</span>=<span class="vl">"240px"</span>
-  <span class="at">link</span>=<span class="vl">"slider:done"</span>          <span class="cm">&lt;!-- 按完成按鈕時發事件 --&gt;</span>
-  <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span>     <span class="cm">&lt;!-- 等事件才解鎖整個導航 --&gt;</span>
-  <span class="at">auto-show-part-buttons</span>=<span class="vl">"true"</span>
-  <span class="at">finish-btn-text</span>=<span class="vl">"完成課程 →"</span><span class="tg">&gt;</span>
-
-  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span><span class="tg">&gt;</span>第一頁<span class="tg">&lt;/div&gt;</span>
-
-  <span class="cm">&lt;!-- 切換到此頁時發出事件 --&gt;</span>
-  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">link</span>=<span class="vl">"slide:p2"</span><span class="tg">&gt;</span>第二頁<span class="tg">&lt;/div&gt;</span>
-
-  <span class="cm">&lt;!-- 停在此頁時鎖住下一頁，等 quiz:pass 才放行 --&gt;</span>
-  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span><span class="tg">&gt;</span>第三頁<span class="tg">&lt;/div&gt;</span>
-
-<span class="tg">&lt;/bp-slide&gt;</span></pre>
-  </div>
-
-  <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:12px">patch 新增連動屬性</h3>
-  <table class="attr-table">
-    <tr><th>屬性位置</th><th>屬性</th><th>說明</th></tr>
-    <tr><td>&lt;bp-slide&gt;</td><td>link</td><td>按「完成」按鈕時發出事件</td></tr>
-    <tr><td>&lt;bp-slide&gt;</td><td>unlock-on</td><td>等事件才解鎖整個 slider 的導航</td></tr>
-    <tr><td>[slide]</td><td>link</td><td>切換到此張時發出事件</td></tr>
-    <tr><td>[slide]</td><td>unlock-on</td><td>停在此張時鎖住下一頁，等事件才放行</td></tr>
-  </table>
-</section>
-
-<!-- ── bp-notice ── -->
-<section class="doc-section" id="bn">
-  <div class="section-label"><span class="section-badge badge-bn">元件</span></div>
-  <h2><em class="warning">bp-notice</em> 公告元件</h2>
-  <p class="doc-desc">區塊級公告，支援燃燒引線倒數動畫、可關閉、置頂固定、事件解鎖。內文支援完整 HTML 與 Bootstrap Icons。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 完整範例</div>
-    <pre><span class="cm">&lt;!-- 燃燒引線 + 可關閉 --&gt;</span>
-<span class="tg">&lt;bp-notice</span>
-  <span class="at">color</span>=<span class="vl">"sky"</span>
-  <span class="at">icon</span>=<span class="vl">"info-circle-fill"</span>    <span class="cm">&lt;!-- Bootstrap Icon 類名 --&gt;</span>
-  <span class="at">font-size</span>=<span class="vl">"1rem"</span>
-  <span class="at">icon-size</span>=<span class="vl">"1.4rem"</span>
-  <span class="at">padding</span>=<span class="vl">"16px 20px"</span>
-  <span class="at">dismissible</span>                <span class="cm">&lt;!-- 顯示關閉按鈕 --&gt;</span>
-  <span class="at">auto-hide</span>=<span class="vl">"5000"</span>           <span class="cm">&lt;!-- 5 秒後燃盡消失 --&gt;</span>
-  <span class="at">sticky</span>                     <span class="cm">&lt;!-- 置頂固定 --&gt;</span>
-  <span class="at">unlock-on</span>=<span class="vl">"lesson:done"</span>  <span class="cm">&lt;!-- 等事件才顯示，顯示後才倒數 --&gt;</span>
-  <span class="at">link</span>=<span class="vl">"notice:closed"</span>      <span class="cm">&lt;!-- 關閉時發出事件 --&gt;</span><span class="tg">&gt;</span>
-  <span class="cm">&lt;!-- 完整 HTML + Bootstrap Icons --&gt;</span>
-  &lt;strong&gt;公告標題&lt;/strong&gt;
-  &lt;ul&gt;
-    &lt;li&gt;&lt;i class="bi bi-check2"&gt;&lt;/i&gt; 項目一&lt;/li&gt;
-  &lt;/ul&gt;
-<span class="tg">&lt;/bp-notice&gt;</span></pre>
-  </div>
-
-  <table class="attr-table">
-    <tr><th>屬性</th><th>預設</th><th>說明</th></tr>
-    <tr><td>color</td><td>sky</td><td>品牌色</td></tr>
-    <tr><td>icon</td><td>—</td><td>左側 Bootstrap Icon 類名（不含 bi-）</td></tr>
-    <tr><td>font-size</td><td>.92rem</td><td>整體字體大小</td></tr>
-    <tr><td>icon-size</td><td>1.2rem</td><td>左側圖示大小</td></tr>
-    <tr><td>padding</td><td>14px 18px</td><td>內距</td></tr>
-    <tr><td>dismissible</td><td>—</td><td>布林屬性，顯示關閉按鈕</td></tr>
-    <tr><td>auto-hide</td><td>—</td><td>毫秒數，到時燃燒引線燃盡後淡出</td></tr>
-    <tr><td>sticky</td><td>—</td><td>布林屬性，position:sticky 置頂</td></tr>
-    <tr><td>unlock-on</td><td>—</td><td>等匯流排事件才顯示，顯示後才開始倒數</td></tr>
-    <tr><td>link</td><td>—</td><td>關閉或 auto-hide 消失時發出的事件</td></tr>
-  </table>
-
-  <div class="tip sky"><strong>燃燒引線</strong>：加上 <code>auto-hide</code> 屬性後底部自動出現引線動畫，火花顏色跟隨 <code>color</code> 屬性，無需額外設定。</div>
-</section>
-
-<!-- ── BpNote ── -->
-<section class="doc-section" id="sn">
-  <div class="section-label"><span class="section-badge badge-sn">元件</span></div>
-  <h2><em class="pink">BpNote</em> 便利貼</h2>
-  <p class="doc-desc">雙擊頁面任意空白處建立便利貼。整合 BrandColors 品牌色，支援拖曳、調色、收合、localStorage 自動儲存，並可透過 BPTools 匯流排通知其他元件。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 全域設定（在 patch 載入前定義）</div>
-    <pre><span class="tg">&lt;script&gt;</span>
-  window.StickyNotesConfig = {
-    defaultColor : <span class="vl">'lavender'</span>,  <span class="cm">// 品牌色名稱或 hex</span>
-    defaultWidth : <span class="vl">280</span>,
-    position     : <span class="vl">'fixed'</span>,      <span class="cm">// 'fixed' | 'absolute'</span>
-    storageKey   : <span class="vl">'my_notes'</span>,  <span class="cm">// localStorage 鍵名</span>
-    excludeClass : <span class="vl">'no-sticky'</span>, <span class="cm">// 掛此 class 的元素不觸發</span>
-    fontSize     : <span class="vl">'1rem'</span>,       <span class="cm">// 便利貼字體大小</span>
-    lineHeight   : <span class="vl">'1.8'</span>,        <span class="cm">// 便利貼行高</span>
-    link         : <span class="vl">'note:saved'</span>, <span class="cm">// 操作時向匯流排發出的事件</span>
-  };
-<span class="tg">&lt;/script&gt;</span></pre>
-  </div>
-
-  <div class="api-grid">
-    <div class="api-card"><div class="sig">BpNote.save()</div><p>手動觸發 localStorage 儲存。</p></div>
-    <div class="api-card"><div class="sig">BpNote.clearAll()</div><p>清除所有便利貼。</p></div>
-    <div class="api-card"><div class="sig">BpNote.export()</div><p>回傳 JSON 陣列，可存入資料庫。</p></div>
-    <div class="api-card"><div class="sig">BpNote.import(arr)</div><p>批次匯入便利貼資料（疊加）。</p></div>
-    <div class="api-card"><div class="sig">BpNote.disable()</div><p>暫停雙擊建立功能。</p></div>
-    <div class="api-card"><div class="sig">BpNote.enable()</div><p>恢復雙擊建立功能。</p></div>
-  </div>
-
-  <div class="tip lavender"><strong>向後相容</strong>：<code>window.StickyWall</code> 是 <code>BpNote</code> 的別名，原本使用 sticky-wall.js 的程式碼無需修改。</div>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 資料庫存取範例</div>
-    <pre><span class="cm">// 存入資料庫</span>
-<span class="kw">const</span> data = BpNote.<span class="fn">export</span>();
-<span class="fn">fetch</span>(<span class="vl">'/api/save-notes'</span>, {
-  method: <span class="vl">'POST'</span>,
-  headers: { <span class="vl">'Content-Type'</span>: <span class="vl">'application/json'</span> },
-  body: JSON.<span class="fn">stringify</span>(data),
-});
-
-<span class="cm">// 從資料庫還原</span>
-<span class="fn">fetch</span>(<span class="vl">'/api/load-notes'</span>)
-  .<span class="fn">then</span>(r => r.<span class="fn">json</span>())
-  .<span class="fn">then</span>(arr => BpNote.<span class="fn">import</span>(arr));</pre>
-  </div>
-</section>
-
-<!-- ── 連動流程 ── -->
-<section class="doc-section" id="flow">
-  <div class="section-label"><span class="section-badge badge-bus">進階</span></div>
-  <h2>連動流程範例</h2>
-  <p class="doc-desc">以雅思口說教學場景為例，展示五個元件如何透過一個事件名稱串接完整的學習流程。</p>
-
-  <div class="flow"><span class="el">bp-slide</span> 第一頁 → 第二頁（<span class="ev">link="slide:intro"</span> 發出）
-  <span class="arr">↓</span>
-<span class="el">WordFlip</span> 解鎖（<span class="ev">unlock-on="slide:intro"</span>）
-
-<span class="el">bp-slide</span> 第三頁（<span class="ev">unlock-on="quiz:pass"</span> 鎖住）
-  <span class="arr">↓ 需答題才能翻頁</span>
-<span class="el">ir-challenge</span> 答對 → <span class="ev">BPTools.emit("quiz:pass")</span>
-  <span class="arr">↓ 同時觸發</span>
-<span class="ok">✓</span> <span class="el">bp-slide</span> 第三頁解鎖
-<span class="ok">✓</span> <span class="el">DualCell</span> 高分範例遮罩移除（<span class="ev">on-link="quiz:pass"</span>）
-<span class="ok">✓</span> <span class="el">InfoRegion</span> 正確回饋滑入（<span class="ev">unlock-on="quiz:pass"</span>）
-
-<span class="el">bp-slide</span> 按「完成」→ <span class="ev">BPTools.emit("slider:done")</span>
-  <span class="arr">↓</span>
-<span class="ok">✓</span> <span class="el">bp-notice</span> 完課公告浮現（<span class="ev">unlock-on="slider:done"</span>）
-<span class="ok">✓</span> JS 顯示完課徽章
-<span class="ok">✓</span> JS 打 API 記錄進度</div>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 完整連動 HTML 骨架</div>
-    <pre><span class="cm">&lt;!-- 投影片：答題通過才進第三頁，完成發事件 --&gt;</span>
-<span class="tg">&lt;bp-slide</span> <span class="at">theme</span>=<span class="vl">"orange"</span> <span class="at">link</span>=<span class="vl">"slider:done"</span> <span class="at">auto-show-part-buttons</span>=<span class="vl">"true"</span><span class="tg">&gt;</span>
-  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">link</span>=<span class="vl">"slide:intro"</span><span class="tg">&gt;</span>第一頁<span class="tg">&lt;/div&gt;</span>
-  <span class="tg">&lt;div</span> <span class="at">slide</span> <span class="at">part</span>=<span class="vl">"1"</span> <span class="at">unlock-on</span>=<span class="vl">"quiz:pass"</span><span class="tg">&gt;</span>第二頁（鎖住）<span class="tg">&lt;/div&gt;</span>
-<span class="tg">&lt;/bp-slide&gt;</span>
-
-<span class="cm">&lt;!-- 答題：答對後解鎖所有訂閱 quiz:pass 的元件 --&gt;</span>
-<span class="tg">&lt;ir-challenge</span> <span class="at">answer</span>=<span class="vl">"Cookie"</span> <span class="at">link</span>=<span class="vl">"quiz:pass"</span> <span class="at">color</span>=<span class="vl">"lavender"</span><span class="tg">&gt;&lt;/ir-challenge&gt;</span>
-
-<span class="cm">&lt;!-- 答案表格：答對解鎖 --&gt;</span>
-<span class="tg">&lt;div</span> <span class="at">data-dual-cell</span> <span class="at">data-cols</span>=<span class="vl">"2"</span> <span class="at">data-theme</span>=<span class="vl">"lavender"</span><span class="tg">&gt;</span>
-  <span class="tg">&lt;div</span> <span class="at">data-col</span><span class="tg">&gt;</span>問題<span class="tg">&lt;/div&gt;</span>
-  <span class="tg">&lt;div</span> <span class="at">data-col</span> <span class="at">data-on-link</span>=<span class="vl">"quiz:pass"</span> <span class="at">data-overlay-1-text</span>=<span class="vl">"答對後解鎖"</span><span class="tg">&gt;</span>答案<span class="tg">&lt;/div&gt;</span>
-<span class="tg">&lt;/div&gt;</span>
-
-<span class="cm">&lt;!-- 完課公告：完成投影片才顯示，5 秒引線 --&gt;</span>
-<span class="tg">&lt;bp-notice</span> <span class="at">color</span>=<span class="vl">"special"</span> <span class="at">icon</span>=<span class="vl">"stars"</span>
-  <span class="at">unlock-on</span>=<span class="vl">"slider:done"</span> <span class="at">auto-hide</span>=<span class="vl">"5000"</span> <span class="at">dismissible</span><span class="tg">&gt;</span>
-  🎓 課程完成！
-<span class="tg">&lt;/bp-notice&gt;</span></pre>
-  </div>
-</section>
-
-<!-- ── 公開 API ── -->
-<section class="doc-section" id="api">
-  <div class="section-label"><span class="section-badge badge-bus">進階</span></div>
-  <h2>所有公開 API</h2>
-  <p class="doc-desc">patch 載入後全域可用的所有物件與方法。</p>
-
-  <div class="code-wrap">
-    <div class="code-head"><i class="bi bi-code-slash"></i> 完整 API 一覽</div>
-    <pre><span class="cm">/* BPTools 匯流排 */</span>
-BPTools.<span class="fn">on</span>(ev, fn)        <span class="cm">// 訂閱</span>
-BPTools.<span class="fn">emit</span>(ev, data)   <span class="cm">// 發布</span>
-BPTools.<span class="fn">off</span>(ev, fn)       <span class="cm">// 取消訂閱</span>
-BPTools._fired             <span class="cm">// Set，已發過的事件歷史</span>
-
-<span class="cm">/* BrandColors */</span>
-BrandColors.<span class="fn">applyTheme</span>(<span class="vl">'dark'</span> | <span class="vl">'light'</span>)
-BrandColors.<span class="fn">get</span>(colorName)
-BrandColors.<span class="fn">resolve</span>(val)
-BrandColors.<span class="fn">toCSSVars</span>(themeName)
-
-<span class="cm">/* InfoRegion */</span>
-InfoRegion.<span class="fn">activate</span>(id)
-InfoRegion.<span class="fn">resetAll</span>()
-
-<span class="cm">/* BpNote（便利貼）*/</span>
-BpNote.<span class="fn">save</span>()
-BpNote.<span class="fn">clearAll</span>()
-BpNote.<span class="fn">export</span>()          <span class="cm">// → JSON 陣列</span>
-BpNote.<span class="fn">import</span>(arr)
-BpNote.<span class="fn">enable</span>() / <span class="fn">disable</span>()
-StickyWall                 <span class="cm">// BpNote 的別名（向後相容）</span></pre>
-  </div>
-</section>
-
-<!-- ── 相容性 ── -->
-<section class="doc-section" id="compat">
-  <div class="section-label"><span class="section-badge badge-bus">進階</span></div>
-  <h2>相容性與注意事項</h2>
-
-  <table class="attr-table">
-    <tr><th>項目</th><th>說明</th></tr>
-    <tr><td>瀏覽器支援</td><td>Chrome 80+、Edge 80+、Firefox 75+、Safari 14+。使用 Custom Elements v1、CSS 變數、ResizeObserver。</td></tr>
-    <tr><td>相依檔案</td><td>bp-tools.js 必須在 patch 之前載入。Bootstrap Icons CSS 為選填，但 icon 屬性需要它。</td></tr>
-    <tr><td>slider-show.js</td><td>已整合進 patch，可以移除。<code>&lt;slider-show&gt;</code> 舊標籤須改為 <code>&lt;bp-slide&gt;</code>。</td></tr>
-    <tr><td>sticky-wall.js</td><td>已整合進 patch，可以移除。<code>StickyWall</code> 別名保留，舊程式碼不需修改。</td></tr>
-    <tr><td>word-flip 屬性</td><td>展開內容用 <code>data-content</code>，不是 <code>answer</code>。patch 的 answer-src 功能不受影響。</td></tr>
-    <tr><td>BPTools 訂閱時機</td><td>頁面 script 裡使用 BPTools 須用輪詢寫法，避免 BPTools is not defined 錯誤。</td></tr>
-    <tr><td>unlock-on + auto-hide</td><td>bp-notice 的倒數從「公告出現後」才開始，不是頁面載入時。</td></tr>
-  </table>
-</section>
-
-<footer id="footer">
-  bp-tools-patch.js v2.1 ·
-  搭配 <span>bp-tools.js</span> 使用 ·
-  零外部依賴 · 單檔掛載
-</footer>
-
-</div><!-- /main -->
-
-<script>
-/* 側邊欄 active 狀態 */
-const links = document.querySelectorAll('.sb-link');
-const sections = document.querySelectorAll('.doc-section, #hero');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = entry.target.id;
-      links.forEach(l => {
-        l.classList.toggle('active', l.getAttribute('href') === '#' + id);
-      });
-    }
-  });
-}, { threshold: 0.25 });
-sections.forEach(s => observer.observe(s));
-</script>
-
+	<div class="mx-3 mt-4 fs-4 fw-bold bp-text-shell">What's your favorite drink?</div>
+	<div class="mx-3">
+      <bp-stepper id="demo-wrap" data-theme="sky" data-card-width="520px" data-gap="120px" data-pad-top="6px" data-radius="6px" data-auto-number="false">
+        <bp-step data-state="error">
+			<bp-step-title>My favorite drink is coffee.</bp-step-title>
+			<bp-step-content>
+				<div class="bp-text-shell">
+					只是在「答題」，而不是在「跟活人聊天」<br>
+					是「文法無誤，卻沒品質、沒魅力、更沒有影響力」的機械式回應<br>
+					<span class="fs-xsmall">複製貼上對方用詞，聽起來像在朗讀教科書例句；提供資訊而不是在經營話題</span>
+				</div>
+			</bp-step-content>
+		</bp-step>
+        <bp-step>
+			<bp-step-title>自然道地＋社交互動</bp-step-title>
+			<bp-step-content>
+				<div class="bp-text-shell">
+					I'm a black coffee person through and through. A solid cup helps clear my head, especially on days when my schedule is completely packed. Do you need caffeine to function as well?
+				</div>
+			</bp-step-content>
+		</bp-step>
+      </bp-stepper>
+	</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/card-badge.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/dual-line.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-stepper.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/list-card.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-popnote.js"></script>
 </body>
 </html>
