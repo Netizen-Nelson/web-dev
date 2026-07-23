@@ -1,23 +1,4 @@
-/**
- * list-card.js  v1.0
- * Web Component：<list-card> + <card-item>
- * 無 Shadow DOM，CSS + JS 單一檔案
- * ─────────────────────────────────────────
- * 使用方式：
- *   <list-card theme="default" divider-width="16px">
- *     <card-item>HTML 內容</card-item>
- *     <card-item data-text-source="some-div-id"></card-item>
- *     <card-item><p>第三張</p></card-item>
- *   </list-card>
- *
- * 全域設定：
- *   window.ListCardConfig = { theme: 'fill', dividerWidth: '24px', ... }
- */
-
 ;(function () {
-  /* ════════════════════════════════════════
-     0. 品牌色票
-  ════════════════════════════════════════ */
   const BRAND = {
     bg      : '#0c0d0c',
     shell   : '#c6c7bd',
@@ -35,25 +16,12 @@
     orange  : '#eda109',
   }
 
-  /* ════════════════════════════════════════
-     1. 主題系統：每個品牌色自動生成 default / fill
-     ────────────────────────────────────────
-     命名規則：
-       theme="special"       → default 變體（深底＋品牌色文字）
-       theme="special-fill"  → fill 變體（品牌色底＋深色文字）
+  const BG = BRAND.bg
 
-     別名：
-       "default" → "shell"
-       "fill"    → "shell-fill"
-  ════════════════════════════════════════ */
-  const BG = BRAND.bg   // #0c0d0c
-
-  /* 排除 bg 本身，其餘色票全部產生主題 */
   const THEME_COLORS = (({ bg, ...rest }) => rest)(BRAND)
 
   function _mkTheme (color) {
     return {
-      /* ── default：深底＋品牌色 ── */
       default: {
         containerBg    : BG,
         containerBorder: `1px solid ${color}`,
@@ -183,11 +151,9 @@ card-item.lc-animate {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 8px;
-  height: 24px;
-  border-radius: 3px;
+  width: 12px;
+  height: 28px;
   background: var(--lc-divider-color, #C3A5E5);
-  opacity: 0.65;
   pointer-events: none;
   transition: background 0.18s, opacity 0.18s, height 0.18s;
   flex-shrink: 0;
@@ -210,7 +176,6 @@ card-item.lc-animate {
   }
 }
 
-/* ── 內容區 ── */
 .lc-item-inner {
   width: 100%;
   height: 100%;
