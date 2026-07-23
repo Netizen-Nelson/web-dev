@@ -10,8 +10,9 @@
     safe    : '#40c99a',
     vanilla : '#FDF6ED',
     yellow  : '#DECA4B',
-    info    : '#5fafed',
+    info    : '#4285EB',
     stone   : '#95BDD7',
+    vanilla : '#D4C5A9',
     pink    : '#FFB3D9',
     orange  : '#eda109',
   }
@@ -432,10 +433,6 @@ card-item.lc-animate {
       })
     }
 
-    /* ════════════════
-       公開 API
-    ═══════════════ */
-
     /** 展開至第 n 個 item（1-based） */
     expandTo (n) {
       this._expanded = Math.min(Math.max(1, n), this._items.length)
@@ -452,7 +449,6 @@ card-item.lc-animate {
       this.expandTo(1)
     }
 
-    /** 動態切換主題 */
     setTheme (name) {
       const cfg = this._cfg()
       const theme = THEMES[name] || THEMES['shell']
@@ -467,20 +463,14 @@ card-item.lc-animate {
       this._items.forEach(item => item.applyTheme(name, cfg))
     }
 
-    /** 動態更新設定 */
     setConfig (obj) {
       window.ListCardConfig = Object.assign(getGlobal(), obj)
     }
 
-    /** 回傳所有 card-item 陣列 */
     getItems () {
       return [...this._items]
     }
 
-    /**
-     * 重新同步 data-text-source
-     * @param {number} [index] 省略則全部同步
-     */
     refreshSource (index) {
       if (index !== undefined) {
         this._items[index]?.refreshSource()
@@ -490,9 +480,6 @@ card-item.lc-animate {
     }
   }
 
-  /* ════════════════════════════════════════
-     6. 註冊自訂元素
-  ════════════════════════════════════════ */
   if (!customElements.get('card-item')) {
     customElements.define('card-item', CardItem)
   }
