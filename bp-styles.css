@@ -9,8 +9,10 @@
 .bp-text-sky { color: #04b5a3; }
 .bp-text-safe { color: #81E6D9; }
 .bp-text-yellow { color: #DECA4B; }
-.bp-text-info { color: #90CDF4; }
-.bp-text-stone {color: #7090A8; }
+.bp-text-info { color: #4285EB; }
+.bp-text-vanilla { color: #D4C5A9; }
+.bp-text-stone {color: #95BDD7; }
+.bp-text-indigo {color: #7B6CF0; }
 .bp-text-pink { color: #FFB3D9; }
 .bp-text-orange { color: #f69653; }
 
@@ -26,8 +28,8 @@
 .bp-bg-sky { background-color: #04b5a3; }
 .bp-bg-safe { background-color: #81E6D9; }
 .bp-bg-yellow { background-color: #DECA4B; }
-.bp-bg-stone { background-color: #7090A8; }
-.bp-bg-info { background-color: #90CDF4; }
+.bp-bg-stone { background-color: #95BDD7; }
+.bp-bg-info { background-color: #4285EB; }
 .bp-bg-pink { background-color: #FFB3D9; }
 .bp-bg-orange { background-color: #f69653; }
 
