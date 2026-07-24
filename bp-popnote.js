@@ -223,12 +223,55 @@
       flex-shrink: 0;
       opacity: 0.9;
     }
+
     /* Active trigger highlight in panel mode */
     [data-popover-title].xpop-panel-active,
     [data-popover-content].xpop-panel-active,
     [data-popover-target].xpop-panel-active {
       border-bottom-style: solid !important;
       color: var(--xpop-hint-color, #C3A5E5);
+    }
+
+    /* ── Bootstrap Modal theming ─────────────────────────────── */
+    #xpop-bs-modal .modal-content {
+      border-width: 1px;
+      border-style: solid;
+    }
+    #xpop-bs-modal .modal-header {
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      align-items: center;
+    }
+    #xpop-bs-modal .modal-body {
+      color: #C6C7BD;
+      font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      line-height: 1.6;
+      overflow-y: auto;
+    }
+
+    /* ── Bootstrap Offcanvas theming ─────────────────────────── */
+    #xpop-bs-offcanvas .offcanvas-header {
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      align-items: center;
+    }
+    #xpop-bs-offcanvas .offcanvas-body {
+      color: #C6C7BD;
+      font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      line-height: 1.6;
+      overflow-y: auto;
+    }
+
+    /* ── Shared close button ─────────────────────────────────── */
+    #xpop-bs-modal .btn-close,
+    #xpop-bs-offcanvas .btn-close {
+      opacity: 0.65;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    #xpop-bs-modal .btn-close:hover,
+    #xpop-bs-offcanvas .btn-close:hover {
+      opacity: 1;
     }
   `;
 
@@ -259,10 +302,14 @@
     borderStyle: 'solid',
     placement:   'top',
     carousel:    { animation: 'slide', interval: 3000 },
-    // panelTarget: null  ← set to a CSS selector (e.g. '#my-notes') to enable
-    //                      global panel mode for every trigger
     panelTarget: null,
     _customThemes: {},
+    // ── Modal / Offcanvas ─────────────────────────────────────
+    // modal: false | 'dialog' | 'start' | 'end' | 'top' | 'bottom'
+    // true is treated as 'dialog' for convenience
+    modal:       false,
+    modalSize:   '',      // CSS value: '480px', '80vw' … or Bootstrap keyword 'sm'|'lg'|'xl'
+    modalStatic: false,   // true → clicking backdrop does NOT close
   };
 
   window.PopoverConfig = {
@@ -435,6 +482,198 @@
     return { stop: () => clearTimeout(timer) };
   }
 
+  // ─── Modal mode helpers ───────────────────────────────────────────────────────
+  //
+  // data-popover-modal values:
+  //   'true' | 'dialog'            → Bootstrap Modal (centred dialog)
+  //   'start' | 'end' | 'top' | 'bottom'  → Bootstrap Offcanvas (side panel)
+  //   'false'                      → opt-out even when config.modal is set
+  //   (attribute present, no value / empty string) → treated as 'dialog'
+  //
+  // Global:
+  //   PopoverConfig.set({ modal: 'dialog' })   or   modal: 'end'
+  //   modal: true  is treated as  modal: 'dialog'
+  //
+  // Per-trigger overrides (data attribute wins over config):
+  //   data-popover-modal-size="600px"      – CSS value or 'sm'|'lg'|'xl' (dialog only)
+  //   data-popover-modal-static="true"     – clicking backdrop does NOT close
+
+  const OC_PLACEMENTS = ['start', 'end', 'top', 'bottom'];
+
+  function getModalMode(trigger) {
+    const attr = trigger.dataset.popoverModal;
+    let val;
+
+    if (attr !== undefined) {
+      // Per-trigger attribute exists — it wins over global config
+      val = (attr === '') ? 'dialog' : attr;
+    } else if (config.modal) {
+      val = config.modal;
+    } else {
+      return null; // not modal mode
+    }
+
+    if (val === 'false' || val === false)          return null;
+    if (val === true || val === 'true' || val === 'dialog') return 'dialog';
+    if (OC_PLACEMENTS.includes(val))               return val;
+    return 'dialog'; // unknown value → safe default
+  }
+
+  // Lazy-init the shared Bootstrap Modal DOM element
+  function ensureModal() {
+    let el = document.getElementById('xpop-bs-modal');
+    if (el) return el;
+
+    el = document.createElement('div');
+    el.className = 'modal fade';
+    el.id = 'xpop-bs-modal';
+    el.tabIndex = -1;
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML =
+      '<div class="modal-dialog modal-dialog-scrollable">' +
+        '<div class="modal-content">' +
+          '<div class="modal-header">' +
+            '<span class="modal-title fw-bold fs-5"></span>' +
+            '<button type="button" class="btn-close btn-close-white ms-auto"' +
+              ' data-bs-dismiss="modal" aria-label="Close"></button>' +
+          '</div>' +
+          '<div class="modal-body"></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(el);
+    return el;
+  }
+
+  // Lazy-init the shared Bootstrap Offcanvas DOM element
+  function ensureOffcanvas() {
+    let el = document.getElementById('xpop-bs-offcanvas');
+    if (el) return el;
+
+    el = document.createElement('div');
+    el.className = 'offcanvas';
+    el.id = 'xpop-bs-offcanvas';
+    el.tabIndex = -1;
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML =
+      '<div class="offcanvas-header">' +
+        '<span class="offcanvas-title fw-bold fs-5"></span>' +
+        '<button type="button" class="btn-close btn-close-white ms-auto"' +
+          ' data-bs-dismiss="offcanvas" aria-label="Close"></button>' +
+      '</div>' +
+      '<div class="offcanvas-body"></div>';
+    document.body.appendChild(el);
+    return el;
+  }
+
+  // Apply theme colours as inline styles to a modal/offcanvas root and its header
+  function applyThemeStyles(rootEl, headerEl, titleEl, theme) {
+    rootEl.style.background   = theme.bg;
+    rootEl.style.borderColor  = theme.borderColor;
+
+    headerEl.style.background        = theme.bg;
+    headerEl.style.borderBottomColor  = theme.borderColor;
+
+    titleEl.style.color = theme.titleColor;
+  }
+
+  // Resolve Bootstrap named size → CSS class name (dialog only)
+  const NAMED_SIZES = { sm: 'modal-sm', lg: 'modal-lg', xl: 'modal-xl' };
+
+  function showModal(trigger) {
+    const modalEl  = ensureModal();
+    const theme    = getTheme(ra(trigger, 'popoverTheme',      config.theme));
+    const title    = trigger.dataset.popoverTitle || '';
+    const html     = extractContent(trigger);
+    const rawSize  = ra(trigger, 'popoverModalSize',   config.modalSize);
+    const isStatic = ra(trigger, 'popoverModalStatic', String(config.modalStatic)) === 'true';
+
+    // Close any open Offcanvas first
+    const ocEl = document.getElementById('xpop-bs-offcanvas');
+    if (ocEl) {
+      const ocInst = bootstrap.Offcanvas.getInstance(ocEl);
+      if (ocInst) ocInst.hide();
+    }
+
+    // Populate content
+    const content = modalEl.querySelector('.modal-content');
+    const header  = modalEl.querySelector('.modal-header');
+    const titleEl = modalEl.querySelector('.modal-title');
+    const body    = modalEl.querySelector('.modal-body');
+
+    applyThemeStyles(content, header, titleEl, theme);
+    titleEl.innerHTML = title;
+    body.innerHTML    = html;
+
+    // Dialog size
+    const dialog = modalEl.querySelector('.modal-dialog');
+    dialog.className = 'modal-dialog modal-dialog-scrollable';
+    dialog.style.maxWidth = '';
+
+    if (NAMED_SIZES[rawSize]) {
+      dialog.classList.add(NAMED_SIZES[rawSize]);
+    } else if (rawSize) {
+      dialog.style.maxWidth = rawSize;
+    }
+
+    // Dispose previous instance so backdrop option can change
+    const prev = bootstrap.Modal.getInstance(modalEl);
+    if (prev) prev.dispose();
+
+    new bootstrap.Modal(modalEl, {
+      backdrop: isStatic ? 'static' : true,
+      keyboard: !isStatic,
+    }).show();
+  }
+
+  function showOffcanvas(trigger, placement) {
+    const ocEl    = ensureOffcanvas();
+    const theme   = getTheme(ra(trigger, 'popoverTheme',      config.theme));
+    const title   = trigger.dataset.popoverTitle || '';
+    const html    = extractContent(trigger);
+    const rawSize = ra(trigger, 'popoverModalSize',   config.modalSize);
+    const isStatic = ra(trigger, 'popoverModalStatic', String(config.modalStatic)) === 'true';
+
+    // Close any open Modal first
+    const mEl = document.getElementById('xpop-bs-modal');
+    if (mEl) {
+      const mInst = bootstrap.Modal.getInstance(mEl);
+      if (mInst) mInst.hide();
+    }
+
+    // Reset placement class — offcanvas-{start|end|top|bottom}
+    ocEl.className = 'offcanvas offcanvas-' + placement;
+
+    // Size: start/end → width, top/bottom → height
+    ocEl.style.width  = '';
+    ocEl.style.height = '';
+    if (rawSize) {
+      if (placement === 'start' || placement === 'end') {
+        ocEl.style.width  = rawSize;
+      } else {
+        ocEl.style.height = rawSize;
+      }
+    }
+
+    // Populate content
+    const header  = ocEl.querySelector('.offcanvas-header');
+    const titleEl = ocEl.querySelector('.offcanvas-title');
+    const body    = ocEl.querySelector('.offcanvas-body');
+
+    applyThemeStyles(ocEl, header, titleEl, theme);
+    titleEl.innerHTML = title;
+    body.innerHTML    = html;
+
+    // Dispose previous instance so options can change
+    const prev = bootstrap.Offcanvas.getInstance(ocEl);
+    if (prev) prev.dispose();
+
+    new bootstrap.Offcanvas(ocEl, {
+      backdrop: true,
+      keyboard: !isStatic,
+      scroll:   false,
+    }).show();
+  }
+
   // ─── Panel mode ──────────────────────────────────────────────────────────────
   //
   // Usage A — per-trigger:
@@ -593,30 +832,51 @@
     currentPop = currentTrigger = null;
   }
 
+  // ─── Unified click handler ────────────────────────────────────────────────────
+
   document.addEventListener('click', function (e) {
     const trigger = e.target.closest(
       '[data-popover-title],[data-popover-content],[data-popover-target]'
     );
+
     if (trigger) {
       e.stopPropagation();
-      const panelEl = getPanelTargetEl(trigger);
 
+      // ① Modal / Offcanvas mode (highest priority)
+      const modalMode = getModalMode(trigger);
+      if (modalMode) {
+        closePop();
+        clearPanel();
+        if (modalMode === 'dialog') {
+          showModal(trigger);
+        } else {
+          showOffcanvas(trigger, modalMode);
+        }
+        return;
+      }
+
+      // ② Panel mode
+      const panelEl = getPanelTargetEl(trigger);
       if (panelEl) {
         closePop();
         renderToPanel(trigger, panelEl);
         return;
       }
+
+      // ③ Floating Popover (default)
       if (currentTrigger === trigger) { closePop(); return; }
       closePop();
       currentTrigger = trigger;
       currentPop = createPopover(trigger);
       return;
     }
+
     if (currentPop && currentPop.contains(e.target)) return;
     closePop();
   });
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
+
   window.addEventListener('resize', function () {
     if (!currentPop || !currentTrigger) return;
     const p = currentTrigger.dataset.popoverPlacement || config.placement;
@@ -627,5 +887,6 @@
     currentPop.style.top  = top  + 'px';
     currentPop.style.left = left + 'px';
   });
+
   injectCSS();
 })();
