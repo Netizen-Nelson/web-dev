@@ -1,37 +1,41 @@
 /*!
  * chunk-demo.js  —  English Chunk Replacement Component
- * Custom element: <chunk-demo>   v2.1.0
+ * Custom element: <chunk-demo>   v2.2.0
  *
- * ── Quick Start ──────────────────────────────────────────────
- *   <script src="chunk-demo.js"></script>
- *
- *   <chunk-demo
- *     theme="sky"
- *     border-width="2px"
- *     border-style="dashed"
- *     sentence="The cafe {0} is really nice."
- *     show-preview="true"
- *     chunks='[{"id":0,"icon":"📍","label":"Location","levels":[
- *       {"level":1,"text":"near my condo"},
- *       {"level":2,"text":"around the corner of my place"},
- *       {"level":3,"text":"just a five-minute walk from my rented apartment"}
- *     ]}]'>
+ * ── Child Element Syntax (推薦，長文字友善) ──────────────────
+ *   <chunk-demo theme="sky" sentence="The cafe {0} is really nice."
+ *               show-preview="true">
+ *     <cd-chunk id="0" icon="📍" label="Location">
+ *       <cd-level>near my condo</cd-level>
+ *       <cd-level>around the corner of my place</cd-level>
+ *       <cd-level>just a five-minute walk from my rented apartment</cd-level>
+ *     </cd-chunk>
  *   </chunk-demo>
  *
- * ── Attributes ───────────────────────────────────────────────
- *   sentence       Template string with {n} placeholders   (required)
- *   chunks         JSON array of chunk definitions          (required)
- *   theme          Brand colour theme                       (default: special)
- *   border-width   Chunk button border thickness            (default: 1.5px)
- *   border-style   Chunk button border style                (default: solid)
- *                  Accepts: solid | dashed | dotted | double | groove | ridge
+ *   <cd-chunk> attributes
+ *     id             對應 sentence 中 {n} 的 n（省略時依序 0、1、2…）
+ *     icon           前綴 emoji / 圖示（可省略）
+ *     label          下拉標頭文字（省略或空字串 → 不顯示標頭）
+ *     current-level  初始層級（預設 1）
+ *
+ *   <cd-level> attributes
+ *     level          明確指定層級編號（省略時依序 1、2、3…）
+ *     文字內容即替代字串，可自由換行
+ *
+ * ── JSON Attribute Syntax (向下相容) ─────────────────────────
+ *   <chunk-demo theme="sky" sentence="The cafe {0} is nice."
+ *     chunks='[{"id":0,"icon":"📍","levels":[...]}]'>
+ *   </chunk-demo>
+ *   優先序：cd-chunk 子元素 > chunks 屬性
+ *
+ * ── <chunk-demo> Attributes ──────────────────────────────────
+ *   sentence       Template with {n} placeholders  (required)
+ *   theme          Brand colour theme               (default: special)
+ *   border-width   Chunk button border thickness    (default: 1.5px)
+ *   border-style   Chunk button border style        (default: solid)
+ *                  solid | dashed | dotted | double | groove | ridge
  *   show-preview   "true" → show assembled sentence below bar
  *   data-config    JSON string for per-element config overrides
- *
- * ── Chunk Object ─────────────────────────────────────────────
- *   { id, icon?, label?, currentLevel?,
- *     levels: [{ level, text }, ...] }
- *   label: omit or "" → dropdown header is hidden.
  *
  * ── Brand Themes ─────────────────────────────────────────────
  *   shell | lavender | special | warning | salmon | sky
@@ -41,16 +45,16 @@
  * ── Global Config (set BEFORE loading this script) ───────────
  *   window.ChunkDemoConfig = {
  *     defaultTheme:       'sky',
- *     chunkBorderWidth:   '2px',
- *     chunkBorderStyle:   'dashed',
+ *     chunkBorderWidth:   '1.5px',
+ *     chunkBorderStyle:   'solid',
  *     previewBorderColor: null,   // null = auto-follow active theme color
  *     themes: { brand: { border:'#FF5733', text:'#FF5733', bg:'rgba(255,87,51,.09)' } },
  *     levelDotColors: { 1:'#40C99A', 2:'#DECA4B', 3:'#C3A5E5' },
  *   };
- *   All keys are deep-merged with built-in defaults.
  *
  * ── Config Priority (lowest → highest) ───────────────────────
- *   DEFAULTS → window.ChunkDemoConfig → data-config attr → border-width/border-style attr
+ *   DEFAULTS → ChunkDemoConfig → data-config attr
+ *            → border-width / border-style HTML attrs
  */
 (function (win, doc) {
   'use strict';
@@ -63,6 +67,9 @@
     const s = doc.createElement('style');
     s.id = CSS_ID;
     s.textContent = `
+/* Data-carrier elements — always hidden */
+cd-chunk, cd-level { display: none !important; }
+
 chunk-demo { display: block; }
 
 /* ── Sentence bar ──────────────────────────── */
@@ -142,14 +149,14 @@ chunk-demo { display: block; }
 .cd-lv.is-sel .cd-lv-text { color: #dde0d8; }
 
 /* ── Full-sentence preview ──────────────────── */
-/* --pvb is set dynamically to match the element's active theme color */
+/* --pvb / --pvt / --pvbg all set dynamically in _draw() */
 .cd-preview {
   margin-top: 9px; padding: 7px 12px;
   border-left: 3px solid var(--pvb, #C8DD5A);
   border-radius: 0 6px 6px 0;
-  background: rgba(255,255,255,.035);
+  background: var(--pvbg, rgba(255,255,255,.035));
 }
-.cd-pv-text { font-size: .89rem; font-style: italic; color: #7a8078; }
+.cd-pv-text { font-size: .89rem; font-style: italic; color: var(--pvt, #7a8078); }
     `.trim();
     (doc.head || doc.documentElement).appendChild(s);
   }
@@ -175,8 +182,8 @@ chunk-demo { display: block; }
       orange:   { border: '#EDA109', text: '#EDA109', bg: 'rgba(237,161,9,.09)'   },
     },
     defaultTheme:       'special',
-    chunkBorderWidth:   '1.5px',           /* border-width attr or data-config override */
-    chunkBorderStyle:   'solid',           /* border-style attr or data-config override */
+    chunkBorderWidth:   '1.5px',
+    chunkBorderStyle:   'solid',
     levelDotColors:     { 1: '#40C99A', 2: '#DECA4B', 3: '#C3A5E5' },
     fixedTextColor:     '#C6C7BD',
     sentenceBg:         '#161816',
@@ -184,6 +191,8 @@ chunk-demo { display: block; }
     dropdownBg:         '#1d1f1d',
     dropdownBorder:     '#2c2e2c',
     previewBorderColor: null,              /* null = auto-follow active theme color */
+    previewTextColor:   null,              /* null = use CSS default (#7a8078) */
+    previewBg:          null,              /* null = use CSS default (rgba(255,255,255,.035)) */
     showPreview:        false,
   };
 
@@ -206,14 +215,20 @@ chunk-demo { display: block; }
       this._openId   = null;
       this._btns     = {};
       this._dds      = {};
+      this._ready    = false;   /* guards against premature attributeChangedCallback */
       this._docClick = () => this._close();
       this._docKey   = e => { if (e.key === 'Escape') this._close(); };
     }
 
     connectedCallback() {
-      this._init();
       doc.addEventListener('click',   this._docClick);
       doc.addEventListener('keydown', this._docKey);
+      /*
+       * Defer first _init() by one tick so the HTML parser has time to
+       * append all <cd-chunk> / <cd-level> children before we read them.
+       * Without this, connectedCallback fires before child nodes exist.
+       */
+      setTimeout(() => { this._ready = true; this._init(); }, 0);
     }
 
     disconnectedCallback() {
@@ -222,13 +237,9 @@ chunk-demo { display: block; }
     }
 
     attributeChangedCallback() {
-      if (this.isConnected) this._init();
+      if (this.isConnected && this._ready) this._init();
     }
 
-    /* ── Config merge ─────────────────────────────────────────
-       Priority: DEFAULTS ← G (global) ← E (data-config attr)
-                 ← border-width/border-style HTML attrs (highest)
-    ──────────────────────────────────────────────────────────── */
     _cfg() {
       const G = win.ChunkDemoConfig || {};
       let E = {};
@@ -244,35 +255,75 @@ chunk-demo { display: block; }
       const name = this.getAttribute('theme') || cfg.defaultTheme || 'special';
       cfg._theme = cfg.themes[name] || cfg.themes.special || DEFAULTS.themes.special;
 
-      /* HTML attributes override config for border (highest priority) */
+      /* HTML attributes override config (highest priority) */
       if (this.getAttribute('border-width')) cfg.chunkBorderWidth = this.getAttribute('border-width');
       if (this.getAttribute('border-style')) cfg.chunkBorderStyle = this.getAttribute('border-style');
 
-      /* Preview border: null → follow theme color automatically */
+      /* Preview border color: null → follow theme automatically */
       cfg._pvColor = cfg.previewBorderColor || cfg._theme.border;
 
       return cfg;
     }
 
+    /* ── Parse <cd-chunk> / <cd-level> child elements ─────────
+       Called only when cd-chunk children are detected.
+       id        → maps to {n} placeholder; defaults to position index
+       icon      → emoji prefix (optional)
+       label     → dropdown header (omit / "" → hidden)
+       current-level → starting level (default 1)
+       <cd-level> children are numbered 1, 2, 3… unless level attr set.
+    ──────────────────────────────────────────────────────────── */
+    _parseChildren(cdChunks) {
+      return cdChunks.map((el, i) => {
+        const rawId   = el.getAttribute('id');
+        const cdLevels = Array.from(el.querySelectorAll('cd-level'));
+        return {
+          id:           rawId !== null ? parseInt(rawId) : i,
+          icon:         el.getAttribute('icon')          || '',
+          label:        el.getAttribute('label')         ?? '',
+          currentLevel: parseInt(el.getAttribute('current-level') || '1'),
+          levels:       cdLevels.map((lv, j) => ({
+            level: parseInt(lv.getAttribute('level') || String(j + 1)),
+            text:  lv.innerHTML.trim(),      /* innerHTML: preserves any HTML tags inside */
+          })),
+        };
+      });
+    }
+
     _init() {
-      let chunks = [];
-      try { chunks = JSON.parse(this.getAttribute('chunks') || '[]'); } catch {}
+      const cdChunks = Array.from(this.querySelectorAll(':scope > cd-chunk'));
+      let chunks;
+
+      if (cdChunks.length > 0) {
+        chunks = this._parseChildren(cdChunks);
+      } else {
+        try { chunks = JSON.parse(this.getAttribute('chunks') || '[]'); } catch { chunks = []; }
+      }
+
       this._sent   = this.getAttribute('sentence') || '';
       this._chunks = chunks;
-      /* Preserve level selections across attribute changes */
+
+      /* Preserve level selections across re-inits */
       const prev  = this._state;
       this._state = chunks.map(c => {
         const p = prev.find(s => s.id === c.id);
         return { id: c.id, level: p ? p.level : (c.currentLevel || 1) };
       });
+
       this._openId = null;
       this._draw();
     }
 
     _draw() {
+ 
+      const srcNodes = Array.from(this.querySelectorAll(':scope > cd-chunk'));
+
       this.innerHTML = '';
       this._btns = {};
       this._dds  = {};
+
+      srcNodes.forEach(n => this.appendChild(n));
+
       const cfg = this._cfg();
 
       /* Sentence bar */
@@ -303,11 +354,13 @@ chunk-demo { display: block; }
       if (showPrev) {
         const pv = doc.createElement('div');
         pv.className = 'cd-preview';
-        pv.style.setProperty('--pvb', cfg._pvColor);   /* auto-follows theme */
+        pv.style.setProperty('--pvb',  cfg._pvColor);
+        if (cfg.previewTextColor) pv.style.setProperty('--pvt',  cfg.previewTextColor);
+        if (cfg.previewBg)        pv.style.setProperty('--pvbg', cfg.previewBg);
 
         const t = doc.createElement('div');
-        t.className   = 'cd-pv-text';
-        t.textContent = this._full();
+        t.className = 'cd-pv-text';
+        t.innerHTML = this._full();
         pv.appendChild(t);
         this.appendChild(pv);
       }
@@ -325,16 +378,11 @@ chunk-demo { display: block; }
       const anchor = doc.createElement('div');
       anchor.className = 'cd-anchor';
 
-      /* ── Button ── */
       const btn = doc.createElement('button');
       btn.className = 'cd-btn';
-      /* All three border properties set via inline style so they're fully overridable */
       btn.style.cssText =
-        `border-color:${th.border};` +
-        `border-width:${bw};` +
-        `border-style:${bs};` +
-        `color:${th.text};` +
-        `background:${th.bg};`;
+        `border-color:${th.border};border-width:${bw};border-style:${bs};` +
+        `color:${th.text};background:${th.bg};`;
 
       if (chunk.icon) {
         const ic = doc.createElement('span');
@@ -344,15 +392,14 @@ chunk-demo { display: block; }
       }
 
       const tx = doc.createElement('span');
-      tx.className   = 'cd-b-text';
-      tx.textContent = lvD?.text ?? '—';
+      tx.className = 'cd-b-text';
+      tx.innerHTML = lvD?.text ?? '—';
       btn.appendChild(tx);
 
       btn.addEventListener('click', e => { e.stopPropagation(); this._toggle(chunk.id); });
       this._btns[chunk.id] = btn;
       anchor.appendChild(btn);
 
-      /* ── Dropdown ── */
       const dd = this._mkDD(chunk, cfg, lvNum, dotC);
       this._dds[chunk.id] = dd;
       anchor.appendChild(dd);
@@ -382,7 +429,6 @@ chunk-demo { display: block; }
         dd.appendChild(hd);
       }
 
-      /* Level rows: dot + text (no level label) */
       chunk.levels.forEach(lv => {
         const dotC  = cfg.levelDotColors[lv.level] || '#C6C7BD';
         const isSel = lv.level === currentLevel;
@@ -396,8 +442,8 @@ chunk-demo { display: block; }
         row.appendChild(dot);
 
         const text = doc.createElement('div');
-        text.className   = 'cd-lv-text';
-        text.textContent = lv.text;
+        text.className = 'cd-lv-text';
+        text.innerHTML = lv.text;            /* innerHTML: supports HTML in level text */
         row.appendChild(text);
 
         row.addEventListener('click', e => { e.stopPropagation(); this._pick(chunk.id, lv.level); });
@@ -415,7 +461,6 @@ chunk-demo { display: block; }
       const dd = this._dds[id];
       if (!dd) return;
       dd.classList.add('is-open');
-      /* Prevent right-edge viewport overflow */
       requestAnimationFrame(() => {
         const r = dd.getBoundingClientRect();
         dd.style.left  = r.right > win.innerWidth - 8 ? 'auto' : '0';
