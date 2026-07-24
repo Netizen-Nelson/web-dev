@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  // ─── CSS ────────────────────────────────────────────────────────────────────
   const CSS = `
     [data-popover-title],
     [data-popover-content],
@@ -186,7 +185,6 @@
       transition: width linear;
     }
 
-    /* ── Panel mode ──────────────────────────────────────────── */
     .xpop-panel-wrap {
       border-radius: 8px;
       border-width: 1px;
@@ -234,16 +232,7 @@
     }
   `;
 
-  // ─── Brand colour themes ─────────────────────────────────────────────────────
-  //
-  // Naming follows the user's personal palette:
-  //   lavender #C3A5E5 · sky #08a9d1 · warning #F08080 · safe #40c99a
-  //   special  #C8DD5A · yellow #DECA4B · salmon #E5C3B3 · pink #FFB3D9
-  //   stone    #95BDD7 · orange #eda109 · vanilla #FDF6ED · info #5fafed
-  //
-  // Legacy aliases kept so existing markup continues to work unchanged.
   const THEMES = {
-    // ── primary ─────────────────────────────────────────────
     dark:      { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' },
     lavender:  { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' }, // alias
     sky:       { bg: '#091522', titleColor: '#08a9d1', borderColor: '#08a9d1' },
@@ -262,7 +251,6 @@
     info:      { bg: '#0a1522', titleColor: '#5fafed', borderColor: '#5fafed' },
   };
 
-  // ─── Global config ───────────────────────────────────────────────────────────
   let config = {
     theme:       'dark',
     maxWidth:    '560px',
@@ -286,10 +274,9 @@
   };
 
   // ─── State ───────────────────────────────────────────────────────────────────
-  let currentPop = null, currentTrigger = null, carouselState = null; // floating popup
-  let panelActiveTrigger = null, panelCarouselState = null;           // panel mode
+  let currentPop = null, currentTrigger = null, carouselState = null;
+  let panelActiveTrigger = null, panelCarouselState = null;
 
-  // ─── Utilities ───────────────────────────────────────────────────────────────
   function getTheme(n)  { return config._customThemes[n] || THEMES[n] || THEMES.dark; }
   function ra(el, k, fb){ return el.dataset[k] !== undefined ? el.dataset[k] : fb; }
 
@@ -326,7 +313,6 @@
     return ({top:'center bottom',bottom:'center top',left:'right center',right:'left center'})[p] || 'center bottom';
   }
 
-  // ─── Shared content extraction ───────────────────────────────────────────────
   function extractContent(trigger) {
     const targetId = trigger.dataset.popoverTarget  || '';
     if (targetId) {
@@ -341,8 +327,6 @@
     return trigger.dataset.popoverContent || '';
   }
 
-  // ─── Shared DOM builder (popup + panel) ─────────────────────────────────────
-  // Returns { isCarousel, body, progressEl, barEl }
   function buildContentDOM(html) {
     const tmp  = document.createElement('div');
     tmp.innerHTML = html;
@@ -392,9 +376,6 @@
     return { isCarousel, body, progressEl, barEl };
   }
 
-  // ─── Carousel engine ─────────────────────────────────────────────────────────
-  // Works for both floating popup and panel — wrap is the common ancestor.
-  // Returns { stop } so the caller can cancel the auto-advance timer.
   function buildCarousel(sections, wrap, interval, animType) {
     const track    = wrap.querySelector('.xpop-carousel-track');
     const dotsWrap = wrap.querySelector('.xpop-dots');
@@ -529,7 +510,6 @@
       wrap.appendChild(barEl);
     }
 
-    // Replace panel contents — replacing the node forces the animation to replay
     panelEl.innerHTML = '';
     panelEl.appendChild(wrap);
 
@@ -544,7 +524,6 @@
     panelActiveTrigger = trigger;
   }
 
-  // ─── Floating popup mode ─────────────────────────────────────────────────────
   function createPopover(trigger) {
     const themeName = ra(trigger, 'popoverTheme',      config.theme);
     const placement = ra(trigger, 'popoverPlacement',  config.placement);
@@ -582,7 +561,6 @@
     hdr.innerHTML = title;
     pop.appendChild(hdr);
     pop.appendChild(body);
-
     if (isCarousel) {
       pop.appendChild(progressEl);
       pop.appendChild(barEl);
@@ -596,14 +574,12 @@
     pop.style.setProperty('--xpop-origin', originOf(finalPlacement));
     pop.style.top  = top  + 'px';
     pop.style.left = left + 'px';
-
     if (isCarousel) {
       carouselState = buildCarousel(
         Array.from(pop.querySelectorAll('.xpop-carousel-track section')),
         pop, cInterval, cAnim
       );
     }
-
     requestAnimationFrame(() => requestAnimationFrame(() => pop.classList.add('xpop-visible')));
     return pop;
   }
@@ -617,38 +593,30 @@
     currentPop = currentTrigger = null;
   }
 
-  // ─── Event handling ──────────────────────────────────────────────────────────
   document.addEventListener('click', function (e) {
     const trigger = e.target.closest(
       '[data-popover-title],[data-popover-content],[data-popover-target]'
     );
-
     if (trigger) {
       e.stopPropagation();
       const panelEl = getPanelTargetEl(trigger);
 
       if (panelEl) {
-        // Panel mode — close any floating popup first
         closePop();
         renderToPanel(trigger, panelEl);
         return;
       }
-
-      // Floating popup mode
       if (currentTrigger === trigger) { closePop(); return; }
       closePop();
       currentTrigger = trigger;
       currentPop = createPopover(trigger);
       return;
     }
-
-    // Click outside — close popup
     if (currentPop && currentPop.contains(e.target)) return;
     closePop();
   });
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closePop(); });
-
   window.addEventListener('resize', function () {
     if (!currentPop || !currentTrigger) return;
     const p = currentTrigger.dataset.popoverPlacement || config.placement;
@@ -659,7 +627,5 @@
     currentPop.style.top  = top  + 'px';
     currentPop.style.left = left + 'px';
   });
-
   injectCSS();
-
 })();
