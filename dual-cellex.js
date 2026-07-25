@@ -33,7 +33,7 @@ class DualCell {
 
       showMenuButton:               options.showMenuButton !== false,
       menuButtonPosition:           options.menuButtonPosition  || 'right',
-      menuButtonColor:              R(options.menuButtonColor)  || tc.menuButtonColor || '#b9c971',
+      menuButtonColor:              R(options.menuButtonColor)  || tc.menuButtonColor || '#C8DD5A',
       menuButtonSize:               options.menuButtonSize      || '1.25rem',
       menuButtonIconPush:           options.menuButtonIconPush           || null,
       menuButtonIconPull:           options.menuButtonIconPull           || null,
@@ -47,15 +47,15 @@ class DualCell {
       targetId: options.targetId || null,
 
       overlay1Text:  options.overlay1Text  || null,
-      overlay1Color: R(options.overlay1Color) || tc.menuButtonColor || '#E5E5A6',
+      overlay1Color: R(options.overlay1Color) || tc.menuButtonColor || '#DECA4B',
       overlay2Text:  options.overlay2Text  || null,
-      overlay2Color: R(options.overlay2Color) || tc.menuButtonColor || '#E5E5A6',
+      overlay2Color: R(options.overlay2Color) || tc.menuButtonColor || '#DECA4B',
       overlayInvert: options.overlayInvert || false,
-      accentColor:   tc.menuButtonColor || R(options.menuButtonColor) || '#b9c971',
+      accentColor:   tc.menuButtonColor || R(options.menuButtonColor) || '#C8DD5A',
 
       groupTitleFontSize: options.groupTitleFontSize || '1.125rem',
       groupTitleColor:    R(options.groupTitleColor)   || tc.groupTitleColor   || '#1C1C1E',
-      groupTitleBgColor:  R(options.groupTitleBgColor) || tc.groupTitleBgColor || '#b9c971',
+      groupTitleBgColor:  R(options.groupTitleBgColor) || tc.groupTitleBgColor || '#C8DD5A',
       groupTitlePadding:  options.groupTitlePadding    || '10px 12px',
       groupIconSize:      options.groupIconSize        || '1rem',
       groupCollapsedIcon: options.groupCollapsedIcon   || null,
@@ -64,7 +64,7 @@ class DualCell {
       carouselInterval:        parseInt(options.carouselInterval)   || 4000,
       carouselIndicator:       options.carouselIndicator       !== false,
       autoRevealInterval:      parseInt(options.autoRevealInterval) || 0,
-      carouselIndicatorColor:  R(options.carouselIndicatorColor) || tc.menuButtonColor || '#b9c971',
+      carouselIndicatorColor:  R(options.carouselIndicatorColor) || tc.menuButtonColor || '#C8DD5A',
       carouselIndicatorHeight: options.carouselIndicatorHeight || '3px',
 
       // ── 回調 ──────────────────────────────────────────────────
@@ -82,33 +82,70 @@ class DualCell {
   }
 
   static getThemeConfig(name) {
+    // ── 個人品牌配色系統 ─────────────────────────────────────────
+    // shell:#C6C7BD  lavender:#C3A5E5  special:#C8DD5A  warning:#F08080
+    // salmon:#E5C3B3 sky:#08A9D1       safe:#40C99A     vanilla:#D4C5A9
+    // yellow:#DECA4B info:#4285EB      stone:#95BDD7    indigo:#7B6CF0
+    // pink:#FFB3D9   orange:#EDA109
+    // ────────────────────────────────────────────────────────────
     const T = {
+      // ── 既有品牌色（已全數對齊）──────────────────────────────
       lavender:  { borderColor:'#C3A5E5', cellBgColor:'#2a2435', hoverBgColor:'#3d344a', textColor:'#e8dff5', menuButtonColor:'#C3A5E5', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C3A5E5' },
       special:   { borderColor:'#C8DD5A', cellBgColor:'#2a2e1a', hoverBgColor:'#3d4329', textColor:'#edf0d9', menuButtonColor:'#C8DD5A', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C8DD5A' },
       warning:   { borderColor:'#F08080', cellBgColor:'#2e2422', hoverBgColor:'#443532', textColor:'#f5e8e6', menuButtonColor:'#F08080', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#F08080' },
-      sky:       { borderColor:'#08a9d1', cellBgColor:'#1a2830', hoverBgColor:'#263948', textColor:'#d9f0f8', menuButtonColor:'#08a9d1', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#08a9d1' },
-      safe:      { borderColor:'#40c99a', cellBgColor:'#1e2d25', hoverBgColor:'#2c4035', textColor:'#daf5ec', menuButtonColor:'#40c99a', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#40c99a' },
-      info:      { borderColor:'#5fafed', cellBgColor:'#1e2636', hoverBgColor:'#2c3a4d', textColor:'#ddeefb', menuButtonColor:'#5fafed', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#5fafed' },
+      sky:       { borderColor:'#08A9D1', cellBgColor:'#1a2830', hoverBgColor:'#263948', textColor:'#d9f0f8', menuButtonColor:'#08A9D1', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#08A9D1' },
+      safe:      { borderColor:'#40C99A', cellBgColor:'#1e2d25', hoverBgColor:'#2c4035', textColor:'#daf5ec', menuButtonColor:'#40C99A', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#40C99A' },
       salmon:    { borderColor:'#E5C3B3', cellBgColor:'#2e2824', hoverBgColor:'#443d36', textColor:'#f5ede8', menuButtonColor:'#E5C3B3', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#E5C3B3' },
-      attention: { borderColor:'#E5E5A6', cellBgColor:'#2e2e22', hoverBgColor:'#434333', textColor:'#f5f5e0', menuButtonColor:'#E5E5A6', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#E5E5A6' },
       pink:      { borderColor:'#FFB3D9', cellBgColor:'#2e2228', hoverBgColor:'#44323d', textColor:'#ffe8f5', menuButtonColor:'#FFB3D9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#FFB3D9' },
-      orange:    { borderColor:'#eda109', cellBgColor:'#2d2510', hoverBgColor:'#42381a', textColor:'#f5ece0', menuButtonColor:'#eda109', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#eda109' },
+      orange:    { borderColor:'#EDA109', cellBgColor:'#2d2510', hoverBgColor:'#42381a', textColor:'#f5ece0', menuButtonColor:'#EDA109', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#EDA109' },
       yellow:    { borderColor:'#DECA4B', cellBgColor:'#2c2d10', hoverBgColor:'#403f1a', textColor:'#f5f2d9', menuButtonColor:'#DECA4B', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#DECA4B' },
-      stone:     { borderColor:'#7090A8', cellBgColor:'#1e2730', hoverBgColor:'#2c3a44', textColor:'#dae6ef', menuButtonColor:'#7090A8', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#7090A8' },
+
+      // ── 更新色值（★）────────────────────────────────────────
+      // info: #5fafed → #4285EB（對齊品牌 info 藍）
+      info:      { borderColor:'#4285EB', cellBgColor:'#1a2540', hoverBgColor:'#263a58', textColor:'#d9e8ff', menuButtonColor:'#4285EB', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#4285EB' },
+      // stone: #7090A8 → #95BDD7（對齊品牌石藍）
+      stone:     { borderColor:'#95BDD7', cellBgColor:'#1e2830', hoverBgColor:'#2c3d48', textColor:'#daeaf5', menuButtonColor:'#95BDD7', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#95BDD7' },
+      // attention: #E5E5A6 → #DECA4B（對齊品牌 yellow，向後相容保留別名）
+      attention: { borderColor:'#DECA4B', cellBgColor:'#2b2a12', hoverBgColor:'#3d3c1e', textColor:'#f5f0d0', menuButtonColor:'#DECA4B', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#DECA4B' },
+
+      // ── 新增品牌主題（✦）────────────────────────────────────
+      // vanilla: #D4C5A9（暖灰米）
+      vanilla:   { borderColor:'#D4C5A9', cellBgColor:'#2a2820', hoverBgColor:'#3d3a30', textColor:'#f0ece4', menuButtonColor:'#D4C5A9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#D4C5A9' },
+      // indigo: #7B6CF0（藍紫靛）
+      indigo:    { borderColor:'#7B6CF0', cellBgColor:'#201d38', hoverBgColor:'#302c50', textColor:'#e2dcff', menuButtonColor:'#7B6CF0', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#7B6CF0' },
+
+      // ── 保留向後相容（非品牌色）──────────────────────────────
       brown:     { borderColor:'#d9b375', cellBgColor:'#2b2621', hoverBgColor:'#3f3931', textColor:'#f2ebe3', menuButtonColor:'#d9b375', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#d9b375' },
-      default:   { borderColor:'#c6c7bd', cellBgColor:'#333333', hoverBgColor:'#404040', textColor:'#c6c7bd', menuButtonColor:'#c6c7bd', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#c6c7bd' },
+      default:   { borderColor:'#C6C7BD', cellBgColor:'#333333', hoverBgColor:'#404040', textColor:'#C6C7BD', menuButtonColor:'#C6C7BD', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C6C7BD' },
     };
     return T[name?.toLowerCase()] || T.default;
   }
 
   static resolveColor(color) {
     if (!color) return null;
+    // ── 個人品牌色名稱對照表 ──────────────────────────────────
+    // ★ = 更新色值    ✦ = 新增色票
     const M = {
-      shell:'#c6c7bd', lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
-      salmon:'#E5C3B3', attention:'#E5E5A6', sky:'#08a9d1', safe:'#40c99a',
-      brown:'#d9b375', info:'#5fafed', pink:'#FFB3D9', orange:'#eda109',
-      yellow:'#DECA4B', stone:'#7090A8',
-      bg:'#0c0d0c', area:'#333333',
+      shell:     '#C6C7BD',
+      lavender:  '#C3A5E5',
+      special:   '#C8DD5A',
+      warning:   '#F08080',
+      salmon:    '#E5C3B3',
+      sky:       '#08A9D1',
+      safe:      '#40C99A',
+      vanilla:   '#D4C5A9',   // ✦ 新增
+      yellow:    '#DECA4B',
+      info:      '#4285EB',   // ★ #5fafed → #4285EB
+      stone:     '#95BDD7',   // ★ #7090A8 → #95BDD7
+      indigo:    '#7B6CF0',   // ✦ 新增
+      pink:      '#FFB3D9',
+      orange:    '#EDA109',
+      attention: '#DECA4B',   // ★ #E5E5A6 → #DECA4B（向後相容，同 yellow）
+      // 非品牌色，保留向後相容
+      brown:     '#d9b375',
+      // 功能性顏色
+      bg:        '#0C0D0C',
+      area:      '#333333',
     };
     return M[color.toLowerCase()] || color;
   }
