@@ -113,6 +113,7 @@
         display: block;
         overflow: hidden;
         max-height: 0;
+        min-height: 0;        /* 防止 flex item 的 min-height:auto 覆蓋 max-height:0 */
         opacity: 0;
         transform: translateY(10px);
         pointer-events: none;
@@ -274,10 +275,12 @@
         color: inherit;
         margin-bottom: 6px;
       }
-      info-region p  { margin-bottom: 4px; }
+      info-region p  { margin-top: 0; margin-bottom: 4px; }
       info-region p:last-child { margin-bottom: 0; }
-      info-region ul, info-region ol { padding-left: 18px; }
+      info-region ul, info-region ol { margin-top: 0; padding-left: 18px; }
       info-region li { margin-bottom: 3px; }
+      info-region h1, info-region h2, info-region h3,
+      info-region h4, info-region h5, info-region h6 { margin-top: 0; }
     `;
 
     const styleEl = document.createElement('style');
