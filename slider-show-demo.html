@@ -344,7 +344,7 @@ class SliderShow extends HTMLElement {
   }
 
   getThemeColor() {
-    let theme = this.getAttribute('theme') || 'shell';
+    let theme = this.getAttribute('theme') || SliderShow.defaults.theme;
     const isOutlineTheme = theme.endsWith('-outline');
     const baseTheme = isOutlineTheme ? theme.replace('-outline', '') : theme;
     return this.parseColor(baseTheme) || this.parseColor('shell');
@@ -368,6 +368,22 @@ class SliderShow extends HTMLElement {
     const g = parseInt(h.substr(2, 2), 16);
     const b = parseInt(h.substr(4, 2), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  _attr(name, fallback) {
+    const val = this.getAttribute(name);
+    if (val !== null) return val;
+    const key = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    const def = SliderShow.defaults[key];
+    if (def !== undefined) return String(def);
+    return fallback !== undefined ? fallback : null;
+  }
+
+  _bool(name) {
+    const val = this.getAttribute(name);
+    if (val !== null) return val !== 'false';
+    const key = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    return SliderShow.defaults[key] ?? false;
   }
 
   analyzeParts() {
@@ -1020,6 +1036,28 @@ class SliderShow extends HTMLElement {
   }
 }
 customElements.define('slider-show', SliderShow);
+
+SliderShow.defaults = {
+  height: '400px', slideContentPadding: '30', slideContentBg: '#333333',
+  extraNoteContentBg: null, theme: 'shell',
+  showDots: true, showArrows: true, loop: false, showPageNumbers: false,
+  keyboardNav: true, keyboardPartNav: false,
+  arrowBg: 'rgba(51,51,51,0.8)',
+  nextPartBtnText: '下一部分 →', prevPartBtnText: '← 上一部分',
+  finishBtnText: '完成', restartBtnText: '重新開始', nextPartBtnPosition: 'center',
+  partBtnFontSize: '0.9rem', partBtnPadding: '8px 16px', partBtnBorderRadius: '6px',
+  finishBtnBg: 'safe', finishBtnColor: '#0C0D0C',
+  restartBtnBg: 'info', restartBtnColor: '#0C0D0C',
+  autoShowPartButtons: false, showFinish: true, showRestart: true,
+  partTransition: 'slide', partTransitionDuration: 500,
+  showPartIndicator: true, partIndicatorFormat: 'Part {part} / {total}',
+  filmstripThumbSize: '24x30', filmstripShowHoles: true, filmstripLabelFormat: '',
+  showProgress: false, progressPosition: 'top', progressHeight: '4px',
+  fontcolorSubtitle: 'lavender', fontcolorMain: 'shell', fontcolorFooter: 'sky',
+  extraNoteHoverColor: 'special',
+  quizBlankWidth: '60px', quizCorrectColor: 'safe', quizIncorrectColor: 'warning',
+  quizRequireComplete: true, spoilerText: '點擊查看內容',
+};
 </script>
 
 <!-- ════════════════════════════════════════════
@@ -1299,6 +1337,82 @@ const EXAMPLES = [
     </div>
   </div>
 
+</slider-show>`
+  },
+  /* ───────────────── Lv 5 ───────────────── */
+  {
+    id: 'lv5',
+    label: 'Lv 5',
+    badge: '全域預設值',
+    desc: '用 SliderShow.defaults 一次設定所有元件的預設行為，屬性仍優先。',
+    features: [
+      { cls: 'ftag-sky',  text: 'SliderShow.defaults' },
+      { cls: 'ftag-lime', text: '屬性 > defaults > 出廠值' },
+      { cls: 'ftag-yel',  text: '改一處、全局生效' },
+      { cls: 'ftag-lav',  text: '不動元件程式碼' },
+    ],
+    attrs: [
+      { name: 'defaults.theme',                desc: '預設主題色，所有未設 theme 的元件都套用' },
+      { name: 'defaults.height',               desc: '預設高度' },
+      { name: 'defaults.showProgress',         desc: 'true = 所有元件預設顯示進度條' },
+      { name: 'defaults.progressPosition',     desc: '"top" 或 "bottom"' },
+      { name: 'defaults.partTransition',       desc: '"slide" 或 "fade"' },
+      { name: 'defaults.quizRequireComplete',  desc: 'false = 所有 quiz 不強制填完才能翻頁' },
+      { name: 'defaults.spoilerText',          desc: '所有 [spoiler] 的預設提示文字' },
+      { name: 'defaults.nextPartBtnText',      desc: '「下一部分」按鈕的預設文字' },
+      { name: 'defaults.slideContentBg',       desc: '.slide-content 的預設背景色' },
+      { name: '（任意鍵）',                    desc: '覆寫後立即生效，僅對之後建立的實例有效' },
+    ],
+    html:
+`<!-- 在 <script> 裡覆寫，放在 slider-show.js 之後 -->
+<script>
+  // 整個站台共用的設定
+  SliderShow.defaults.theme            = 'lavender';
+  SliderShow.defaults.showProgress     = true;
+  SliderShow.defaults.progressPosition = 'bottom';
+  SliderShow.defaults.partTransition   = 'fade';
+  SliderShow.defaults.quizBlankWidth   = '90px';
+  SliderShow.defaults.spoilerText      = '點我看解答 👀';
+  SliderShow.defaults.nextPartBtnText  = '繼續下一關 →';
+${'</'}script>
+
+<!-- 這個元件繼承全域設定，不需要寫任何屬性 -->
+<slider-show height="270px">
+  <div slide part="1">
+    <div class="slide-content">
+      <div class="slide-subtitle">全域主題：lavender</div>
+      <div class="slide-main">
+        <p>進度條、動畫、按鈕文字</p>
+        <p style="font-size:1rem;color:#C3A5E5;">
+          全部來自 SliderShow.defaults
+        </p>
+      </div>
+      <div class="slide-footer">沒有寫任何屬性</div>
+    </div>
+  </div>
+  <div slide part="1">
+    <div class="slide-content">
+      <div class="slide-subtitle">個別屬性仍優先</div>
+      <div class="slide-main">
+        <p>如果某一個元件需要例外，<br>直接加屬性即可覆蓋 defaults。</p>
+      </div>
+      <div class="slide-footer">
+        &lt;slider-show theme="sky"&gt; → sky 蓋過 defaults.theme
+      </div>
+    </div>
+  </div>
+</slider-show>
+
+<!-- 這個元件用屬性覆蓋部分設定 -->
+<slider-show height="160px" theme="special" style="margin-top:12px;">
+  <div slide part="1">
+    <div class="slide-content">
+      <div class="slide-subtitle">theme="special" 覆蓋 defaults</div>
+      <div class="slide-main" style="font-size:1rem;">
+        進度條、動畫仍繼承 defaults，只有 theme 被覆蓋
+      </div>
+    </div>
+  </div>
 </slider-show>`
   }
 ];

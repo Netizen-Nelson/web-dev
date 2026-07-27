@@ -99,10 +99,9 @@ class SliderShow extends HTMLElement {
   }
 
   getThemeColor() {
-    let theme = this.getAttribute('theme') || 'shell';
+    let theme = this.getAttribute('theme') || SliderShow.defaults.theme;
     const isOutlineTheme = theme.endsWith('-outline');
     const baseTheme = isOutlineTheme ? theme.replace('-outline', '') : theme;
-    
     return this.parseColor(baseTheme) || this.parseColor('shell');
   }
 
@@ -127,6 +126,24 @@ class SliderShow extends HTMLElement {
     const g = parseInt(h.substr(2, 2), 16);
     const b = parseInt(h.substr(4, 2), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  // 讀取屬性，未設定時查 SliderShow.defaults（kebab-case 自動轉 camelCase）
+  _attr(name, fallback) {
+    const val = this.getAttribute(name);
+    if (val !== null) return val;
+    const key = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    const def = SliderShow.defaults[key];
+    if (def !== undefined) return String(def);
+    return fallback !== undefined ? fallback : null;
+  }
+
+  // 布林屬性：'false' → false，其餘有值 → true，未設定 → 查 defaults
+  _bool(name) {
+    const val = this.getAttribute(name);
+    if (val !== null) return val !== 'false';
+    const key = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    return SliderShow.defaults[key] ?? false;
   }
 
   analyzeParts() {
@@ -239,7 +256,7 @@ class SliderShow extends HTMLElement {
   // 新增：設置防劇透遮罩功能
   setupSpoilerMasks() {
     const spoilerMode = this.getAttribute('spoiler-mode');
-    const globalSpoilerText = this.getAttribute('spoiler-text') || '點擊查看內容';
+    const globalSpoilerText = this._attr('spoiler-text');
     const spoilerColor = this.parseColor(this.getAttribute('spoiler-color')) || this.getThemeColor();
     
     // 處理整頁防劇透模式
@@ -392,7 +409,7 @@ class SliderShow extends HTMLElement {
   // 檢查填空題是否全部完成
   checkQuizCompletion() {
     // 檢查是否要求填完才能換頁（預設為 true）
-    const requireComplete = this.getAttribute('quiz-require-complete') !== 'false';
+    const requireComplete = this._bool('quiz-require-complete');
     
     // 如果不要求填完，直接啟用導航
     if (!requireComplete) {
@@ -535,32 +552,18 @@ class SliderShow extends HTMLElement {
 
   prevSlide() {
     if (this.isTransitioning) return;
-    
     const slides = this.getCurrentPartSlides();
-    const loop = this.getAttribute('loop') === 'true';
-    
-    if (this.currentSlideInPart > 0) {
-      this.currentSlideInPart--;
-      this.updateDisplay();
-    } else if (loop) {
-      this.currentSlideInPart = slides.length - 1;
-      this.updateDisplay();
-    }
+    const loop = this._bool('loop');
+    if (this.currentSlideInPart > 0) { this.currentSlideInPart--; this.updateDisplay(); }
+    else if (loop) { this.currentSlideInPart = slides.length - 1; this.updateDisplay(); }
   }
 
   nextSlide() {
     if (this.isTransitioning) return;
-    
     const slides = this.getCurrentPartSlides();
-    const loop = this.getAttribute('loop') === 'true';
-    
-    if (this.currentSlideInPart < slides.length - 1) {
-      this.currentSlideInPart++;
-      this.updateDisplay();
-    } else if (loop) {
-      this.currentSlideInPart = 0;
-      this.updateDisplay();
-    }
+    const loop = this._bool('loop');
+    if (this.currentSlideInPart < slides.length - 1) { this.currentSlideInPart++; this.updateDisplay(); }
+    else if (loop) { this.currentSlideInPart = 0; this.updateDisplay(); }
   }
 
   nextPart() {
@@ -808,9 +811,9 @@ class SliderShow extends HTMLElement {
     }
 
     const partIndicator = this.container?.querySelector('.part-indicator');
-    const showPartIndicator = this.getAttribute('show-part-indicator') !== 'false';
+    const showPartIndicator = this._bool('show-part-indicator');
     if (partIndicator && showPartIndicator) {
-      const indicatorFormat = this.getAttribute('part-indicator-format') || 'Part {part} / {total}';
+      const indicatorFormat = this._attr('part-indicator-format');
       partIndicator.textContent = indicatorFormat
         .replace('{part}', this.currentPart)
         .replace('{total}', this.getTotalParts())
@@ -821,9 +824,9 @@ class SliderShow extends HTMLElement {
       partIndicator.style.display = 'none';
     }
 
-    const autoShowPartButtons = this.getAttribute('auto-show-part-buttons') === 'true';
-    const showFinish = this.getAttribute('show-finish') !== 'false';
-    const showRestart = this.getAttribute('show-restart') !== 'false';
+    const autoShowPartButtons = this._bool('auto-show-part-buttons');
+    const showFinish  = this._bool('show-finish');
+    const showRestart = this._bool('show-restart');
 
     const nextPartBtn = this.container?.querySelector('.next-part-btn');
     const prevPartBtn = this.container?.querySelector('.prev-part-btn');
@@ -869,13 +872,13 @@ class SliderShow extends HTMLElement {
     const prevBtn = this.container?.querySelector('.prev-btn');
     const nextBtn = this.container?.querySelector('.next-btn');
     if (prevBtn && nextBtn) {
-      const loop = this.getAttribute('loop') === 'true';
+      const loop = this._bool('loop');
       prevBtn.disabled = !loop && this.currentSlideInPart === 0;
       nextBtn.disabled = !loop && this.isLastSlideInPart();
     }
 
     const updateHeader = this.getAttribute('update-header') === 'true';
-    const updateTitle = this.getAttribute('update-title') === 'true';
+    const updateTitle  = this.getAttribute('update-title')  === 'true';
     
     if (updateHeader || updateTitle) {
       const currentSlide = slides[this.currentSlideInPart];
@@ -963,60 +966,59 @@ class SliderShow extends HTMLElement {
   }
 
   render() {
-    const height = this.getAttribute('height') || '400px';
-    const nextPartBtnText = this.getAttribute('next-part-btn-text') || '下一部分 →';
-    const prevPartBtnText = this.getAttribute('prev-part-btn-text') || '← 上一部分';
-    const finishBtnText = this.getAttribute('finish-btn-text') || '完成';
-    const restartBtnText = this.getAttribute('restart-btn-text') || '重新開始';
-    const nextPartBtnPosition = this.getAttribute('next-part-btn-position') || 'center';
+    const height             = this._attr('height');
+    const nextPartBtnText    = this._attr('next-part-btn-text');
+    const prevPartBtnText    = this._attr('prev-part-btn-text');
+    const finishBtnText      = this._attr('finish-btn-text');
+    const restartBtnText     = this._attr('restart-btn-text');
+    const nextPartBtnPosition = this._attr('next-part-btn-position');
 
-    const showDots = this.getAttribute('show-dots') !== 'false';
-    const showArrows = this.getAttribute('show-arrows') !== 'false';
+    const showDots   = this._bool('show-dots');
+    const showArrows = this._bool('show-arrows');
 
-    const themeColor = this.getThemeColor();
-    const arrowColor = this.parseColor(this.getAttribute('arrow-color')) || themeColor;
-    const arrowBg = this.parseColor(this.getAttribute('arrow-bg')) || 'rgba(51, 51, 51, 0.8)';
-    const dotColor = this.parseColor(this.getAttribute('dot-color')) || 'rgba(198, 199, 189, 0.3)';
+    const themeColor    = this.getThemeColor();
+    const arrowColor    = this.parseColor(this.getAttribute('arrow-color')) || themeColor;
+    const arrowBg       = this.parseColor(this.getAttribute('arrow-bg'))    || SliderShow.defaults.arrowBg;
+    const dotColor      = this.parseColor(this.getAttribute('dot-color'))   || 'rgba(198, 199, 189, 0.3)';
     const activeDotColor = this.parseColor(this.getAttribute('active-dot-color')) || themeColor;
-    
-    const partBtnBg = this.parseColor(this.getAttribute('part-btn-bg')) || themeColor;
-    const partBtnColor = this.parseColor(this.getAttribute('part-btn-color')) || this.getContrastColor(themeColor);
-    const partBtnFontSize = this.getAttribute('part-btn-font-size') || '0.9rem';
-    const partBtnPadding = this.getAttribute('part-btn-padding') || '8px 16px';
-    const partBtnBorderRadius = this.getAttribute('part-btn-border-radius') || '6px';
-    
-    const finishBtnBg = this.parseColor(this.getAttribute('finish-btn-bg')) || themeColor;
-    const finishBtnColor = this.parseColor(this.getAttribute('finish-btn-color')) || this.getContrastColor(themeColor);
-    const restartBtnBg = this.parseColor(this.getAttribute('restart-btn-bg')) || themeColor;
-    const restartBtnColor = this.parseColor(this.getAttribute('restart-btn-color')) || this.getContrastColor(themeColor);
 
-    const fontColorSubtitle = this.parseColor(this.getAttribute('fontcolor-subtitle')) || this.parseColor('lavender');
-    const fontColorMain = this.parseColor(this.getAttribute('fontcolor-main')) || this.parseColor('shell');
-    const fontColorFooter = this.parseColor(this.getAttribute('fontcolor-footer')) || this.parseColor('sky');
-    
-    const extraNoteHoverColor = this.parseColor(this.getAttribute('extra-note-hover-color')) || this.parseColor('special');
+    const partBtnBg           = this.parseColor(this.getAttribute('part-btn-bg'))    || themeColor;
+    const partBtnColor        = this.parseColor(this.getAttribute('part-btn-color')) || this.getContrastColor(themeColor);
+    const partBtnFontSize     = this._attr('part-btn-font-size');
+    const partBtnPadding      = this._attr('part-btn-padding');
+    const partBtnBorderRadius = this._attr('part-btn-border-radius');
+
+    const finishBtnBg     = this.parseColor(this.getAttribute('finish-btn-bg'))    || this.parseColor(SliderShow.defaults.finishBtnBg)  || themeColor;
+    const finishBtnColor  = this.parseColor(this.getAttribute('finish-btn-color')) || this.parseColor(SliderShow.defaults.finishBtnColor) || this.getContrastColor(themeColor);
+    const restartBtnBg    = this.parseColor(this.getAttribute('restart-btn-bg'))   || this.parseColor(SliderShow.defaults.restartBtnBg)  || themeColor;
+    const restartBtnColor = this.parseColor(this.getAttribute('restart-btn-color'))|| this.parseColor(SliderShow.defaults.restartBtnColor)|| this.getContrastColor(themeColor);
+
+    const fontColorSubtitle  = this.parseColor(this.getAttribute('fontcolor-subtitle'))    || this.parseColor(SliderShow.defaults.fontcolorSubtitle);
+    const fontColorMain      = this.parseColor(this.getAttribute('fontcolor-main'))        || this.parseColor(SliderShow.defaults.fontcolorMain);
+    const fontColorFooter    = this.parseColor(this.getAttribute('fontcolor-footer'))      || this.parseColor(SliderShow.defaults.fontcolorFooter);
+    const extraNoteHoverColor = this.parseColor(this.getAttribute('extra-note-hover-color'))|| this.parseColor(SliderShow.defaults.extraNoteHoverColor);
 
     // 底片縮圖尺寸
-    const thumbSize = this.getAttribute('filmstrip-thumb-size') || '24x30';
+    const thumbSize  = this._attr('filmstrip-thumb-size');
     const thumbParts = thumbSize.toLowerCase().split('x');
-    const thumbW = parseInt(thumbParts[0]) || 24;
-    const thumbH = parseInt(thumbParts[1]) || 30;
-    const showHoles = this.getAttribute('filmstrip-show-holes') !== 'false';
+    const thumbW     = parseInt(thumbParts[0]) || 24;
+    const thumbH     = parseInt(thumbParts[1]) || 30;
+    const showHoles  = this._bool('filmstrip-show-holes');
 
     // 投影片內容 padding
-    const slideContentPadding = this.getAttribute('slide-content-padding') || '30';
+    const slideContentPadding = this._attr('slide-content-padding');
 
     // Part 切換動畫時間
-    const partTransDuration = parseInt(this.getAttribute('part-transition-duration')) || 500;
+    const partTransDuration = parseInt(this._attr('part-transition-duration'));
 
     // quiz-blank 寬度
-    const quizBlankWidth = this.getAttribute('quiz-blank-width') || '60px';
+    const quizBlankWidth = this._attr('quiz-blank-width');
 
     // 進度條
-    const showProgress    = this.hasAttribute('show-progress') && this.getAttribute('show-progress') !== 'false';
-    const progressPosition = this.getAttribute('progress-position') || 'top';
-    const progressHeight   = this.getAttribute('progress-height')   || '4px';
-    const progressColor    = this.parseColor(this.getAttribute('progress-color')) || null; // fallback to theme
+    const showProgress     = this._bool('show-progress');
+    const progressPosition = this._attr('progress-position');
+    const progressHeight   = this._attr('progress-height');
+    const progressColor    = this.parseColor(this.getAttribute('progress-color')) || null;
 
     this.style.setProperty('--filmstrip-thumb-w', `${thumbW}px`);
     this.style.setProperty('--filmstrip-thumb-h', `${thumbH}px`);
@@ -1050,11 +1052,11 @@ class SliderShow extends HTMLElement {
     this.style.setProperty('--show-arrows', showArrows ? 'flex' : 'none');
     this.style.setProperty('--part-btn-position', nextPartBtnPosition);
 
-    // 新增：可設定的顏色屬性
-    const quizCorrectColor  = this.parseColor(this.getAttribute('quiz-correct-color'))  || this.parseColor('safe');
-    const quizIncorrectColor = this.parseColor(this.getAttribute('quiz-incorrect-color')) || this.parseColor('warning');
-    const slideContentBg     = this.parseColor(this.getAttribute('slide-content-bg'))     || '#333333';
-    const extraNoteContentBg = this.parseColor(this.getAttribute('extra-note-content-bg')) || slideContentBg;
+    // 可設定的顏色屬性
+    const quizCorrectColor   = this.parseColor(this.getAttribute('quiz-correct-color'))   || this.parseColor(SliderShow.defaults.quizCorrectColor);
+    const quizIncorrectColor = this.parseColor(this.getAttribute('quiz-incorrect-color')) || this.parseColor(SliderShow.defaults.quizIncorrectColor);
+    const slideContentBg     = this.parseColor(this.getAttribute('slide-content-bg'))     || SliderShow.defaults.slideContentBg;
+    const extraNoteContentBg = this.parseColor(this.getAttribute('extra-note-content-bg'))|| SliderShow.defaults.extraNoteContentBg || slideContentBg;
 
     this.style.setProperty('--quiz-correct-color', quizCorrectColor);
     this.style.setProperty('--quiz-correct-bg',    this.hexToRgba(quizCorrectColor, 0.15)  || 'rgba(64, 201, 154, 0.15)');
@@ -1701,3 +1703,90 @@ class SliderShow extends HTMLElement {
 }
 
 customElements.define('slider-show', SliderShow);
+
+/* ════════════════════════════════════════
+   SliderShow.defaults — 全域預設值
+   ────────────────────────────────────────
+   在頁面任何位置覆寫即可影響所有實例：
+     SliderShow.defaults.theme = 'lavender';
+   個別屬性仍優先於 defaults。
+   ════════════════════════════════════════ */
+SliderShow.defaults = {
+  // ── 版面 ──
+  height:                 '400px',
+  slideContentPadding:    '30',
+  slideContentBg:         '#333333',
+  extraNoteContentBg:     null,          // null = 跟隨 slideContentBg
+
+  // ── 主題 ──
+  theme:                  'shell',
+
+  // ── 導航顯示 ──
+  showDots:               true,
+  showArrows:             true,
+  loop:                   false,
+  showPageNumbers:        false,
+
+  // ── 鍵盤 ──
+  keyboardNav:            true,
+  keyboardPartNav:        false,
+
+  // ── 箭頭 ──
+  arrowBg:                'rgba(51,51,51,0.8)',
+
+  // ── Part 按鈕文字 ──
+  nextPartBtnText:        '下一部分 →',
+  prevPartBtnText:        '← 上一部分',
+  finishBtnText:          '完成',
+  restartBtnText:         '重新開始',
+  nextPartBtnPosition:    'center',
+
+  // ── Part 按鈕外觀 ──
+  partBtnFontSize:        '0.9rem',
+  partBtnPadding:         '8px 16px',
+  partBtnBorderRadius:    '6px',
+
+  // ── 完成／重啟按鈕顏色 ──
+  finishBtnBg:            'safe',        // 品牌色名或 #hex
+  finishBtnColor:         '#0C0D0C',
+  restartBtnBg:           'info',
+  restartBtnColor:        '#0C0D0C',
+
+  // ── 自動顯示 Part 按鈕 ──
+  autoShowPartButtons:    false,
+  showFinish:             true,
+  showRestart:            true,
+
+  // ── Part 切換 ──
+  partTransition:         'slide',
+  partTransitionDuration: 500,
+
+  // ── Part 指示器 ──
+  showPartIndicator:      true,
+  partIndicatorFormat:    'Part {part} / {total}',
+
+  // ── 底片縮圖 ──
+  filmstripThumbSize:     '24x30',
+  filmstripShowHoles:     true,
+  filmstripLabelFormat:   '',
+
+  // ── 進度條 ──
+  showProgress:           false,
+  progressPosition:       'top',
+  progressHeight:         '4px',
+
+  // ── 字型顏色 ──
+  fontcolorSubtitle:      'lavender',
+  fontcolorMain:          'shell',
+  fontcolorFooter:        'sky',
+  extraNoteHoverColor:    'special',
+
+  // ── Quiz ──
+  quizBlankWidth:         '60px',
+  quizCorrectColor:       'safe',
+  quizIncorrectColor:     'warning',
+  quizRequireComplete:    true,
+
+  // ── Spoiler ──
+  spoilerText:            '點擊查看內容',
+};
