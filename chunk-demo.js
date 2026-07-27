@@ -1,67 +1,6 @@
-/*!
- * chunk-demo.js  —  English Chunk Replacement Component
- * Custom element: <chunk-demo>   v2.2.0
- *
- * ── Child Element Syntax (推薦，長文字友善) ──────────────────
- *   <chunk-demo theme="sky" sentence="The cafe {0} is really nice."
- *               show-preview="true">
- *     <cd-chunk id="0" icon="📍" label="Location">
- *       <cd-level>near my condo</cd-level>
- *       <cd-level>around the corner of my place</cd-level>
- *       <cd-level>just a five-minute walk from my rented apartment</cd-level>
- *     </cd-chunk>
- *   </chunk-demo>
- *
- *   <cd-chunk> attributes
- *     id             對應 sentence 中 {n} 的 n（省略時依序 0、1、2…）
- *     icon           前綴 emoji / 圖示（可省略）
- *     label          下拉標頭文字（省略或空字串 → 不顯示標頭）
- *     current-level  初始層級（預設 1）
- *
- *   <cd-level> attributes
- *     level          明確指定層級編號（省略時依序 1、2、3…）
- *     文字內容即替代字串，可自由換行
- *
- * ── JSON Attribute Syntax (向下相容) ─────────────────────────
- *   <chunk-demo theme="sky" sentence="The cafe {0} is nice."
- *     chunks='[{"id":0,"icon":"📍","levels":[...]}]'>
- *   </chunk-demo>
- *   優先序：cd-chunk 子元素 > chunks 屬性
- *
- * ── <chunk-demo> Attributes ──────────────────────────────────
- *   sentence       Template with {n} placeholders  (required)
- *   theme          Brand colour theme               (default: special)
- *   border-width   Chunk button border thickness    (default: 1.5px)
- *   border-style   Chunk button border style        (default: solid)
- *                  solid | dashed | dotted | double | groove | ridge
- *   show-preview   "true" → show assembled sentence below bar
- *   data-config    JSON string for per-element config overrides
- *
- * ── Brand Themes ─────────────────────────────────────────────
- *   shell | lavender | special | warning | salmon | sky
- *   safe  | vanilla  | yellow  | info    | stone  | indigo
- *   pink  | orange
- *
- * ── Global Config (set BEFORE loading this script) ───────────
- *   window.ChunkDemoConfig = {
- *     defaultTheme:       'sky',
- *     chunkBorderWidth:   '1.5px',
- *     chunkBorderStyle:   'solid',
- *     previewBorderColor: null,   // null = auto-follow active theme color
- *     themes: { brand: { border:'#FF5733', text:'#FF5733', bg:'rgba(255,87,51,.09)' } },
- *     levelDotColors: { 1:'#40C99A', 2:'#DECA4B', 3:'#C3A5E5' },
- *   };
- *
- * ── Config Priority (lowest → highest) ───────────────────────
- *   DEFAULTS → ChunkDemoConfig → data-config attr
- *            → border-width / border-style HTML attrs
- */
 (function (win, doc) {
   'use strict';
 
-  /* ══════════════════════════════════════════════════════════
-     CSS — injected once per page
-  ══════════════════════════════════════════════════════════ */
   const CSS_ID = '__chunk-demo-v2__';
   if (!doc.getElementById(CSS_ID)) {
     const s = doc.createElement('style');
@@ -161,9 +100,6 @@ chunk-demo { display: block; }
     (doc.head || doc.documentElement).appendChild(s);
   }
 
-  /* ══════════════════════════════════════════════════════════
-     Built-in Defaults
-  ══════════════════════════════════════════════════════════ */
   const DEFAULTS = {
     themes: {
       shell:    { border: '#C6C7BD', text: '#C6C7BD', bg: 'rgba(198,199,189,.09)' },
@@ -196,9 +132,6 @@ chunk-demo { display: block; }
     showPreview:        false,
   };
 
-  /* ══════════════════════════════════════════════════════════
-     ChunkDemo Custom Element
-  ══════════════════════════════════════════════════════════ */
   class ChunkDemo extends HTMLElement {
     static get observedAttributes() {
       return [
@@ -223,11 +156,6 @@ chunk-demo { display: block; }
     connectedCallback() {
       doc.addEventListener('click',   this._docClick);
       doc.addEventListener('keydown', this._docKey);
-      /*
-       * Defer first _init() by one tick so the HTML parser has time to
-       * append all <cd-chunk> / <cd-level> children before we read them.
-       * Without this, connectedCallback fires before child nodes exist.
-       */
       setTimeout(() => { this._ready = true; this._init(); }, 0);
     }
 
@@ -255,24 +183,14 @@ chunk-demo { display: block; }
       const name = this.getAttribute('theme') || cfg.defaultTheme || 'special';
       cfg._theme = cfg.themes[name] || cfg.themes.special || DEFAULTS.themes.special;
 
-      /* HTML attributes override config (highest priority) */
       if (this.getAttribute('border-width')) cfg.chunkBorderWidth = this.getAttribute('border-width');
       if (this.getAttribute('border-style')) cfg.chunkBorderStyle = this.getAttribute('border-style');
 
-      /* Preview border color: null → follow theme automatically */
       cfg._pvColor = cfg.previewBorderColor || cfg._theme.border;
 
       return cfg;
     }
 
-    /* ── Parse <cd-chunk> / <cd-level> child elements ─────────
-       Called only when cd-chunk children are detected.
-       id        → maps to {n} placeholder; defaults to position index
-       icon      → emoji prefix (optional)
-       label     → dropdown header (omit / "" → hidden)
-       current-level → starting level (default 1)
-       <cd-level> children are numbered 1, 2, 3… unless level attr set.
-    ──────────────────────────────────────────────────────────── */
     _parseChildren(cdChunks) {
       return cdChunks.map((el, i) => {
         const rawId   = el.getAttribute('id');
@@ -303,7 +221,6 @@ chunk-demo { display: block; }
       this._sent   = this.getAttribute('sentence') || '';
       this._chunks = chunks;
 
-      /* Preserve level selections across re-inits */
       const prev  = this._state;
       this._state = chunks.map(c => {
         const p = prev.find(s => s.id === c.id);
@@ -326,7 +243,6 @@ chunk-demo { display: block; }
 
       const cfg = this._cfg();
 
-      /* Sentence bar */
       const bar = doc.createElement('div');
       bar.className = 'cd-bar';
       bar.style.background  = cfg.sentenceBg;
@@ -346,7 +262,6 @@ chunk-demo { display: block; }
       });
       this.appendChild(bar);
 
-      /* Full-sentence preview */
       const showPrev =
         this.getAttribute('show-preview') === 'true' ||
         (this.getAttribute('show-preview') === null && cfg.showPreview);
