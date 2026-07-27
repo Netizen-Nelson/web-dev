@@ -27,7 +27,6 @@ class SliderShow extends HTMLElement {
       'extra-note-hover-color', 'extra-note-prefix', 'extra-note-postfix',
       'spoiler-mode', 'spoiler-text', 'spoiler-color',
       'quiz-require-complete',
-      'keyboard-nav', 'keyboard-part-nav',
       'part-transition-duration', 'part-indicator-format',
       'filmstrip-label-format', 'filmstrip-thumb-size', 'filmstrip-show-holes',
       'slide-content-padding',
@@ -950,19 +949,6 @@ class SliderShow extends HTMLElement {
       });
     }
 
-    document.addEventListener('keydown', (e) => {
-      const keyboardNav = this.getAttribute('keyboard-nav') !== 'false';
-      if (!keyboardNav) return;
-
-      if (e.key === 'ArrowLeft') this.prevSlide();
-      if (e.key === 'ArrowRight') this.nextSlide();
-
-      const keyboardPartNav = this.getAttribute('keyboard-part-nav') === 'true';
-      if (keyboardPartNav) {
-        if (e.key === 'PageUp')   { e.preventDefault(); this.prevPart(); }
-        if (e.key === 'PageDown') { e.preventDefault(); this.nextPart(); }
-      }
-    });
   }
 
   render() {
@@ -1726,10 +1712,6 @@ SliderShow.defaults = {
   showArrows:             true,
   loop:                   false,
   showPageNumbers:        false,
-
-  // ── 鍵盤 ──
-  keyboardNav:            true,
-  keyboardPartNav:        false,
 
   // ── 箭頭 ──
   arrowBg:                'rgba(51,51,51,0.8)',
