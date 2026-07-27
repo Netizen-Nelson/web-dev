@@ -33,7 +33,9 @@ class SliderShow extends HTMLElement {
       'slide-content-padding',
       'quiz-icon-correct', 'quiz-icon-incorrect',
       'quiz-correct-color', 'quiz-incorrect-color',
-      'slide-content-bg', 'extra-note-content-bg'
+      'slide-content-bg', 'extra-note-content-bg',
+      'quiz-blank-width',
+      'show-progress', 'progress-color', 'progress-position', 'progress-height'
     ];
   }
 
@@ -904,6 +906,21 @@ class SliderShow extends HTMLElement {
       }
     }
     
+    // 更新進度條
+    const progressTrack = this.container?.querySelector('.progress-bar-track');
+    if (progressTrack) {
+      const allPartKeys = Object.keys(this.partsData)
+        .sort((a, b) => parseInt(a) - parseInt(b));
+      const totalSlides = allPartKeys.reduce(
+        (sum, k) => sum + this.partsData[k].length, 0);
+      const globalIndex = this.getGlobalSlideIndex();
+      const pct = totalSlides > 1
+        ? ((globalIndex + 1) / totalSlides) * 100
+        : 100;
+      const fill = progressTrack.querySelector('.progress-bar-fill');
+      if (fill) fill.style.width = `${pct}%`;
+    }
+
     // 檢查當前投影片的測驗完成狀態
     this.checkQuizCompletion();
   }
@@ -992,11 +1009,23 @@ class SliderShow extends HTMLElement {
     // Part 切換動畫時間
     const partTransDuration = parseInt(this.getAttribute('part-transition-duration')) || 500;
 
+    // quiz-blank 寬度
+    const quizBlankWidth = this.getAttribute('quiz-blank-width') || '60px';
+
+    // 進度條
+    const showProgress    = this.hasAttribute('show-progress') && this.getAttribute('show-progress') !== 'false';
+    const progressPosition = this.getAttribute('progress-position') || 'top';
+    const progressHeight   = this.getAttribute('progress-height')   || '4px';
+    const progressColor    = this.parseColor(this.getAttribute('progress-color')) || null; // fallback to theme
+
     this.style.setProperty('--filmstrip-thumb-w', `${thumbW}px`);
     this.style.setProperty('--filmstrip-thumb-h', `${thumbH}px`);
     this.style.setProperty('--filmstrip-holes-display', showHoles ? 'block' : 'none');
     this.style.setProperty('--slide-content-padding', `${slideContentPadding}px`);
     this.style.setProperty('--part-transition-duration', `${partTransDuration}ms`);
+    this.style.setProperty('--quiz-blank-width', quizBlankWidth);
+    this.style.setProperty('--progress-height', progressHeight);
+    if (progressColor) this.style.setProperty('--progress-color', progressColor);
 
     // 使用 CSS 變數設定此元件的顏色
     this.style.setProperty('--theme-color', themeColor);
@@ -1232,7 +1261,7 @@ class SliderShow extends HTMLElement {
         
         .quiz-blank {
           display: inline-block;
-          min-width: 60px;
+          min-width: var(--quiz-blank-width, 60px);
           padding: 2px 8px;
           margin: 0 2px;
           background: rgba(51, 51, 51, 0.6);
@@ -1571,6 +1600,36 @@ class SliderShow extends HTMLElement {
         slider-show .slide-in { 
           animation: slideInRight var(--part-transition-duration, 500ms) ease-out forwards; 
         }
+
+        /* ── 進度條 ── */
+        slider-show .progress-bar-track {
+          display: none;
+          position: absolute;
+          left: 0;
+          width: 100%;
+          height: var(--progress-height, 4px);
+          background: rgba(198, 199, 189, 0.12);
+          z-index: 6;
+          pointer-events: none;
+        }
+        slider-show .progress-bar-track.show {
+          display: block;
+        }
+        slider-show .progress-bar-track.position-top {
+          top: 0;
+          border-radius: 0 0 2px 2px;
+        }
+        slider-show .progress-bar-track.position-bottom {
+          bottom: 0;
+          border-radius: 2px 2px 0 0;
+        }
+        slider-show .progress-bar-fill {
+          height: 100%;
+          width: 0%;
+          background: var(--progress-color, var(--theme-color, #C6C7BD));
+          border-radius: inherit;
+          transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
       `;
       document.head.appendChild(style);
     }
@@ -1589,7 +1648,17 @@ class SliderShow extends HTMLElement {
     const partIndicator = document.createElement('div');
     partIndicator.className = 'part-indicator';
     wrapper.appendChild(partIndicator);
-    
+
+    // 進度條（position: absolute 疊在 wrapper 內，不佔版面高度）
+    const progressTrack = document.createElement('div');
+    progressTrack.className = ['progress-bar-track',
+      `position-${progressPosition}`,
+      showProgress ? 'show' : ''].filter(Boolean).join(' ');
+    const progressFill = document.createElement('div');
+    progressFill.className = 'progress-bar-fill';
+    progressTrack.appendChild(progressFill);
+    wrapper.appendChild(progressTrack);
+
     const slidesContainer = document.createElement('div');
     slidesContainer.className = 'slides-container';
     
