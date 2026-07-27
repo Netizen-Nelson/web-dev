@@ -31,7 +31,9 @@ class SliderShow extends HTMLElement {
       'part-transition-duration', 'part-indicator-format',
       'filmstrip-label-format', 'filmstrip-thumb-size', 'filmstrip-show-holes',
       'slide-content-padding',
-      'quiz-icon-correct', 'quiz-icon-incorrect'
+      'quiz-icon-correct', 'quiz-icon-incorrect',
+      'quiz-correct-color', 'quiz-incorrect-color',
+      'slide-content-bg', 'extra-note-content-bg'
     ];
   }
 
@@ -68,20 +70,23 @@ class SliderShow extends HTMLElement {
     if (!colorValue) return null;
     
     const brandColors = {
-      'background': '#0c0d0c',
+      'background': '#0C0D0C',
       'fill': '#333333',
-      'shell': '#c6c7bd',
+      'shell': '#C6C7BD',
       'lavender': '#C3A5E5',
       'special': '#C8DD5A',
       'warning': '#F08080',
       'salmon': '#E5C3B3',
-      'sky': '#04b5a3',
-      'safe': '#81E6D9',
-      'yellow': '#D4B440',
-      'info': '#90CDF4',
-      'stone': '#7090A8',
+      'sky': '#08A9D1',
+      'safe': '#40C99A',
+      'vanilla': '#DBEDD8',
+      'yellow': '#DECA4B',
+      'focus': '#A0CF72',
+      'info': '#4285EB',
+      'stone': '#95BDD7',
+      'indigo': '#7B6CF0',
       'pink': '#FFB3D9',
-      'orange': '#f69653'
+      'orange': '#EDA109'
     };
     
     if (brandColors[colorValue.toLowerCase()]) {
@@ -111,6 +116,15 @@ class SliderShow extends HTMLElement {
     
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#333333' : '#e0e0e0';
+  }
+
+  hexToRgba(hex, alpha) {
+    if (!hex || !hex.startsWith('#')) return null;
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substr(0, 2), 16);
+    const g = parseInt(h.substr(2, 2), 16);
+    const b = parseInt(h.substr(4, 2), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   analyzeParts() {
@@ -1007,6 +1021,19 @@ class SliderShow extends HTMLElement {
     this.style.setProperty('--show-arrows', showArrows ? 'flex' : 'none');
     this.style.setProperty('--part-btn-position', nextPartBtnPosition);
 
+    // 新增：可設定的顏色屬性
+    const quizCorrectColor  = this.parseColor(this.getAttribute('quiz-correct-color'))  || this.parseColor('safe');
+    const quizIncorrectColor = this.parseColor(this.getAttribute('quiz-incorrect-color')) || this.parseColor('warning');
+    const slideContentBg     = this.parseColor(this.getAttribute('slide-content-bg'))     || '#333333';
+    const extraNoteContentBg = this.parseColor(this.getAttribute('extra-note-content-bg')) || slideContentBg;
+
+    this.style.setProperty('--quiz-correct-color', quizCorrectColor);
+    this.style.setProperty('--quiz-correct-bg',    this.hexToRgba(quizCorrectColor, 0.15)  || 'rgba(64, 201, 154, 0.15)');
+    this.style.setProperty('--quiz-incorrect-color', quizIncorrectColor);
+    this.style.setProperty('--quiz-incorrect-bg',  this.hexToRgba(quizIncorrectColor, 0.15) || 'rgba(240, 128, 128, 0.15)');
+    this.style.setProperty('--slide-content-bg',     slideContentBg);
+    this.style.setProperty('--extra-note-content-bg', extraNoteContentBg);
+
     const styleId = 'slider-show-style';
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
@@ -1059,7 +1086,7 @@ class SliderShow extends HTMLElement {
           flex-direction: column;
           gap: 20px;
           padding: var(--slide-content-padding, 30px);
-          background: #333333;
+          background: var(--slide-content-bg, #333333);
           border-radius: 8px;
           height: 100%;
           box-sizing: border-box;
@@ -1085,17 +1112,58 @@ class SliderShow extends HTMLElement {
           text-align: center;
         }
         
+        /* --- p / ul / ol / li 排版修正 --- */
+        /* slide-main 本身是 flex column + align-items:center，
+           若不給寬度，p 會縮成文字寬、ul 符號會消失 */
+        slider-show .slide-main > * {
+          width: 100%;
+        }
+        
         slider-show .slide-main p {
+          margin-top: 0;
           margin-bottom: 15px;
+          width: 100%;
         }
         
         slider-show .slide-main p:last-child {
           margin-bottom: 0;
         }
         
+        /* ul / ol：所有 slide 層級均適用，不限於 slide-main */
+        slider-show [slide] ul,
+        slider-show [slide] ol {
+          padding-left: 1.5em;
+          margin-top: 0;
+          margin-bottom: 12px;
+          text-align: left;
+          width: 100%;
+          box-sizing: border-box;
+          list-style-position: outside;
+        }
+        
+        slider-show [slide] ul { list-style-type: disc; }
+        slider-show [slide] ol { list-style-type: decimal; }
+        
+        slider-show [slide] li {
+          margin-bottom: 6px;
+          line-height: 1.65;
+          text-align: left;
+        }
+        
+        slider-show [slide] li:last-child { margin-bottom: 0; }
+        
+        /* 巢狀清單縮排 */
+        slider-show [slide] ul ul,
+        slider-show [slide] ol ol,
+        slider-show [slide] ul ol,
+        slider-show [slide] ol ul {
+          margin-top: 4px;
+          margin-bottom: 4px;
+        }
+        
         slider-show .slide-footer {
           font-size: 0.9rem;
-          color: var(--fontcolor-footer, #04b5a3);
+          color: var(--fontcolor-footer, #08A9D1);
           padding-top: 10px;
           border-top: 1px solid rgba(198, 199, 189, 0.13);
         }
@@ -1120,7 +1188,7 @@ class SliderShow extends HTMLElement {
         }
         
         .extra-note-content {
-          background: #333333;
+          background: var(--extra-note-content-bg, #333333);
           padding: 12px;
           color: #c6c7bd;
           line-height: 1.75;
@@ -1241,11 +1309,11 @@ class SliderShow extends HTMLElement {
         }
         
         .quiz-result-item.correct {
-          background: rgba(115, 209, 146, 0.15);
+          background: var(--quiz-correct-bg, rgba(64, 201, 154, 0.15));
         }
         
         .quiz-result-item.incorrect {
-          background: rgba(217, 128, 121, 0.15);
+          background: var(--quiz-incorrect-bg, rgba(240, 128, 128, 0.15));
         }
         
         .quiz-result-icon {
@@ -1255,11 +1323,11 @@ class SliderShow extends HTMLElement {
         }
         
         .quiz-result-item.correct .quiz-result-icon {
-          color: #81E6D9;
+          color: var(--quiz-correct-color, #40C99A);
         }
         
         .quiz-result-item.incorrect .quiz-result-icon {
-          color: #F08080;
+          color: var(--quiz-incorrect-color, #F08080);
         }
         
         .quiz-result-label {
@@ -1477,12 +1545,12 @@ class SliderShow extends HTMLElement {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); 
         }
         slider-show .finish-btn { 
-          background: var(--finish-btn-bg, #81E6D9); 
-          color: var(--finish-btn-color, #333333); 
+          background: var(--finish-btn-bg, #40C99A); 
+          color: var(--finish-btn-color, #0C0D0C); 
         }
         slider-show .restart-btn { 
-          background: var(--restart-btn-bg, #90CDF4); 
-          color: var(--restart-btn-color, #e0e0e0); 
+          background: var(--restart-btn-bg, #4285EB); 
+          color: var(--restart-btn-color, #0C0D0C); 
         }
         
         @keyframes fadeInBtn { 
