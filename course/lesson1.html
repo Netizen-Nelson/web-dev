@@ -128,16 +128,15 @@
 <dual-hr color-left="orange" color-right="safe" ratio="1:9" thickness="1px"></dual-hr>
 <section id="all_exercises" class="bp-text-shell">
 	<div id="practice_tophrase">
-		<div slide part="1" class="m-3">
-			<chunk-demo theme="sky" show-preview="true" sentence="{0}"
-				data-config='{"levelDotColors": {"1": "#FF5733", "2": "#33FF57", "3": "#3357FF", "4": "#457B9D", "5": "#DECA4B"}}'>
-				  <cd-chunk id="0">
-					<cd-level>mobile games to play</cd-level>
-					<cd-level>cafes to check out</cd-level>
-					<cd-level>exhibitions to see</cd-level>
-					<cd-level>TV shows to catch up on</cd-level>
-					<cd-level>playlists to listen to</cd-level>
-			</cd-chunk>
+		<div>
+			<chunk-demo sentence="Do you have any cool spots {1} on your trip to Japan?"
+					  theme="shell" show-dots="false">
+				<cd-chunk id="1" label="to + V 修飾 spots">
+				  <cd-level level="1">to visit</cd-level>
+				  <cd-level level="2">to explore off the beaten path</cd-level>
+				  <cd-level level="3">to add to your itinerary</cd-level>
+				</cd-chunk>
+			</chunk-demo>
 		</div>
 	</div>
 </section>
