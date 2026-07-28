@@ -1,54 +1,11 @@
-/**
- * <side-menu> Web Component Suite  v1
- *
- * 元件清單：
- *   <side-menu>     容器，控制全域設定
- *   <menu-brand>    品牌區（選用）
- *   <menu-section>  分組，含 label 與 col 屬性
- *   <menu-item>     項目，含 icon / title / subtitle
- *   <menu-footer>   底部區域（選用）
- *
- * <side-menu> 屬性：
- *   theme       dark（預設）| light
- *   width       寬度 px，預設 320
- *   font-size   基礎字級，預設 1rem
- *   bar-show    true（預設）| false
- *   bar-color   指示條色彩（未設則跟隨主題 accent）
- *   bar-width   指示條粗細 px，預設 3
- *   bar-style   solid（預設）| dashed | dotted
- *
- * <menu-section> 屬性：
- *   label       分組標題
- *   col         1（預設，單欄）| 2（雙欄）
- *
- * <menu-item> 屬性：
- *   icon        Bootstrap Icon class，如 bi-gear
- *   title       主標題（必填）
- *   subtitle    副標題（選用）
- *
- * JS API：
- *   SideMenu.config({ theme, width, fontSize, barShow, barColor, barWidth, barStyle })
- *   SideMenu.resetConfig()
- *   el.setTheme('dark' | 'light')
- *
- * 事件（均 bubbles）：
- *   menu-select   detail: { item, title, section, col, icon }
- *   theme-change  detail: { theme }
- */
-
 (() => {
   'use strict';
-
-  /* ═══════════════════════════════════════════
-     全域樣式（只注入一次）
-  ═══════════════════════════════════════════ */
   const STYLE_ID = '__side-menu-style__';
   if (!document.getElementById(STYLE_ID)) {
     const s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = `
 
-/* ── 容器元素 ─────────────────────────────── */
 side-menu {
   display       : flex;
   flex-direction: column;
@@ -294,9 +251,9 @@ side-menu[theme="dark"] {
   --sm-bg              : #0e0f0e;
   --sm-divider         : #1d1e1d;
   --sm-text            : #C6C7BD;
-  --sm-text-muted      : rgba(198,199,189,0.84);  /* ↑ 亮度提升 */
-  --sm-sub-c           : rgba(149,189,215,0.58);  /* ↑ 亮度提升 */
-  --sm-sub-hover-c     : rgba(149,189,215,0.78);
+  --sm-text-muted      : rgba(198,199,189,0.91);  /* ↑ 亮度提升 */
+  --sm-sub-c           : rgba(149,189,215,0.78);  /* ↑ 亮度提升 */
+  --sm-sub-hover-c     : rgba(149,189,215,0.88);
   --sm-hover-bg        : rgba(198,199,189,0.05);
   --sm-active-bg       : rgba(200,221,90,0.16);   /* ↑ 對比加強 */
   --sm-label           : rgba(149,189,215,0.35);
