@@ -1,147 +1,185 @@
-.bp-text-base { color: #0c0d0c; }
-.bp-text-fill { color: #333333; }
+/* ══════════════════════════════════════════
+   bp-styles.css  —  品牌色彩工具樣式
+   品牌色彩基準（2025）
+   ──────────────────────────────────────
+   base      #0C0D0C
+   shell     #C6C7BD
+   lavender  #C3A5E5
+   special   #C8DD5A
+   warning   #F08080
+   salmon    #E5C3B3
+   sky       #08A9D1
+   safe      #40C99A
+   vanilla   #DBEDD8
+   yellow    #DECA4B
+   focus     #A0CF72
+   info      #4285EB
+   stone     #95BDD7
+   indigo    #7B6CF0
+   pink      #FFB3D9
+   orange    #EDA109
+══════════════════════════════════════════ */
+
+/* ── Text colors ─────────────────────────── */
+.bp-text-base     { color: #0C0D0C; }
+.bp-text-fill     { color: #333333; }
 .bp-text-fill-hover { color: #3a3a3a; }
-.bp-text-shell { color: #c6c7bd; }
+.bp-text-shell    { color: #C6C7BD; }
 .bp-text-lavender { color: #C3A5E5; }
-.bp-text-special { color: #C8DD5A; }
-.bp-text-warning { color: #F08080; }
-.bp-text-salmon { color: #E5C3B3; }
-.bp-text-sky { color: #04b5a3; }
-.bp-text-safe { color: #81E6D9; }
-.bp-text-yellow { color: #DECA4B; }
-.bp-text-info { color: #4285EB; }
-.bp-text-vanilla { color: #D4C5A9; }
-.bp-text-stone {color: #95BDD7; }
-.bp-text-indigo {color: #7B6CF0; }
-.bp-text-pink { color: #FFB3D9; }
-.bp-text-orange { color: #f69653; }
+.bp-text-special  { color: #C8DD5A; }
+.bp-text-warning  { color: #F08080; }
+.bp-text-salmon   { color: #E5C3B3; }
+.bp-text-sky      { color: #08A9D1; }
+.bp-text-safe     { color: #40C99A; }
+.bp-text-vanilla  { color: #DBEDD8; }
+.bp-text-yellow   { color: #DECA4B; }
+.bp-text-focus    { color: #A0CF72; }
+.bp-text-info     { color: #4285EB; }
+.bp-text-stone    { color: #95BDD7; }
+.bp-text-indigo   { color: #7B6CF0; }
+.bp-text-pink     { color: #FFB3D9; }
+.bp-text-orange   { color: #EDA109; }
 
-.bp-bg-background { background-color: #0c0d0c; }
-.bp-bg-base { background-color: #0c0d0c; }
-.bp-bg-fill { background-color: #333333; }
+/* ── Background colors ───────────────────── */
+.bp-bg-background { background-color: #0C0D0C; }
+.bp-bg-base       { background-color: #0C0D0C; }
+.bp-bg-fill       { background-color: #333333; }
 .bp-bg-fill-hover { background-color: #3a3a3a; }
-.bp-bg-shell { background-color: #c6c7bd; }
-.bp-bg-lavender { background-color: #C3A5E5; }
-.bp-bg-special { background-color: #b9c971; }
-.bp-bg-warning { background-color: #F08080; }
-.bp-bg-salmon { background-color: #E5C3B3; }
-.bp-bg-sky { background-color: #04b5a3; }
-.bp-bg-safe { background-color: #81E6D9; }
-.bp-bg-yellow { background-color: #DECA4B; }
-.bp-bg-stone { background-color: #95BDD7; }
-.bp-bg-info { background-color: #4285EB; }
-.bp-bg-pink { background-color: #FFB3D9; }
-.bp-bg-orange { background-color: #f69653; }
+.bp-bg-shell      { background-color: #C6C7BD; }
+.bp-bg-lavender   { background-color: #C3A5E5; }
+.bp-bg-special    { background-color: #C8DD5A; }
+.bp-bg-warning    { background-color: #F08080; }
+.bp-bg-salmon     { background-color: #E5C3B3; }
+.bp-bg-sky        { background-color: #08A9D1; }
+.bp-bg-safe       { background-color: #40C99A; }
+.bp-bg-vanilla    { background-color: #DBEDD8; }
+.bp-bg-yellow     { background-color: #DECA4B; }
+.bp-bg-focus      { background-color: #A0CF72; }
+.bp-bg-info       { background-color: #4285EB; }
+.bp-bg-stone      { background-color: #95BDD7; }
+.bp-bg-indigo     { background-color: #7B6CF0; }
+.bp-bg-pink       { background-color: #FFB3D9; }
+.bp-bg-orange     { background-color: #EDA109; }
 
-.bp-border-base { border: 1px solid #0c0d0c; }
-.bp-border-fill { border: 1px solid #333333; }
+/* ── Border colors ───────────────────────── */
+.bp-border-base       { border: 1px solid #0C0D0C; }
+.bp-border-fill       { border: 1px solid #333333; }
 .bp-border-fill-hover { border: 1px solid #3a3a3a; }
-.bp-border-shell { border: 1px solid #c6c7bd; }
-.bp-border-lavender { border: 1px solid #C3A5E5; }
-.bp-border-special { border: 1px solid #b9c971; }
-.bp-border-warning { border: 1px solid #F08080; }
-.bp-border-salmon { border: 1px solid #E5C3B3; }
-.bp-border-sky { border: 1px solid #04b5a3; }
-.bp-border-safe { border: 1px solid #81E6D9; }
-.bp-border-yellow { border: 1px solid #DECA4B; }
-.bp-border-info { border: 1px solid #90CDF4; }
-.bp-border-pink { border: 1px solid #FFB3D9; }
-.bp-border-orange { border: 1px solid #f69653; }
+.bp-border-shell      { border: 1px solid #C6C7BD; }
+.bp-border-lavender   { border: 1px solid #C3A5E5; }
+.bp-border-special    { border: 1px solid #C8DD5A; }
+.bp-border-warning    { border: 1px solid #F08080; }
+.bp-border-salmon     { border: 1px solid #E5C3B3; }
+.bp-border-sky        { border: 1px solid #08A9D1; }
+.bp-border-safe       { border: 1px solid #40C99A; }
+.bp-border-vanilla    { border: 1px solid #DBEDD8; }
+.bp-border-yellow     { border: 1px solid #DECA4B; }
+.bp-border-focus      { border: 1px solid #A0CF72; }
+.bp-border-info       { border: 1px solid #4285EB; }
+.bp-border-stone      { border: 1px solid #95BDD7; }
+.bp-border-indigo     { border: 1px solid #7B6CF0; }
+.bp-border-pink       { border: 1px solid #FFB3D9; }
+.bp-border-orange     { border: 1px solid #EDA109; }
 
-.fs-extralarge {font-size: 3.3rem;}
-.fs-xlarge {font-size: 2.8rem;}
-.fs-larger {font-size: 1.8rem;}
-.fs-large {font-size: 1.35rem;}
-.fs-regular {font-size: 1rem;}
-.fs-small, .fs-6 {font-size: 0.85rem;}
-.fs-smaller, .fs-7 {font-size: 0.75rem;}
-.fs-xsmall, .fs-8 {font-size: 0.65rem;}
-.fs-extrasmall, .fs-9 {font-size: 0.5rem;}
-.w-90 {width: 90%;}
-.w-80 {width: 80%;}
-.w-70 {width: 70%;}
-.w-60 {width: 60%;}
-.w-40 {width: 40%;}
-.w-30 {width: 33%;}
-.w-20 {width: 20%;}
+/* ── Font sizes ──────────────────────────── */
+.fs-extralarge        { font-size: 3.3rem; }
+.fs-xlarge            { font-size: 2.8rem; }
+.fs-larger            { font-size: 1.8rem; }
+.fs-large             { font-size: 1.35rem; }
+.fs-regular           { font-size: 1rem; }
+.fs-small,  .fs-6     { font-size: 0.85rem; }
+.fs-smaller,.fs-7     { font-size: 0.75rem; }
+.fs-xsmall, .fs-8     { font-size: 0.65rem; }
+.fs-extrasmall,.fs-9  { font-size: 0.5rem; }
 
-.m-6 { margin: 4rem !important; }
-.mt-6, .my-6 { margin-top: 4rem !important; }
-.mb-6, .my-6 { margin-bottom: 4rem !important; }
-.ms-6, .mx-6 { margin-left: 4rem !important; }
-.me-6, .mx-6 { margin-right: 4rem !important; }
+/* ── Widths ──────────────────────────────── */
+.w-90 { width: 90%; }
+.w-80 { width: 80%; }
+.w-70 { width: 70%; }
+.w-60 { width: 60%; }
+.w-40 { width: 40%; }
+.w-30 { width: 33%; }
+.w-20 { width: 20%; }
 
-.m-7 { margin: 5rem !important; }
-.mt-7, .my-7 { margin-top: 5rem !important; }
-.mb-7, .my-7 { margin-bottom: 5rem !important; }
-.ms-7, .mx-7 { margin-left: 5rem !important; }
-.me-7, .mx-7 { margin-right: 5rem !important; }
+/* ── Margin utilities (level 6–8) ────────── */
+.m-6                { margin: 4rem !important; }
+.mt-6, .my-6        { margin-top: 4rem !important; }
+.mb-6, .my-6        { margin-bottom: 4rem !important; }
+.ms-6, .mx-6        { margin-left: 4rem !important; }
+.me-6, .mx-6        { margin-right: 4rem !important; }
 
-.m-8 { margin: 8rem !important; }
-.mt-8, .my-8 { margin-top: 8rem !important; }
-.mb-8, .my-8 { margin-bottom: 8rem !important; }
-.ms-8, .mx-8 { margin-left: 8rem !important; }
-.me-8, .mx-8 { margin-right: 8rem !important; }
+.m-7                { margin: 5rem !important; }
+.mt-7, .my-7        { margin-top: 5rem !important; }
+.mb-7, .my-7        { margin-bottom: 5rem !important; }
+.ms-7, .mx-7        { margin-left: 5rem !important; }
+.me-7, .mx-7        { margin-right: 5rem !important; }
 
-.p-6 { padding: 4rem !important; }
-.pt-6, .py-6 { padding-top: 4rem !important; }
-.pb-6, .py-6 { padding-bottom: 4rem !important; }
-.ps-6, .px-6 { padding-left: 4rem !important; }
-.pe-6, .px-6 { padding-right: 4rem !important; }
+.m-8                { margin: 8rem !important; }
+.mt-8, .my-8        { margin-top: 8rem !important; }
+.mb-8, .my-8        { margin-bottom: 8rem !important; }
+.ms-8, .mx-8        { margin-left: 8rem !important; }
+.me-8, .mx-8        { margin-right: 8rem !important; }
 
-.p-7 { padding: 5rem !important; }
-.pt-7, .py-7 { padding-top: 5rem !important; }
-.pb-7, .py-7 { padding-bottom: 5rem !important; }
-.ps-7, .px-7 { padding-left: 5rem !important; }
-.pe-7, .px-7 { padding-right: 5rem !important; }
+/* ── Padding utilities (level 6–8) ──────── */
+.p-6                { padding: 4rem !important; }
+.pt-6, .py-6        { padding-top: 4rem !important; }
+.pb-6, .py-6        { padding-bottom: 4rem !important; }
+.ps-6, .px-6        { padding-left: 4rem !important; }
+.pe-6, .px-6        { padding-right: 4rem !important; }
 
-.p-8 { padding: 8rem !important; }
-.pt-8, .py-8 { padding-top: 8rem !important; }
-.pb-8, .py-8 { padding-bottom: 8rem !important; }
-.ps-8, .px-8 { padding-left: 8rem !important; }
-.pe-8, .px-8 { padding-right: 8rem !important; }
+.p-7                { padding: 5rem !important; }
+.pt-7, .py-7        { padding-top: 5rem !important; }
+.pb-7, .py-7        { padding-bottom: 5rem !important; }
+.ps-7, .px-7        { padding-left: 5rem !important; }
+.pe-7, .px-7        { padding-right: 5rem !important; }
 
-bp-ind-1 {text-indent: 0.8rem;}
-bp-ind-2 {text-indent: 1rem;}
-bp-ind-3 {text-indent: 1.2rem;}
-bp-ind-4 {text-indent: 1.5rem;}
-bp-ind-5 {text-indent: 1.8rem;}
+.p-8                { padding: 8rem !important; }
+.pt-8, .py-8        { padding-top: 8rem !important; }
+.pb-8, .py-8        { padding-bottom: 8rem !important; }
+.ps-8, .px-8        { padding-left: 8rem !important; }
+.pe-8, .px-8        { padding-right: 8rem !important; }
 
+/* ── Text indent ─────────────────────────── */
+/* 修正：原檔缺少「.」，以下為正確 class 選擇器 */
+.bp-ind-1 { text-indent: 0.8rem; }
+.bp-ind-2 { text-indent: 1rem; }
+.bp-ind-3 { text-indent: 1.2rem; }
+.bp-ind-4 { text-indent: 1.5rem; }
+.bp-ind-5 { text-indent: 1.8rem; }
+
+/* ── Blockquote ──────────────────────────── */
 blockquote {
-    margin: 16px 0px;
+    margin: 16px 0;
     font-size: 1.25rem;
-    padding: 16px 24px 16px 60px; /* 左側留空間給符號 */
+    padding: 16px 24px 16px 60px;
     background: #333333;
-    color: #c6c7bd;
+    color: #C6C7BD;
     line-height: 1.5;
     position: relative;
     overflow: hidden;
 }
 
 blockquote::before {
-    content: ''; /* 不放文字 */
+    content: '';
     position: absolute;
     left: 15px;
     top: 0;
     bottom: 0;
     width: 30px;
-    
-    /* 使用線性漸層製作「重複出現的 ░ 質感」 */
     background-image: radial-gradient(#FFF 30%, transparent 30%);
-    background-size: 10px 10px; /* 這裡可以調整點點或網格的密度 */
+    background-size: 10px 10px;
     opacity: 0.5;
 }
 
-.bp-hidden {
-	display: none;
-}
+/* ── Utilities ───────────────────────────── */
+.bp-hidden { display: none; }
 
 .bp-annotation {
     position: relative;
     display: inline-block;
-    border-bottom: 1px dashed var(--note-color, #5BC0DE); 
+    border-bottom: 1px dashed var(--note-color, #5BC0DE);
     padding-bottom: 1px;
-	margin-bottom: 24px;
+    margin-bottom: 24px;
 }
 
 .bp-annotation::after {
@@ -152,5 +190,5 @@ blockquote::before {
     transform: translateX(-50%);
     font-size: 0.7rem;
     white-space: nowrap;
-    color: var(--note-color, #8E8E93); 
+    color: var(--note-color, #8E8E93);
 }
