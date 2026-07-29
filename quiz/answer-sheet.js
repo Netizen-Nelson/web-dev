@@ -1,24 +1,3 @@
-/**
- * answer-sheet.js — 答案卷 Web Component 套件 v3
- * ─────────────────────────────────────────────────
- *  <answer-sheet>  單選題答案卡
- *  <fill-sheet>    填空題答案卡
- *
- * 共用屬性：
- *   total, start-from, per-column, submit-url, submit-filename,
- *   answer-src, question-selector, theme, selected-color,
- *   hover-color, width, src
- *
- * <answer-sheet> 專用：options, option-case
- *
- * 全域預設（可選）：
- *   window.AnswerSheetConfig = { theme:'dark', selectedColor:'lavender', … }
- *
- * 公開 API（兩個元件皆有）：
- *   el.setAnswerKey({ "1":"a", … })
- *   el.getAnswers()
- *   el.reset()
- */
 (function () {
   'use strict';
 
