@@ -666,6 +666,50 @@
       </div>
     </div><!-- /section 3 -->
 
+    <!-- Section 4: Fill-in -->
+    <div class="section-block">
+      <div class="section-label">Section 4 — Fill in the Blanks (Q25–30)</div>
+      <div class="passage">
+        <strong>Instructions:</strong> Complete the sentences below using information from the passage in Section 3. Write <strong>NO MORE THAN TWO WORDS</strong> for each answer.
+      </div>
+
+      <div id="q25" class="q-item fill-item" data-q="25">
+        <span class="q-num">25</span>
+        <div class="q-text">Urban farming can help cities reduce their reliance on long <em>________</em>.</div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q26" class="q-item fill-item" data-q="26">
+        <span class="q-num">26</span>
+        <div class="q-text">One hectare of urban farmland can supply roughly 200 <em>________</em> with fresh produce each year.</div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q27" class="q-item fill-item" data-q="27">
+        <span class="q-num">27</span>
+        <div class="q-text">Urban agriculture is said to contribute to <em>________</em>, reducing the heat island effect.</div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q28" class="q-item fill-item" data-q="28">
+        <span class="q-num">28</span>
+        <div class="q-text">Critics argue that the initial <em>________</em> costs remain too high for low-income communities.</div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q29" class="q-item fill-item" data-q="29">
+        <span class="q-num">29</span>
+        <div class="q-text">Pilot programmes in cities such as Singapore, Detroit, and Taipei demonstrated improved <em>________</em> cohesion.</div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q30" class="q-item fill-item" data-q="30">
+        <span class="q-num">30</span>
+        <div class="q-text">One environmental concern raised is that water <em>________</em> may offset some gains.</div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+    </div>
+
     <!-- Usage code -->
     <div class="section-label" style="margin-top:40px;">元件使用說明</div>
     <pre class="usage"><span class="cmt">&lt;!-- 1. 引入元件 --&gt;</span>
@@ -754,10 +798,7 @@ document.querySelector(<span class="str">'answer-sheet'</span>)
       </div>
     </details>
 
-    <!-- The component
-         width 屬性：可設 "100%"、"420px"、"fit-content" 等任意 CSS 寬度值。
-         per-column="12" → 24題÷12 = 2欄，適合此側欄寬度。
-    -->
+    <!-- MCQ 答案卡 -->
     <answer-sheet
       id="mySheet"
       total="24"
@@ -770,6 +811,20 @@ document.querySelector(<span class="str">'answer-sheet'</span>)
       hover-color="sky"
       theme="dark">
     </answer-sheet>
+
+    <!-- 填空題答案卡 -->
+    <div class="aside-label" style="margin-top:18px;">填空題答案卡</div>
+    <fill-sheet
+      id="myFill"
+      total="6"
+      start-from="25"
+      per-column="6"
+      width="100%"
+      question-selector=".fill-item"
+      selected-color="sky"
+      hover-color="focus"
+      theme="dark">
+    </fill-sheet>
 
   </aside>
 
@@ -793,6 +848,16 @@ const DEMO_ANSWER_KEY = {
   1:'b', 2:'b', 3:'c', 4:'b', 5:'b', 6:'b', 7:'c', 8:'c',
   9:'b', 10:'c', 11:'b', 12:'b', 13:'c', 14:'d', 15:'b', 16:'b',
   17:'b', 18:'c', 19:'b', 20:'c', 21:'b', 22:'c', 23:'b', 24:'b',
+};
+
+/* 填空題答案金鑰（接受多個正解用陣列）*/
+const DEMO_FILL_KEY = {
+  25: ['supply chains', 'supply chain'],
+  26: 'families',
+  27: 'biodiversity',
+  28: 'infrastructure',
+  29: 'neighbourhood',
+  30: 'usage',
 };
 
 /* ── 建立色板 ── */
@@ -835,29 +900,28 @@ function applyConfig() {
 let isDark = true;
 function toggleTheme() {
   isDark = !isDark;
-  const sheet = document.getElementById('mySheet');
-  sheet.setAttribute('theme', isDark ? 'dark' : 'light');
+  const theme = isDark ? 'dark' : 'light';
+  document.getElementById('mySheet').setAttribute('theme', theme);
+  document.getElementById('myFill').setAttribute('theme', theme);
 
   const btn = document.getElementById('themeBtn');
   btn.textContent = isDark ? '🌙 深色' : '☀️ 淺色';
   btn.classList.toggle('active', isDark);
 
-  // 同步頁面背景
-  document.documentElement.style.setProperty('--bg',   isDark ? '#0C0D0C' : '#f0f0ee');
+  document.documentElement.style.setProperty('--bg',    isDark ? '#0C0D0C' : '#f0f0ee');
   document.documentElement.style.setProperty('--shell', isDark ? '#C6C7BD' : '#111111');
   document.documentElement.style.setProperty('--panel', isDark ? '#141614' : '#ffffff');
-  document.documentElement.style.setProperty('--border', isDark ? '#252624' : '#d6d6d6');
+  document.documentElement.style.setProperty('--border',isDark ? '#252624' : '#d6d6d6');
   document.documentElement.style.setProperty('--dim',   isDark ? '#3A3B38' : '#bbbbbb');
-  document.body.style.background    = isDark ? '#0C0D0C' : '#f0f0ee';
-  document.body.style.color         = isDark ? '#C6C7BD' : '#111111';
+  document.body.style.background = isDark ? '#0C0D0C' : '#f0f0ee';
+  document.body.style.color      = isDark ? '#C6C7BD' : '#111111';
 }
 
 /* ── 載入答案金鑰（示範批改）── */
 function loadAnswerKey() {
-  const sheet = document.getElementById('mySheet');
-  sheet.setAnswerKey(DEMO_ANSWER_KEY);
+  document.getElementById('mySheet').setAnswerKey(DEMO_ANSWER_KEY);
+  document.getElementById('myFill').setAnswerKey(DEMO_FILL_KEY);
 
-  // 給使用者提示
   const btn = event.target;
   btn.textContent = '✓ 答案金鑰已載入';
   btn.style.color = '#40C99A';
