@@ -1,12 +1,4 @@
-/**
- * StepTutor v2.0
- * 步驟鏈教學元件，支援 manual / auto / auto-pausable 混合模式
- * 僅適用於寬螢幕教學與展示場景
- */
-
 class StepTutor {
-
-    // ─── 色票常數（統一維護） ────────────────────────────────────────
     static COLORS = {
         shell:     '#c6c7bd',
         lavender:  '#C3A5E5',
@@ -43,7 +35,6 @@ class StepTutor {
         return StepTutor.GRADIENTS[value] || value;
     }
 
-    // ─── 建構子 ────────────────────────────────────────────────────
     constructor(containerId, options = {}) {
         this.container = document.getElementById(containerId);
         if (!this.container) {
@@ -78,13 +69,11 @@ class StepTutor {
         this._init();
     }
 
-    // ─── 選項合併（分組結構） ────────────────────────────────────────
     _mergeOptions(o) {
         const rc = StepTutor.resolveColor.bind(StepTutor);
         const rg = StepTutor.resolveGradient.bind(StepTutor);
 
         return {
-            // 步驟外觀
             step: {
                 bgColor:      rc(o.stepBgColor)      || 'rgba(200,221,90,0.07)',
                 borderColor:  rc(o.stepBorderColor)  || StepTutor.COLORS.special,
@@ -102,7 +91,6 @@ class StepTutor {
                 activeBgColor:      rc(o.activeBgColor)       || 'rgba(222,202,75,0.10)',
                 activeGlow:         o.activeGlow !== false,
             },
-            // 指示器
             indicator: {
                 show:         o.showIndicator !== false,
                 format:       o.indicatorFormat       || '步驟 {current}',
@@ -114,7 +102,6 @@ class StepTutor {
                 padding:      o.indicatorPadding       || '3px 8px',
                 marginBottom: o.indicatorMarginBottom  || '8px',
             },
-            // 按鈕
             button: {
                 text:         o.buttonText             || '顯示下一步',
                 completeText: o.buttonCompleteText     || '所有步驟已顯示',
@@ -128,14 +115,12 @@ class StepTutor {
                 paddingY:     o.buttonPaddingY         || null,
                 fontSize:     o.buttonFontSize         || null,
             },
-            // 進度文字
             progress: {
                 show:     o.showProgress !== false,
                 text:     o.progressText      || '已顯示步驟 {current} / {total}',
                 fontSize: o.progressFontSize  || '0.875rem',
                 position: o.progressPosition  || 'bottom',
             },
-            // 進度條
             progressBar: {
                 show:         o.showProgressBar       || false,
                 height:       o.progressBarHeight     || '20px',
@@ -160,12 +145,10 @@ class StepTutor {
                 auto:   o.autoScroll !== false,
                 offset: o.scrollOffset || 80,
             },
-            // 目標渲染
             target: {
                 mode:         o.targetMode         || 'replace',
                 clearOnReset: o.targetClearOnReset !== false,
             },
-            // 步驟鏈行為
             chain: {
                 defaultAdvance: o.defaultAdvance || 'manual', // 'manual' | 'auto' | 'auto-pausable'
                 defaultDelay:   o.defaultDelay   || 3,        // 秒
@@ -187,9 +170,7 @@ class StepTutor {
         };
     }
 
-    // ─── 初始化 ─────────────────────────────────────────────────────
     _init() {
-        // 讓 indicator.bgColor 跟隨 button.theme
         this.options.indicator.bgColor =
             StepTutor.COLORS[this.options.button.theme] ||
             StepTutor.COLORS.special;
@@ -247,7 +228,6 @@ class StepTutor {
         });
     }
 
-    // 從陣列載入（JSON 匯入路徑）
     _loadStepsFromArray(arr) {
         this.steps = [];
         this.targetElements = new Map();
@@ -273,7 +253,6 @@ class StepTutor {
         this.totalSteps = this.steps.length;
     }
 
-    // ─── DOM 建構 ────────────────────────────────────────────────────
     _createLayout() {
         this._buildStepContainer();
         this._buildControls();
@@ -422,7 +401,6 @@ class StepTutor {
         return ind;
     }
 
-    // 建立內容元素（共用）
     _buildContentEl(step) {
         const div = document.createElement('div');
         div.className = 'st-content';
@@ -448,7 +426,6 @@ class StepTutor {
         card.className = 'st-card';
         card.style.setProperty('--card-accent', accentHex);
 
-        // ── 標題列 ──
         const header = document.createElement('div');
         header.className = 'st-card-header';
 
@@ -487,7 +464,6 @@ class StepTutor {
         front.className = 'st-card-face st-card-face-front';
         front.appendChild(this._buildContentEl(step));
 
-        // 翻轉按鈕（只在有 cardBack 時出現）
         if (step.cardBack) {
             const flipRow = document.createElement('div');
             flipRow.className = 'st-card-flip-row';
@@ -543,9 +519,7 @@ class StepTutor {
             const expanded = card.classList.toggle('is-expanded');
             toggleBtn.setAttribute('aria-label', expanded ? '收合' : '展開');
         };
-        header.addEventListener('click', toggleExpand);
 
-        // 記錄 DOM 參照方便 reset
         step._cardEl = card;
 
         return card;
