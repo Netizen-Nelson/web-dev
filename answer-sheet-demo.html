@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Answer Sheet 元件示範</title>
+<style>
+  /* ── reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #0C0D0C;
+    --shell:   #C6C7BD;
+    --dim:     #3A3B38;
+    --panel:   #141614;
+    --border:  #252624;
+    --lavender:#C3A5E5;
+    --sky:     #08A9D1;
+    --safe:    #40C99A;
+    --warning: #F08080;
+    --yellow:  #DECA4B;
+    --special: #C8DD5A;
+    --focus:   #A0CF72;
+    --orange:  #EDA109;
+    --indigo:  #7B6CF0;
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--shell);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── layout ── */
+  .page-wrap {
+    display: grid;
+    /*
+      aside 需要足夠放下答案卡：
+      2 欄 × (題號 ~40px + 4選項 ~32px×4 + 間距) ≈ 460px
+      3 欄時建議 680px。這裡預設讓 aside 自適應，min 460px。
+    */
+    grid-template-columns: 1fr minmax(460px, auto);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "header header"
+      "main   aside";
+    min-height: 100vh;
+    /* 防止整體頁面橫向溢出 */
+    overflow-x: hidden;
+  }
+
+  /* ── header ── */
+  .page-header {
+    grid-area: header;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .page-header h1 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--special);
+    letter-spacing: .03em;
+    flex-shrink: 0;
+  }
+  .header-meta {
+    font-size: 0.8rem;
+    color: #56574F;
+  }
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .hdr-btn {
+    padding: 4px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--dim);
+    background: transparent;
+    color: var(--shell);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .hdr-btn:hover { border-color: var(--shell); }
+  .hdr-btn.active {
+    background: var(--lavender);
+    border-color: var(--lavender);
+    color: #0C0D0C;
+    font-weight: 700;
+  }
+
+  /* tag badge */
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+  }
+  .tag-sky { background: rgba(8,169,209,.18); color: var(--sky); }
+  .tag-safe { background: rgba(64,201,154,.18); color: var(--safe); }
+
+  /* ── main: question list ── */
+  .main-scroll {
+    grid-area: main;
+    overflow-y: auto;
+    padding: 28px 32px 60px;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #56574F;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 18px;
+  }
+  .section-block { margin-bottom: 36px; }
+
+  /* reading passage */
+  .passage {
+    background: #181917;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--sky);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: #9A9B96;
+  }
+  .passage strong { color: var(--shell); }
+
+  /* question card */
+  .q-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+  .q-item:hover { border-color: var(--sky); }
+  .q-item.as-q-hl {
+    border-color: var(--sky) !important;
+    background: rgba(8,169,209,.07) !important;
+  }
+
+  .q-num {
+    position: absolute;
+    top: 12px; left: 16px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: #56574F;
+    line-height: 1;
+  }
+  .q-text {
+    padding-left: 32px;
+    font-size: 0.93rem;
+    color: var(--shell);
+    margin-bottom: 10px;
+  }
+  .q-text em { color: var(--yellow); font-style: normal; }
+  .q-choices {
+    padding-left: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+  }
+  .q-choice {
+    font-size: 0.85rem;
+    color: #7A7B78;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+  }
+  .q-choice-lbl {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #56574F;
+    flex-shrink: 0;
+  }
+
+  /* click hint */
+  .click-hint {
+    position: absolute;
+    top: 12px; right: 14px;
+    font-size: 0.68rem;
+    color: #3A3B38;
+    pointer-events: none;
+  }
+
+  /* ── aside: answer sheet ── */
+  .aside-wrap {
+    grid-area: aside;
+    border-left: 1px solid var(--border);
+    padding: 18px 16px;
+    position: sticky;
+    top: 57px;    /* header height */
+    height: calc(100vh - 57px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg);
+  }
+  .aside-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: #3A3B38;
+    margin-bottom: 12px;
+  }
+
+  /* ── config panel ── */
+  .config-panel {
+    background: #181917;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 14px;
+    margin-bottom: 14px;
+    font-size: 0.8rem;
+  }
+  .config-panel summary {
+    cursor: pointer;
+    color: #56574F;
+    font-size: 0.75rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-weight: 700;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .config-panel summary:hover { color: var(--shell); }
+  .config-panel summary::before { content: '▸'; }
+  details[open] .config-panel summary::before { content: '▾'; }
+  .config-rows { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .cfg-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .cfg-lbl { color: #7A7B78; }
+  .cfg-row select,
+  .cfg-row input[type=number] {
+    background: #0C0D0C;
+    border: 1px solid var(--dim);
+    color: var(--shell);
+    border-radius: 4px;
+    padding: 3px 7px;
+    font-size: 0.78rem;
+    width: 110px;
+  }
+  .cfg-row select:focus,
+  .cfg-row input:focus { outline: 1px solid var(--sky); border-color: var(--sky); }
+
+  .apply-cfg-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid var(--lavender);
+    background: rgba(195,165,229,.12);
+    color: var(--lavender);
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background .15s;
+  }
+  .apply-cfg-btn:hover { background: rgba(195,165,229,.22); }
+
+  /* ── color legend ── */
+  .color-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+  }
+  .clr-swatch {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform .12s, border-color .12s;
+    title: attr(title);
+  }
+  .clr-swatch:hover  { transform: scale(1.25); }
+  .clr-swatch.active { border-color: #fff; }
+
+  /* ── code snippet ── */
+  pre.usage {
+    background: #181917;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 0.72rem;
+    font-family: 'Courier New', monospace;
+    color: #7A7B78;
+    overflow-x: auto;
+    margin-top: 14px;
+    line-height: 1.6;
+  }
+  .kw  { color: var(--lavender); }
+  .str { color: var(--focus); }
+  .cmt { color: #3A3B38; }
+
+  /* ── responsive ── */
+  @media (max-width: 960px) {
+    .page-wrap {
+      grid-template-columns: 1fr;
+      grid-template-areas: "header" "aside" "main";
+    }
+    .aside-wrap {
+      position: static;
+      height: auto;
+      border-left: none;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;    /* 小螢幕答案卡允許水平卷軸 */
+    }
+    .main-scroll { padding: 20px 16px 60px; }
+    .q-choices { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- ── HEADER ── -->
+  <header class="page-header">
+    <h1>📋 Answer Sheet 元件示範</h1>
+    <span class="header-meta">IELTS Network · 單選題答案卷 Web Component</span>
+    <div class="header-actions">
+      <span class="tag tag-sky">v1.0</span>
+      <button class="hdr-btn active" id="themeBtn" onclick="toggleTheme()">🌙 深色</button>
+      <button class="hdr-btn" onclick="loadAnswerKey()">🔑 載入答案金鑰（示範批改）</button>
+    </div>
+  </header>
+
+  <!-- ── MAIN: Questions ── -->
+  <main class="main-scroll">
+
+    <!-- Section 1: Vocabulary -->
+    <div class="section-block">
+      <div class="section-label">Section 1 — Vocabulary &amp; Meaning (Q1–8)</div>
+      <div id="q1" class="q-item" data-q="1">
+        <span class="q-num">1</span>
+        <div class="q-text">The word <em>enumerate</em> is closest in meaning to:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> estimate roughly</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> list one by one</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> measure precisely</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> ignore completely</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q2" class="q-item" data-q="2">
+        <span class="q-num">2</span>
+        <div class="q-text">Which word is a synonym for <em>meticulous</em>?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> careless</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> thorough</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> impulsive</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> vague</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q3" class="q-item" data-q="3">
+        <span class="q-num">3</span>
+        <div class="q-text">The word <em>subsequent</em> means:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> prior to</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> unrelated</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> coming after</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> simultaneous</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q4" class="q-item" data-q="4">
+        <span class="q-num">4</span>
+        <div class="q-text">An <em>ambiguous</em> statement is one that is:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> extremely clear</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> open to more than one interpretation</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> deliberately false</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> formally written</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q5" class="q-item" data-q="5">
+        <span class="q-num">5</span>
+        <div class="q-text">Choose the word that means <em>to make something less severe</em>:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> exacerbate</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> mitigate</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> obliterate</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> stipulate</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q6" class="q-item" data-q="6">
+        <span class="q-num">6</span>
+        <div class="q-text"><em>Albeit</em> is best replaced by which connector?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> because</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> even though</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> as a result</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> in addition</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q7" class="q-item" data-q="7">
+        <span class="q-num">7</span>
+        <div class="q-text">Which prefix means <em>not</em> or <em>opposite of</em>?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> mis-</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> re-</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> un-</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> pre-</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q8" class="q-item" data-q="8">
+        <span class="q-num">8</span>
+        <div class="q-text">The noun form of <em>acquire</em> is:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> acquisitive</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> acquirement</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> acquisition</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> acquirable</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+    </div>
+
+    <!-- Section 2: Grammar -->
+    <div class="section-block">
+      <div class="section-label">Section 2 — Grammar in Use (Q9–16)</div>
+
+      <div id="q9" class="q-item" data-q="9">
+        <span class="q-num">9</span>
+        <div class="q-text">Choose the correct form: "She _____ to the conference by the time we arrived."</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> has already gone</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> had already gone</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> already went</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> was already going</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q10" class="q-item" data-q="10">
+        <span class="q-num">10</span>
+        <div class="q-text">"If I _____ more time, I would have reviewed the report."</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> have</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> had</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> had had</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> would have</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q11" class="q-item" data-q="11">
+        <span class="q-num">11</span>
+        <div class="q-text">Which sentence uses the passive voice correctly?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> The report written by the manager.</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> The report was written by the manager.</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> The report has write by the manager.</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> The manager written the report.</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q12" class="q-item" data-q="12">
+        <span class="q-num">12</span>
+        <div class="q-text">"Neither the CEO nor the directors _____ attended the session."</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> has</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> have</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> having</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> had</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q13" class="q-item" data-q="13">
+        <span class="q-num">13</span>
+        <div class="q-text">The gerund form is used correctly in:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> She enjoys to swim every morning.</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> She enjoys swim every morning.</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> She enjoys swimming every morning.</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> She enjoys swam every morning.</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q14" class="q-item" data-q="14">
+        <span class="q-num">14</span>
+        <div class="q-text">"The data _____ collected over three years." — choose the correct verb:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> were</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> was</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> are</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> Both a and b are acceptable</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q15" class="q-item" data-q="15">
+        <span class="q-num">15</span>
+        <div class="q-text">Which is a relative clause used correctly?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> The book, which I borrowed it, was fascinating.</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> The book, which I borrowed, was fascinating.</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> The book I borrowed it was fascinating.</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> The book that I borrowed it was fascinating.</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q16" class="q-item" data-q="16">
+        <span class="q-num">16</span>
+        <div class="q-text">Identify the correct reported speech: He said, "I will finish it tomorrow."</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> He said he will finish it tomorrow.</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> He said he would finish it the next day.</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> He said he would finish it tomorrow.</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> He told he would finish it the next day.</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+    </div>
+
+    <!-- Section 3: Reading -->
+    <div class="section-block">
+      <div class="section-label">Section 3 — Reading Comprehension (Q17–24)</div>
+      <div class="passage">
+        <strong>Passage:</strong> Urban farming has emerged as a viable solution to food insecurity in densely populated cities. By converting rooftops, vacant lots, and even indoor spaces into productive growing areas, municipalities can reduce their dependence on long supply chains. Studies suggest that a single hectare of urban farmland can supply fresh produce to approximately 200 families annually. Furthermore, urban agriculture contributes to biodiversity, reduces heat islands, and improves community well-being. Critics, however, point out that the initial infrastructure costs remain prohibitively high for low-income communities, and that water usage can offset some environmental gains. Despite these challenges, pilot programmes in cities such as Singapore, Detroit, and Taipei have demonstrated measurable improvements in both food access and neighbourhood cohesion.
+      </div>
+
+      <div id="q17" class="q-item" data-q="17">
+        <span class="q-num">17</span>
+        <div class="q-text">What is the main purpose of the passage?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> To condemn urban farming as impractical</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> To present a balanced view of urban farming</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> To promote a specific urban farming product</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> To compare farming methods across continents</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q18" class="q-item" data-q="18">
+        <span class="q-num">18</span>
+        <div class="q-text">According to the passage, one hectare of urban farmland can supply produce to approximately how many families?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> 20</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> 2,000</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> 200</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> 20,000</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q19" class="q-item" data-q="19">
+        <span class="q-num">19</span>
+        <div class="q-text">Which word in the passage is closest in meaning to <em>extremely high</em>?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> measurable</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> prohibitively</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> viable</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> densely</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q20" class="q-item" data-q="20">
+        <span class="q-num">20</span>
+        <div class="q-text">Which city is NOT mentioned as a pilot programme location?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> Singapore</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> Detroit</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> Tokyo</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> Taipei</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q21" class="q-item" data-q="21">
+        <span class="q-num">21</span>
+        <div class="q-text">Critics of urban farming mentioned in the passage argue that:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> it reduces neighbourhood cohesion</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> startup costs are too high for poorer communities</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> it cannot reduce dependence on supply chains</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> it is only effective in Asian cities</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q22" class="q-item" data-q="22">
+        <span class="q-num">22</span>
+        <div class="q-text">The phrase <em>heat islands</em> in the passage refers to:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> tropical tourist destinations</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> isolated warm ocean currents</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> urban areas that are significantly warmer than surroundings</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> greenhouses used for indoor farming</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q23" class="q-item" data-q="23">
+        <span class="q-num">23</span>
+        <div class="q-text">The word <em>cohesion</em> as used in the passage most likely means:</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> separation between groups</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> unity and cooperation</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> physical infrastructure</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> financial profit</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+
+      <div id="q24" class="q-item" data-q="24">
+        <span class="q-num">24</span>
+        <div class="q-text">Which of the following best summarises the passage's conclusion?</div>
+        <div class="q-choices">
+          <div class="q-choice"><span class="q-choice-lbl">a)</span> Urban farming is too expensive to be worth pursuing.</div>
+          <div class="q-choice"><span class="q-choice-lbl">b)</span> Despite limitations, urban farming has shown positive real-world results.</div>
+          <div class="q-choice"><span class="q-choice-lbl">c)</span> Urban farming is only practical in wealthy cities.</div>
+          <div class="q-choice"><span class="q-choice-lbl">d)</span> Water consumption makes urban farming environmentally harmful.</div>
+        </div>
+        <span class="click-hint">↑ 點此定位</span>
+      </div>
+    </div><!-- /section 3 -->
+
+    <!-- Usage code -->
+    <div class="section-label" style="margin-top:40px;">元件使用說明</div>
+    <pre class="usage"><span class="cmt">&lt;!-- 1. 引入元件 --&gt;</span>
+<span class="kw">&lt;script</span> <span class="str">src</span>=<span class="str">"answer-sheet.js"</span><span class="kw">&gt;&lt;/script&gt;</span>
+
+<span class="cmt">&lt;!-- 2. 全域預設（可選） --&gt;</span>
+<span class="kw">&lt;script&gt;</span>
+window.AnswerSheetConfig = {
+  theme: <span class="str">'dark'</span>,
+  selectedColor: <span class="str">'lavender'</span>,
+  hoverColor: <span class="str">'sky'</span>,
+  perColumn: 10,
+  submitUrl: <span class="str">'/api/submit.php'</span>,
+};
+<span class="kw">&lt;/script&gt;</span>
+
+<span class="cmt">&lt;!-- 3. 嵌入元件 --&gt;</span>
+<span class="kw">&lt;answer-sheet</span>
+  <span class="str">total</span>=<span class="str">"24"</span>
+  <span class="str">options</span>=<span class="str">"4"</span>
+  <span class="str">option-case</span>=<span class="str">"lower"</span>
+  <span class="str">per-column</span>=<span class="str">"12"</span>    <span class="cmt">&lt;!-- 12題/欄 → 2欄，適合 ~420px 容器 --&gt;</span>
+  <span class="str">width</span>=<span class="str">"100%"</span>         <span class="cmt">&lt;!-- 任意 CSS 寬度："420px" "fit-content" 等 --&gt;</span>
+  <span class="str">submit-url</span>=<span class="str">"/api/submit.php"</span>
+  <span class="str">answer-src</span>=<span class="str">"/api/answers.json"</span>
+  <span class="str">question-selector</span>=<span class="str">".q-item"</span>
+  <span class="str">selected-color</span>=<span class="str">"lavender"</span>
+  <span class="str">hover-color</span>=<span class="str">"sky"</span>
+  <span class="str">theme</span>=<span class="str">"dark"</span>
+  <span class="str">submit-filename</span>=<span class="str">"quiz_result"</span>
+<span class="kw">&gt;&lt;/answer-sheet&gt;</span>
+
+<span class="cmt">&lt;!-- 4. 或以 JS 設定答案金鑰 --&gt;</span>
+<span class="kw">&lt;script&gt;</span>
+document.querySelector(<span class="str">'answer-sheet'</span>)
+  .setAnswerKey({ <span class="str">"1"</span>:<span class="str">"b"</span>, <span class="str">"2"</span>:<span class="str">"b"</span>, <span class="str">"3"</span>:<span class="str">"c"</span> <span class="cmt">/* … */</span> });
+<span class="kw">&lt;/script&gt;</span>
+
+<span class="cmt">&lt;!-- 5. 後端 src JSON 格式 --&gt;</span>
+{ <span class="str">"total"</span>: 24, <span class="str">"options"</span>: 4, <span class="str">"optionCase"</span>: <span class="str">"lower"</span> }
+
+<span class="cmt">&lt;!-- 6. 後端回傳帶答案金鑰（批改方案 B） --&gt;</span>
+{ <span class="str">"ok"</span>: true, <span class="str">"answers"</span>: { <span class="str">"1"</span>:<span class="str">"b"</span>, <span class="str">"2"</span>:<span class="str">"b"</span> <span class="cmt">/* … */</span> } }</pre>
+
+  </main><!-- /main -->
+
+  <!-- ── ASIDE: Answer Sheet ── -->
+  <aside class="aside-wrap">
+    <div class="aside-label">答案卡</div>
+
+    <!-- Config panel -->
+    <details>
+      <div class="config-panel">
+        <summary>外觀設定</summary>
+        <div class="config-rows">
+          <div class="cfg-row">
+            <span class="cfg-lbl">選中顏色</span>
+            <div class="color-legend" id="selColors"></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-lbl">Hover 顏色</span>
+            <div class="color-legend" id="hovColors"></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-lbl">每欄題數</span>
+            <input type="number" id="cfgPerCol" value="12" min="5" max="25">
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-lbl">選項大寫</span>
+            <select id="cfgCase">
+              <option value="lower">小寫 a b c d</option>
+              <option value="upper">大寫 A B C D</option>
+            </select>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-lbl">選項數量</span>
+            <select id="cfgOpts">
+              <option value="2">2 選項</option>
+              <option value="3">3 選項</option>
+              <option value="4" selected>4 選項</option>
+              <option value="5">5 選項</option>
+            </select>
+          </div>
+        </div>
+        <button class="apply-cfg-btn" onclick="applyConfig()">套用設定</button>
+      </div>
+    </details>
+
+    <!-- The component
+         width 屬性：可設 "100%"、"420px"、"fit-content" 等任意 CSS 寬度值。
+         per-column="12" → 24題÷12 = 2欄，適合此側欄寬度。
+    -->
+    <answer-sheet
+      id="mySheet"
+      total="24"
+      options="4"
+      option-case="lower"
+      per-column="12"
+      width="100%"
+      question-selector=".q-item"
+      selected-color="lavender"
+      hover-color="sky"
+      theme="dark">
+    </answer-sheet>
+
+  </aside>
+
+</div><!-- /page-wrap -->
+
+<!-- Load the component script -->
+<script src="answer-sheet.js"></script>
+
+<script>
+/* ── 品牌色盤（用於設定面板）──────────────────────────────────── */
+const BRAND_COLORS = {
+  shell:    '#C6C7BD', lavender: '#C3A5E5', special: '#C8DD5A',
+  warning:  '#F08080', salmon:   '#E5C3B3', sky:     '#08A9D1',
+  safe:     '#40C99A', vanilla:  '#DBEDD8', yellow:  '#DECA4B',
+  focus:    '#A0CF72', info:     '#4285EB', stone:   '#95BDD7',
+  indigo:   '#7B6CF0', pink:     '#FFB3D9', orange:  '#EDA109',
+};
+
+/* ── 示範用答案金鑰 ── */
+const DEMO_ANSWER_KEY = {
+  1:'b', 2:'b', 3:'c', 4:'b', 5:'b', 6:'b', 7:'c', 8:'c',
+  9:'b', 10:'c', 11:'b', 12:'b', 13:'c', 14:'d', 15:'b', 16:'b',
+  17:'b', 18:'c', 19:'b', 20:'c', 21:'b', 22:'c', 23:'b', 24:'b',
+};
+
+/* ── 建立色板 ── */
+let selColor = 'lavender';
+let hovColor = 'sky';
+
+function buildSwatches(containerId, activeKey, onPick) {
+  const wrap = document.getElementById(containerId);
+  Object.entries(BRAND_COLORS).forEach(([name, hex]) => {
+    const el = document.createElement('span');
+    el.className = 'clr-swatch' + (name === activeKey ? ' active' : '');
+    el.style.background = hex;
+    el.title = name;
+    el.dataset.name = name;
+    el.addEventListener('click', () => {
+      wrap.querySelectorAll('.clr-swatch').forEach(s => s.classList.remove('active'));
+      el.classList.add('active');
+      onPick(name);
+    });
+    wrap.appendChild(el);
+  });
+}
+
+buildSwatches('selColors', selColor, n => { selColor = n; });
+buildSwatches('hovColors', hovColor, n => { hovColor = n; });
+
+/* ── 套用設定 ── */
+function applyConfig() {
+  const sheet = document.getElementById('mySheet');
+  sheet.setAttribute('selected-color', selColor);
+  sheet.setAttribute('hover-color', hovColor);
+  sheet.setAttribute('per-column', document.getElementById('cfgPerCol').value);
+  sheet.setAttribute('option-case', document.getElementById('cfgCase').value);
+  sheet.setAttribute('options', document.getElementById('cfgOpts').value);
+  /* width 保持 100%，使用者可在此自訂 */
+  sheet.setAttribute('width', '100%');
+}
+
+/* ── 深色 / 淺色切換 ── */
+let isDark = true;
+function toggleTheme() {
+  isDark = !isDark;
+  const sheet = document.getElementById('mySheet');
+  sheet.setAttribute('theme', isDark ? 'dark' : 'light');
+
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = isDark ? '🌙 深色' : '☀️ 淺色';
+  btn.classList.toggle('active', isDark);
+
+  // 同步頁面背景
+  document.documentElement.style.setProperty('--bg',   isDark ? '#0C0D0C' : '#f0f0ee');
+  document.documentElement.style.setProperty('--shell', isDark ? '#C6C7BD' : '#111111');
+  document.documentElement.style.setProperty('--panel', isDark ? '#141614' : '#ffffff');
+  document.documentElement.style.setProperty('--border', isDark ? '#252624' : '#d6d6d6');
+  document.documentElement.style.setProperty('--dim',   isDark ? '#3A3B38' : '#bbbbbb');
+  document.body.style.background    = isDark ? '#0C0D0C' : '#f0f0ee';
+  document.body.style.color         = isDark ? '#C6C7BD' : '#111111';
+}
+
+/* ── 載入答案金鑰（示範批改）── */
+function loadAnswerKey() {
+  const sheet = document.getElementById('mySheet');
+  sheet.setAnswerKey(DEMO_ANSWER_KEY);
+
+  // 給使用者提示
+  const btn = event.target;
+  btn.textContent = '✓ 答案金鑰已載入';
+  btn.style.color = '#40C99A';
+  btn.style.borderColor = '#40C99A';
+  setTimeout(() => {
+    btn.textContent = '🔑 載入答案金鑰（示範批改）';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  }, 2500);
+}
+</script>
+</body>
+</html>
