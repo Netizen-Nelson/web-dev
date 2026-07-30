@@ -1,5 +1,18 @@
 /**
- * chunk-demo.js  v3
+ * chunk-demo.js  v4
+ *
+ * 新增屬性（v4）：
+ *   translation        句子翻譯模板，佔位符與 sentence 相同：{1} {2} …
+ *                      例：translation="我每天{1}去{2}。"
+ *   show-translation   true|false  是否顯示翻譯行，預設 false
+ *
+ * <cd-level> 新增屬性（v4）：
+ *   trans              該等級對應的翻譯詞，例如 trans="走路"
+ *
+ * data-config / ChunkDemoConfig 新增對應鍵：
+ *   showTranslation    boolean  (預設 false)
+ *   translationColor   string   翻譯文字顏色 (預設 '#8C9088')
+ *   translationBorderColor string 翻譯左側線顏色 (預設與主題 border 同色)
  *
  * 新增屬性（v3）：
  *   show-dots       true|false          圓點顯示開關，預設 true
@@ -151,6 +164,19 @@ chunk-demo { display: block; }
   background: var(--pvbg, rgba(255,255,255,.035));
 }
 .cd-pv-text { font-size: .89rem; font-style: italic; color: var(--pvt, #7a8078); }
+
+/* ── 翻譯行（v4）────────────────────────── */
+.cd-translation {
+  margin-top: 7px; padding: 6px 12px;
+  border-left: 3px solid var(--trlb, #C6C7BD);
+  border-radius: 0 6px 6px 0;
+  background: rgba(255,255,255,.025);
+  transition: opacity .2s ease;
+}
+.cd-tr-text {
+  font-size: .87rem; color: var(--trlc, #8C9088);
+  letter-spacing: .01em; line-height: 1.6;
+}
     `.trim();
     (doc.head || doc.documentElement).appendChild(s);
   }
@@ -196,6 +222,10 @@ chunk-demo { display: block; }
     width:              null,
     dropdownWidth:      null,
     buttonWidth:        null,
+    /* ── v4 新增 ──────────────────────────── */
+    showTranslation:       false,
+    translationColor:      '#8C9088',
+    translationBorderColor: null,   // null = 跟隨主題 border 色
   };
 
   /* ═══════════════════════════════════════════
@@ -211,6 +241,8 @@ chunk-demo { display: block; }
         /* v3 新增 */
         'show-dots', 'width', 'dropdown-width', 'button-width',
         'level-colors', 'mask-mode',
+        /* v4 新增 */
+        'translation', 'show-translation',
       ];
     }
 
@@ -285,9 +317,14 @@ chunk-demo { display: block; }
       const mmAttr = this.getAttribute('mask-mode');
       if (mmAttr !== null) cfg.maskMode = mmAttr === 'true';
 
+      /* v4：show-translation */
+      const stAttr = this.getAttribute('show-translation');
+      if (stAttr !== null) cfg.showTranslation = stAttr === 'true';
+
       /* 衍生值 */
       cfg._pvColor   = cfg.previewBorderColor || cfg._theme.border;
       cfg._maskColor = cfg.maskColor || DEFAULTS.maskColor;
+      cfg._trColor   = cfg.translationBorderColor || cfg._theme.border;
 
       return cfg;
     }
@@ -305,6 +342,7 @@ chunk-demo { display: block; }
           levels      : cdLevels.map((lv, j) => ({
             level: parseInt(lv.getAttribute('level') || String(j + 1)),
             text : lv.innerHTML.trim(),
+            trans: lv.getAttribute('trans') ?? '',   /* v4 */
           })),
         };
       });
@@ -321,7 +359,8 @@ chunk-demo { display: block; }
         try { chunks = JSON.parse(this.getAttribute('chunks') || '[]'); } catch { chunks = []; }
       }
 
-      this._sent   = this.getAttribute('sentence') || '';
+      this._sent   = this.getAttribute('sentence')    || '';
+      this._trans  = this.getAttribute('translation') || '';  /* v4 */
       this._chunks = chunks;
 
       const prev  = this._state;
@@ -397,6 +436,24 @@ chunk-demo { display: block; }
         t.innerHTML   = this._full();
         pv.appendChild(t);
         this.appendChild(pv);
+      }
+
+      /* ── v4：翻譯行 ────────────────────── */
+      const showTrans =
+        this.getAttribute('show-translation') === 'true' ||
+        (this.getAttribute('show-translation') === null && cfg.showTranslation);
+
+      if (showTrans && this._trans) {
+        const tr = doc.createElement('div');
+        tr.className = 'cd-translation';
+        tr.style.setProperty('--trlb', cfg._trColor);
+        if (cfg.translationColor) tr.style.setProperty('--trlc', cfg.translationColor);
+
+        const tt     = doc.createElement('div');
+        tt.className = 'cd-tr-text';
+        tt.innerHTML = this._fullTrans();
+        tr.appendChild(tt);
+        this.appendChild(tr);
       }
     }
 
@@ -557,6 +614,19 @@ chunk-demo { display: block; }
         const lvNum = (this._state.find(st => st.id === c.id) || {}).level || 1;
         const lvD   = c.levels.find(l => l.level === lvNum) || c.levels[0];
         result = result.replace(`{${c.id}}`, lvD?.text ?? '…');
+      });
+      return result;
+    }
+
+    /* ── v4：組合翻譯句 ───────────────────── */
+    _fullTrans() {
+      if (!this._trans) return '';
+      let result = this._trans;
+      this._chunks.forEach(c => {
+        const lvNum = (this._state.find(st => st.id === c.id) || {}).level || 1;
+        const lvD   = c.levels.find(l => l.level === lvNum) || c.levels[0];
+        /* 優先用 trans；若未設定則退回英文 text */
+        result = result.replace(`{${c.id}}`, lvD?.trans || lvD?.text || '…');
       });
       return result;
     }
