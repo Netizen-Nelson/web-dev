@@ -158,24 +158,24 @@ chunk-demo { display: block; }
 
 /* ── 整句預覽 ───────────────────────────── */
 .cd-preview {
-  margin-top: 9px; padding: 7px 12px;
+  margin-top: 3px; padding: 3px 6px;
   border-left: 3px solid var(--pvb, #C8DD5A);
   border-radius: 0 6px 6px 0;
   background: var(--pvbg, rgba(255,255,255,.035));
 }
-.cd-pv-text { font-size: .89rem; font-style: italic; color: var(--pvt, #7a8078); }
+.cd-pv-text { font-size: .9rem; font-style: italic; color: var(--pvt, #7a8078); }
 
 /* ── 翻譯行（v4）────────────────────────── */
 .cd-translation {
-  margin-top: 7px; padding: 6px 12px;
+  margin-top: 3px; padding: 3px 6px;
   border-left: 3px solid var(--trlb, #C6C7BD);
   border-radius: 0 6px 6px 0;
   background: rgba(255,255,255,.025);
   transition: opacity .2s ease;
 }
 .cd-tr-text {
-  font-size: .87rem; color: var(--trlc, #8C9088);
-  letter-spacing: .01em; line-height: 1.6;
+  font-size: .9rem; color: var(--trlc, #8C9088);
+  letter-spacing: .01em; line-height: 1.25;
 }
     `.trim();
     (doc.head || doc.documentElement).appendChild(s);
