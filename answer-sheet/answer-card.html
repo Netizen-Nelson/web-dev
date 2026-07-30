@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnswerCard 元件示範</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0C0D0C;
+      color: #C6C7BD;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    /* ── Demo page chrome ── */
+    .page-hd { margin-bottom: 28px; }
+    .page-hd h1 {
+      font-size: 1.4rem; color: #C8DD5A;
+      font-weight: 700; margin-bottom: 4px;
+    }
+    .page-hd p { font-size: 0.85rem; color: #3A3B38; }
+
+    .ctrl-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+
+    .ctrl-btn {
+      padding: 7px 14px;
+      background: #141514; color: #C6C7BD;
+      border: 1px solid #222320;
+      border-radius: 5px; font-size: 0.85rem;
+      cursor: pointer; transition: background .15s;
+      font-family: inherit;
+    }
+    .ctrl-btn:hover { background: #1E1F1C; }
+    .ctrl-btn.hi { border-color: #7B6CF0; color: #C3A5E5; }
+    .ctrl-btn.hi:hover { background: #16142A; }
+    .ctrl-btn.danger { border-color: #F08080; color: #F08080; }
+    .ctrl-btn.danger:hover { background: #1A1010; }
+
+    pre#demo-out {
+      background: #080908;
+      border: 1px solid #181916;
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.78rem; color: #40C99A;
+      white-space: pre; overflow-x: auto;
+      margin-bottom: 24px; display: none;
+      max-height: 260px; overflow-y: auto;
+    }
+    pre#demo-out.show { display: block; }
+
+    /* ── Demo question cards ── */
+    .q-list { max-width: 680px; }
+    .q-card {
+      background: #0F100F;
+      border: 1px solid #181916;
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin-bottom: 10px;
+    }
+    .q-no {
+      font-size: 0.72rem; color: #7B6CF0;
+      font-weight: 700; margin-bottom: 6px;
+      letter-spacing: .07em; text-transform: uppercase;
+    }
+    .q-text {
+      font-size: 0.95rem; line-height: 1.7;
+      color: #C6C7BD; margin-bottom: 10px;
+    }
+    .q-opts { display: flex; flex-direction: column; gap: 3px; }
+    .q-opt  { font-size: 0.85rem; color: #4A4B47; padding: 1px 0; }
+  </style>
+</head>
+<body>
+
+<div class="page-hd">
+  <h1>AnswerCard — 答案卡元件示範</h1>
+  <p>共 50 題 · 4 選項 · 雙欄模式 · 右側面板</p>
+</div>
+
+<div class="ctrl-row">
+  <button class="ctrl-btn hi"     onclick="card.open()">▶ 開啟答案卡</button>
+  <button class="ctrl-btn"        onclick="card.close()">收合</button>
+  <button class="ctrl-btn danger" onclick="card.reset()">清除所有答案</button>
+  <button class="ctrl-btn"        onclick="doSummary()">統計資訊</button>
+  <button class="ctrl-btn"        onclick="doLoadDemo()">載入示範答案（35題）</button>
+  <button class="ctrl-btn"        onclick="doShowAll()">顯示所有答案</button>
+</div>
+
+<pre id="demo-out"></pre>
+<div class="q-list" id="q-list"></div>
+
+<!-- ① 引入元件 -->
+<script src="answer-card.js"></script>
+
+<!-- ② 頁面自身的邏輯 -->
+<script>
+/* ── 示範題目資料 ──────────────────────────────────────────────── */
+const DEMO_QUESTIONS = [
+  {
+    text: 'The Renaissance artistic movement originated in which European country during the 14th century?',
+    opts: ['A. France', 'B. Italy', 'C. Germany', 'D. Spain']
+  },
+  {
+    text: 'Which of the following elements belongs to the noble gas group?',
+    opts: ['A. Chlorine', 'B. Nitrogen', 'C. Argon', 'D. Fluorine']
+  },
+  {
+    text: 'What is the largest organ in the human body?',
+    opts: ['A. Liver', 'B. Heart', 'C. Lung', 'D. Skin']
+  },
+  {
+    text: 'In economics, what does the abbreviation "GDP" stand for?',
+    opts: ['A. General Domestic Product', 'B. Gross Domestic Product', 'C. Global Development Plan', 'D. Gross Demand Percentage']
+  },
+  {
+    text: 'Which ancient wonder of the world was located in the city of Alexandria?',
+    opts: ['A. The Colossus of Rhodes', 'B. The Hanging Gardens', 'C. The Lighthouse of Alexandria', 'D. The Temple of Artemis']
+  },
+  {
+    text: 'The speed of light in a vacuum is approximately how many kilometres per second?',
+    opts: ['A. 150,000 km/s', 'B. 200,000 km/s', 'C. 300,000 km/s', 'D. 400,000 km/s']
+  },
+  {
+    text: 'Which programming paradigm treats computation as the evaluation of mathematical functions?',
+    opts: ['A. Object-Oriented', 'B. Imperative', 'C. Procedural', 'D. Functional']
+  },
+  {
+    text: 'Photosynthesis is the process by which plants use sunlight, water, and which gas to produce glucose?',
+    opts: ['A. Oxygen', 'B. Nitrogen', 'C. Carbon dioxide', 'D. Hydrogen']
+  },
+  {
+    text: 'Which treaty, signed in 1919, formally ended the First World War?',
+    opts: ['A. Treaty of Versailles', 'B. Treaty of Paris', 'C. Treaty of Westphalia', 'D. Treaty of Utrecht']
+  },
+  {
+    text: 'In musical notation, the term "allegro" indicates which of the following tempos?',
+    opts: ['A. Slow and stately', 'B. Fast and lively', 'C. Moderate pace', 'D. Very slowly']
+  },
+];
+
+/* ── 生成示範題目 ──────────────────────────────────────────────── */
+const qList = document.getElementById('q-list');
+for (let i = 1; i <= 50; i++) {
+  const q   = DEMO_QUESTIONS[(i - 1) % DEMO_QUESTIONS.length];
+  const div = document.createElement('div');
+  div.className = 'q-card';
+  div.innerHTML = `
+    <div class="q-no">第 ${i} 題</div>
+    <div class="q-text">${q.text}</div>
+    <div class="q-opts">
+      ${q.opts.map(o => `<div class="q-opt">${o}</div>`).join('')}
+    </div>
+  `;
+  qList.appendChild(div);
+}
+
+/* ── 初始化 AnswerCard ────────────────────────────────────────── */
+const card = new AnswerCard({
+  totalQuestions: 50,
+  optionCount:    4,
+  twoColumns:     true,
+  panelTitle:     '英語測驗答案卡',
+  exportLabel:    '匯出答案',
+  exportFileName: 'exam-answers',
+  panelSide:      'right',
+  onChange: (q, opt) => {
+    console.log(`Q${String(q).padStart(2, '0')} → ${opt ?? '（取消）'}`);
+  },
+});
+
+/* ── Demo helpers ────────────────────────────────────────────── */
+function showOut(data) {
+  const el = document.getElementById('demo-out');
+  el.textContent = JSON.stringify(data, null, 2);
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function doSummary()  { showOut(card.getSummary()); }
+function doShowAll()  { showOut(card.getAnswers()); }
+
+function doLoadDemo() {
+  const opts = ['A','B','C','D'];
+  const data = {};
+  for (let i = 1; i <= 35; i++) {
+    data[i] = opts[Math.floor(Math.random() * 4)];
+  }
+  card.reset();
+  card.setAnswers(data);
+  card.open();
+}
+</script>
+</body>
+</html>

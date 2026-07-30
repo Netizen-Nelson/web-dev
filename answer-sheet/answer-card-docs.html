@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnswerCard 使用說明</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0C0D0C;
+      --bg2:      #111211;
+      --bg3:      #181918;
+      --div:      #1A1B18;
+      --shell:    #C6C7BD;
+      --dim:      #5A5B57;
+      --dim2:     #3A3B38;
+      --lavender: #C3A5E5;
+      --special:  #C8DD5A;
+      --safe:     #40C99A;
+      --sky:      #08A9D1;
+      --indigo:   #7B6CF0;
+      --orange:   #EDA109;
+      --stone:    #95BDD7;
+      --focus:    #A0CF72;
+      --warning:  #F08080;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--shell);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ══ Sidebar ══════════════════════════════════════════════ */
+    #sidebar {
+      width: 210px;
+      min-height: 100vh;
+      background: var(--bg2);
+      border-right: 1px solid var(--div);
+      position: fixed;
+      top: 0; left: 0;
+      overflow-y: auto;
+      padding-bottom: 40px;
+      z-index: 100;
+      scrollbar-width: thin;
+      scrollbar-color: #1E1F1C transparent;
+    }
+    #sidebar::-webkit-scrollbar { width: 3px; }
+    #sidebar::-webkit-scrollbar-thumb { background: #1E1F1C; }
+
+    .brand {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid var(--div);
+      margin-bottom: 6px;
+    }
+    .brand-name {
+      font-size: 0.9rem; font-weight: 800;
+      color: var(--special); letter-spacing: .04em;
+    }
+    .brand-sub {
+      font-size: 0.68rem; color: var(--dim2);
+      margin-top: 2px; display: block;
+    }
+
+    #sidebar ul { list-style: none; padding: 0 8px; }
+    #sidebar li { margin: 1px 0; }
+
+    .nav-label {
+      font-size: 0.6rem; color: var(--dim2);
+      font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 12px 10px 3px;
+      display: block;
+    }
+
+    #sidebar a {
+      display: block;
+      padding: 5px 10px;
+      color: #5A5B57;
+      text-decoration: none;
+      font-size: 0.82rem;
+      border-radius: 4px;
+      transition: color .15s, background .15s;
+    }
+    #sidebar a:hover { color: var(--shell); background: var(--bg3); }
+    #sidebar a.active { color: var(--lavender); background: rgba(195,165,229,0.07); }
+
+    /* ══ Main ══════════════════════════════════════════════════ */
+    main {
+      margin-left: 210px;
+      flex: 1;
+      padding: 48px 52px 96px;
+      max-width: 920px;
+    }
+
+    /* Intro */
+    .intro { margin-bottom: 52px; }
+    .intro h1 {
+      font-size: 1.75rem; color: var(--special);
+      font-weight: 800; letter-spacing: -.01em;
+      margin-bottom: 10px;
+    }
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .badge {
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.73rem; font-weight: 600;
+    }
+    .badge-v  { background: rgba(123,108,240,.12); border: 1px solid rgba(123,108,240,.25); color: var(--indigo); }
+    .badge-nd { background: rgba(64,201,154,.08);  border: 1px solid rgba(64,201,154,.2);  color: var(--safe); }
+    .badge-js { background: rgba(200,221,90,.08);  border: 1px solid rgba(200,221,90,.2);  color: var(--special); }
+    .intro-desc { font-size: 0.9rem; color: var(--dim); line-height: 1.7; }
+
+    /* Sections */
+    section { margin-bottom: 56px; scroll-margin-top: 24px; }
+
+    h2 {
+      font-size: 1.25rem; color: var(--shell); font-weight: 700;
+      padding-bottom: 10px; margin-bottom: 16px;
+      border-bottom: 1px solid var(--div);
+    }
+    h3 {
+      font-size: 0.95rem; color: var(--lavender); font-weight: 600;
+      margin: 28px 0 10px;
+    }
+
+    p { color: var(--dim); font-size: 0.9rem; margin-bottom: 14px; line-height: 1.7; }
+
+    /* ══ Tables ════════════════════════════════════════════════ */
+    .tbl-wrap { overflow-x: auto; margin-bottom: 20px; border-radius: 6px; border: 1px solid var(--div); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+
+    thead th {
+      background: var(--bg2);
+      color: var(--dim2);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      border-bottom: 1px solid var(--div);
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--div);
+      vertical-align: top; line-height: 1.55;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: rgba(255,255,255,.012); }
+
+    td.prop {
+      color: var(--special);
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.8rem; white-space: nowrap;
+      font-weight: 600;
+    }
+    td.type {
+      color: var(--stone);
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.78rem; white-space: nowrap;
+    }
+    td.dflt {
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.78rem; color: var(--safe);
+    }
+    td.desc { color: #8A8B87; }
+    td.desc code { font-size: 0.82em; }
+
+    /* ── Method table ── */
+    td.method {
+      color: var(--lavender);
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.8rem; white-space: nowrap; font-weight: 600;
+    }
+    td.param {
+      color: var(--stone);
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.78rem;
+    }
+
+    /* ══ Code ══════════════════════════════════════════════════ */
+    pre.code {
+      background: #070807;
+      border: 1px solid #181916;
+      border-radius: 6px;
+      padding: 18px 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      line-height: 1.75;
+      margin: 14px 0;
+      color: #8A8B87;
+    }
+    /* Manual highlight classes */
+    .c-kw  { color: var(--lavender); }    /* keyword: const, new, function */
+    .c-fn  { color: var(--sky); }         /* function call */
+    .c-str { color: var(--safe); }        /* string value */
+    .c-num { color: var(--orange); }      /* number */
+    .c-key { color: var(--special); }     /* object key */
+    .c-cmt { color: #3A3B38; }            /* comment */
+    .c-boo { color: var(--focus); }       /* boolean */
+    .c-cls { color: #FFB3D9; }            /* class name */
+    .c-nul { color: var(--warning); }     /* null */
+
+    code {
+      background: #111211;
+      border: 1px solid #1A1B18;
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.82em;
+      color: var(--special);
+    }
+
+    /* ══ Color swatch ══════════════════════════════════════════ */
+    .sw {
+      display: inline-block;
+      width: 11px; height: 11px;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 5px;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    /* ══ Callout boxes ═════════════════════════════════════════ */
+    .note, .tip, .warn {
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.86rem;
+      color: #8A8B87;
+      margin: 14px 0;
+      line-height: 1.6;
+    }
+    .note { background: rgba(195,165,229,.05); border-left: 3px solid var(--lavender); }
+    .tip  { background: rgba(64,201,154,.05);  border-left: 3px solid var(--safe); }
+    .warn { background: rgba(240,128,128,.05); border-left: 3px solid var(--warning); }
+    .note strong { color: var(--lavender); }
+    .tip  strong { color: var(--safe); }
+    .warn strong { color: var(--warning); }
+
+    /* ══ Return type tag ═══════════════════════════════════════ */
+    .ret {
+      display: inline-block;
+      padding: 1px 8px;
+      background: rgba(8,169,209,.08);
+      border: 1px solid rgba(8,169,209,.18);
+      border-radius: 10px;
+      font-size: 0.72rem;
+      color: var(--sky);
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* ══ Priority chain ════════════════════════════════════════ */
+    .chain {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap; margin: 14px 0;
+    }
+    .chain-item {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-family: 'Fira Code', monospace;
+    }
+    .chain-arrow { color: var(--dim2); font-size: 1rem; }
+    .ci-base   { background: #181918; border: 1px solid #2A2B28; color: var(--dim); }
+    .ci-global { background: rgba(123,108,240,.08); border: 1px solid rgba(123,108,240,.2); color: var(--indigo); }
+    .ci-inst   { background: rgba(200,221,90,.08);  border: 1px solid rgba(200,221,90,.2);  color: var(--special); }
+    .chain-note { font-size: 0.78rem; color: var(--dim2); margin-left: 4px; }
+
+    /* ══ JSON Output preview ═══════════════════════════════════ */
+    .json-preview {
+      background: #070807;
+      border: 1px solid #181916;
+      border-radius: 6px;
+      padding: 16px 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: #5A5B57;
+    }
+    .json-key  { color: var(--stone); }
+    .json-val  { color: var(--safe); }
+    .json-null { color: var(--warning); }
+
+    /* ══ Section anchor offset ═════════════════════════════════ */
+    section { scroll-margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<!-- ══ Sidebar ══════════════════════════════════════════════════ -->
+<nav id="sidebar">
+  <div class="brand">
+    <div class="brand-name">AnswerCard</div>
+    <span class="brand-sub">v1.0 · 側邊答案卡元件</span>
+  </div>
+  <ul>
+    <li><a href="#quickstart">快速開始</a></li>
+
+    <li><span class="nav-label">配置選項</span></li>
+    <li><a href="#panel">面板佈局</a></li>
+    <li><a href="#toggle-sec">切換按鈕</a></li>
+    <li><a href="#questions">題目設定</a></li>
+    <li><a href="#circles">圓圈外觀</a></li>
+    <li><a href="#typography">字型</a></li>
+    <li><a href="#col-panel">顏色：面板</a></li>
+    <li><a href="#col-text">顏色：文字</a></li>
+    <li><a href="#col-circle">顏色：圓圈</a></li>
+    <li><a href="#col-toggle">顏色：切換＆進度</a></li>
+    <li><a href="#col-focus">顏色：Focus Ring</a></li>
+    <li><a href="#export-sec">匯出按鈕</a></li>
+    <li><a href="#callback">回呼函數</a></li>
+
+    <li><span class="nav-label">API</span></li>
+    <li><a href="#api">公開方法</a></li>
+    <li><a href="#global">全域設定</a></li>
+
+    <li><span class="nav-label">範例</span></li>
+    <li><a href="#ex-basic">基本用法</a></li>
+    <li><a href="#ex-theme">自訂主題</a></li>
+    <li><a href="#ex-save">自動存檔</a></li>
+    <li><a href="#ex-submit">送出驗證</a></li>
+  </ul>
+</nav>
+
+<!-- ══ Main ═════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- 頁面標頭 -->
+  <div class="intro">
+    <h1>AnswerCard 使用說明</h1>
+    <div class="badges">
+      <span class="badge badge-v">v1.0</span>
+      <span class="badge badge-nd">零依賴</span>
+      <span class="badge badge-js">純 JS</span>
+    </div>
+    <p class="intro-desc">
+      側邊滑入式答題卡元件。支援動態題數、2–5 個選項、單欄與雙欄模式，
+      提供完整的尺寸、間距、顏色客製化系統以及全域預設值機制。
+      所有 CSS 與 JS 整合於單一 <code>&lt;script&gt;</code>，無需額外依賴或建置工具。
+    </p>
+  </div>
+
+  <!-- ── 快速開始 ─────────────────────────────────────────── -->
+  <section id="quickstart">
+    <h2>快速開始</h2>
+    <p>將 <code>AnswerCard</code> class 程式碼複製至頁面 <code>&lt;script&gt;</code> 標籤，建立實例即可使用。</p>
+
+    <h3>引入方式</h3>
+    <pre class="code"><span class="c-cmt">&lt;!-- 在 &lt;/body&gt; 前引入，之後的 &lt;script&gt; 即可使用 AnswerCard --&gt;</span>
+&lt;<span class="c-key">script</span> <span class="c-key">src</span>=<span class="c-str">"answer-card.js"</span>&gt;&lt;/<span class="c-key">script</span>&gt;
+&lt;<span class="c-key">script</span>&gt;
+  <span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({ ... });
+&lt;/<span class="c-key">script</span>&gt;</pre>
+
+    <h3>最小用法</h3>
+    <pre class="code"><span class="c-cmt">// 建立 40 題、4 選項的答案卡（靠右，預設收合）</span>
+<span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">40</span>,
+  <span class="c-key">optionCount</span>:    <span class="c-num">4</span>,
+});</pre>
+
+    <h3>常見設定組合</h3>
+    <pre class="code"><span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">50</span>,
+  <span class="c-key">optionCount</span>:    <span class="c-num">4</span>,
+  <span class="c-key">twoColumns</span>:     <span class="c-boo">true</span>,
+  <span class="c-key">panelTitle</span>:     <span class="c-str">'英語科測驗答案卡'</span>,
+  <span class="c-key">panelSide</span>:      <span class="c-str">'right'</span>,
+  <span class="c-key">exportLabel</span>:    <span class="c-str">'匯出答案'</span>,
+  <span class="c-key">exportFileName</span>: <span class="c-str">'exam-answers'</span>,
+  <span class="c-key">onChange</span>: (q, opt, all) => {
+    console.<span class="c-fn">log</span>(<span class="c-str">`第 ${q} 題 → ${opt ?? '（取消）'}`</span>);
+  },
+});
+
+<span class="c-cmt">// 手動開啟面板</span>
+card.<span class="c-fn">open</span>();</pre>
+  </section>
+
+  <!-- ── 面板佈局 ─────────────────────────────────────────── -->
+  <section id="panel">
+    <h2>面板佈局</h2>
+    <p>控制答案卡面板的位置、尺寸、標題文字。<strong style="color:var(--shell)">面板寬度完全可自訂</strong>，單欄與雙欄模式各自獨立設定。</p>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">panelSide</td><td class="type">string</td>
+          <td class="dflt">'right'</td>
+          <td class="desc">面板出現的邊，可設為 <code>'right'</code> 或 <code>'left'</code>。切換按鈕位置、陰影方向、圓角位置均會自動對應調整。</td>
+        </tr>
+        <tr>
+          <td class="prop">panelWidth</td><td class="type">string</td>
+          <td class="dflt">'268px'</td>
+          <td class="desc"><strong style="color:var(--shell)">單欄模式</strong>時面板的寬度，接受任何有效 CSS 寬度（px、rem、vw 等）。</td>
+        </tr>
+        <tr>
+          <td class="prop">panelWidthTwoCol</td><td class="type">string</td>
+          <td class="dflt">'450px'</td>
+          <td class="desc"><strong style="color:var(--shell)">雙欄模式</strong>時面板的寬度。建議為 <code>panelWidth</code> 的 1.6–1.8 倍，確保圓圈有足夠空間。</td>
+        </tr>
+        <tr>
+          <td class="prop">twoColumns</td><td class="type">boolean</td>
+          <td class="dflt">false</td>
+          <td class="desc">啟用雙欄排版。題目以<strong style="color:var(--shell)">直向填欄</strong>排列（左欄先填滿後接右欄），符合標準答題卡習慣。</td>
+        </tr>
+        <tr>
+          <td class="prop">panelPadding</td><td class="type">string</td>
+          <td class="dflt">'14px'</td>
+          <td class="desc">面板 header、body、footer 的左右內距。</td>
+        </tr>
+        <tr>
+          <td class="prop">panelTitle</td><td class="type">string</td>
+          <td class="dflt">'答案卡'</td>
+          <td class="desc">顯示在面板頂部標題列的文字。</td>
+        </tr>
+        <tr>
+          <td class="prop">panelTitleSize</td><td class="type">string</td>
+          <td class="dflt">'0.95rem'</td>
+          <td class="desc">標題文字的字體大小，接受任何 CSS font-size 值。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="note">
+      <strong>注意：</strong>配置在 <code>new AnswerCard()</code> 時決定。若需執行期動態切換（如雙欄改單欄），請先呼叫 <code>card.destroy()</code> 再重新建立實例。
+    </div>
+  </section>
+
+  <!-- ── 切換按鈕 ─────────────────────────────────────────── -->
+  <section id="toggle-sec">
+    <h2>切換按鈕</h2>
+    <p>固定貼邊的切換按鈕，包含方向箭頭、直向進度條與完成百分比。按鈕與面板同步滑動，箭頭方向隨開關狀態自動翻轉。</p>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">toggleOffsetTop</td><td class="type">string</td>
+          <td class="dflt">'28vh'</td>
+          <td class="desc">切換按鈕距頁面頂端的距離，接受任何 CSS 值（px、vh 等）。若頁面有固定 header，建議設為 header 高度加上適當間距，例如 <code>'72px'</code>。</td>
+        </tr>
+        <tr>
+          <td class="prop">toggleSize</td><td class="type">string</td>
+          <td class="dflt">'34px'</td>
+          <td class="desc">切換按鈕的<strong style="color:var(--shell)">寬度</strong>，高度由箭頭 + 進度條 + 百分比自動決定。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 題目設定 ─────────────────────────────────────────── -->
+  <section id="questions">
+    <h2>題目設定</h2>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">totalQuestions</td><td class="type">number</td>
+          <td class="dflt">40</td>
+          <td class="desc">題目總數，決定答案卡的圓圈列數量，動態傳入，無上限。</td>
+        </tr>
+        <tr>
+          <td class="prop">optionCount</td><td class="type">number</td>
+          <td class="dflt">4</td>
+          <td class="desc">每題的選項數量，可設為 <code>2</code>、<code>3</code>、<code>4</code> 或 <code>5</code>。對應字母依序為 A、B、C、D、E（截取前 N 個）。全部題目共用相同的選項數量。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="tip">
+      <strong>提示：</strong>選項標籤固定為 A B C D E 前 N 個字母。若需自訂標籤（如數字 1 2 3 4），可修改元件內 <code>_buildDOM()</code> 方法中的 <code>labels</code> 陣列。
+    </div>
+  </section>
+
+  <!-- ── 圓圈外觀 ─────────────────────────────────────────── -->
+  <section id="circles">
+    <h2>圓圈外觀</h2>
+    <p>控制選項圓圈與題目列的尺寸、間距配置。雙欄模式可設定獨立的圓圈尺寸。</p>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">circleSize</td><td class="type">string</td>
+          <td class="dflt">'1.85rem'</td>
+          <td class="desc"><strong style="color:var(--shell)">單欄模式</strong>下圓圈的直徑（同時為寬與高）。</td>
+        </tr>
+        <tr>
+          <td class="prop">circleSizeTwoCol</td><td class="type">string</td>
+          <td class="dflt">'1.5rem'</td>
+          <td class="desc"><strong style="color:var(--shell)">雙欄模式</strong>下圓圈的直徑。空間較窄時建議設為 <code>circleSize</code> 的 80% 左右。</td>
+        </tr>
+        <tr>
+          <td class="prop">borderWidth</td><td class="type">string</td>
+          <td class="dflt">'2px'</td>
+          <td class="desc">未選取圓圈的邊框線條粗細。</td>
+        </tr>
+        <tr>
+          <td class="prop">optionGap</td><td class="type">string</td>
+          <td class="dflt">'4px'</td>
+          <td class="desc">同一題各選項圓圈之間的水平間距（A 與 B 之間等）。</td>
+        </tr>
+        <tr>
+          <td class="prop">questionGap</td><td class="type">string</td>
+          <td class="dflt">'4px'</td>
+          <td class="desc">題目列之間的垂直間距（grid <code>row-gap</code>）。</td>
+        </tr>
+        <tr>
+          <td class="prop">columnGap</td><td class="type">string</td>
+          <td class="dflt">'12px'</td>
+          <td class="desc">雙欄模式兩欄之間的水平間距（grid <code>column-gap</code>），僅 <code>twoColumns: true</code> 時生效。</td>
+        </tr>
+        <tr>
+          <td class="prop">cellPaddingV</td><td class="type">string</td>
+          <td class="dflt">'3px'</td>
+          <td class="desc">每個題目列的上下 padding。</td>
+        </tr>
+        <tr>
+          <td class="prop">cellPaddingH</td><td class="type">string</td>
+          <td class="dflt">'3px'</td>
+          <td class="desc">每個題目列的左右 padding。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 字型 ─────────────────────────────────────────────── -->
+  <section id="typography">
+    <h2>字型</h2>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">fontSize</td><td class="type">string</td>
+          <td class="dflt">'0.82rem'</td>
+          <td class="desc">選項圓圈內字母（A、B、C、D）的字體大小。</td>
+        </tr>
+        <tr>
+          <td class="prop">qNumFontSize</td><td class="type">string</td>
+          <td class="dflt">'0.72rem'</td>
+          <td class="desc">題號數字的字體大小。</td>
+        </tr>
+        <tr>
+          <td class="prop">fontFamily</td><td class="type">string</td>
+          <td class="dflt">'system-ui, sans-serif'</td>
+          <td class="desc">元件整體字型族，套用至圓圈字母、題號、標題、匯出按鈕等所有文字。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 顏色：面板 ──────────────────────────────────────── -->
+  <section id="col-panel">
+    <h2>顏色：面板結構</h2>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">panelBg</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#181918"></span>'#181918'</td>
+          <td class="desc">題目區域（body）的背景色。</td>
+        </tr>
+        <tr>
+          <td class="prop">headerBg</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#0F100F"></span>'#0F100F'</td>
+          <td class="desc">頂部標題列的背景色。</td>
+        </tr>
+        <tr>
+          <td class="prop">footerBg</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#0F100F"></span>'#0F100F'</td>
+          <td class="desc">底部匯出按鈕列的背景色。</td>
+        </tr>
+        <tr>
+          <td class="prop">dividerColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#1A1B18"></span>'#1A1B18'</td>
+          <td class="desc">header / body / footer 之間分隔線的顏色。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 顏色：文字 ──────────────────────────────────────── -->
+  <section id="col-text">
+    <h2>顏色：文字</h2>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">titleColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#C6C7BD"></span>'#C6C7BD'</td>
+          <td class="desc">面板標題（<code>panelTitle</code>）的文字顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">statsColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#5A5B57"></span>'#5A5B57'</td>
+          <td class="desc">標題列右側作答統計（如「12 / 50」）的文字顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">qNumColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#4A4B47"></span>'#4A4B47'</td>
+          <td class="desc"><strong style="color:var(--shell)">未作答</strong>題目的題號顏色（偏暗，作為背景色的一部分）。</td>
+        </tr>
+        <tr>
+          <td class="prop">qNumAnsweredColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#C8DD5A"></span>'#C8DD5A'</td>
+          <td class="desc"><strong style="color:var(--shell)">已作答</strong>題目的題號顏色。作答後題號亮起，提供一眼掃描全卷進度的視覺回饋。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 顏色：圓圈 ──────────────────────────────────────── -->
+  <section id="col-circle">
+    <h2>顏色：圓圈</h2>
+    <p>共有三種視覺狀態：未選取、懸停（hover）、已選取（selected）。</p>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop" colspan="4" style="color:var(--dim);font-weight:400;background:#0F100F;padding:8px 14px;font-size:0.72rem;letter-spacing:.05em;">未選取狀態</td>
+        </tr>
+        <tr>
+          <td class="prop">circleBorderColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#4A4B47"></span>'#4A4B47'</td>
+          <td class="desc">未選取圓圈的邊框顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">circleTextColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#6B6C68"></span>'#6B6C68'</td>
+          <td class="desc">未選取圓圈內字母的顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop" colspan="4" style="color:var(--dim);font-weight:400;background:#0F100F;padding:8px 14px;font-size:0.72rem;letter-spacing:.05em;">懸停狀態（hover）</td>
+        </tr>
+        <tr>
+          <td class="prop">hoverBg</td><td class="type">string</td>
+          <td class="dflt">'rgba(195,165,229, 0.10)'</td>
+          <td class="desc">懸停時圓圈的背景色，接受任何 CSS 顏色（含 rgba 半透明值）。</td>
+        </tr>
+        <tr>
+          <td class="prop">hoverBorder</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#C3A5E5"></span>'#C3A5E5'</td>
+          <td class="desc">懸停時圓圈的邊框顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">hoverText</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#C3A5E5"></span>'#C3A5E5'</td>
+          <td class="desc">懸停時圓圈內字母的顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop" colspan="4" style="color:var(--dim);font-weight:400;background:#0F100F;padding:8px 14px;font-size:0.72rem;letter-spacing:.05em;">已選取狀態（selected）</td>
+        </tr>
+        <tr>
+          <td class="prop">selectedBg</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#C8DD5A"></span>'#C8DD5A'</td>
+          <td class="desc">已選取圓圈的填充背景色。</td>
+        </tr>
+        <tr>
+          <td class="prop">selectedBorder</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#C8DD5A"></span>'#C8DD5A'</td>
+          <td class="desc">已選取圓圈的邊框顏色（通常與 <code>selectedBg</code> 相同）。</td>
+        </tr>
+        <tr>
+          <td class="prop">selectedText</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#0C0D0C"></span>'#0C0D0C'</td>
+          <td class="desc">已選取圓圈內字母的顏色。建議使用深色以與亮色填充背景形成對比。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="note">
+      <strong>再次點擊取消：</strong>點擊已選取的同一選項可取消答案，題號恢復暗色，圓圈回到未選取狀態，<code>onChange</code> 也會觸發（<code>opt</code> 為 <code>null</code>）。
+    </div>
+  </section>
+
+  <!-- ── 顏色：切換＆進度 ───────────────────────────────── -->
+  <section id="col-toggle">
+    <h2>顏色：切換按鈕與進度條</h2>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">toggleBg</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#7B6CF0"></span>'#7B6CF0'</td>
+          <td class="desc">切換按鈕的背景色。</td>
+        </tr>
+        <tr>
+          <td class="prop">toggleTextColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#FFFFFF"></span>'#FFFFFF'</td>
+          <td class="desc">切換按鈕內箭頭符號及百分比文字的顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">progressTrack</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#14150F"></span>'#14150F'</td>
+          <td class="desc">進度條軌道（未完成部分）的顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">progressFill</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#C8DD5A"></span>'#C8DD5A'</td>
+          <td class="desc">進度條填充（已作答比例）的顏色，由底部往上增長。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 顏色：Focus Ring ───────────────────────────────── -->
+  <section id="col-focus">
+    <h2>顏色：Focus Ring（鍵盤聚焦）</h2>
+    <p>使用 Tab 鍵在圓圈之間切換時顯示的外框指示。僅在 <code>:focus-visible</code> 時出現，滑鼠點擊不觸發。</p>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">focusRingColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#A0CF72"></span>'#A0CF72'</td>
+          <td class="desc">聚焦外框的顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">focusRingWidth</td><td class="type">string</td>
+          <td class="dflt">'2px'</td>
+          <td class="desc">聚焦外框的線條粗細（CSS <code>outline-width</code>）。</td>
+        </tr>
+        <tr>
+          <td class="prop">focusRingOffset</td><td class="type">string</td>
+          <td class="dflt">'2px'</td>
+          <td class="desc">聚焦外框與圓圈邊緣的間距（CSS <code>outline-offset</code>）。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 匯出按鈕 ─────────────────────────────────────────── -->
+  <section id="export-sec">
+    <h2>匯出按鈕</h2>
+    <p>顯示在面板底部。點擊後自動觸發下載 <code>.json</code> 格式的答案檔案，無需後端介入。</p>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">exportLabel</td><td class="type">string</td>
+          <td class="dflt">'匯出答案 JSON'</td>
+          <td class="desc">按鈕的顯示文字，可自訂為任何說明文字。</td>
+        </tr>
+        <tr>
+          <td class="prop">exportFontSize</td><td class="type">string</td>
+          <td class="dflt">'0.88rem'</td>
+          <td class="desc">按鈕文字的字體大小。</td>
+        </tr>
+        <tr>
+          <td class="prop">exportPadding</td><td class="type">string</td>
+          <td class="dflt">'9px 16px'</td>
+          <td class="desc">按鈕的內距（CSS padding 語法）。</td>
+        </tr>
+        <tr>
+          <td class="prop">exportBg</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#40C99A"></span>'#40C99A'</td>
+          <td class="desc">按鈕的背景色。</td>
+        </tr>
+        <tr>
+          <td class="prop">exportHoverBg</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#35B088"></span>'#35B088'</td>
+          <td class="desc">按鈕懸停時的背景色。</td>
+        </tr>
+        <tr>
+          <td class="prop">exportColor</td><td class="type">string</td>
+          <td class="dflt"><span class="sw" style="background:#0C0D0C"></span>'#0C0D0C'</td>
+          <td class="desc">按鈕的文字顏色。</td>
+        </tr>
+        <tr>
+          <td class="prop">exportFileName</td><td class="type">string</td>
+          <td class="dflt">'answers'</td>
+          <td class="desc">下載檔案的名稱（不含副檔名）。最終產生 <code>answers.json</code>。</td>
+        </tr>
+        <tr>
+          <td class="prop">exportRadius</td><td class="type">string</td>
+          <td class="dflt">'6px'</td>
+          <td class="desc">按鈕的圓角半徑。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>匯出 JSON 格式</h3>
+    <div class="json-preview">{
+  <span class="json-key">"note"</span>: <span class="json-val">"EXAM_2025_001"</span>,   <span class="c-cmt" style="font-size:.75rem">← 固定輸出，即使為空字串</span>
+  <span class="json-key">"memo"</span>: <span class="json-val">"STU_A123456"</span>,
+  <span class="json-key">"answers"</span>: {
+    <span class="json-key">"1"</span>: <span class="json-val">"A"</span>,
+    <span class="json-key">"2"</span>: <span class="json-val">"C"</span>,
+    <span class="json-key">"3"</span>: <span class="json-null">null</span>,  <span class="c-cmt" style="font-size:.75rem">← 未作答</span>
+    <span class="json-key">"4"</span>: <span class="json-val">"B"</span>,
+    ...
+    <span class="json-key">"50"</span>: <span class="json-val">"D"</span>
+  }
+}</div>
+    <p style="margin-top:10px;"><code>note</code> 與 <code>memo</code> 固定出現在頂層，即使為空字串亦然。<code>answers</code> 內每個題號對應選項字母，未作答為 <code>null</code>。</p>
+
+    <h3>元資料屬性</h3>
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">note</td><td class="type">string</td>
+          <td class="dflt">''</td>
+          <td class="desc">自訂備註欄位，建議用來存放<strong style="color:var(--shell)">試卷 ID</strong>。不論是否為空字串，匯出時固定輸出。</td>
+        </tr>
+        <tr>
+          <td class="prop">memo</td><td class="type">string</td>
+          <td class="dflt">''</td>
+          <td class="desc">自訂備忘欄位，建議用來存放<strong style="color:var(--shell)">作答者 ID</strong>。不論是否為空字串，匯出時固定輸出。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <pre class="code"><span class="c-cmt">// 帶入試卷 ID 與作答者 ID 的典型用法</span>
+<span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">50</span>,
+  <span class="c-key">note</span>: <span class="c-str">'EXAM_2025_001'</span>,   <span class="c-cmt">// 試卷 ID</span>
+  <span class="c-key">memo</span>: <span class="c-str">'STU_A123456'</span>,    <span class="c-cmt">// 作答者 ID</span>
+});</pre>
+  </section>
+
+  <!-- ── 回呼函數 ─────────────────────────────────────────── -->
+  <section id="callback">
+    <h2>回呼函數</h2>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>屬性名稱</th><th>型別</th><th>預設值</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="prop">onChange</td><td class="type">function</td>
+          <td class="dflt">null</td>
+          <td class="desc">每次作答或取消選取時觸發，簽名為 <code>(q, opt, allAnswers)</code>。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>參數說明</h3>
+    <pre class="code"><span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">onChange</span>: (q, opt, allAnswers) => {
+    <span class="c-cmt">// q          : number  — 題號，從 1 起算</span>
+    <span class="c-cmt">// opt        : string | null  — 選取的字母 ('A'~'E')，取消時為 null</span>
+    <span class="c-cmt">// allAnswers : Object  — 當前所有答案的快照（僅含已作答的題目）</span>
+
+    console.<span class="c-fn">log</span>(`第 ${q} 題 → ${opt ?? <span class="c-str">'取消'</span>}`);
+    console.<span class="c-fn">log</span>(<span class="c-str">'目前已答題數:'</span>, Object.<span class="c-fn">keys</span>(allAnswers).length);
+  },
+});</pre>
+
+    <div class="note">
+      <strong>注意：</strong><code>allAnswers</code> 是快照副本，只含<strong>已作答</strong>的題號鍵；已取消的題目不會出現在其中。如需取得含 <code>null</code> 的完整結構，請呼叫 <code>card.getAnswers()</code>。
+    </div>
+  </section>
+
+  <!-- ── 公開 API 方法 ─────────────────────────────────────── -->
+  <section id="api">
+    <h2>公開 API 方法</h2>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>方法</th><th>參數</th><th>回傳</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="method">open()</td><td class="param">—</td>
+          <td><span class="ret">void</span></td>
+          <td class="desc">滑入展開面板，切換按鈕箭頭方向更新。</td>
+        </tr>
+        <tr>
+          <td class="method">close()</td><td class="param">—</td>
+          <td><span class="ret">void</span></td>
+          <td class="desc">滑出收合面板，切換按鈕箭頭方向更新。</td>
+        </tr>
+        <tr>
+          <td class="method">toggle()</td><td class="param">—</td>
+          <td><span class="ret">void</span></td>
+          <td class="desc">若已收合則展開，若已展開則收合。</td>
+        </tr>
+        <tr>
+          <td class="method">getAnswers()</td><td class="param">—</td>
+          <td><span class="ret">Object</span></td>
+          <td class="desc">回傳<strong style="color:var(--shell)">所有題目</strong>的答案物件。格式：<code>&#123; 1: 'A', 2: null, 3: 'C', ... &#125;</code>。未作答的題目值為 <code>null</code>，題號鍵為數字型別。</td>
+        </tr>
+        <tr>
+          <td class="method">setAnswers(data)</td><td class="param">Object</td>
+          <td><span class="ret">void</span></td>
+          <td class="desc">批次載入預存答案，常用於恢復作答進度。格式同 <code>getAnswers()</code>，<code>null</code> 與空值鍵會被略過。</td>
+        </tr>
+        <tr>
+          <td class="method">getSummary()</td><td class="param">—</td>
+          <td><span class="ret">Object</span></td>
+          <td class="desc">回傳作答統計。格式：<code>&#123; total, answered, unanswered, percentage &#125;</code>，<code>percentage</code> 為整數 0–100。</td>
+        </tr>
+        <tr>
+          <td class="method">reset()</td><td class="param">—</td>
+          <td><span class="ret">void</span></td>
+          <td class="desc">清除所有答案，還原全部圓圈與題號至初始狀態，進度條歸零。</td>
+        </tr>
+        <tr>
+          <td class="method">destroy()</td><td class="param">—</td>
+          <td><span class="ret">void</span></td>
+          <td class="desc">從 DOM 移除面板、切換按鈕及注入的 <code>&lt;style&gt;</code> 元素，釋放所有資源。</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>使用片段</h3>
+    <pre class="code"><span class="c-cmt">// 讀取全部答案</span>
+<span class="c-kw">const</span> answers = card.<span class="c-fn">getAnswers</span>();
+<span class="c-cmt">// → { 1: 'A', 2: null, 3: 'C', ..., 50: 'D' }</span>
+
+<span class="c-cmt">// 載入預存進度</span>
+card.<span class="c-fn">setAnswers</span>({ <span class="c-num">1</span>: <span class="c-str">'B'</span>, <span class="c-num">2</span>: <span class="c-str">'A'</span>, <span class="c-num">3</span>: <span class="c-str">'C'</span> });
+
+<span class="c-cmt">// 取得統計</span>
+<span class="c-kw">const</span> s = card.<span class="c-fn">getSummary</span>();
+<span class="c-cmt">// → { total: 50, answered: 3, unanswered: 47, percentage: 6 }</span>
+
+<span class="c-cmt">// 送出前確認</span>
+<span class="c-kw">if</span> (s.unanswered > <span class="c-num">0</span>) {
+  card.<span class="c-fn">open</span>();
+  <span class="c-kw">return</span>;
+}
+
+<span class="c-cmt">// 傳送至後端</span>
+<span class="c-fn">fetch</span>(<span class="c-str">'/api/submit'</span>, {
+  method: <span class="c-str">'POST'</span>,
+  headers: { <span class="c-str">'Content-Type'</span>: <span class="c-str">'application/json'</span> },
+  body: <span class="c-cls">JSON</span>.<span class="c-fn">stringify</span>(card.<span class="c-fn">getAnswers</span>()),
+});</pre>
+  </section>
+
+  <!-- ── 全域設定 ─────────────────────────────────────────── -->
+  <section id="global">
+    <h2>全域設定 <code>AnswerCard.config()</code></h2>
+    <p>在建立任何實例之前呼叫 <code>AnswerCard.config()</code>，可永久覆寫所有後續實例的預設值。實例層級的選項仍可個別覆寫全域設定。</p>
+
+    <h3>優先序</h3>
+    <div class="chain">
+      <div class="chain-item ci-base">元件內建預設值</div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-item ci-global">AnswerCard.config()</div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-item ci-inst">new AnswerCard( opts )</div>
+      <span class="chain-note">右側優先</span>
+    </div>
+
+    <pre class="code"><span class="c-cmt">// 必須在 new AnswerCard() 之前呼叫</span>
+<span class="c-cls">AnswerCard</span>.<span class="c-fn">config</span>({
+  <span class="c-cmt">// 全站改用藍色主題</span>
+  <span class="c-key">selectedBg</span>:     <span class="c-str">'#4285EB'</span>,
+  <span class="c-key">selectedBorder</span>: <span class="c-str">'#4285EB'</span>,
+  <span class="c-key">selectedText</span>:   <span class="c-str">'#FFFFFF'</span>,
+  <span class="c-key">toggleBg</span>:       <span class="c-str">'#4285EB'</span>,
+  <span class="c-key">progressFill</span>:   <span class="c-str">'#4285EB'</span>,
+
+  <span class="c-cmt">// 全站面板靠左</span>
+  <span class="c-key">panelSide</span>: <span class="c-str">'left'</span>,
+});
+
+<span class="c-cmt">// 繼承全域設定</span>
+<span class="c-kw">const</span> card1 = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({ <span class="c-key">totalQuestions</span>: <span class="c-num">30</span> });
+
+<span class="c-cmt">// 覆寫單一實例的 toggleBg（其他仍沿用全域）</span>
+<span class="c-kw">const</span> card2 = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">50</span>,
+  <span class="c-key">toggleBg</span>: <span class="c-str">'#7B6CF0'</span>,
+});</pre>
+  </section>
+
+  <!-- ── 範例：基本用法 ─────────────────────────────────── -->
+  <section id="ex-basic">
+    <h2>範例：基本用法</h2>
+
+    <h3>聽力測驗（4 選項 × 30 題）</h3>
+    <pre class="code"><span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">30</span>,
+  <span class="c-key">optionCount</span>:    <span class="c-num">4</span>,
+  <span class="c-key">twoColumns</span>:     <span class="c-boo">false</span>,
+  <span class="c-key">panelTitle</span>:     <span class="c-str">'聽力測驗答案卡'</span>,
+  <span class="c-key">panelWidth</span>:     <span class="c-str">'240px'</span>,
+  <span class="c-key">exportLabel</span>:    <span class="c-str">'送出聽力答案'</span>,
+  <span class="c-key">exportFileName</span>: <span class="c-str">'listening'</span>,
+});</pre>
+
+    <h3>是非題（2 選項 × 20 題）</h3>
+    <pre class="code"><span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>:  <span class="c-num">20</span>,
+  <span class="c-key">optionCount</span>:     <span class="c-num">2</span>,         <span class="c-cmt">// 僅顯示 A、B</span>
+  <span class="c-key">twoColumns</span>:      <span class="c-boo">true</span>,
+  <span class="c-key">panelWidthTwoCol</span>: <span class="c-str">'300px'</span>,
+  <span class="c-key">circleSize</span>:      <span class="c-str">'2rem'</span>,
+  <span class="c-key">circleSizeTwoCol</span>: <span class="c-str">'1.8rem'</span>,
+  <span class="c-key">panelTitle</span>:      <span class="c-str">'是非題答案卡'</span>,
+});</pre>
+
+    <h3>五選一題型（5 選項 × 40 題）</h3>
+    <pre class="code"><span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>:  <span class="c-num">40</span>,
+  <span class="c-key">optionCount</span>:     <span class="c-num">5</span>,         <span class="c-cmt">// A B C D E</span>
+  <span class="c-key">twoColumns</span>:      <span class="c-boo">true</span>,
+  <span class="c-key">panelWidthTwoCol</span>: <span class="c-str">'500px'</span>,  <span class="c-cmt">// 5 圓圈需要更寬</span>
+  <span class="c-key">circleSizeTwoCol</span>: <span class="c-str">'1.35rem'</span>,
+  <span class="c-key">optionGap</span>:       <span class="c-str">'3px'</span>,
+});</pre>
+  </section>
+
+  <!-- ── 範例：自訂主題 ─────────────────────────────────── -->
+  <section id="ex-theme">
+    <h2>範例：自訂主題色</h2>
+
+    <h3>天空藍主題</h3>
+    <pre class="code"><span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">50</span>,
+  <span class="c-key">optionCount</span>:    <span class="c-num">4</span>,
+  <span class="c-key">twoColumns</span>:     <span class="c-boo">true</span>,
+  <span class="c-cmt">// ── 藍色主題 ──────────────────────</span>
+  <span class="c-key">toggleBg</span>:           <span class="c-str">'#08A9D1'</span>,
+  <span class="c-key">progressFill</span>:       <span class="c-str">'#08A9D1'</span>,
+  <span class="c-key">selectedBg</span>:         <span class="c-str">'#08A9D1'</span>,
+  <span class="c-key">selectedBorder</span>:     <span class="c-str">'#08A9D1'</span>,
+  <span class="c-key">selectedText</span>:       <span class="c-str">'#FFFFFF'</span>,
+  <span class="c-key">hoverBorder</span>:        <span class="c-str">'#08A9D1'</span>,
+  <span class="c-key">hoverText</span>:          <span class="c-str">'#08A9D1'</span>,
+  <span class="c-key">hoverBg</span>:            <span class="c-str">'rgba(8,169,209,0.10)'</span>,
+  <span class="c-key">qNumAnsweredColor</span>:  <span class="c-str">'#08A9D1'</span>,
+  <span class="c-key">focusRingColor</span>:     <span class="c-str">'#08A9D1'</span>,
+});</pre>
+
+    <h3>橙色警示主題（限時測驗用）</h3>
+    <pre class="code"><span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">50</span>,
+  <span class="c-key">optionCount</span>:    <span class="c-num">4</span>,
+  <span class="c-key">toggleBg</span>:           <span class="c-str">'#EDA109'</span>,
+  <span class="c-key">progressFill</span>:       <span class="c-str">'#EDA109'</span>,
+  <span class="c-key">selectedBg</span>:         <span class="c-str">'#EDA109'</span>,
+  <span class="c-key">selectedBorder</span>:     <span class="c-str">'#EDA109'</span>,
+  <span class="c-key">selectedText</span>:       <span class="c-str">'#0C0D0C'</span>,
+  <span class="c-key">hoverBorder</span>:        <span class="c-str">'#EDA109'</span>,
+  <span class="c-key">hoverText</span>:          <span class="c-str">'#EDA109'</span>,
+  <span class="c-key">hoverBg</span>:            <span class="c-str">'rgba(237,161,9,0.10)'</span>,
+  <span class="c-key">qNumAnsweredColor</span>:  <span class="c-str">'#EDA109'</span>,
+});</pre>
+  </section>
+
+  <!-- ── 範例：自動存檔 ─────────────────────────────────── -->
+  <section id="ex-save">
+    <h2>範例：整合自動存檔</h2>
+    <pre class="code"><span class="c-kw">const</span> SAVE_KEY = <span class="c-str">'exam_progress'</span>;
+
+<span class="c-kw">const</span> card = <span class="c-kw">new</span> <span class="c-cls">AnswerCard</span>({
+  <span class="c-key">totalQuestions</span>: <span class="c-num">50</span>,
+  <span class="c-key">optionCount</span>:    <span class="c-num">4</span>,
+  <span class="c-key">twoColumns</span>:     <span class="c-boo">true</span>,
+  <span class="c-key">onChange</span>: (q, opt, all) => {
+    <span class="c-cmt">// 每次答題自動存至 sessionStorage</span>
+    sessionStorage.<span class="c-fn">setItem</span>(SAVE_KEY, <span class="c-cls">JSON</span>.<span class="c-fn">stringify</span>(all));
+  },
+});
+
+<span class="c-cmt">// 頁面載入時嘗試恢復進度</span>
+<span class="c-kw">const</span> saved = sessionStorage.<span class="c-fn">getItem</span>(SAVE_KEY);
+<span class="c-kw">if</span> (saved) {
+  <span class="c-kw">try</span> {
+    card.<span class="c-fn">setAnswers</span>(<span class="c-cls">JSON</span>.<span class="c-fn">parse</span>(saved));
+    console.<span class="c-fn">log</span>(<span class="c-str">'進度已恢復'</span>, card.<span class="c-fn">getSummary</span>());
+  } <span class="c-kw">catch</span> (e) {
+    sessionStorage.<span class="c-fn">removeItem</span>(SAVE_KEY);
+  }
+}</pre>
+
+    <div class="warn">
+      <strong>注意：</strong><code>sessionStorage</code> 在關閉分頁後會清除。若需跨頁面持久化，改用 <code>localStorage</code>，或搭配 <code>onChange</code> 回呼向後端即時儲存。
+    </div>
+  </section>
+
+  <!-- ── 範例：送出驗證 ─────────────────────────────────── -->
+  <section id="ex-submit">
+    <h2>範例：送出前驗證</h2>
+    <pre class="code">document.<span class="c-fn">getElementById</span>(<span class="c-str">'submit-btn'</span>)
+  .<span class="c-fn">addEventListener</span>(<span class="c-str">'click'</span>, <span class="c-kw">async</span> () => {
+
+  <span class="c-kw">const</span> summary = card.<span class="c-fn">getSummary</span>();
+
+  <span class="c-cmt">// 仍有未作答題目 → 展開答案卡提示</span>
+  <span class="c-kw">if</span> (summary.unanswered > <span class="c-num">0</span>) {
+    card.<span class="c-fn">open</span>();
+    <span class="c-fn">showAlert</span>(`尚有 ${summary.unanswered} 題未作答，請確認。`);
+    <span class="c-kw">return</span>;
+  }
+
+  <span class="c-kw">const</span> answers = card.<span class="c-fn">getAnswers</span>();
+
+  <span class="c-kw">try</span> {
+    <span class="c-kw">const</span> res = <span class="c-kw">await</span> <span class="c-fn">fetch</span>(<span class="c-str">'/api/exam/submit'</span>, {
+      method:  <span class="c-str">'POST'</span>,
+      headers: { <span class="c-str">'Content-Type'</span>: <span class="c-str">'application/json'</span> },
+      body:    <span class="c-cls">JSON</span>.<span class="c-fn">stringify</span>({
+        examId:      <span class="c-str">'EXAM_2025_001'</span>,
+        answers:     answers,
+        submittedAt: <span class="c-kw">new</span> <span class="c-cls">Date</span>().<span class="c-fn">toISOString</span>(),
+      }),
+    });
+
+    <span class="c-kw">if</span> (res.ok) {
+      card.<span class="c-fn">destroy</span>();                  <span class="c-cmt">// 成功後移除答案卡</span>
+      sessionStorage.<span class="c-fn">removeItem</span>(SAVE_KEY);
+      <span class="c-fn">showAlert</span>(<span class="c-str">'答案已成功送出！'</span>);
+    }
+  } <span class="c-kw">catch</span> (err) {
+    <span class="c-fn">showAlert</span>(<span class="c-str">'送出失敗，請檢查網路連線後重試。'</span>);
+  }
+});</pre>
+  </section>
+
+</main>
+
+<script>
+  /* ── 側邊欄當前項目高亮 ── */
+  const links = document.querySelectorAll('#sidebar a');
+
+  function setActive() {
+    const sections = document.querySelectorAll('section[id]');
+    let cur = '';
+    sections.forEach(s => {
+      if (window.scrollY + 100 >= s.offsetTop) cur = s.id;
+    });
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+  }
+
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+</body>
+</html>
