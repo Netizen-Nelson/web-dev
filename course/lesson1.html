@@ -128,17 +128,19 @@
 <dual-hr color-left="orange" color-right="safe" ratio="1:9" thickness="1px"></dual-hr>
 <section id="all_exercises" class="bp-text-shell">
 	<div id="practice_tophrase">
-		<div>
-			<chunk-demo sentence="Here are some cool spots {0}."
-					  theme="shell" show-dots="false"
+		<div class="bp-border-orange">
+			<chunk-demo sentence="Here are some cool spots {1}."
+					show-dots="false" show-preview="true" mask-mode="true"
+					translation="我每天{1}。" show-translation="true"
+					theme="shell"
 					level-colors="#C3A5E5, #A0CF72, #FFB3D9, #DECA4B, #E5C3B3, #EDA109">
-				<cd-chunk id="0" label="to + V 修飾 spots">
-				  <cd-level level="1">to hang out with friends</cd-level>
-				  <cd-level level="2">to watch the sunset</cd-level>
-				  <cd-level level="3">to chill on a sunny weekend</cd-level>
-				  <cd-level level="4">to take photos for Instagram</cd-level>
-				  <cd-level level="5">to grab a late-night bite</cd-level>
-				  <cd-level level="6">to enjoy your time in Sydney</cd-level>
+				<cd-chunk id="1" label="to + V 修飾 spots">
+				  <cd-level level="1" trans="和朋友聚聚">to hang out with friends</cd-level>
+				  <cd-level level="2" trans="看夕陽">to watch the sunset</cd-level>
+				  <cd-level level="3" trans="在晴朗的週末放鬆">to chill on a sunny weekend</cd-level>
+				  <cd-level level="4" trans="為 Instagram 拍照">to take photos for Instagram</cd-level>
+				  <cd-level level="5" trans="吃宵夜">to grab a late-night bite</cd-level>
+				  <cd-level level="6" trans="享受你在雪梨的時間">to enjoy your time in Sydney</cd-level>
 				</cd-chunk>
 			</chunk-demo>
 		</div>
@@ -152,5 +154,6 @@
 <script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/info-region.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/chunk-demo.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-popnote.js"></script>
+</script>
 </body>
 </html>
