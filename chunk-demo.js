@@ -1,46 +1,5 @@
-/**
- * chunk-demo.js  v4
- *
- * 新增屬性（v4）：
- *   translation        句子翻譯模板，佔位符與 sentence 相同：{1} {2} …
- *                      例：translation="我每天{1}去{2}。"
- *   show-translation   true|false  是否顯示翻譯行，預設 false
- *
- * <cd-level> 新增屬性（v4）：
- *   trans              該等級對應的翻譯詞，例如 trans="走路"
- *
- * data-config / ChunkDemoConfig 新增對應鍵：
- *   showTranslation    boolean  (預設 false)
- *   translationColor   string   翻譯文字顏色 (預設 '#8C9088')
- *   translationBorderColor string 翻譯左側線顏色 (預設與主題 border 同色)
- *
- * 新增屬性（v3）：
- *   show-dots       true|false          圓點顯示開關，預設 true
- *   width           CSS 寬度字串        整體元件寬度，例如 "600px" / "100%"
- *   dropdown-width  CSS 寬度字串        下拉選單固定寬度，例如 "320px"
- *   button-width    CSS 寬度字串        語塊按鈕最小寬度，例如 "140px"
- *   level-colors    逗號分隔色彩字串    Level 1,2,3 圓點與左側線條顏色
- *                   例：level-colors="#40C99A, #DECA4B, #C3A5E5"
- *   mask-mode       true|false          遮罩填空模式，預設 false
- *                   開啟後語塊按鈕初始顯示遮罩，使用者點選 Level 後才揭露
- *
- * data-config / ChunkDemoConfig 新增對應鍵：
- *   showDots        boolean  (預設 true)
- *   maskMode        boolean  (預設 false)
- *   maskColor       string   遮罩底色 (預設 '#252625')
- *   width           string   同屬性
- *   dropdownWidth   string   同屬性
- *   buttonWidth     string   同屬性
- *
- * 完整向下相容 v2 的 <cd-chunk>/<cd-level> 標籤結構。
- */
-
 (function (win, doc) {
   'use strict';
-
-  /* ═══════════════════════════════════════════
-     全域樣式（只注入一次）
-  ═══════════════════════════════════════════ */
   const CSS_ID = '__chunk-demo-v3__';
   if (!doc.getElementById(CSS_ID)) {
     const s = doc.createElement('style');
@@ -144,7 +103,7 @@ chunk-demo { display: block; }
 .cd-lv.is-sel     { background: rgba(255,255,255,.07); }
 .cd-lv.is-sel::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-  width: 3px; background: var(--lc, #C6C7BD); border-radius: 0 2px 2px 0;
+  width: 3px; background: var(--sel-bar, var(--lc, #C6C7BD)); border-radius: 0 2px 2px 0;
 }
 
 /* 圓點（show-dots=false 時不渲染此元素，無需 CSS 隱藏）*/
@@ -165,7 +124,6 @@ chunk-demo { display: block; }
 }
 .cd-pv-text { font-size: .9rem; font-style: italic; color: var(--pvt, #7a8078); }
 
-/* ── 翻譯行（v4）────────────────────────── */
 .cd-translation {
   margin-top: 3px; padding: 3px 6px;
   border-left: 3px solid var(--trlb, #C6C7BD);
@@ -181,9 +139,6 @@ chunk-demo { display: block; }
     (doc.head || doc.documentElement).appendChild(s);
   }
 
-  /* ═══════════════════════════════════════════
-     預設值
-  ═══════════════════════════════════════════ */
   const DEFAULTS = {
     themes: {
       shell:    { border: '#C6C7BD', text: '#C6C7BD', bg: 'rgba(198,199,189,.09)' },
@@ -215,33 +170,25 @@ chunk-demo { display: block; }
     previewTextColor:   null,
     previewBg:          null,
     showPreview:        false,
-    /* ── v3 新增 ──────────────────────────── */
     showDots:           true,
     maskMode:           false,
     maskColor:          '#252625',
     width:              null,
     dropdownWidth:      null,
     buttonWidth:        null,
-    /* ── v4 新增 ──────────────────────────── */
     showTranslation:       false,
     translationColor:      '#8C9088',
     translationBorderColor: null,   // null = 跟隨主題 border 色
   };
 
-  /* ═══════════════════════════════════════════
-     Web Component
-  ═══════════════════════════════════════════ */
   class ChunkDemo extends HTMLElement {
 
     static get observedAttributes() {
       return [
-        /* v2 */
         'sentence', 'chunks', 'show-preview',
         'theme', 'border-width', 'border-style', 'data-config',
-        /* v3 新增 */
         'show-dots', 'width', 'dropdown-width', 'button-width',
         'level-colors', 'mask-mode',
-        /* v4 新增 */
         'translation', 'show-translation',
       ];
     }
@@ -275,7 +222,6 @@ chunk-demo { display: block; }
       if (this.isConnected && this._ready) this._init();
     }
 
-    /* ── 設定解析 ─────────────────────────── */
     _cfg() {
       const G = win.ChunkDemoConfig || {};
       let E = {};
@@ -287,15 +233,12 @@ chunk-demo { display: block; }
         levelDotColors: { ...DEFAULTS.levelDotColors, ...(G.levelDotColors || {}), ...(E.levelDotColors || {}) },
       };
 
-      /* 主題 */
       const name  = this.getAttribute('theme') || cfg.defaultTheme || 'special';
       cfg._theme  = cfg.themes[name] || cfg.themes.special || DEFAULTS.themes.special;
 
-      /* v2 屬性覆蓋 */
       if (this.getAttribute('border-width')) cfg.chunkBorderWidth = this.getAttribute('border-width');
       if (this.getAttribute('border-style')) cfg.chunkBorderStyle = this.getAttribute('border-style');
 
-      /* v3：level-colors 屬性 → 覆蓋 levelDotColors */
       const lcAttr = this.getAttribute('level-colors');
       if (lcAttr) {
         lcAttr.split(',').forEach((color, i) => {
@@ -304,20 +247,16 @@ chunk-demo { display: block; }
         });
       }
 
-      /* v3：show-dots */
       const sdAttr = this.getAttribute('show-dots');
       if (sdAttr !== null) cfg.showDots = sdAttr !== 'false';
 
-      /* v3：寬度屬性 */
       if (this.getAttribute('width'))          cfg.width         = this.getAttribute('width');
       if (this.getAttribute('dropdown-width')) cfg.dropdownWidth = this.getAttribute('dropdown-width');
       if (this.getAttribute('button-width'))   cfg.buttonWidth   = this.getAttribute('button-width');
 
-      /* v3：mask-mode */
       const mmAttr = this.getAttribute('mask-mode');
       if (mmAttr !== null) cfg.maskMode = mmAttr === 'true';
 
-      /* v4：show-translation */
       const stAttr = this.getAttribute('show-translation');
       if (stAttr !== null) cfg.showTranslation = stAttr === 'true';
 
@@ -329,7 +268,6 @@ chunk-demo { display: block; }
       return cfg;
     }
 
-    /* ── 解析子元素 ───────────────────────── */
     _parseChildren(cdChunks) {
       return cdChunks.map((el, i) => {
         const rawId    = el.getAttribute('id');
@@ -348,7 +286,6 @@ chunk-demo { display: block; }
       });
     }
 
-    /* ── 初始化 ───────────────────────────── */
     _init() {
       const cdChunks = Array.from(this.querySelectorAll(':scope > cd-chunk'));
       let chunks;
@@ -360,7 +297,7 @@ chunk-demo { display: block; }
       }
 
       this._sent   = this.getAttribute('sentence')    || '';
-      this._trans  = this.getAttribute('translation') || '';  /* v4 */
+      this._trans  = this.getAttribute('translation') || '';
       this._chunks = chunks;
 
       const prev  = this._state;
@@ -369,13 +306,11 @@ chunk-demo { display: block; }
         return { id: c.id, level: p ? p.level : (c.currentLevel || 1) };
       });
 
-      /* v3：重設揭露狀態（內容更換時全部重新遮罩）*/
       this._revealed = new Set();
       this._openId   = null;
       this._draw();
     }
 
-    /* ── 渲染 ─────────────────────────────── */
     _draw() {
       const srcNodes = Array.from(this.querySelectorAll(':scope > cd-chunk'));
       this.innerHTML = '';
@@ -385,14 +320,12 @@ chunk-demo { display: block; }
 
       const cfg = this._cfg();
 
-      /* v3：元件寬度 */
       if (cfg.width) {
         this.style.width = cfg.width;
       } else {
         this.style.removeProperty('width');
       }
 
-      /* v3：遮罩背景色 CSS 變數 */
       if (cfg.maskMode) {
         this.style.setProperty('--cd-mask-bg', cfg._maskColor);
       } else {
@@ -419,7 +352,6 @@ chunk-demo { display: block; }
       });
       this.appendChild(bar);
 
-      /* 整句預覽（選用）*/
       const showPrev =
         this.getAttribute('show-preview') === 'true' ||
         (this.getAttribute('show-preview') === null && cfg.showPreview);
@@ -438,7 +370,6 @@ chunk-demo { display: block; }
         this.appendChild(pv);
       }
 
-      /* ── v4：翻譯行 ────────────────────── */
       const showTrans =
         this.getAttribute('show-translation') === 'true' ||
         (this.getAttribute('show-translation') === null && cfg.showTranslation);
@@ -457,7 +388,6 @@ chunk-demo { display: block; }
       }
     }
 
-    /* ── 建立語塊錨點（按鈕 + 下拉）────────── */
     _mkAnchor(chunk, cfg) {
       const st    = this._state.find(s => s.id === chunk.id) || { level: 1 };
       const lvNum = st.level;
@@ -466,23 +396,19 @@ chunk-demo { display: block; }
       const bw    = cfg.chunkBorderWidth || '1.5px';
       const bs    = cfg.chunkBorderStyle || 'solid';
 
-      /* v3：判斷是否需要遮罩 */
       const isMasked = cfg.maskMode && !this._revealed.has(chunk.id);
 
       const anchor     = doc.createElement('div');
       anchor.className = 'cd-anchor';
 
-      /* 按鈕 */
       const btn     = doc.createElement('button');
       btn.className = 'cd-btn' + (isMasked ? ' is-masked' : '');
       btn.style.cssText =
         `border-color:${th.border};border-width:${bw};border-style:${bs};` +
         `color:${th.text};background:${th.bg};`;
 
-      /* v3：button-width */
       if (cfg.buttonWidth) btn.style.minWidth = cfg.buttonWidth;
 
-      /* icon（選用）*/
       if (chunk.icon) {
         const ic     = doc.createElement('span');
         ic.className = 'cd-b-icon';
@@ -522,7 +448,6 @@ chunk-demo { display: block; }
       dd.style.background  = cfg.dropdownBg;
       dd.style.borderColor = cfg.dropdownBorder;
 
-      /* v3：dropdown-width */
       if (cfg.dropdownWidth) {
         dd.style.minWidth = cfg.dropdownWidth;
         dd.style.maxWidth = cfg.dropdownWidth;
@@ -553,8 +478,8 @@ chunk-demo { display: block; }
         const row     = doc.createElement('div');
         row.className = 'cd-lv' + (isSel ? ' is-sel' : '');
         row.style.setProperty('--lc', dotC);
+        if (isSel) row.style.setProperty('--sel-bar', th.border);
 
-        /* v3：show-dots — false 時完全不渲染圓點元素 */
         if (cfg.showDots !== false) {
           const dot     = doc.createElement('span');
           dot.className = 'cd-lv-dot';
@@ -573,7 +498,6 @@ chunk-demo { display: block; }
       return dd;
     }
 
-    /* ── 開關下拉 ─────────────────────────── */
     _toggle(id) {
       if (this._openId === id) { this._close(); return; }
       this._close();
@@ -589,7 +513,6 @@ chunk-demo { display: block; }
       });
     }
 
-    /* ── 關閉下拉 ─────────────────────────── */
     _close() {
       if (this._openId === null) return;
       this._btns[this._openId]?.classList.remove('is-open');
@@ -597,17 +520,15 @@ chunk-demo { display: block; }
       this._openId = null;
     }
 
-    /* ── 選取 Level ───────────────────────── */
     _pick(id, level) {
       const st = this._state.find(s => s.id === id);
       if (st) st.level = level;
-      /* v3：選取後標記為已揭露（mask-mode 下移除遮罩）*/
+
       this._revealed.add(id);
       this._close();
       this._draw();
     }
 
-    /* ── 組合整句 ─────────────────────────── */
     _full() {
       let result = this._sent;
       this._chunks.forEach(c => {
@@ -618,7 +539,6 @@ chunk-demo { display: block; }
       return result;
     }
 
-    /* ── v4：組合翻譯句 ───────────────────── */
     _fullTrans() {
       if (!this._trans) return '';
       let result = this._trans;
