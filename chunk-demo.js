@@ -529,7 +529,7 @@ chunk-demo { display: block; }
         const row     = doc.createElement('div');
         row.className = 'cd-lv' + (isSel ? ' is-sel' : '');
         row.style.setProperty('--lc', dotC);
-        if (isSel) row.style.setProperty('--sel-bar', th.border);
+        if (isSel) row.style.setProperty('--sel-bar', cfg._theme.border);
 
         if (cfg.showDots !== false) {
           const dot     = doc.createElement('span');
