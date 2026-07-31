@@ -1,11 +1,92 @@
+/**
+ * quiz-panel.js v4 — 收合式題目面板元件
+ *
+ * ── 品牌主題 ──────────────────────────────────────────────────────────────────
+ *
+ * theme="colorName"       套用品牌色主題（見下表）
+ * theme-style="dark"      dark（深色背景＋主題色文字，預設）
+ *                         filled（主題色背景＋深色文字）
+ *
+ * 範例：
+ *   <div data-quiz-panel theme="sky" ...>          → 深色背景＋sky藍文字
+ *   <div data-quiz-panel theme="indigo" theme-style="filled" ...>
+ *                                                  → indigo背景＋深色文字
+ *
+ * 全域套用（所有元件）：
+ *   window.QuizPanelConfig = { theme: 'sky', themeStyle: 'dark' };
+ *
+ * ── 收合按鈕緊湊模式 ──────────────────────────────────────────────────────────
+ *
+ * init-small         布林屬性。收合狀態高度減半（適合橫向排列多題時）
+ *                    全域：QuizPanelConfig.initSmall = true
+ *
+ * ── 字體大小（各部位）────────────────────────────────────────────────────────
+ *
+ * fs-trigger="1.2rem"      收合觸發器圖示
+ * fs-question="0.96rem"    題目文字
+ * fs-number="0.76rem"      題號
+ * fs-input="0.88rem"       輸入欄
+ * fs-result="0.8rem"       核對結果（inline）
+ * fs-explanation="0.82rem" 解說文字
+ *
+ * 全域：QuizPanelConfig.fsTrigger / fsQuestion / fsNumber / fsInput / fsResult / fsExplanation
+ *
+ * ── 按鈕 ─────────────────────────────────────────────────────────────────────
+ *
+ * btn-style="icon"          icon（預設）│ text │ both
+ * btn-size="30px"           按鈕邊長
+ * check-icon / reset-icon   覆蓋圖示 HTML
+ * check-label / reset-label aria-label 及 tooltip
+ * correct-message / incorrect-message
+ *
+ * 全域：QuizPanelConfig.btnStyle / btnSize / checkIcon / resetIcon / checkLabel / resetLabel
+ *
+ * ── 欄寬 ─────────────────────────────────────────────────────────────────────
+ *
+ * ratio="1:1"          左:右比例（預設），與 right-width 擇一
+ * right-width="220px"  固定右欄（設定後取消 ratio）
+ *
+ * ── 群組自動編號 ──────────────────────────────────────────────────────────────
+ *
+ * group="名稱"          群組，依 DOM 順序自動編號
+ * group-start="N"       起始號（同群組第一個出現的值生效）
+ * group-no-number       布林，整組停用編號
+ * skip-number           布林，此題不佔序號、不顯示
+ *
+ * ── 其他屬性 ─────────────────────────────────────────────────────────────────
+ *
+ * question / answer / explanation / placeholder
+ * case-sensitive / match-mode（exact│contains│regex）
+ * show-number / input-type / input-rows / start-open / readonly-answer
+ * question-color / explanation-color / accent-color / divider-color
+ * panel-width / min-height / trigger-width / trigger-min-height
+ * collapse-icon / expand-icon / anim-duration
+ *
+ * ── 事件（bubble）────────────────────────────────────────────────────────────
+ *
+ * quiz-panel-open / quiz-panel-close / quiz-panel-reset
+ * quiz-panel-check  →  detail: { answer, correct, expected }
+ *
+ * ── 靜態 API ─────────────────────────────────────────────────────────────────
+ *
+ * QuizPanel.getGroup(name) / .resetGroup(name) / .renumberGroup(name, N)
+ *
+ * ── 實例 API（wrapper.__qp）──────────────────────────────────────────────────
+ *
+ * .open() / .close() / .check() / .reset() / .isOpen()
+ * .setQuestion(t) / .setAnswer(t) / .setExplanation(t) / .getGroupNumber()
+ */
+
 (function () {
   'use strict';
+
   const C = {
     bg:'#0C0D0C', bg1:'#141514', bg2:'#1C1D1C', bg3:'#252625',
     shell:'#C6C7BD', lavender:'#C3A5E5', special:'#C8DD5A',
     warning:'#F08080', safe:'#40C99A', vanilla:'#DBEDD8',
     focus:'#A0CF72', stone:'#95BDD7', indigo:'#7B6CF0',
   };
+
   const BRAND = {
     lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
     salmon  :'#E5C3B3', sky    :'#08A9D1', safe   :'#40C99A',
@@ -13,6 +94,7 @@
     info    :'#4285EB', stone  :'#95BDD7', indigo :'#7B6CF0',
     pink    :'#FFB3D9', orange :'#EDA109', shell  :'#C6C7BD',
   };
+
   function _rgb(hex) {
     hex = hex.replace('#','');
     return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
@@ -35,52 +117,35 @@
     if (!color) return {};
 
     if (style === 'filled') {
-      /*
-       * 填滿樣式：主題色作為面板背景，深色文字
-       * bg  = 主題色（題目區）
-       * bg1 = 稍暗（右側面板）
-       * bg2 = 更暗（輸入欄）
-       * bg3 = 最暗（重設按鈕）
-       */
       return {
         '--qp-bg'          : color,
         '--qp-bg1'         : _darken(color, 0.10),
         '--qp-bg2'         : _darken(color, 0.18),
         '--qp-bg3'         : _darken(color, 0.28),
         '--qp-panel-border': 'rgba(0,0,0,0.28)',
-        /* 題目區 */
         '--qp-q-color'     : '#0a0b0a',
-        /* 輸入 */
         '--qp-vanilla'     : '#0a0b0a',
         '--qp-inp-border'  : 'rgba(0,0,0,0.22)',
         '--qp-focus'       : 'rgba(0,0,0,0.55)',
         '--qp-inp-ok-bg'   : 'rgba(0,0,0,0.12)',
         '--qp-inp-err-bg'  : 'rgba(0,0,0,0.12)',
-        /* 結果 */
         '--qp-safe'        : '#0a5432',
         '--qp-warning'     : '#852020',
-        /* 分隔線 */
         '--qp-divider'     : 'rgba(0,0,0,0.18)',
-        /* 解說 */
         '--qp-expl-color'  : 'rgba(0,0,0,0.72)',
         '--qp-expl-bg'     : 'rgba(0,0,0,0.10)',
-        /* 題號 */
         '--qp-stone'       : 'rgba(0,0,0,0.42)',
-        /* 觸發器 */
         '--qp-trig-bg'     : _darken(color, 0.10),
         '--qp-trig-border' : 'rgba(0,0,0,0.28)',
         '--qp-trig-color'  : '#0a0b0a',
         '--qp-trig-hbg'    : _lighten(color, 0.10),
         '--qp-trig-hborder': 'rgba(0,0,0,0.50)',
         '--qp-trig-hcolor' : '#000',
-        /* 核對按鈕：深色底，主題色圖示 */
         '--qp-ck-bg'       : 'rgba(0,0,0,0.68)',
         '--qp-ck-fg'       : color,
-        /* 重設按鈕 */
         '--qp-rs-bg'       : 'rgba(0,0,0,0.10)',
         '--qp-rs-fg'       : 'rgba(0,0,0,0.48)',
         '--qp-rs-bd'       : 'rgba(0,0,0,0.16)',
-        /* 收合箭頭 */
         '--qp-col-fg'      : 'rgba(0,0,0,0.40)',
         '--qp-col-hfg'     : '#000',
         '--qp-col-hbg'     : _darken(color, 0.14),
@@ -96,20 +161,16 @@
         '--qp-expl-bg'     : `color-mix(in srgb, ${color} 8%, #0C0D0C)`,
         '--qp-stone'       : _rgba(color, 0.52),
         '--qp-accent'      : color,
-        /* 觸發器 */
         '--qp-trig-bg'     : C.bg1,
         '--qp-trig-border' : _rgba(color, 0.52),
         '--qp-trig-color'  : color,
         '--qp-trig-hbg'    : C.bg2,
         '--qp-trig-hborder': color,
         '--qp-trig-hcolor' : color,
-        /* 核對按鈕：主題色底，深色圖示 */
         '--qp-ck-bg'       : color,
         '--qp-ck-fg'       : C.bg,
-        /* 重設按鈕 */
         '--qp-rs-fg'       : _rgba(color, 0.60),
         '--qp-rs-bd'       : _rgba(color, 0.18),
-        /* 收合箭頭 */
         '--qp-col-fg'      : _rgba(color, 0.48),
         '--qp-col-hfg'     : color,
       };
@@ -138,7 +199,7 @@
         align-items     : center;
         justify-content : center;
         background      : var(--qp-trig-bg,    var(--qp-bg1));
-        border          : 1px solid var(--qp-trig-border, var(--qp-shell));
+        border          : 2px solid var(--qp-trig-border, var(--qp-shell));
         border-radius   : 6px;
         cursor          : pointer;
         color           : var(--qp-trig-color,  var(--qp-shell));
@@ -156,16 +217,13 @@
         color        : var(--qp-trig-hcolor,   var(--qp-accent));
         outline      : none;
       }
-      /* 緊湊：高度減半 */
       .qp-wrapper.qp-ctrig .qp-trigger {
         min-height: calc(var(--qp-trig-h) / 2);
       }
-
-      /* ── 展開面板 ── */
       .qp-panel {
         display      : none;
         background   : var(--qp-bg);
-        border       : 1px solid var(--qp-panel-border, var(--qp-shell));
+        border       : 2px solid var(--qp-panel-border, var(--qp-shell));
         border-radius: 8px;
         overflow     : hidden;
         width        : var(--qp-panel-w);
@@ -179,15 +237,13 @@
         animation        : qpFadeIn var(--qp-anim) ease;
         transform-origin : left center;
       }
-
-      /* ── 題目區 ── */
       .qp-question {
         flex       : 1 1 auto;
         min-width  : 0;
         padding    : 12px 16px;
         color      : var(--qp-q-color);
         font-size  : var(--qp-fs-q);
-        line-height: 1.4;
+        line-height: 1.7;
         display    : flex;
         align-items: center;
         gap        : 8px;
@@ -207,7 +263,6 @@
         padding-top: 2px;
       }
 
-      /* ── 右側操作區 ── */
       .qp-right {
         flex       : 0 0 var(--qp-right-w);
         min-width  : 0;
@@ -220,7 +275,6 @@
       }
       .qp-wrapper.qp-ratio .qp-right { flex: var(--qp-ratio-r) 1 0; }
 
-      /* ── 輸入欄 ── */
       .qp-input {
         width        : 100%;
         background   : var(--qp-bg2);
@@ -234,14 +288,13 @@
         transition   : border-color .18s, background .18s;
         resize       : vertical;
         font-family  : inherit;
-        line-height  : 1.4;
+        line-height  : 1.5;
       }
       .qp-input::placeholder { color: #55555a; }
       .qp-input:focus        { border-color: var(--qp-focus); }
       .qp-input.qp-correct   { border-color: var(--qp-safe);    background: var(--qp-inp-ok-bg,  #0b1a12); }
       .qp-input.qp-incorrect { border-color: var(--qp-warning); background: var(--qp-inp-err-bg, #1c0b0b); }
 
-      /* ── 操作列（按鈕 ＋ 結果 同行）── */
       .qp-action-row {
         display    : flex;
         align-items: center;
@@ -249,7 +302,6 @@
         min-height : var(--qp-btn-size);
       }
 
-      /* ── 按鈕 ── */
       .qp-btn {
         flex           : 0 0 var(--qp-btn-size);
         width          : var(--qp-btn-size);
@@ -313,7 +365,7 @@
         display    : none;
         font-size  : var(--qp-fs-expl);
         color      : var(--qp-expl-color);
-        line-height: 1.4;
+        line-height: 1.6;
         padding    : 7px 9px;
         background : var(--qp-expl-bg, #120d19);
         border-left: 3px solid var(--qp-expl-color);
@@ -428,11 +480,28 @@
   }
   function md(t) {
     if (!t) return '';
-    // 先將屬性中手寫的 <br> / <br/> / <br /> 換成佔位符，
-    // 跳脫 HTML 特殊字元後再還原，避免 < > 被轉成實體而失效。
+    /*
+     * <br> 在屬性值裡的兩種形態：
+     *
+     * ① 直接寫 HTML 屬性  question="中文。<br>English"
+     *   → 瀏覽器 HTML parser 解析後 getAttribute() 拿到帶真正角括號的字串 "<br>"
+     *   → pattern A：/<br\s*\/?>/gi
+     *
+     * ② PHP / JS setAttribute 先做 htmlspecialchars / escapeHtml
+     *   question="中文。&lt;br&gt;English"
+     *   → getAttribute() 仍拿到解碼後的 "<br>"，pattern A 仍可處理
+     *
+     * ③ 雙重跳脫（如範本引擎 double-encode）
+     *   question="中文。&amp;lt;br&amp;gt;English"
+     *   → getAttribute() 拿到 "&lt;br&gt;"（實體字串，非角括號）
+     *   → pattern B：/&lt;br\s*(\/)?&gt;/gi
+     *
+     * 同時處理 ①②③，以 PH 佔位再還原，確保不被後續跳脫覆蓋。
+     */
     const PH = '\x00BR\x00';
     return t
-      .replace(/<br\s*\/?>/gi, PH)
+      .replace(/&lt;br\s*(\/)?\s*&gt;/gi, PH)   // pattern B：實體字串 &lt;br&gt;
+      .replace(/<br\s*\/?>/gi, PH)                // pattern A：真實角括號 <br>
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')
@@ -452,9 +521,6 @@
     return e;
   }
 
-  /* ══════════════════════════════════════════
-     QuizPanel 類別
-  ══════════════════════════════════════════ */
   class QuizPanel {
 
     constructor(src) {
@@ -468,13 +534,11 @@
       if (this.o.group) this._registerGroup();
     }
 
-    /* ─ 讀取設定 ─────────────────────────── */
     _readCfg() {
       const e = this._src;
       const G = window.QuizPanelConfig || {};
       const r = (attr, key, fb) => gcfg(e, attr, key, fb);
 
-      /* 欄寬 */
       let ratioStr=null, rightWidth=null;
       if      (e.hasAttribute('ratio'))       ratioStr  = e.getAttribute('ratio');
       else if (e.hasAttribute('right-width')) rightWidth= e.getAttribute('right-width');
@@ -511,19 +575,16 @@
         eColor     : r('explanation-color','explColor',     D.explColor),
         accent     : r('accent-color',     'accentColor',   D.accentColor),
         divider    : r('divider-color',    'dividerColor',  D.dividerColor),
-        /* 主題 */
         theme      : r('theme',            'theme',         D.theme),
         themeStyle : r('theme-style',      'themeStyle',    D.themeStyle),
         initSmall: e.hasAttribute('init-small') ||
                    (G.initSmall === true),
-        /* 字體大小 */
         fsTrig : r('fs-trigger',    'fsTrigger',    D.fsTrigger),
         fsQ    : r('fs-question',   'fsQuestion',   D.fsQuestion),
         fsNum  : r('fs-number',     'fsNumber',     D.fsNumber),
         fsInp  : r('fs-input',      'fsInput',      D.fsInput),
         fsRes  : r('fs-result',     'fsResult',     D.fsResult),
         fsExpl : r('fs-explanation','fsExplanation',D.fsExplanation),
-        /* 其他 */
         showNum      : e.getAttribute('show-number') || '',
         inputType    : e.getAttribute('input-type')  || 'text',
         inputRows    : parseInt(e.getAttribute('input-rows') || '2'),
