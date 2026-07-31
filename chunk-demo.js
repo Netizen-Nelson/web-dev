@@ -126,6 +126,7 @@ chunk-demo { display: block; }
 
 .cd-translation {
   margin-top: 3px; padding: 3px 6px;
+  margin-left: var(--trl-indent, 0px);
   border-left: 3px solid var(--trlb, #C6C7BD);
   border-radius: 0 6px 6px 0;
   background: rgba(255,255,255,.025);
@@ -134,6 +135,19 @@ chunk-demo { display: block; }
 .cd-tr-text {
   font-size: .9rem; color: var(--trlc, #8C9088);
   letter-spacing: .01em; line-height: 1.25;
+}
+
+.cd-note {
+  margin-top: 3px; padding: 3px 6px;
+  margin-left: var(--note-indent, 0px);
+  border-left: 3px solid var(--noteb, #C6C7BD);
+  border-radius: 0 6px 6px 0;
+  background: rgba(255,255,255,.018);
+  transition: opacity .2s ease;
+}
+.cd-note-text {
+  font-size: .85rem; color: var(--notec, #6e7270);
+  letter-spacing: .02em; line-height: 1.3; font-style: italic;
 }
     `.trim();
     (doc.head || doc.documentElement).appendChild(s);
@@ -176,9 +190,15 @@ chunk-demo { display: block; }
     width:              null,
     dropdownWidth:      null,
     buttonWidth:        null,
-    showTranslation:       false,
-    translationColor:      '#8C9088',
+    showTranslation:        false,
+    translationColor:       '#8C9088',
     translationBorderColor: null,   // null = 跟隨主題 border 色
+    translationIndent:      0,      // px，translation 左側線條右移量
+
+    showNote:               false,
+    noteColor:              '#6e7270',
+    noteBorderColor:        null,   // null = 跟隨主題 border 色
+    noteIndent:             0,      // px，note 左側線條右移量
   };
 
   class ChunkDemo extends HTMLElement {
@@ -189,7 +209,8 @@ chunk-demo { display: block; }
         'theme', 'border-width', 'border-style', 'data-config',
         'show-dots', 'width', 'dropdown-width', 'button-width',
         'level-colors', 'mask-mode',
-        'translation', 'show-translation',
+        'translation', 'show-translation', 'translation-indent',
+        'note', 'show-note', 'note-indent',
       ];
     }
 
@@ -260,10 +281,20 @@ chunk-demo { display: block; }
       const stAttr = this.getAttribute('show-translation');
       if (stAttr !== null) cfg.showTranslation = stAttr === 'true';
 
+      const tiAttr = this.getAttribute('translation-indent');
+      if (tiAttr !== null) cfg.translationIndent = parseFloat(tiAttr) || 0;
+
+      const snAttr = this.getAttribute('show-note');
+      if (snAttr !== null) cfg.showNote = snAttr === 'true';
+
+      const niAttr = this.getAttribute('note-indent');
+      if (niAttr !== null) cfg.noteIndent = parseFloat(niAttr) || 0;
+
       /* 衍生值 */
       cfg._pvColor   = cfg.previewBorderColor || cfg._theme.border;
       cfg._maskColor = cfg.maskColor || DEFAULTS.maskColor;
       cfg._trColor   = cfg.translationBorderColor || cfg._theme.border;
+      cfg._noteColor = cfg.noteBorderColor || cfg._theme.border;
 
       return cfg;
     }
@@ -378,13 +409,33 @@ chunk-demo { display: block; }
         const tr = doc.createElement('div');
         tr.className = 'cd-translation';
         tr.style.setProperty('--trlb', cfg._trColor);
-        if (cfg.translationColor) tr.style.setProperty('--trlc', cfg.translationColor);
+        if (cfg.translationColor)  tr.style.setProperty('--trlc', cfg.translationColor);
+        if (cfg.translationIndent) tr.style.setProperty('--trl-indent', cfg.translationIndent + 'px');
 
         const tt     = doc.createElement('div');
         tt.className = 'cd-tr-text';
         tt.innerHTML = this._fullTrans();
         tr.appendChild(tt);
         this.appendChild(tr);
+      }
+
+      const showNote =
+        this.getAttribute('show-note') === 'true' ||
+        (this.getAttribute('show-note') === null && cfg.showNote);
+
+      const noteText = this.getAttribute('note') || '';
+      if (showNote && noteText) {
+        const nt = doc.createElement('div');
+        nt.className = 'cd-note';
+        nt.style.setProperty('--noteb', cfg._noteColor);
+        if (cfg.noteColor)  nt.style.setProperty('--notec', cfg.noteColor);
+        if (cfg.noteIndent) nt.style.setProperty('--note-indent', cfg.noteIndent + 'px');
+
+        const ntx     = doc.createElement('div');
+        ntx.className = 'cd-note-text';
+        ntx.innerHTML = noteText;
+        nt.appendChild(ntx);
+        this.appendChild(nt);
       }
     }
 
