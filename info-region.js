@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  /* ── 工具函式 ────────────────────────────────────────────────────── */
   const cap     = s => s.charAt(0).toUpperCase() + s.slice(1);
   const addUnit = (val, unit) => {
     if (!val) return null;
@@ -9,7 +8,6 @@
     return val + unit;
   };
 
-  /* ── 品牌色 ─────────────────────────────────────────────────────── */
   const BrandColors = {
     bg:       '#0C0D0C',
     region:   '#333333',
@@ -30,25 +28,22 @@
     orange:   '#EDA109',
   };
 
-  /* ── 全域預設值 ─────────────────────────────────────────────────── */
-  const defaults = {
+    const defaults = {
     defaultColor:       'sky',
-    animDuration:       500,          // 垂直展開動畫 ms
-    horizontalAnimDur:  380,          // 橫向淡入動畫 ms
-    defaultInterval:    500,          // 無 countdown 的鏈結延遲 ms
-
-    /* ── 內容框線 ────────────────────────── */
-    borderWidth:        4,            // 左邊框粗細（原始預設，僅左側）
-    borderAllWidth:     null,         // 若設定，四邊框同寬（覆蓋各側個別設定）
-    borderTopWidth:     null,         // 上框線粗細
-    borderRightWidth:   null,         // 右框線粗細
-    borderBottomWidth:  null,         // 下框線粗細
-    borderLeftWidth:    null,         // 左框線粗細（覆蓋 borderWidth）
-    borderStyle:        'solid',      // 全邊框樣式（solid|dashed|dotted|double|groove|ridge|inset|outset）
-    borderTopStyle:     null,         // 上框線樣式
-    borderRightStyle:   null,         // 右框線樣式
-    borderBottomStyle:  null,         // 下框線樣式
-    borderLeftStyle:    null,         // 左框線樣式
+    animDuration:       500,
+    horizontalAnimDur:  380,
+    defaultInterval:    500,
+    borderWidth:        4,     
+    borderAllWidth:     null, 
+    borderTopWidth:     null,   
+    borderRightWidth:   null,  
+    borderBottomWidth:  null, 
+    borderLeftWidth:    null, 
+    borderStyle:        'solid',
+    borderTopStyle:     null,   
+    borderRightStyle:   null,   
+    borderBottomStyle:  null,   
+    borderLeftStyle:    null, 
 
     borderRadius:       '0 6px 6px 0',
     bgColor:            BrandColors.region,
@@ -63,10 +58,9 @@
     progressTransition: 400,
     manualLabel:        '▶ 下一步',
     manualAlign:        'right',
-    cascadeInterval:    0,            // 0 = 不啟用，由 next 屬性鏈結
-    colsPerRow:         4,            // 水平佈局每列顯示幾個步驟
+    cascadeInterval:    0,  
+    colsPerRow:         4,
 
-    /* ── 按鈕尺寸（開始 / 重設共用，可被個別覆蓋） ─── */
     btnWidth:           null,         // 共用寬度
     btnHeight:          null,         // 共用高度
     btnFontSize:        null,         // 共用字體大小
@@ -212,7 +206,6 @@
         margin-bottom: 16px;
       }
 
-      /* ── 按鈕基礎樣式 ───────────────────────────────────────────────── */
       .ir-btn {
         display: inline-flex;
         align-items: center;
@@ -232,10 +225,8 @@
       }
       .ir-btn:hover { background: #3a3b3a; }
 
-      /* 品牌色按鈕 variants */
       ${btnColorVariants}
 
-      /* ── 全體進度條 ──────────────────────────────────────────────────── */
       .ir-global-progress-wrap {
         display: flex;
         align-items: center;
@@ -289,9 +280,6 @@
     document.head.appendChild(styleEl);
   }
 
-  /* ════════════════════════════════════════════════════════════════════
-   *  InfoRegion
-   * ════════════════════════════════════════════════════════════════════ */
   class InfoRegion extends HTMLElement {
     static get observedAttributes() {
       return [
@@ -346,17 +334,6 @@
       }
     }
 
-    /* ── 框線樣式套用 ─────────────────────────────────────────────── */
-    /*
-     * 屬性優先順序（高→低）：
-     *   元素的 border-{side}-width  >  元素的 border-width  >
-     *   InfoRegionConfig.border{Side}Width  >  InfoRegionConfig.borderAllWidth  >
-     *   左側預設 cfg.borderWidth，其他側預設 0
-     *
-     * 樣式（style）同理：
-     *   border-{side}-style  >  border-style  >
-     *   cfg.border{Side}Style  >  cfg.borderStyle  >  'solid'
-     */
     _applyBorderStyles() {
       const cfg       = window.InfoRegionConfig;
       const colorName = this.getAttribute('color') || cfg.defaultColor;
@@ -366,8 +343,8 @@
       const attrAllS = this.getAttribute('border-style');
 
       ['top', 'right', 'bottom', 'left'].forEach(side => {
-        const C    = cap(side);           // 'Top' / 'Right' / 'Bottom' / 'Left'
-        const prop = 'border' + C;        // 'borderTop' etc.
+        const C    = cap(side); 
+        const prop = 'border' + C; 
 
         /* Width */
         const attrW = this.getAttribute(`border-${side}-width`) != null
