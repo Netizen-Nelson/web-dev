@@ -30,9 +30,6 @@
     return `rgb(${Math.round(r+(255-r)*t)},${Math.round(g+(255-g)*t)},${Math.round(b+(255-b)*t)})`;
   }
 
-  /* ══════════════════════════════════════════
-     主題變數計算
-  ══════════════════════════════════════════ */
   function _themeVars(name, style) {
     const color = BRAND[name];
     if (!color) return {};
@@ -89,9 +86,6 @@
         '--qp-col-hbg'     : _darken(color, 0.14),
       };
     } else {
-      /*
-       * 深色樣式（預設）：#0C0D0C 背景，主題色文字/邊框/強調
-       */
       return {
         '--qp-panel-border': _rgba(color, 0.52),
         '--qp-q-color'     : color,
@@ -122,15 +116,9 @@
     }
   }
 
-  /* ══════════════════════════════════════════
-     SVG 圖示
-  ══════════════════════════════════════════ */
   const ICON_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
   const ICON_RESET = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
 
-  /* ══════════════════════════════════════════
-     全域樣式（只注入一次）
-  ══════════════════════════════════════════ */
   const STYLE_ID = 'quiz-panel-style-v4';
   if (!document.getElementById(STYLE_ID)) {
     const s = document.createElement('style');
@@ -150,7 +138,7 @@
         align-items     : center;
         justify-content : center;
         background      : var(--qp-trig-bg,    var(--qp-bg1));
-        border          : 2px solid var(--qp-trig-border, var(--qp-shell));
+        border          : 1px solid var(--qp-trig-border, var(--qp-shell));
         border-radius   : 6px;
         cursor          : pointer;
         color           : var(--qp-trig-color,  var(--qp-shell));
@@ -177,7 +165,7 @@
       .qp-panel {
         display      : none;
         background   : var(--qp-bg);
-        border       : 2px solid var(--qp-panel-border, var(--qp-shell));
+        border       : 1px solid var(--qp-panel-border, var(--qp-shell));
         border-radius: 8px;
         overflow     : hidden;
         width        : var(--qp-panel-w);
@@ -199,7 +187,7 @@
         padding    : 12px 16px;
         color      : var(--qp-q-color);
         font-size  : var(--qp-fs-q);
-        line-height: 1.7;
+        line-height: 1.4;
         display    : flex;
         align-items: center;
         gap        : 8px;
@@ -246,7 +234,7 @@
         transition   : border-color .18s, background .18s;
         resize       : vertical;
         font-family  : inherit;
-        line-height  : 1.5;
+        line-height  : 1.4;
       }
       .qp-input::placeholder { color: #55555a; }
       .qp-input:focus        { border-color: var(--qp-focus); }
@@ -325,7 +313,7 @@
         display    : none;
         font-size  : var(--qp-fs-expl);
         color      : var(--qp-expl-color);
-        line-height: 1.6;
+        line-height: 1.4;
         padding    : 7px 9px;
         background : var(--qp-expl-bg, #120d19);
         border-left: 3px solid var(--qp-expl-color);
