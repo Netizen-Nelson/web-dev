@@ -7,6 +7,10 @@
  * theme-style="dark"      dark（深色背景＋主題色文字，預設）
  *                         filled（主題色背景＋深色文字）
  *
+ * 可用主題色名稱：
+ *   lavender │ special │ warning │ salmon │ sky │ safe │ vanilla
+ *   yellow   │ focus   │ info    │ stone  │ indigo │ pink │ orange │ shell
+ *
  * 範例：
  *   <div data-quiz-panel theme="sky" ...>          → 深色背景＋sky藍文字
  *   <div data-quiz-panel theme="indigo" theme-style="filled" ...>
@@ -80,6 +84,9 @@
 (function () {
   'use strict';
 
+  /* ══════════════════════════════════════════
+     調色盤基底
+  ══════════════════════════════════════════ */
   const C = {
     bg:'#0C0D0C', bg1:'#141514', bg2:'#1C1D1C', bg3:'#252625',
     shell:'#C6C7BD', lavender:'#C3A5E5', special:'#C8DD5A',
@@ -87,6 +94,9 @@
     focus:'#A0CF72', stone:'#95BDD7', indigo:'#7B6CF0',
   };
 
+  /* ══════════════════════════════════════════
+     品牌色映射表
+  ══════════════════════════════════════════ */
   const BRAND = {
     lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
     salmon  :'#E5C3B3', sky    :'#08A9D1', safe   :'#40C99A',
@@ -95,6 +105,9 @@
     pink    :'#FFB3D9', orange :'#EDA109', shell  :'#C6C7BD',
   };
 
+  /* ══════════════════════════════════════════
+     色彩工具
+  ══════════════════════════════════════════ */
   function _rgb(hex) {
     hex = hex.replace('#','');
     return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
@@ -112,45 +125,68 @@
     return `rgb(${Math.round(r+(255-r)*t)},${Math.round(g+(255-g)*t)},${Math.round(b+(255-b)*t)})`;
   }
 
+  /* ══════════════════════════════════════════
+     主題變數計算
+  ══════════════════════════════════════════ */
   function _themeVars(name, style) {
     const color = BRAND[name];
     if (!color) return {};
 
     if (style === 'filled') {
+      /*
+       * 填滿樣式：主題色作為面板背景，深色文字
+       * bg  = 主題色（題目區）
+       * bg1 = 稍暗（右側面板）
+       * bg2 = 更暗（輸入欄）
+       * bg3 = 最暗（重設按鈕）
+       */
       return {
         '--qp-bg'          : color,
         '--qp-bg1'         : _darken(color, 0.10),
         '--qp-bg2'         : _darken(color, 0.18),
         '--qp-bg3'         : _darken(color, 0.28),
         '--qp-panel-border': 'rgba(0,0,0,0.28)',
+        /* 題目區 */
         '--qp-q-color'     : '#0a0b0a',
+        /* 輸入 */
         '--qp-vanilla'     : '#0a0b0a',
         '--qp-inp-border'  : 'rgba(0,0,0,0.22)',
         '--qp-focus'       : 'rgba(0,0,0,0.55)',
         '--qp-inp-ok-bg'   : 'rgba(0,0,0,0.12)',
         '--qp-inp-err-bg'  : 'rgba(0,0,0,0.12)',
+        /* 結果 */
         '--qp-safe'        : '#0a5432',
         '--qp-warning'     : '#852020',
+        /* 分隔線 */
         '--qp-divider'     : 'rgba(0,0,0,0.18)',
+        /* 解說 */
         '--qp-expl-color'  : 'rgba(0,0,0,0.72)',
         '--qp-expl-bg'     : 'rgba(0,0,0,0.10)',
+        /* 題號 */
         '--qp-stone'       : 'rgba(0,0,0,0.42)',
+        /* 觸發器 */
         '--qp-trig-bg'     : _darken(color, 0.10),
         '--qp-trig-border' : 'rgba(0,0,0,0.28)',
         '--qp-trig-color'  : '#0a0b0a',
         '--qp-trig-hbg'    : _lighten(color, 0.10),
         '--qp-trig-hborder': 'rgba(0,0,0,0.50)',
         '--qp-trig-hcolor' : '#000',
+        /* 核對按鈕：深色底，主題色圖示 */
         '--qp-ck-bg'       : 'rgba(0,0,0,0.68)',
         '--qp-ck-fg'       : color,
+        /* 重設按鈕 */
         '--qp-rs-bg'       : 'rgba(0,0,0,0.10)',
         '--qp-rs-fg'       : 'rgba(0,0,0,0.48)',
         '--qp-rs-bd'       : 'rgba(0,0,0,0.16)',
+        /* 收合箭頭 */
         '--qp-col-fg'      : 'rgba(0,0,0,0.40)',
         '--qp-col-hfg'     : '#000',
         '--qp-col-hbg'     : _darken(color, 0.14),
       };
     } else {
+      /*
+       * 深色樣式（預設）：#0C0D0C 背景，主題色文字/邊框/強調
+       */
       return {
         '--qp-panel-border': _rgba(color, 0.52),
         '--qp-q-color'     : color,
@@ -161,36 +197,58 @@
         '--qp-expl-bg'     : `color-mix(in srgb, ${color} 8%, #0C0D0C)`,
         '--qp-stone'       : _rgba(color, 0.52),
         '--qp-accent'      : color,
+        /* 觸發器 */
         '--qp-trig-bg'     : C.bg1,
         '--qp-trig-border' : _rgba(color, 0.52),
         '--qp-trig-color'  : color,
         '--qp-trig-hbg'    : C.bg2,
         '--qp-trig-hborder': color,
         '--qp-trig-hcolor' : color,
+        /* 核對按鈕：主題色底，深色圖示 */
         '--qp-ck-bg'       : color,
         '--qp-ck-fg'       : C.bg,
+        /* 重設按鈕 */
         '--qp-rs-fg'       : _rgba(color, 0.60),
         '--qp-rs-bd'       : _rgba(color, 0.18),
+        /* 收合箭頭 */
         '--qp-col-fg'      : _rgba(color, 0.48),
         '--qp-col-hfg'     : color,
       };
     }
   }
 
+  /* ══════════════════════════════════════════
+     SVG 圖示
+  ══════════════════════════════════════════ */
   const ICON_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
   const ICON_RESET = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
 
+  /* ══════════════════════════════════════════
+     全域樣式（只注入一次）
+  ══════════════════════════════════════════ */
   const STYLE_ID = 'quiz-panel-style-v4';
   if (!document.getElementById(STYLE_ID)) {
     const s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = /* css */`
+      /*
+       * ── wrapper 自己擁有寬度 ──────────────────────────────────────
+       * 關鍵設計：不依賴 inline-block shrink-wrap 來決定寬度。
+       * 收合時 width = --qp-trig-w（觸發器寬）；
+       * 展開時 .qp-expanded → width = --qp-panel-w（面板寬）。
+       * 子元素 trigger / panel 一律 width: 100% 填滿 wrapper，
+       * 不再各自宣告 width，避免多個元件並排時互相干擾。
+       */
       .qp-wrapper {
-        display      : inline-block;
-        position     : relative;
-        vertical-align: top;
-        font-family  : system-ui, 'Segoe UI', sans-serif;
-        font-size    : 1rem;
+        display        : inline-block;
+        position       : relative;
+        vertical-align : top;
+        font-family    : system-ui, 'Segoe UI', sans-serif;
+        font-size      : 1rem;
+        width          : var(--qp-trig-w);   /* 預設：觸發器寬度 */
+      }
+      .qp-wrapper.qp-expanded {
+        width          : var(--qp-panel-w);  /* 展開後：面板寬度 */
       }
 
       /* ── 收合觸發器 ── */
@@ -205,7 +263,7 @@
         color           : var(--qp-trig-color,  var(--qp-shell));
         font-size       : var(--qp-fs-trig);
         user-select     : none;
-        width           : var(--qp-trig-w);
+        width           : 100%;             /* 填滿 wrapper */
         min-height      : var(--qp-trig-h);
         box-sizing      : border-box;
         transition      : background .18s, border-color .18s, color .18s;
@@ -217,16 +275,19 @@
         color        : var(--qp-trig-hcolor,   var(--qp-accent));
         outline      : none;
       }
+      /* 緊湊：高度減半 */
       .qp-wrapper.qp-ctrig .qp-trigger {
         min-height: calc(var(--qp-trig-h) / 2);
       }
+
+      /* ── 展開面板 ── */
       .qp-panel {
         display      : none;
         background   : var(--qp-bg);
         border       : 2px solid var(--qp-panel-border, var(--qp-shell));
         border-radius: 8px;
         overflow     : hidden;
-        width        : var(--qp-panel-w);
+        width        : 100%;             /* 填滿 wrapper（wrapper 負責實際寬度）*/
         min-height   : var(--qp-min-h);
         box-sizing   : border-box;
       }
@@ -237,6 +298,8 @@
         animation        : qpFadeIn var(--qp-anim) ease;
         transform-origin : left center;
       }
+
+      /* ── 題目區 ── */
       .qp-question {
         flex       : 1 1 auto;
         min-width  : 0;
@@ -263,6 +326,7 @@
         padding-top: 2px;
       }
 
+      /* ── 右側操作區 ── */
       .qp-right {
         flex       : 0 0 var(--qp-right-w);
         min-width  : 0;
@@ -275,6 +339,7 @@
       }
       .qp-wrapper.qp-ratio .qp-right { flex: var(--qp-ratio-r) 1 0; }
 
+      /* ── 輸入欄 ── */
       .qp-input {
         width        : 100%;
         background   : var(--qp-bg2);
@@ -295,6 +360,7 @@
       .qp-input.qp-correct   { border-color: var(--qp-safe);    background: var(--qp-inp-ok-bg,  #0b1a12); }
       .qp-input.qp-incorrect { border-color: var(--qp-warning); background: var(--qp-inp-err-bg, #1c0b0b); }
 
+      /* ── 操作列（按鈕 ＋ 結果 同行）── */
       .qp-action-row {
         display    : flex;
         align-items: center;
@@ -302,6 +368,7 @@
         min-height : var(--qp-btn-size);
       }
 
+      /* ── 按鈕 ── */
       .qp-btn {
         flex           : 0 0 var(--qp-btn-size);
         width          : var(--qp-btn-size);
@@ -521,6 +588,9 @@
     return e;
   }
 
+  /* ══════════════════════════════════════════
+     QuizPanel 類別
+  ══════════════════════════════════════════ */
   class QuizPanel {
 
     constructor(src) {
@@ -534,11 +604,13 @@
       if (this.o.group) this._registerGroup();
     }
 
+    /* ─ 讀取設定 ─────────────────────────── */
     _readCfg() {
       const e = this._src;
       const G = window.QuizPanelConfig || {};
       const r = (attr, key, fb) => gcfg(e, attr, key, fb);
 
+      /* 欄寬 */
       let ratioStr=null, rightWidth=null;
       if      (e.hasAttribute('ratio'))       ratioStr  = e.getAttribute('ratio');
       else if (e.hasAttribute('right-width')) rightWidth= e.getAttribute('right-width');
@@ -575,16 +647,19 @@
         eColor     : r('explanation-color','explColor',     D.explColor),
         accent     : r('accent-color',     'accentColor',   D.accentColor),
         divider    : r('divider-color',    'dividerColor',  D.dividerColor),
+        /* 主題 */
         theme      : r('theme',            'theme',         D.theme),
         themeStyle : r('theme-style',      'themeStyle',    D.themeStyle),
         initSmall: e.hasAttribute('init-small') ||
                    (G.initSmall === true),
+        /* 字體大小 */
         fsTrig : r('fs-trigger',    'fsTrigger',    D.fsTrigger),
         fsQ    : r('fs-question',   'fsQuestion',   D.fsQuestion),
         fsNum  : r('fs-number',     'fsNumber',     D.fsNumber),
         fsInp  : r('fs-input',      'fsInput',      D.fsInput),
         fsRes  : r('fs-result',     'fsResult',     D.fsResult),
         fsExpl : r('fs-explanation','fsExplanation',D.fsExplanation),
+        /* 其他 */
         showNum      : e.getAttribute('show-number') || '',
         inputType    : e.getAttribute('input-type')  || 'text',
         inputRows    : parseInt(e.getAttribute('input-rows') || '2'),
@@ -598,16 +673,19 @@
       };
     }
 
+    /* ─ 建立 DOM ─────────────────────────── */
     _build() {
       const o = this.o;
       const ratio = parseRatio(o.ratioStr);
 
+      /* wrapper + 分類 class */
       this.$wrap = mk('div','qp-wrapper');
       if (ratio)                      this.$wrap.classList.add('qp-ratio');
       if (o.btnStyle==='text')        this.$wrap.classList.add('qp-bstyle-text');
       else if (o.btnStyle==='both')   this.$wrap.classList.add('qp-bstyle-both');
       if (o.initSmall)                this.$wrap.classList.add('qp-ctrig');
 
+      /* ── 基礎 CSS 變數 ── */
       const v = [
         `--qp-bg:${C.bg}`,`--qp-bg1:${C.bg1}`,`--qp-bg2:${C.bg2}`,`--qp-bg3:${C.bg3}`,
         `--qp-shell:${C.shell}`,`--qp-accent:${o.accent}`,`--qp-divider:${o.divider}`,
@@ -628,6 +706,7 @@
 
       this.$wrap.style.cssText = v.join(';');
 
+      /* ── 主題色覆蓋（覆蓋於基礎變數之上）── */
       if (o.theme) {
         const tv = _themeVars(o.theme, o.themeStyle);
         for (const [k, val] of Object.entries(tv)) {
@@ -635,16 +714,19 @@
         }
       }
 
+      /* ── 觸發器 ── */
       this.$trigger = mk('div','qp-trigger',{
         role:'button', tabindex:'0',
         title:'展開題目','aria-label':'展開題目面板',
         html: o.collapseIcon,
       });
 
+      /* ── 面板 ── */
       this.$panel = mk('div','qp-panel',{
         role:'region','aria-label':'題目面板',
       });
 
+      /* ── 題目區 ── */
       this.$question = mk('div','qp-question');
       if (o.showNum) {
         this._numEl = mk('span','qp-num',{text: o.showNum+'.'});
@@ -654,6 +736,7 @@
       this._qTextEl.innerHTML = md(o.question);
       this.$question.appendChild(this._qTextEl);
 
+      /* ── 右側 ── */
       this.$right = mk('div','qp-right');
 
       if (!o.readonlyAnswer) {
@@ -719,11 +802,12 @@
         const txt = mk('span','qp-btn-label',{text:lbl});
         btn.appendChild(ico); btn.appendChild(txt);
       } else {
-        btn.innerHTML = icon;
+        btn.innerHTML = icon;   // icon（預設）
       }
       return btn;
     }
 
+    /* ─ 群組 ─────────────────────────────── */
     _registerGroup() {
       const name = this.o.group;
       if (!_groups[name]) _groups[name]={panels:[],start:null,noNumber:false};
@@ -743,6 +827,7 @@
       } else { this._numEl.textContent = n+'.'; }
     }
 
+    /* ─ 比對 ─────────────────────────────── */
     _match(u) {
       const {answer,caseSensitive,matchMode} = this.o;
       if (!answer) return false;
@@ -755,6 +840,7 @@
       return answer.split('|').map(a=>n(a)).includes(ua);
     }
 
+    /* ─ 事件 ─────────────────────────────── */
     _bindEvents() {
       this.$trigger.addEventListener('click',()=>this.open());
       this.$trigger.addEventListener('keydown',e=>{
@@ -779,7 +865,9 @@
       }
     }
 
+    /* ─ 公開 API ─────────────────────────── */
     open() {
+      this.$wrap.classList.add('qp-expanded');   // wrapper → panel width
       this.$trigger.style.display='none';
       this.$panel.classList.add('qp-open');
       this._isOpen=true;
@@ -789,6 +877,7 @@
     close() {
       this.$panel.classList.remove('qp-open');
       this.$trigger.style.display='';
+      this.$wrap.classList.remove('qp-expanded'); // wrapper → trigger width
       this._isOpen=false;
       this._emit('quiz-panel-close',{});
     }
@@ -821,6 +910,34 @@
     static resetGroup(name)      { QuizPanel.getGroup(name).forEach(p=>p.reset()); }
     static renumberGroup(name,n) { if(_groups[name]){_groups[name].start=n;applyGroupNums(name);} }
 
+    /**
+     * collectAnswers([options]) → Array
+     * 蒐集頁面上所有題目的使用者輸入與正解，回傳物件陣列。
+     *
+     * 每筆紀錄欄位：
+     *   index       {number}        頁面上的順序（0起算）
+     *   number      {string|null}   顯示的題號（group自動號 / show-number / null）
+     *   group       {string|null}   所屬群組名稱
+     *   question    {string}        題目原始文字
+     *   userInput   {string}        使用者輸入（未輸入為空字串）
+     *   expected    {string}        正解（| 分隔多個）
+     *   correct     {boolean|null}  是否答對（readonly-answer 題型為 null）
+     *   isOpen      {boolean}       面板目前是否展開
+     *
+     * options（選用）：
+     *   onlyAnswered {boolean} true → 只含已輸入的題目（預設 false）
+     *   group        {string}  只蒐集指定群組（預設全部）
+     *
+     * 用法：
+     *   const rows = QuizPanel.collectAnswers();
+     *   const json = JSON.stringify(rows, null, 2);
+     *
+     *   // 只蒐集答過的題目
+     *   const done = QuizPanel.collectAnswers({ onlyAnswered: true });
+     *
+     *   // 只蒐集某群組
+     *   const g = QuizPanel.collectAnswers({ group: '網路概論' });
+     */
     static collectAnswers(options = {}) {
       const { onlyAnswered = false, group: filterGroup = null } = options;
       const results = [];
@@ -854,11 +971,18 @@
       return results;
     }
 
+    /**
+     * collectAnswersJSON([options]) → string
+     * collectAnswers() 的 JSON 字串版本（縮排 2 格）。
+     */
     static collectAnswersJSON(options = {}) {
       return JSON.stringify(QuizPanel.collectAnswers(options), null, 2);
     }
   }
 
+  /* ══════════════════════════════════════════
+     自動初始化
+  ══════════════════════════════════════════ */
   function initAll(root) {
     (root||document).querySelectorAll('[data-quiz-panel]').forEach(node=>{
       if(!node._qpInit){node._qpInit=true; new QuizPanel(node);}
