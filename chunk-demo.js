@@ -13,7 +13,7 @@ chunk-demo { display: block; }
 /* ── 句子框 ─────────────────────────────── */
 .cd-bar {
   display: flex; align-items: center; flex-wrap: wrap;
-  gap: 4px 8px; padding: 16px 22px;
+  gap: 4px 8px; padding: 16px 22px 8px;
   border-radius: 12px; border: 1px solid;
   font-size: 1.1rem; line-height: 2.2;
 }
@@ -117,7 +117,7 @@ chunk-demo { display: block; }
 
 /* ── 整句預覽 ───────────────────────────── */
 .cd-preview {
-  margin-top: 3px; padding: 3px 6px;
+  margin-top: 1px; padding: 3px 6px;
   border-left: 3px solid var(--pvb, #C8DD5A);
   border-radius: 0 6px 6px 0;
   background: var(--pvbg, rgba(255,255,255,.035));
@@ -125,7 +125,7 @@ chunk-demo { display: block; }
 .cd-pv-text { font-size: .9rem; font-style: italic; color: var(--pvt, #7a8078); }
 
 .cd-translation {
-  margin-top: 3px; padding: 3px 6px;
+  margin-top: 1px; padding: 3px 6px;
   margin-left: var(--trl-indent, 0px);
   border-left: 3px solid var(--trlb, #C6C7BD);
   border-radius: 0 6px 6px 0;
@@ -138,7 +138,7 @@ chunk-demo { display: block; }
 }
 
 .cd-note {
-  margin-top: 3px; padding: 3px 6px;
+  margin-top: 1px; padding: 3px 6px;
   margin-left: var(--note-indent, 0px);
   border-left: 3px solid var(--noteb, #C6C7BD);
   border-radius: 0 6px 6px 0;
