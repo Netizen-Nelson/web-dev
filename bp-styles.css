@@ -141,11 +141,12 @@
 
 /* ── Text indent ─────────────────────────── */
 /* 修正：原檔缺少「.」，以下為正確 class 選擇器 */
-.bp-ind-1 { text-indent: 0.8rem; }
-.bp-ind-2 { text-indent: 1rem; }
-.bp-ind-3 { text-indent: 1.2rem; }
-.bp-ind-4 { text-indent: 1.5rem; }
-.bp-ind-5 { text-indent: 1.8rem; }
+.bp-ind-1 { text-indent: 8px; }
+.bp-ind-2 { text-indent: 18px; }
+.bp-ind-3 { text-indent: 28px; }
+.bp-ind-4 { text-indent: 38px; }
+.bp-ind-5 { text-indent: 48px; }
+.bp-ind-6 { text-indent: 58px; }
 
 /* ── Blockquote ──────────────────────────── */
 blockquote {
