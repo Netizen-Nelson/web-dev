@@ -179,12 +179,12 @@
 
       .ir-manual-wrap {
         display: flex;
-        margin-top: 14px;
+        margin-top: 10px;
       }
 
       .ir-manual-btn {
         font-size: 0.85rem;
-        padding: 6px 16px;
+        padding: 8px;
         animation: ir-manual-in 0.25s ease forwards;
       }
 
@@ -208,7 +208,7 @@
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
-        margin-bottom: 16px;
+        margin-bottom: 10px;
       }
 
       .ir-btn {
@@ -824,7 +824,7 @@
       const perRow   = parseInt(this.getAttribute('cols-per-row'), 10) || cfg.colsPerRow || 4;
       const colClass = this.getAttribute('col-class') || this._autoColClass(perRow);
       const gutter   = this.getAttribute('gutter')    || 'g-3';
-      const rowGap   = this.getAttribute('row-gap')   || '16px';
+      const rowGap   = this.getAttribute('row-gap')   || '10px';
 
       children.forEach(child => this.removeChild(child));
 
@@ -922,7 +922,7 @@
 
       const wrap = document.createElement('div');
       wrap.className = 'ir-global-progress-wrap';
-      wrap.style[position === 'top' ? 'marginBottom' : 'marginTop'] = '12px';
+      wrap.style[position === 'top' ? 'marginBottom' : 'marginTop'] = '8px';
 
       const track = document.createElement('div');
       track.className = 'ir-global-progress-track';
@@ -960,11 +960,6 @@
       });
     }
 
-    /**
-     * 進度更新：
-     *   - 測驗模式：用已作答題數 / 總題數（避免 deactivate 讓進度倒退）
-     *   - 一般模式：用 active="true" 的數量
-     */
     _updateProgress() {
       if (!this._progressBar) return;
 
