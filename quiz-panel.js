@@ -1,98 +1,11 @@
-/**
- * theme="colorName"       套用品牌色主題（見下表）
- * theme-style="dark"      dark（深色背景＋主題色文字，預設）
- *                         filled（主題色背景＋深色文字）
- *
- * 可用主題色名稱：
- *   lavender │ special │ warning │ salmon │ sky │ safe │ vanilla
- *   yellow   │ focus   │ info    │ stone  │ indigo │ pink │ orange │ shell
- *
- * 範例：
- *   <div data-quiz-panel theme="sky" ...>          → 深色背景＋sky藍文字
- *   <div data-quiz-panel theme="indigo" theme-style="filled" ...>
- *                                                  → indigo背景＋深色文字
- *
- * 全域套用（所有元件）：
- *   window.QuizPanelConfig = { theme: 'sky', themeStyle: 'dark' };
- *
- * ── 收合按鈕緊湊模式 ──────────────────────────────────────────────────────────
- *
- * init-small         布林屬性。收合狀態高度減半（適合橫向排列多題時）
- *                    全域：QuizPanelConfig.initSmall = true
- *
- * ── 字體大小（各部位）────────────────────────────────────────────────────────
- *
- * fs-trigger="1.2rem"      收合觸發器圖示
- * fs-question="0.96rem"    題目文字
- * fs-number="0.76rem"      題號
- * fs-input="0.88rem"       輸入欄
- * fs-result="0.8rem"       核對結果（inline）
- * fs-explanation="0.82rem" 解說文字
- *
- * 全域：QuizPanelConfig.fsTrigger / fsQuestion / fsNumber / fsInput / fsResult / fsExplanation
- *
- * ── 按鈕 ─────────────────────────────────────────────────────────────────────
- *
- * btn-style="icon"          icon（預設）│ text │ both
- * btn-size="30px"           按鈕邊長
- * check-icon / reset-icon   覆蓋圖示 HTML
- * check-label / reset-label aria-label 及 tooltip
- * correct-message / incorrect-message
- *
- * 全域：QuizPanelConfig.btnStyle / btnSize / checkIcon / resetIcon / checkLabel / resetLabel
- *
- * ── 欄寬 ─────────────────────────────────────────────────────────────────────
- *
- * ratio="1:1"          左:右比例（預設），與 right-width 擇一
- * right-width="220px"  固定右欄（設定後取消 ratio）
- *
- * ── 群組自動編號 ──────────────────────────────────────────────────────────────
- *
- * group="名稱"          群組，依 DOM 順序自動編號
- * group-start="N"       起始號（同群組第一個出現的值生效）
- * group-no-number       布林，整組停用編號
- * skip-number           布林，此題不佔序號、不顯示
- *
- * ── 其他屬性 ─────────────────────────────────────────────────────────────────
- *
- * question / answer / explanation / placeholder
- * case-sensitive / match-mode（exact│contains│regex）
- * show-number / input-type / input-rows / start-open / readonly-answer
- * question-color / explanation-color / accent-color / divider-color
- * panel-width / min-height / trigger-width / trigger-min-height
- * collapse-icon / expand-icon / anim-duration
- *
- * ── 事件（bubble）────────────────────────────────────────────────────────────
- *
- * quiz-panel-open / quiz-panel-close / quiz-panel-reset
- * quiz-panel-check  →  detail: { answer, correct, expected }
- *
- * ── 靜態 API ─────────────────────────────────────────────────────────────────
- *
- * QuizPanel.getGroup(name) / .resetGroup(name) / .renumberGroup(name, N)
- *
- * ── 實例 API（wrapper.__qp）──────────────────────────────────────────────────
- *
- * .open() / .close() / .check() / .reset() / .isOpen()
- * .setQuestion(t) / .setAnswer(t) / .setExplanation(t) / .getGroupNumber()
- */
-
 (function () {
   'use strict';
-
-  /* ══════════════════════════════════════════
-     調色盤基底
-  ══════════════════════════════════════════ */
   const C = {
     bg:'#0C0D0C', bg1:'#141514', bg2:'#1C1D1C', bg3:'#252625',
     shell:'#C6C7BD', lavender:'#C3A5E5', special:'#C8DD5A',
     warning:'#F08080', safe:'#40C99A', vanilla:'#DBEDD8',
     focus:'#A0CF72', stone:'#95BDD7', indigo:'#7B6CF0',
   };
-
-  /* ══════════════════════════════════════════
-     品牌色映射表
-  ══════════════════════════════════════════ */
   const BRAND = {
     lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
     salmon  :'#E5C3B3', sky    :'#08A9D1', safe   :'#40C99A',
@@ -100,7 +13,6 @@
     info    :'#4285EB', stone  :'#95BDD7', indigo :'#7B6CF0',
     pink    :'#FFB3D9', orange :'#EDA109', shell  :'#C6C7BD',
   };
-
   function _rgb(hex) {
     hex = hex.replace('#','');
     return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
@@ -552,6 +464,9 @@
     return e;
   }
 
+  /* ══════════════════════════════════════════
+     QuizPanel 類別
+  ══════════════════════════════════════════ */
   class QuizPanel {
 
     constructor(src) {
@@ -565,11 +480,13 @@
       if (this.o.group) this._registerGroup();
     }
 
+    /* ─ 讀取設定 ─────────────────────────── */
     _readCfg() {
       const e = this._src;
       const G = window.QuizPanelConfig || {};
       const r = (attr, key, fb) => gcfg(e, attr, key, fb);
 
+      /* 欄寬 */
       let ratioStr=null, rightWidth=null;
       if      (e.hasAttribute('ratio'))       ratioStr  = e.getAttribute('ratio');
       else if (e.hasAttribute('right-width')) rightWidth= e.getAttribute('right-width');
@@ -606,19 +523,19 @@
         eColor     : r('explanation-color','explColor',     D.explColor),
         accent     : r('accent-color',     'accentColor',   D.accentColor),
         divider    : r('divider-color',    'dividerColor',  D.dividerColor),
-
+        /* 主題 */
         theme      : r('theme',            'theme',         D.theme),
         themeStyle : r('theme-style',      'themeStyle',    D.themeStyle),
         initSmall: e.hasAttribute('init-small') ||
                    (G.initSmall === true),
-
+        /* 字體大小 */
         fsTrig : r('fs-trigger',    'fsTrigger',    D.fsTrigger),
         fsQ    : r('fs-question',   'fsQuestion',   D.fsQuestion),
         fsNum  : r('fs-number',     'fsNumber',     D.fsNumber),
         fsInp  : r('fs-input',      'fsInput',      D.fsInput),
         fsRes  : r('fs-result',     'fsResult',     D.fsResult),
         fsExpl : r('fs-explanation','fsExplanation',D.fsExplanation),
-
+        /* 其他 */
         showNum      : e.getAttribute('show-number') || '',
         inputType    : e.getAttribute('input-type')  || 'text',
         inputRows    : parseInt(e.getAttribute('input-rows') || '2'),
@@ -669,18 +586,16 @@
         }
       }
 
-      /* ── 觸發器 ── */
       this.$trigger = mk('div','qp-trigger',{
         role:'button', tabindex:'0',
+        title:'展開題目','aria-label':'展開題目面板',
         html: o.collapseIcon,
       });
 
-      /* ── 面板 ── */
       this.$panel = mk('div','qp-panel',{
-        role:'region','aria-label':'面板',
+        role:'region','aria-label':'題目面板',
       });
 
-      /* ── 題目區 ── */
       this.$question = mk('div','qp-question');
       if (o.showNum) {
         this._numEl = mk('span','qp-num',{text: o.showNum+'.'});
@@ -755,7 +670,7 @@
         const txt = mk('span','qp-btn-label',{text:lbl});
         btn.appendChild(ico); btn.appendChild(txt);
       } else {
-        btn.innerHTML = icon;   // icon（預設）
+        btn.innerHTML = icon;
       }
       return btn;
     }
@@ -815,7 +730,6 @@
       }
     }
 
-    /* ─ 公開 API ─────────────────────────── */
     open() {
       this.$trigger.style.display='none';
       this.$panel.classList.add('qp-open');
