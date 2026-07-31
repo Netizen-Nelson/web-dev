@@ -123,7 +123,7 @@
         border-left: ${cfg.borderWidth}px solid transparent;
         border-radius: ${cfg.borderRadius};
         font-size: ${cfg.fontSize};
-        line-height: 1.75;
+        line-height: 1.5;
         transition:
           max-height  ${vDur} cubic-bezier(.4, 0, .2, 1),
           opacity     ${vDur} ease,
@@ -229,14 +229,14 @@
         user-select: none;
       }
       .ir-btn:hover { background: #3a3b3a; }
-      .ir-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+      .ir-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
       ${btnColorVariants}
 
       .ir-global-progress-wrap {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
       }
 
       .ir-global-progress-track {
@@ -269,18 +269,14 @@
       info-region h1, info-region h2, info-region h3,
       info-region h4, info-region h5, info-region h6 {
         color: inherit;
-        margin-bottom: 6px;
+        margin-bottom: 3px;
         margin-top: 0;
       }
 
-      info-region p  { margin-top: 0; margin-bottom: 4px; }
+      info-region p  { margin-top: 0; margin-bottom: 3px; }
       info-region p:last-child { margin-bottom: 0; }
       info-region ul, info-region ol { margin-top: 0; padding-left: 18px; }
       info-region li { margin-bottom: 3px; }
-
-      /* ═══════════════════════════════════════════════
-         測驗模式 (Quiz Mode)
-         ═══════════════════════════════════════════════ */
 
       /* data-ir-ans：在 quiz region 裡預設收合 */
       info-region[quiz] [data-ir-ans] {
@@ -297,7 +293,6 @@
           padding-top 0.3s ease;
       }
 
-      /* quiz-mode group 內的 region 也適用相同規則 */
       info-region-group[quiz-mode] info-region [data-ir-ans] {
         max-height: 0;
         overflow: hidden;
@@ -316,8 +311,8 @@
       info-region [data-ir-ans].ir-ans-revealed {
         max-height: 2000px;
         opacity: 1;
-        margin-top: 14px;
-        padding-top: 14px;
+        margin-top: 8px;
+        padding-top: 8px;
         border-top-width: 1px;
       }
 
@@ -326,17 +321,16 @@
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
-        margin-top: 14px;
+        margin-top: 8px;
         animation: ir-manual-in 0.25s ease forwards;
       }
 
       /* 題號標籤 */
       .ir-quiz-label {
-        font-size: 0.7rem;
-        letter-spacing: 0.07em;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        opacity: 0.55;
-        margin-bottom: 6px;
+        opacity: 0.5;
+        margin-bottom: 3px;
       }
 
       /* 得分顯示 */
@@ -381,7 +375,7 @@
         font-size: 0.88rem;
         color: ${BrandColors.shell};
         opacity: 0.85;
-        line-height: 1.8;
+        line-height: 1.5;
         margin-bottom: 18px;
       }
 
