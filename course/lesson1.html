@@ -125,28 +125,43 @@
 	</div>
 
 
-<dual-hr color-left="orange" color-right="safe" ratio="1:9" thickness="1px"></dual-hr>
+<dual-hr class="my-3" color-left="orange" color-right="safe" ratio="1:9" thickness="1px"></dual-hr>
 <section id="all_exercises" class="bp-text-shell">
 	<div id="practice_tophrase">
-			<box-single
-			  caption="例句"
-			  caption-pos="top"
-			  caption-bg="bg"
-			  caption-color="safe"
-			  border="2px dashed #95BDD7"
-			  padding="6" gap="6"
-			>
+		<box-single
+			caption="基礎例句" caption-pos="top" caption-bg="bg" caption-color="#E5C3B3"
+			border="2px solid #E5C3B3"
+			padding="6" gap="6">
 			<chunk-demo sentence="Here are some cool spots {1}."
-					theme="vanilla" show-dots="false" translation="<span class='mx-4 bp-text-vanilla'>以下是一些{1}的好去處。</span>" show-translation="true"
-					translation-indent="20" show-note="true"
-					level-colors="#C3A5E5, #A0CF72, #FFB3D9, #DECA4B, #E5C3B3, #EDA109">
+					theme="vanilla" show-dots="false" translation="<span class='bp-text-vanilla'>以下是一些{1}的好去處。</span>" show-translation="true"
+					translation-indent="20">
 				<cd-chunk id="1" label="to + V 修飾 spots">
-				  <cd-level level="1" trans="和朋友聚聚" note="這一行的行高太高了">to hang out with friends</cd-level>
+				  <cd-level level="1" trans="和朋友聚聚">to hang out with friends</cd-level>
 				  <cd-level level="2" trans="看夕陽">to watch the sunset</cd-level>
 				  <cd-level level="3" trans="在晴朗週末放鬆">to chill on a sunny weekend</cd-level>
 				  <cd-level level="4" trans="為了IG拍照">to take photos for Instagram</cd-level>
 				  <cd-level level="5" trans="吃宵夜">to grab a late-night bite</cd-level>
 				  <cd-level level="6" trans="享受你在雪梨時間">to enjoy your time in Sydney</cd-level>
+				</cd-chunk>
+			</chunk-demo>
+		</box-single>
+		<dual-hr class="my-3" color-left="orange" color-right="safe" ratio="1:9" thickness="1px"></dual-hr>
+		<box-single
+			caption="進階例句" caption-pos="top" caption-bg="bg" caption-color="#E5C3B3"
+			border="2px solid #E5C3B3"
+			padding="6" gap="6">
+			<chunk-demo sentence="{1} plan {2}."
+					theme="vanilla" show-dots="false" translation="<span class='bp-text-vanilla'>{1}{2}</span>" show-translation="true"
+					translation-indent="20">
+				<cd-chunk id="1">
+				  <cd-level level="1" trans="她">Her</cd-level>
+				  <cd-level level="2" trans="我們">Our</cd-level>
+				</cd-chunk>				
+				<cd-chunk id="2">
+				  <cd-level level="1" trans="這週末要辦泳池派對的計畫聽起來真好玩。">to host a pool party this weekend sounds like so much fun</cd-level>
+				  <cd-level level="2" trans="原本打算只喝一杯的計畫最後居然變成了整夜的卡拉OK狂歡。">to stay for just one drink turned into an all-night karaoke marathon</cd-level>
+				  <cd-level level="3" trans="租船在湖上玩一天的計畫因為突來的雨而泡湯了。">to rent a boat and spend the day on the lake fell through because of the sudden rain</cd-level>
+				  <cd-level level="4" trans="沿著海岸線來一趟說走就走公路旅行的計畫花費比預期少很多。">to take a spontaneous road trip down the coast cost much less money than expected</cd-level>
 				</cd-chunk>
 			</chunk-demo>
 		</box-single>
