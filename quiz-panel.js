@@ -1,8 +1,4 @@
 /**
- * quiz-panel.js v4 — 收合式題目面板元件
- *
- * ── 品牌主題 ──────────────────────────────────────────────────────────────────
- *
  * theme="colorName"       套用品牌色主題（見下表）
  * theme-style="dark"      dark（深色背景＋主題色文字，預設）
  *                         filled（主題色背景＋深色文字）
@@ -105,9 +101,6 @@
     pink    :'#FFB3D9', orange :'#EDA109', shell  :'#C6C7BD',
   };
 
-  /* ══════════════════════════════════════════
-     色彩工具
-  ══════════════════════════════════════════ */
   function _rgb(hex) {
     hex = hex.replace('#','');
     return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
@@ -535,11 +528,17 @@
   }
   function md(t) {
     if (!t) return '';
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    // 先將屬性中手寫的 <br> / <br/> / <br /> 換成佔位符，
+    // 跳脫 HTML 特殊字元後再還原，避免 < > 被轉成實體而失效。
+    const PH = '\x00BR\x00';
+    return t
+      .replace(/<br\s*\/?>/gi, PH)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')
       .replace(/`(.+?)`/g,'<code>$1</code>')
-      .replace(/\n/g,'<br>');
+      .replace(/\n/g,'<br>')
+      .replace(new RegExp(PH,'g'),'<br>');
   }
   function mk(tag, cls, attrs) {
     const e = document.createElement(tag);
@@ -553,9 +552,6 @@
     return e;
   }
 
-  /* ══════════════════════════════════════════
-     QuizPanel 類別
-  ══════════════════════════════════════════ */
   class QuizPanel {
 
     constructor(src) {
@@ -569,13 +565,11 @@
       if (this.o.group) this._registerGroup();
     }
 
-    /* ─ 讀取設定 ─────────────────────────── */
     _readCfg() {
       const e = this._src;
       const G = window.QuizPanelConfig || {};
       const r = (attr, key, fb) => gcfg(e, attr, key, fb);
 
-      /* 欄寬 */
       let ratioStr=null, rightWidth=null;
       if      (e.hasAttribute('ratio'))       ratioStr  = e.getAttribute('ratio');
       else if (e.hasAttribute('right-width')) rightWidth= e.getAttribute('right-width');
@@ -612,19 +606,19 @@
         eColor     : r('explanation-color','explColor',     D.explColor),
         accent     : r('accent-color',     'accentColor',   D.accentColor),
         divider    : r('divider-color',    'dividerColor',  D.dividerColor),
-        /* 主題 */
+
         theme      : r('theme',            'theme',         D.theme),
         themeStyle : r('theme-style',      'themeStyle',    D.themeStyle),
         initSmall: e.hasAttribute('init-small') ||
                    (G.initSmall === true),
-        /* 字體大小 */
+
         fsTrig : r('fs-trigger',    'fsTrigger',    D.fsTrigger),
         fsQ    : r('fs-question',   'fsQuestion',   D.fsQuestion),
         fsNum  : r('fs-number',     'fsNumber',     D.fsNumber),
         fsInp  : r('fs-input',      'fsInput',      D.fsInput),
         fsRes  : r('fs-result',     'fsResult',     D.fsResult),
         fsExpl : r('fs-explanation','fsExplanation',D.fsExplanation),
-        /* 其他 */
+
         showNum      : e.getAttribute('show-number') || '',
         inputType    : e.getAttribute('input-type')  || 'text',
         inputRows    : parseInt(e.getAttribute('input-rows') || '2'),
@@ -638,19 +632,16 @@
       };
     }
 
-    /* ─ 建立 DOM ─────────────────────────── */
     _build() {
       const o = this.o;
       const ratio = parseRatio(o.ratioStr);
 
-      /* wrapper + 分類 class */
       this.$wrap = mk('div','qp-wrapper');
       if (ratio)                      this.$wrap.classList.add('qp-ratio');
       if (o.btnStyle==='text')        this.$wrap.classList.add('qp-bstyle-text');
       else if (o.btnStyle==='both')   this.$wrap.classList.add('qp-bstyle-both');
       if (o.initSmall)                this.$wrap.classList.add('qp-ctrig');
 
-      /* ── 基礎 CSS 變數 ── */
       const v = [
         `--qp-bg:${C.bg}`,`--qp-bg1:${C.bg1}`,`--qp-bg2:${C.bg2}`,`--qp-bg3:${C.bg3}`,
         `--qp-shell:${C.shell}`,`--qp-accent:${o.accent}`,`--qp-divider:${o.divider}`,
@@ -671,7 +662,6 @@
 
       this.$wrap.style.cssText = v.join(';');
 
-      /* ── 主題色覆蓋（覆蓋於基礎變數之上）── */
       if (o.theme) {
         const tv = _themeVars(o.theme, o.themeStyle);
         for (const [k, val] of Object.entries(tv)) {
@@ -682,13 +672,12 @@
       /* ── 觸發器 ── */
       this.$trigger = mk('div','qp-trigger',{
         role:'button', tabindex:'0',
-        title:'展開題目','aria-label':'展開題目面板',
         html: o.collapseIcon,
       });
 
       /* ── 面板 ── */
       this.$panel = mk('div','qp-panel',{
-        role:'region','aria-label':'題目面板',
+        role:'region','aria-label':'面板',
       });
 
       /* ── 題目區 ── */
@@ -701,7 +690,6 @@
       this._qTextEl.innerHTML = md(o.question);
       this.$question.appendChild(this._qTextEl);
 
-      /* ── 右側 ── */
       this.$right = mk('div','qp-right');
 
       if (!o.readonlyAnswer) {
@@ -772,7 +760,6 @@
       return btn;
     }
 
-    /* ─ 群組 ─────────────────────────────── */
     _registerGroup() {
       const name = this.o.group;
       if (!_groups[name]) _groups[name]={panels:[],start:null,noNumber:false};
@@ -792,7 +779,6 @@
       } else { this._numEl.textContent = n+'.'; }
     }
 
-    /* ─ 比對 ─────────────────────────────── */
     _match(u) {
       const {answer,caseSensitive,matchMode} = this.o;
       if (!answer) return false;
@@ -805,7 +791,6 @@
       return answer.split('|').map(a=>n(a)).includes(ua);
     }
 
-    /* ─ 事件 ─────────────────────────────── */
     _bindEvents() {
       this.$trigger.addEventListener('click',()=>this.open());
       this.$trigger.addEventListener('keydown',e=>{
@@ -873,34 +858,6 @@
     static resetGroup(name)      { QuizPanel.getGroup(name).forEach(p=>p.reset()); }
     static renumberGroup(name,n) { if(_groups[name]){_groups[name].start=n;applyGroupNums(name);} }
 
-    /**
-     * collectAnswers([options]) → Array
-     * 蒐集頁面上所有題目的使用者輸入與正解，回傳物件陣列。
-     *
-     * 每筆紀錄欄位：
-     *   index       {number}        頁面上的順序（0起算）
-     *   number      {string|null}   顯示的題號（group自動號 / show-number / null）
-     *   group       {string|null}   所屬群組名稱
-     *   question    {string}        題目原始文字
-     *   userInput   {string}        使用者輸入（未輸入為空字串）
-     *   expected    {string}        正解（| 分隔多個）
-     *   correct     {boolean|null}  是否答對（readonly-answer 題型為 null）
-     *   isOpen      {boolean}       面板目前是否展開
-     *
-     * options（選用）：
-     *   onlyAnswered {boolean} true → 只含已輸入的題目（預設 false）
-     *   group        {string}  只蒐集指定群組（預設全部）
-     *
-     * 用法：
-     *   const rows = QuizPanel.collectAnswers();
-     *   const json = JSON.stringify(rows, null, 2);
-     *
-     *   // 只蒐集答過的題目
-     *   const done = QuizPanel.collectAnswers({ onlyAnswered: true });
-     *
-     *   // 只蒐集某群組
-     *   const g = QuizPanel.collectAnswers({ group: '網路概論' });
-     */
     static collectAnswers(options = {}) {
       const { onlyAnswered = false, group: filterGroup = null } = options;
       const results = [];
@@ -934,18 +891,11 @@
       return results;
     }
 
-    /**
-     * collectAnswersJSON([options]) → string
-     * collectAnswers() 的 JSON 字串版本（縮排 2 格）。
-     */
     static collectAnswersJSON(options = {}) {
       return JSON.stringify(QuizPanel.collectAnswers(options), null, 2);
     }
   }
 
-  /* ══════════════════════════════════════════
-     自動初始化
-  ══════════════════════════════════════════ */
   function initAll(root) {
     (root||document).querySelectorAll('[data-quiz-panel]').forEach(node=>{
       if(!node._qpInit){node._qpInit=true; new QuizPanel(node);}
