@@ -232,12 +232,11 @@
     s.id = STYLE_ID;
     s.textContent = /* css */`
       /*
-       * ── wrapper 自己擁有寬度 ──────────────────────────────────────
-       * 關鍵設計：不依賴 inline-block shrink-wrap 來決定寬度。
-       * 收合時 width = --qp-trig-w（觸發器寬）；
-       * 展開時 .qp-expanded → width = --qp-panel-w（面板寬）。
-       * 子元素 trigger / panel 一律 width: 100% 填滿 wrapper，
-       * 不再各自宣告 width，避免多個元件並排時互相干擾。
+       * ── wrapper 寬度由 JavaScript 直接控制 ─────────────────────────
+       * 不使用 CSS var 決定 width，避免 cssText 解析時序與繼承問題。
+       * 收合時：JS 設 style.width = triggerWidth（預設 48px）
+       * 展開時：JS 設 style.width = panelWidth（如 800px）
+       * 子元素 trigger / panel 一律 width: 100% 填滿 wrapper。
        */
       .qp-wrapper {
         display        : inline-block;
@@ -245,10 +244,7 @@
         vertical-align : top;
         font-family    : system-ui, 'Segoe UI', sans-serif;
         font-size      : 1rem;
-        width          : var(--qp-trig-w);   /* 預設：觸發器寬度 */
-      }
-      .qp-wrapper.qp-expanded {
-        width          : var(--qp-panel-w);  /* 展開後：面板寬度 */
+        /* width 由 JS 管理，不在 CSS 設定 */
       }
 
       /* ── 收合觸發器 ── */
@@ -685,34 +681,42 @@
       else if (o.btnStyle==='both')   this.$wrap.classList.add('qp-bstyle-both');
       if (o.initSmall)                this.$wrap.classList.add('qp-ctrig');
 
-      /* ── 基礎 CSS 變數 ── */
-      const v = [
-        `--qp-bg:${C.bg}`,`--qp-bg1:${C.bg1}`,`--qp-bg2:${C.bg2}`,`--qp-bg3:${C.bg3}`,
-        `--qp-shell:${C.shell}`,`--qp-accent:${o.accent}`,`--qp-divider:${o.divider}`,
-        `--qp-q-color:${o.qColor}`,`--qp-expl-color:${o.eColor}`,
-        `--qp-safe:${C.safe}`,`--qp-warning:${C.warning}`,
-        `--qp-special:#C8DD5A`,`--qp-stone:${C.stone}`,
-        `--qp-focus:${C.focus}`,`--qp-vanilla:${C.vanilla}`,
-        `--qp-panel-w:${o.panelWidth}`,`--qp-min-h:${o.minHeight}`,
-        `--qp-trig-w:${o.triggerW}`,`--qp-trig-h:${o.triggerH}`,
-        `--qp-anim:${o.animDur}ms`,`--qp-btn-size:${o.btnSize}`,
-        `--qp-fs-trig:${o.fsTrig}`,`--qp-fs-q:${o.fsQ}`,
-        `--qp-fs-num:${o.fsNum}`,`--qp-fs-inp:${o.fsInp}`,
-        `--qp-fs-res:${o.fsRes}`,`--qp-fs-expl:${o.fsExpl}`,
-      ];
-      if (ratio)        { v.push(`--qp-ratio-l:${ratio[0]}`,`--qp-ratio-r:${ratio[1]}`); }
-      else if (o.rightWidth) { v.push(`--qp-right-w:${o.rightWidth}`); }
-      else              { v.push(`--qp-right-w:220px`); }
-
-      this.$wrap.style.cssText = v.join(';');
-
-      /* ── 主題色覆蓋（覆蓋於基礎變數之上）── */
-      if (o.theme) {
-        const tv = _themeVars(o.theme, o.themeStyle);
-        for (const [k, val] of Object.entries(tv)) {
-          this.$wrap.style.setProperty(k, val);
-        }
+      /* ── CSS 自訂屬性：用 setProperty 逐一設定，避免 cssText 解析問題 ── */
+      const vars = {
+        '--qp-bg'    : C.bg,  '--qp-bg1': C.bg1, '--qp-bg2': C.bg2, '--qp-bg3': C.bg3,
+        '--qp-shell' : C.shell, '--qp-accent': o.accent, '--qp-divider': o.divider,
+        '--qp-q-color': o.qColor, '--qp-expl-color': o.eColor,
+        '--qp-safe'  : C.safe, '--qp-warning': C.warning,
+        '--qp-special': '#C8DD5A', '--qp-stone': C.stone,
+        '--qp-focus' : C.focus, '--qp-vanilla': C.vanilla,
+        '--qp-panel-w': o.panelWidth, '--qp-min-h': o.minHeight,
+        '--qp-trig-w': o.triggerW,   '--qp-trig-h': o.triggerH,
+        '--qp-anim'  : `${o.animDur}ms`, '--qp-btn-size': o.btnSize,
+        '--qp-fs-trig': o.fsTrig, '--qp-fs-q': o.fsQ,
+        '--qp-fs-num': o.fsNum,   '--qp-fs-inp': o.fsInp,
+        '--qp-fs-res': o.fsRes,   '--qp-fs-expl': o.fsExpl,
+      };
+      if (ratio) {
+        vars['--qp-ratio-l'] = String(ratio[0]);
+        vars['--qp-ratio-r'] = String(ratio[1]);
+      } else if (o.rightWidth) {
+        vars['--qp-right-w'] = o.rightWidth;
+      } else {
+        vars['--qp-right-w'] = '220px';
       }
+
+      /* 主題色覆蓋 */
+      if (o.theme) {
+        Object.assign(vars, _themeVars(o.theme, o.themeStyle));
+      }
+
+      /* 一次性寫入所有 CSS 自訂屬性 */
+      for (const [k, val] of Object.entries(vars)) {
+        this.$wrap.style.setProperty(k, val);
+      }
+
+      /* width 直接用 JS 設定（不依賴 CSS var 推算） */
+      this.$wrap.style.width = o.triggerW;   // 初始：收合狀態
 
       /* ── 觸發器 ── */
       this.$trigger = mk('div','qp-trigger',{
@@ -867,7 +871,7 @@
 
     /* ─ 公開 API ─────────────────────────── */
     open() {
-      this.$wrap.classList.add('qp-expanded');   // wrapper → panel width
+      this.$wrap.style.width = this.o.panelWidth;  // ← 直接寫 800px / 620px 等
       this.$trigger.style.display='none';
       this.$panel.classList.add('qp-open');
       this._isOpen=true;
@@ -877,7 +881,7 @@
     close() {
       this.$panel.classList.remove('qp-open');
       this.$trigger.style.display='';
-      this.$wrap.classList.remove('qp-expanded'); // wrapper → trigger width
+      this.$wrap.style.width = this.o.triggerW;    // ← 還原成觸發器寬度
       this._isOpen=false;
       this._emit('quiz-panel-close',{});
     }
