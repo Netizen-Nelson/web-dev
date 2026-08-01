@@ -1,91 +1,105 @@
 /**
- * quiz-panel.js v4 — 收合式題目面板元件
+ * quiz-panel.js v5 — 題目面板元件（常駐展開）
  *
- * ── 品牌主題 ──────────────────────────────────────────────────────────────────
+ * 收合功能已移除。面板永遠可見，寬度由 panel-width 固定，
+ * 多個元件並排寬度完全獨立、不互相干擾。
  *
- * theme="colorName"       套用品牌色主題（見下表）
- * theme-style="dark"      dark（深色背景＋主題色文字，預設）
- *                         filled（主題色背景＋深色文字）
+ * ── 欄寬 ──────────────────────────────────────────────────────────────────────
  *
- * 可用主題色名稱：
- *   lavender │ special │ warning │ salmon │ sky │ safe │ vanilla
- *   yellow   │ focus   │ info    │ stone  │ indigo │ pink │ orange │ shell
+ * panel-width="620px"    面板總寬（預設 620px）
+ * ratio="1:1"            左:右欄比例（預設 1:1），與 right-width 擇一
+ * right-width="220px"    固定右欄寬（設定後取消 ratio）
+ * min-height="96px"      最小高度
  *
- * 範例：
- *   <div data-quiz-panel theme="sky" ...>          → 深色背景＋sky藍文字
- *   <div data-quiz-panel theme="indigo" theme-style="filled" ...>
- *                                                  → indigo背景＋深色文字
+ * ── 題目與答案 ────────────────────────────────────────────────────────────────
  *
- * 全域套用（所有元件）：
- *   window.QuizPanelConfig = { theme: 'sky', themeStyle: 'dark' };
+ * question="..."         題目文字（支援 **粗** *斜* `code` <br> \n）
+ * answer="A|B"           正解（| 分隔多個）
+ * explanation="..."      解說（核對後顯示）
+ * placeholder="..."      輸入欄提示
+ * case-sensitive="false"
+ * match-mode="exact"     exact | contains | regex
+ * input-type="text"      text | textarea
+ * input-rows="2"
+ * readonly-answer="false" 不顯示輸入欄，只有「顯示解說」按鈕
+ * correct-message="✓ 正確！"
+ * incorrect-message="✗ 錯誤"
  *
- * ── 收合按鈕緊湊模式 ──────────────────────────────────────────────────────────
+ * ── 按鈕 ──────────────────────────────────────────────────────────────────────
  *
- * init-small         布林屬性。收合狀態高度減半（適合橫向排列多題時）
- *                    全域：QuizPanelConfig.initSmall = true
+ * btn-style="icon"       icon（預設）| text | both
+ * btn-size="30px"        按鈕邊長
+ * check-icon="<svg>…"   覆蓋核對圖示 HTML（預設 SVG 打勾）
+ * reset-icon="<svg>…"   覆蓋重設圖示 HTML（預設 SVG 轉圈）
+ * check-label="核對答案"  aria-label 及 tooltip
+ * reset-label="重設"
  *
- * ── 字體大小（各部位）────────────────────────────────────────────────────────
+ * ── 字體大小 ──────────────────────────────────────────────────────────────────
  *
- * fs-trigger="1.2rem"      收合觸發器圖示
  * fs-question="0.96rem"    題目文字
  * fs-number="0.76rem"      題號
  * fs-input="0.88rem"       輸入欄
- * fs-result="0.8rem"       核對結果（inline）
+ * fs-result="0.8rem"       核對結果訊息
  * fs-explanation="0.82rem" 解說文字
  *
- * 全域：QuizPanelConfig.fsTrigger / fsQuestion / fsNumber / fsInput / fsResult / fsExplanation
+ * ── 品牌主題 ──────────────────────────────────────────────────────────────────
  *
- * ── 按鈕 ─────────────────────────────────────────────────────────────────────
+ * theme="colorName"      套用品牌色（見下方 BRAND 色票）
+ * theme-style="dark"     dark（預設）| filled
  *
- * btn-style="icon"          icon（預設）│ text │ both
- * btn-size="30px"           按鈕邊長
- * check-icon / reset-icon   覆蓋圖示 HTML
- * check-label / reset-label aria-label 及 tooltip
- * correct-message / incorrect-message
- *
- * 全域：QuizPanelConfig.btnStyle / btnSize / checkIcon / resetIcon / checkLabel / resetLabel
- *
- * ── 欄寬 ─────────────────────────────────────────────────────────────────────
- *
- * ratio="1:1"          左:右比例（預設），與 right-width 擇一
- * right-width="220px"  固定右欄（設定後取消 ratio）
+ * 可用色名：lavender special warning salmon sky safe vanilla yellow
+ *           focus info stone indigo pink orange shell
  *
  * ── 群組自動編號 ──────────────────────────────────────────────────────────────
  *
- * group="名稱"          群組，依 DOM 順序自動編號
- * group-start="N"       起始號（同群組第一個出現的值生效）
- * group-no-number       布林，整組停用編號
- * skip-number           布林，此題不佔序號、不顯示
+ * group="名稱"           群組識別，同名元件按 DOM 順序自動編號
+ * group-start="N"        起始號（同群組第一個出現的值生效，預設 1）
+ * group-no-number        布林，整組停用編號
+ * skip-number            布林，此題不佔序號、不顯示
+ * show-number="X"        手動指定顯示文字（優先於群組自動號）
  *
- * ── 其他屬性 ─────────────────────────────────────────────────────────────────
+ * ── 全域設定（在引入 JS 前設定）─────────────────────────────────────────────
  *
- * question / answer / explanation / placeholder
- * case-sensitive / match-mode（exact│contains│regex）
- * show-number / input-type / input-rows / start-open / readonly-answer
- * question-color / explanation-color / accent-color / divider-color
- * panel-width / min-height / trigger-width / trigger-min-height
- * collapse-icon / expand-icon / anim-duration
+ * window.QuizPanelConfig = {
+ *   checkIcon, resetIcon, checkLabel, resetLabel,
+ *   btnStyle, btnSize,
+ *   placeholder, correctMessage, incorrectMessage,
+ *   caseSensitive, matchMode,
+ *   panelWidth, ratio, rightWidth, minHeight,
+ *   questionColor, explanationColor, accentColor, dividerColor,
+ *   animDuration,
+ *   theme, themeStyle,
+ *   fsQuestion, fsNumber, fsInput, fsResult, fsExplanation,
+ * };
  *
  * ── 事件（bubble）────────────────────────────────────────────────────────────
  *
- * quiz-panel-open / quiz-panel-close / quiz-panel-reset
- * quiz-panel-check  →  detail: { answer, correct, expected }
- *
- * ── 靜態 API ─────────────────────────────────────────────────────────────────
- *
- * QuizPanel.getGroup(name) / .resetGroup(name) / .renumberGroup(name, N)
+ * quiz-panel-check   detail: { answer, correct, expected }
+ * quiz-panel-reset   detail: {}
  *
  * ── 實例 API（wrapper.__qp）──────────────────────────────────────────────────
  *
- * .open() / .close() / .check() / .reset() / .isOpen()
- * .setQuestion(t) / .setAnswer(t) / .setExplanation(t) / .getGroupNumber()
+ * .check() / .reset()
+ * .setQuestion(t) / .setAnswer(t) / .setExplanation(t)
+ * .getGroupNumber()
+ *
+ * ── 靜態 API ─────────────────────────────────────────────────────────────────
+ *
+ * QuizPanel.getGroup(name)
+ * QuizPanel.resetGroup(name)
+ * QuizPanel.renumberGroup(name, N)
+ * QuizPanel.collectAnswers([{ onlyAnswered, group }])  → Array
+ * QuizPanel.collectAnswersJSON([opts])                 → JSON string
+ *
+ * collectAnswers 每筆欄位：
+ *   index, number, group, question, userInput, expected, correct
  */
 
 (function () {
   'use strict';
 
   /* ══════════════════════════════════════════
-     調色盤基底
+     調色盤
   ══════════════════════════════════════════ */
   const C = {
     bg:'#0C0D0C', bg1:'#141514', bg2:'#1C1D1C', bg3:'#252625',
@@ -94,9 +108,6 @@
     focus:'#A0CF72', stone:'#95BDD7', indigo:'#7B6CF0',
   };
 
-  /* ══════════════════════════════════════════
-     品牌色映射表
-  ══════════════════════════════════════════ */
   const BRAND = {
     lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
     salmon  :'#E5C3B3', sky    :'#08A9D1', safe   :'#40C99A',
@@ -112,107 +123,56 @@
     hex = hex.replace('#','');
     return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
   }
-  function _rgba(hex, a) {
-    const [r,g,b] = _rgb(hex);
-    return `rgba(${r},${g},${b},${a})`;
-  }
-  function _darken(hex, t) {           // t: 0-1 混入黑色比例
-    const [r,g,b] = _rgb(hex), d=1-t;
-    return `rgb(${Math.round(r*d)},${Math.round(g*d)},${Math.round(b*d)})`;
-  }
-  function _lighten(hex, t) {          // t: 0-1 混入白色比例
-    const [r,g,b] = _rgb(hex);
-    return `rgb(${Math.round(r+(255-r)*t)},${Math.round(g+(255-g)*t)},${Math.round(b+(255-b)*t)})`;
-  }
+  function _rgba(hex, a) { const [r,g,b]=_rgb(hex); return `rgba(${r},${g},${b},${a})`; }
+  function _darken(hex,t) { const [r,g,b]=_rgb(hex),d=1-t; return `rgb(${Math.round(r*d)},${Math.round(g*d)},${Math.round(b*d)})`; }
+  function _lighten(hex,t){ const [r,g,b]=_rgb(hex); return `rgb(${Math.round(r+(255-r)*t)},${Math.round(g+(255-g)*t)},${Math.round(b+(255-b)*t)})`; }
 
   /* ══════════════════════════════════════════
-     主題變數計算
+     主題變數
   ══════════════════════════════════════════ */
   function _themeVars(name, style) {
     const color = BRAND[name];
     if (!color) return {};
-
     if (style === 'filled') {
-      /*
-       * 填滿樣式：主題色作為面板背景，深色文字
-       * bg  = 主題色（題目區）
-       * bg1 = 稍暗（右側面板）
-       * bg2 = 更暗（輸入欄）
-       * bg3 = 最暗（重設按鈕）
-       */
       return {
         '--qp-bg'          : color,
-        '--qp-bg1'         : _darken(color, 0.10),
-        '--qp-bg2'         : _darken(color, 0.18),
-        '--qp-bg3'         : _darken(color, 0.28),
+        '--qp-bg1'         : _darken(color,0.10),
+        '--qp-bg2'         : _darken(color,0.18),
+        '--qp-bg3'         : _darken(color,0.28),
         '--qp-panel-border': 'rgba(0,0,0,0.28)',
-        /* 題目區 */
         '--qp-q-color'     : '#0a0b0a',
-        /* 輸入 */
         '--qp-vanilla'     : '#0a0b0a',
         '--qp-inp-border'  : 'rgba(0,0,0,0.22)',
         '--qp-focus'       : 'rgba(0,0,0,0.55)',
         '--qp-inp-ok-bg'   : 'rgba(0,0,0,0.12)',
         '--qp-inp-err-bg'  : 'rgba(0,0,0,0.12)',
-        /* 結果 */
         '--qp-safe'        : '#0a5432',
         '--qp-warning'     : '#852020',
-        /* 分隔線 */
         '--qp-divider'     : 'rgba(0,0,0,0.18)',
-        /* 解說 */
         '--qp-expl-color'  : 'rgba(0,0,0,0.72)',
         '--qp-expl-bg'     : 'rgba(0,0,0,0.10)',
-        /* 題號 */
         '--qp-stone'       : 'rgba(0,0,0,0.42)',
-        /* 觸發器 */
-        '--qp-trig-bg'     : _darken(color, 0.10),
-        '--qp-trig-border' : 'rgba(0,0,0,0.28)',
-        '--qp-trig-color'  : '#0a0b0a',
-        '--qp-trig-hbg'    : _lighten(color, 0.10),
-        '--qp-trig-hborder': 'rgba(0,0,0,0.50)',
-        '--qp-trig-hcolor' : '#000',
-        /* 核對按鈕：深色底，主題色圖示 */
         '--qp-ck-bg'       : 'rgba(0,0,0,0.68)',
         '--qp-ck-fg'       : color,
-        /* 重設按鈕 */
         '--qp-rs-bg'       : 'rgba(0,0,0,0.10)',
         '--qp-rs-fg'       : 'rgba(0,0,0,0.48)',
         '--qp-rs-bd'       : 'rgba(0,0,0,0.16)',
-        /* 收合箭頭 */
-        '--qp-col-fg'      : 'rgba(0,0,0,0.40)',
-        '--qp-col-hfg'     : '#000',
-        '--qp-col-hbg'     : _darken(color, 0.14),
       };
     } else {
-      /*
-       * 深色樣式（預設）：#0C0D0C 背景，主題色文字/邊框/強調
-       */
       return {
-        '--qp-panel-border': _rgba(color, 0.52),
+        '--qp-panel-border': _rgba(color,0.52),
         '--qp-q-color'     : color,
-        '--qp-inp-border'  : _rgba(color, 0.42),
+        '--qp-inp-border'  : _rgba(color,0.42),
         '--qp-focus'       : color,
-        '--qp-divider'     : _rgba(color, 0.32),
-        '--qp-expl-color'  : _rgba(color, 0.80),
-        '--qp-expl-bg'     : `color-mix(in srgb, ${color} 8%, #0C0D0C)`,
-        '--qp-stone'       : _rgba(color, 0.52),
+        '--qp-divider'     : _rgba(color,0.32),
+        '--qp-expl-color'  : _rgba(color,0.80),
+        '--qp-expl-bg'     : `color-mix(in srgb,${color} 8%,#0C0D0C)`,
+        '--qp-stone'       : _rgba(color,0.52),
         '--qp-accent'      : color,
-        /* 觸發器 */
-        '--qp-trig-bg'     : C.bg1,
-        '--qp-trig-border' : _rgba(color, 0.52),
-        '--qp-trig-color'  : color,
-        '--qp-trig-hbg'    : C.bg2,
-        '--qp-trig-hborder': color,
-        '--qp-trig-hcolor' : color,
-        /* 核對按鈕：主題色底，深色圖示 */
         '--qp-ck-bg'       : color,
         '--qp-ck-fg'       : C.bg,
-        /* 重設按鈕 */
-        '--qp-rs-fg'       : _rgba(color, 0.60),
-        '--qp-rs-bd'       : _rgba(color, 0.18),
-        /* 收合箭頭 */
-        '--qp-col-fg'      : _rgba(color, 0.48),
-        '--qp-col-hfg'     : color,
+        '--qp-rs-fg'       : _rgba(color,0.60),
+        '--qp-rs-bd'       : _rgba(color,0.18),
       };
     }
   }
@@ -224,75 +184,34 @@
   const ICON_RESET = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
 
   /* ══════════════════════════════════════════
-     全域樣式（只注入一次）
+     全域樣式
   ══════════════════════════════════════════ */
-  const STYLE_ID = 'quiz-panel-style-v4';
+  const STYLE_ID = 'quiz-panel-style-v5';
   if (!document.getElementById(STYLE_ID)) {
     const s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = /* css */`
-      /*
-       * ── wrapper 寬度由 JavaScript 直接控制 ─────────────────────────
-       * 不使用 CSS var 決定 width，避免 cssText 解析時序與繼承問題。
-       * 收合時：JS 設 style.width = triggerWidth（預設 48px）
-       * 展開時：JS 設 style.width = panelWidth（如 800px）
-       * 子元素 trigger / panel 一律 width: 100% 填滿 wrapper。
-       */
+      /* ── wrapper ── */
       .qp-wrapper {
         display        : inline-block;
-        position       : relative;
         vertical-align : top;
         font-family    : system-ui, 'Segoe UI', sans-serif;
         font-size      : 1rem;
-        /* width 由 JS 管理，不在 CSS 設定 */
+        /* width 由 JS 在初始化時直接寫入 style.width */
       }
 
-      /* ── 收合觸發器 ── */
-      .qp-trigger {
-        display         : flex;
-        align-items     : center;
-        justify-content : center;
-        background      : var(--qp-trig-bg,    var(--qp-bg1));
-        border          : 2px solid var(--qp-trig-border, var(--qp-shell));
-        border-radius   : 6px;
-        cursor          : pointer;
-        color           : var(--qp-trig-color,  var(--qp-shell));
-        font-size       : var(--qp-fs-trig);
-        user-select     : none;
-        width           : 100%;             /* 填滿 wrapper */
-        min-height      : var(--qp-trig-h);
-        box-sizing      : border-box;
-        transition      : background .18s, border-color .18s, color .18s;
-      }
-      .qp-trigger:hover,
-      .qp-trigger:focus-visible {
-        background   : var(--qp-trig-hbg,     var(--qp-bg2));
-        border-color : var(--qp-trig-hborder,  var(--qp-accent));
-        color        : var(--qp-trig-hcolor,   var(--qp-accent));
-        outline      : none;
-      }
-      /* 緊湊：高度減半 */
-      .qp-wrapper.qp-ctrig .qp-trigger {
-        min-height: calc(var(--qp-trig-h) / 2);
-      }
-
-      /* ── 展開面板 ── */
+      /* ── 面板（永遠可見）── */
       .qp-panel {
-        display      : none;
-        background   : var(--qp-bg);
-        border       : 2px solid var(--qp-panel-border, var(--qp-shell));
-        border-radius: 8px;
-        overflow     : hidden;
-        width        : 100%;             /* 填滿 wrapper（wrapper 負責實際寬度）*/
-        min-height   : var(--qp-min-h);
-        box-sizing   : border-box;
-      }
-      .qp-panel.qp-open {
-        display          : flex;
-        flex-direction   : row;
-        align-items      : stretch;
-        animation        : qpFadeIn var(--qp-anim) ease;
-        transform-origin : left center;
+        display        : flex;
+        flex-direction : row;
+        align-items    : stretch;
+        background     : var(--qp-bg);
+        border         : 2px solid var(--qp-panel-border, var(--qp-shell));
+        border-radius  : 8px;
+        overflow       : hidden;
+        width          : 100%;
+        min-height     : var(--qp-min-h);
+        box-sizing     : border-box;
       }
 
       /* ── 題目區 ── */
@@ -384,28 +303,15 @@
       }
       .qp-btn:hover  { filter: brightness(1.22); }
       .qp-btn:active { transform: scale(0.88); }
-
-      .qp-btn-check {
-        background: var(--qp-ck-bg,  var(--qp-accent));
-        color     : var(--qp-ck-fg,  #fff);
-      }
-      .qp-btn-reset {
-        background: var(--qp-rs-bg,  var(--qp-bg3));
-        color     : var(--qp-rs-fg,  var(--qp-stone));
-        border    : 1px solid var(--qp-rs-bd, #ffffff1a);
-      }
+      .qp-btn-check  { background: var(--qp-ck-bg, var(--qp-accent)); color: var(--qp-ck-fg, #fff); }
+      .qp-btn-reset  { background: var(--qp-rs-bg, var(--qp-bg3)); color: var(--qp-rs-fg, var(--qp-stone)); border: 1px solid var(--qp-rs-bd, #ffffff1a); }
 
       /* text / both 模式 */
       .qp-wrapper.qp-bstyle-text .qp-btn,
-      .qp-wrapper.qp-bstyle-both .qp-btn {
-        flex   : 1;
-        width  : auto;
-        padding: 0 8px;
-        gap    : 5px;
-      }
-      .qp-btn-label { display: none; font-size: 0.82rem; letter-spacing: .04em; }
-      .qp-wrapper.qp-bstyle-both .qp-btn-label { display: inline; }
-      .qp-wrapper.qp-bstyle-text .qp-btn-label { display: inline; }
+      .qp-wrapper.qp-bstyle-both .qp-btn { flex:1; width:auto; padding:0 8px; gap:5px; }
+      .qp-btn-label { display:none; font-size:0.82rem; letter-spacing:.04em; }
+      .qp-wrapper.qp-bstyle-both .qp-btn-label,
+      .qp-wrapper.qp-bstyle-text .qp-btn-label { display:inline; }
 
       /* ── 結果訊息（inline）── */
       .qp-result {
@@ -444,27 +350,6 @@
         font-size    : 0.9em;
       }
 
-      /* ── 收合箭頭 ── */
-      .qp-collapse-btn {
-        flex           : 0 0 26px;
-        display        : flex;
-        align-items    : center;
-        justify-content: center;
-        cursor         : pointer;
-        color          : var(--qp-col-fg, var(--qp-stone));
-        font-size      : 0.95rem;
-        background     : var(--qp-bg1);
-        border-left    : 1px solid #ffffff14;
-        user-select    : none;
-        transition     : background .18s, color .18s;
-      }
-      .qp-collapse-btn:hover,
-      .qp-collapse-btn:focus-visible {
-        background : var(--qp-col-hbg, var(--qp-bg2));
-        color      : var(--qp-col-hfg, #C8DD5A);
-        outline    : none;
-      }
-
       /* ── readonly 顯示解說按鈕 ── */
       .qp-reveal-btn {
         width        : 100%;
@@ -479,12 +364,6 @@
         transition   : background .15s, color .15s;
       }
       .qp-reveal-btn:hover { background: var(--qp-bg2); color: var(--qp-shell); }
-
-      /* ── 動畫 ── */
-      @keyframes qpFadeIn {
-        from { opacity: 0; transform: scaleX(0.9); }
-        to   { opacity: 1; transform: scaleX(1); }
-      }
     `;
     document.head.appendChild(s);
   }
@@ -493,26 +372,24 @@
      預設值
   ══════════════════════════════════════════ */
   const D = {
-    collapseIcon:'▶', expandIcon:'◁',
-    checkIcon   : ICON_CHECK, resetIcon: ICON_RESET,
-    checkLabel  : '核對答案', resetLabel: '重設',
-    btnStyle    : 'icon', btnSize: '30px',
-    placeholder : '請輸入答案…',
-    correctMessage: '✓ 正確！', incorrectMsg: '✗ 錯誤',
-    caseSensitive: false, matchMode: 'exact',
-    panelWidth  : '620px', ratio: '1:1', rightWidth: null,
-    minHeight   : '96px',
-    triggerWidth: '48px', triggerMinH: '100px',
-    questionColor: C.shell, explColor: C.lavender,
-    accentColor : C.indigo, dividerColor: C.stone,
-    animDuration: 200,
-    theme: '', themeStyle: 'dark', initSmall: false,
-    fsTrigger:'1.2rem', fsQuestion:'0.96rem', fsNumber:'0.76rem',
-    fsInput:'0.88rem', fsResult:'0.8rem', fsExplanation:'0.82rem',
+    checkIcon    : ICON_CHECK,  resetIcon    : ICON_RESET,
+    checkLabel   : '核對答案',   resetLabel   : '重設',
+    btnStyle     : 'icon',      btnSize      : '30px',
+    placeholder  : '請輸入答案…',
+    correctMessage : '✓ 正確！',  incorrectMsg : '✗ 錯誤',
+    caseSensitive: false,        matchMode    : 'exact',
+    panelWidth   : '620px',      ratio        : '1:1',
+    rightWidth   : null,         minHeight    : '96px',
+    questionColor: C.shell,      explColor    : C.lavender,
+    accentColor  : C.indigo,     dividerColor : C.stone,
+    animDuration : 200,
+    theme: '',   themeStyle: 'dark',
+    fsQuestion:'0.96rem', fsNumber:'0.76rem', fsInput:'0.88rem',
+    fsResult  :'0.8rem',  fsExplanation:'0.82rem',
   };
 
   /* ══════════════════════════════════════════
-     群組登記
+     群組
   ══════════════════════════════════════════ */
   const _groups = Object.create(null);
   const _timers = Object.create(null);
@@ -539,32 +416,14 @@
   function parseRatio(s) {
     if (!s) return null;
     const [l,r] = String(s).split(':').map(Number);
-    return (isFinite(l) && isFinite(r)) ? [l,r] : null;
+    return (isFinite(l)&&isFinite(r)) ? [l,r] : null;
   }
   function md(t) {
     if (!t) return '';
-    /*
-     * <br> 在屬性值裡的兩種形態：
-     *
-     * ① 直接寫 HTML 屬性  question="中文。<br>English"
-     *   → 瀏覽器 HTML parser 解析後 getAttribute() 拿到帶真正角括號的字串 "<br>"
-     *   → pattern A：/<br\s*\/?>/gi
-     *
-     * ② PHP / JS setAttribute 先做 htmlspecialchars / escapeHtml
-     *   question="中文。&lt;br&gt;English"
-     *   → getAttribute() 仍拿到解碼後的 "<br>"，pattern A 仍可處理
-     *
-     * ③ 雙重跳脫（如範本引擎 double-encode）
-     *   question="中文。&amp;lt;br&amp;gt;English"
-     *   → getAttribute() 拿到 "&lt;br&gt;"（實體字串，非角括號）
-     *   → pattern B：/&lt;br\s*(\/)?&gt;/gi
-     *
-     * 同時處理 ①②③，以 PH 佔位再還原，確保不被後續跳脫覆蓋。
-     */
     const PH = '\x00BR\x00';
     return t
-      .replace(/&lt;br\s*(\/)?\s*&gt;/gi, PH)   // pattern B：實體字串 &lt;br&gt;
-      .replace(/<br\s*\/?>/gi, PH)                // pattern A：真實角括號 <br>
+      .replace(/&lt;br\s*(\/)?&gt;/gi, PH)
+      .replace(/<br\s*\/?>/gi, PH)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')
@@ -572,26 +431,24 @@
       .replace(/\n/g,'<br>')
       .replace(new RegExp(PH,'g'),'<br>');
   }
-  function mk(tag, cls, attrs) {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (attrs) for (const [k,v] of Object.entries(attrs)) {
-      if      (k==='html')  e.innerHTML   = v;
-      else if (k==='text')  e.textContent = v;
-      else if (k==='style') Object.assign(e.style, v);
-      else                  e.setAttribute(k, v);
+  function mk(tag,cls,attrs) {
+    const e=document.createElement(tag);
+    if(cls) e.className=cls;
+    if(attrs) for(const [k,v] of Object.entries(attrs)) {
+      if(k==='html') e.innerHTML=v;
+      else if(k==='text') e.textContent=v;
+      else e.setAttribute(k,v);
     }
     return e;
   }
 
   /* ══════════════════════════════════════════
-     QuizPanel 類別
+     QuizPanel
   ══════════════════════════════════════════ */
   class QuizPanel {
 
     constructor(src) {
-      this._src = src;
-      this._isOpen = false;
+      this._src    = src;
       this._autoNum = null;
       this._numEl   = null;
       this._readCfg();
@@ -600,13 +457,12 @@
       if (this.o.group) this._registerGroup();
     }
 
-    /* ─ 讀取設定 ─────────────────────────── */
+    /* ─ 設定 ──────────────────────────────── */
     _readCfg() {
       const e = this._src;
       const G = window.QuizPanelConfig || {};
-      const r = (attr, key, fb) => gcfg(e, attr, key, fb);
+      const r = (attr,key,fb) => gcfg(e,attr,key,fb);
 
-      /* 欄寬 */
       let ratioStr=null, rightWidth=null;
       if      (e.hasAttribute('ratio'))       ratioStr  = e.getAttribute('ratio');
       else if (e.hasAttribute('right-width')) rightWidth= e.getAttribute('right-width');
@@ -614,121 +470,85 @@
       else if (G.rightWidth!=null)            rightWidth= G.rightWidth;
       else                                    ratioStr  = D.ratio;
 
-      const btnStyle = r('btn-style','btnStyle',D.btnStyle);
-
       this.o = {
-        question   : e.getAttribute('question')    || '（未設定題目）',
-        answer     : e.getAttribute('answer')      || '',
-        explanation: e.getAttribute('explanation') || '',
-        placeholder: r('placeholder',      'placeholder',   D.placeholder),
-        checkLabel : r('check-label',      'checkLabel',    D.checkLabel),
-        resetLabel : r('reset-label',      'resetLabel',    D.resetLabel),
-        checkIcon  : r('check-icon',       'checkIcon',     D.checkIcon),
-        resetIcon  : r('reset-icon',       'resetIcon',     D.resetIcon),
-        btnStyle,
-        btnSize    : r('btn-size',         'btnSize',       D.btnSize),
-        correctMsg : r('correct-message',  'correctMessage',D.correctMessage),
-        incorrectMsg:r('incorrect-message','incorrectMsg',  D.incorrectMsg),
-        collapseIcon:r('collapse-icon',    'collapseIcon',  D.collapseIcon),
-        expandIcon : r('expand-icon',      'expandIcon',    D.expandIcon),
+        question    : e.getAttribute('question')    || '（未設定題目）',
+        answer      : e.getAttribute('answer')      || '',
+        explanation : e.getAttribute('explanation') || '',
+        placeholder : r('placeholder',       'placeholder',    D.placeholder),
+        checkLabel  : r('check-label',       'checkLabel',     D.checkLabel),
+        resetLabel  : r('reset-label',       'resetLabel',     D.resetLabel),
+        checkIcon   : r('check-icon',        'checkIcon',      D.checkIcon),
+        resetIcon   : r('reset-icon',        'resetIcon',      D.resetIcon),
+        btnStyle    : r('btn-style',         'btnStyle',       D.btnStyle),
+        btnSize     : r('btn-size',          'btnSize',        D.btnSize),
+        correctMsg  : r('correct-message',   'correctMessage', D.correctMessage),
+        incorrectMsg: r('incorrect-message', 'incorrectMsg',   D.incorrectMsg),
         caseSensitive: r('case-sensitive','caseSensitive',String(D.caseSensitive))==='true',
-        matchMode  : r('match-mode',       'matchMode',     D.matchMode),
-        panelWidth : r('panel-width',      'panelWidth',    D.panelWidth),
-        minHeight  : r('min-height',       'minHeight',     D.minHeight),
-        triggerW   : r('trigger-width',    'triggerWidth',  D.triggerWidth),
-        triggerH   : r('trigger-min-height','triggerMinH',  D.triggerMinH),
-        animDur    : r('anim-duration',    'animDuration',  D.animDuration),
+        matchMode   : r('match-mode',        'matchMode',      D.matchMode),
+        panelWidth  : r('panel-width',       'panelWidth',     D.panelWidth),
+        minHeight   : r('min-height',        'minHeight',      D.minHeight),
+        animDur     : r('anim-duration',     'animDuration',   D.animDuration),
         ratioStr, rightWidth,
-        qColor     : r('question-color',   'questionColor', D.questionColor),
-        eColor     : r('explanation-color','explColor',     D.explColor),
-        accent     : r('accent-color',     'accentColor',   D.accentColor),
-        divider    : r('divider-color',    'dividerColor',  D.dividerColor),
-        /* 主題 */
-        theme      : r('theme',            'theme',         D.theme),
-        themeStyle : r('theme-style',      'themeStyle',    D.themeStyle),
-        initSmall: e.hasAttribute('init-small') ||
-                   (G.initSmall === true),
-        /* 字體大小 */
-        fsTrig : r('fs-trigger',    'fsTrigger',    D.fsTrigger),
-        fsQ    : r('fs-question',   'fsQuestion',   D.fsQuestion),
-        fsNum  : r('fs-number',     'fsNumber',     D.fsNumber),
-        fsInp  : r('fs-input',      'fsInput',      D.fsInput),
-        fsRes  : r('fs-result',     'fsResult',     D.fsResult),
-        fsExpl : r('fs-explanation','fsExplanation',D.fsExplanation),
-        /* 其他 */
-        showNum      : e.getAttribute('show-number') || '',
-        inputType    : e.getAttribute('input-type')  || 'text',
-        inputRows    : parseInt(e.getAttribute('input-rows') || '2'),
-        startOpen    : (e.getAttribute('start-open')     ||'false')==='true',
-        readonlyAnswer:(e.getAttribute('readonly-answer')||'false')==='true',
-        group        : e.getAttribute('group')        || '',
-        groupStart   : e.hasAttribute('group-start')
-                         ? parseInt(e.getAttribute('group-start'),10) : null,
-        groupNoNumber: e.hasAttribute('group-no-number'),
-        skipNumber   : e.hasAttribute('skip-number'),
+        qColor      : r('question-color',    'questionColor',  D.questionColor),
+        eColor      : r('explanation-color', 'explColor',      D.explColor),
+        accent      : r('accent-color',      'accentColor',    D.accentColor),
+        divider     : r('divider-color',     'dividerColor',   D.dividerColor),
+        theme       : r('theme',             'theme',          D.theme),
+        themeStyle  : r('theme-style',       'themeStyle',     D.themeStyle),
+        fsQ         : r('fs-question',   'fsQuestion',   D.fsQuestion),
+        fsNum       : r('fs-number',     'fsNumber',     D.fsNumber),
+        fsInp       : r('fs-input',      'fsInput',      D.fsInput),
+        fsRes       : r('fs-result',     'fsResult',     D.fsResult),
+        fsExpl      : r('fs-explanation','fsExplanation',D.fsExplanation),
+        showNum         : e.getAttribute('show-number') || '',
+        inputType       : e.getAttribute('input-type')  || 'text',
+        inputRows       : parseInt(e.getAttribute('input-rows') || '2'),
+        readonlyAnswer  : (e.getAttribute('readonly-answer')||'false')==='true',
+        group           : e.getAttribute('group')        || '',
+        groupStart      : e.hasAttribute('group-start') ? parseInt(e.getAttribute('group-start'),10) : null,
+        groupNoNumber   : e.hasAttribute('group-no-number'),
+        skipNumber      : e.hasAttribute('skip-number'),
       };
     }
 
-    /* ─ 建立 DOM ─────────────────────────── */
+    /* ─ 建構 ──────────────────────────────── */
     _build() {
       const o = this.o;
       const ratio = parseRatio(o.ratioStr);
 
-      /* wrapper + 分類 class */
+      /* wrapper */
       this.$wrap = mk('div','qp-wrapper');
-      if (ratio)                      this.$wrap.classList.add('qp-ratio');
-      if (o.btnStyle==='text')        this.$wrap.classList.add('qp-bstyle-text');
-      else if (o.btnStyle==='both')   this.$wrap.classList.add('qp-bstyle-both');
-      if (o.initSmall)                this.$wrap.classList.add('qp-ctrig');
+      if (ratio)                     this.$wrap.classList.add('qp-ratio');
+      if (o.btnStyle==='text')       this.$wrap.classList.add('qp-bstyle-text');
+      else if (o.btnStyle==='both')  this.$wrap.classList.add('qp-bstyle-both');
 
-      /* ── CSS 自訂屬性：用 setProperty 逐一設定，避免 cssText 解析問題 ── */
+      /* ── 寬度直接設定（不依賴 CSS var）── */
+      this.$wrap.style.width = o.panelWidth;
+
+      /* ── CSS 自訂屬性 ── */
       const vars = {
-        '--qp-bg'    : C.bg,  '--qp-bg1': C.bg1, '--qp-bg2': C.bg2, '--qp-bg3': C.bg3,
-        '--qp-shell' : C.shell, '--qp-accent': o.accent, '--qp-divider': o.divider,
-        '--qp-q-color': o.qColor, '--qp-expl-color': o.eColor,
+        '--qp-bg'    : C.bg,   '--qp-bg1': C.bg1, '--qp-bg2': C.bg2, '--qp-bg3': C.bg3,
+        '--qp-shell' : C.shell,'--qp-accent': o.accent,'--qp-divider': o.divider,
+        '--qp-q-color': o.qColor,'--qp-expl-color': o.eColor,
         '--qp-safe'  : C.safe, '--qp-warning': C.warning,
-        '--qp-special': '#C8DD5A', '--qp-stone': C.stone,
-        '--qp-focus' : C.focus, '--qp-vanilla': C.vanilla,
-        '--qp-panel-w': o.panelWidth, '--qp-min-h': o.minHeight,
-        '--qp-trig-w': o.triggerW,   '--qp-trig-h': o.triggerH,
+        '--qp-special': '#C8DD5A','--qp-stone': C.stone,
+        '--qp-focus' : C.focus,'--qp-vanilla': C.vanilla,
+        '--qp-min-h' : o.minHeight,
         '--qp-anim'  : `${o.animDur}ms`, '--qp-btn-size': o.btnSize,
-        '--qp-fs-trig': o.fsTrig, '--qp-fs-q': o.fsQ,
-        '--qp-fs-num': o.fsNum,   '--qp-fs-inp': o.fsInp,
-        '--qp-fs-res': o.fsRes,   '--qp-fs-expl': o.fsExpl,
+        '--qp-fs-q'  : o.fsQ, '--qp-fs-num': o.fsNum,
+        '--qp-fs-inp': o.fsInp,'--qp-fs-res': o.fsRes,'--qp-fs-expl': o.fsExpl,
       };
       if (ratio) {
         vars['--qp-ratio-l'] = String(ratio[0]);
         vars['--qp-ratio-r'] = String(ratio[1]);
-      } else if (o.rightWidth) {
-        vars['--qp-right-w'] = o.rightWidth;
       } else {
-        vars['--qp-right-w'] = '220px';
+        vars['--qp-right-w'] = o.rightWidth || '220px';
       }
-
-      /* 主題色覆蓋 */
-      if (o.theme) {
-        Object.assign(vars, _themeVars(o.theme, o.themeStyle));
-      }
-
-      /* 一次性寫入所有 CSS 自訂屬性 */
-      for (const [k, val] of Object.entries(vars)) {
-        this.$wrap.style.setProperty(k, val);
-      }
-
-      /* width 直接用 JS 設定（不依賴 CSS var 推算） */
-      this.$wrap.style.width = o.triggerW;   // 初始：收合狀態
-
-      /* ── 觸發器 ── */
-      this.$trigger = mk('div','qp-trigger',{
-        role:'button', tabindex:'0',
-        title:'展開題目','aria-label':'展開題目面板',
-        html: o.collapseIcon,
-      });
+      if (o.theme) Object.assign(vars, _themeVars(o.theme, o.themeStyle));
+      for (const [k,v] of Object.entries(vars)) this.$wrap.style.setProperty(k,v);
 
       /* ── 面板 ── */
-      this.$panel = mk('div','qp-panel',{
-        role:'region','aria-label':'題目面板',
-      });
+      this.$panel = mk('div','qp-panel',{role:'region','aria-label':'題目面板'});
 
       /* ── 題目區 ── */
       this.$question = mk('div','qp-question');
@@ -745,23 +565,15 @@
 
       if (!o.readonlyAnswer) {
         this.$input = (o.inputType==='textarea')
-          ? mk('textarea','qp-input',{
-              placeholder:o.placeholder, rows:String(o.inputRows),
-              'aria-label':'答案輸入欄位',
-            })
-          : mk('input','qp-input',{
-              type:'text', placeholder:o.placeholder,
-              'aria-label':'答案輸入欄位',
-            });
+          ? mk('textarea','qp-input',{placeholder:o.placeholder,rows:String(o.inputRows),'aria-label':'答案輸入欄位'})
+          : mk('input','qp-input',{type:'text',placeholder:o.placeholder,'aria-label':'答案輸入欄位'});
         this.$right.appendChild(this.$input);
 
         this.$actionRow = mk('div','qp-action-row');
         this.$btnCheck  = this._makeBtn('check');
         this.$btnReset  = this._makeBtn('reset');
         this.$result    = mk('div','qp-result',{role:'status','aria-live':'polite'});
-        this.$actionRow.appendChild(this.$btnCheck);
-        this.$actionRow.appendChild(this.$btnReset);
-        this.$actionRow.appendChild(this.$result);
+        this.$actionRow.append(this.$btnCheck, this.$btnReset, this.$result);
         this.$right.appendChild(this.$actionRow);
       } else {
         this.$revealBtn = mk('button','qp-reveal-btn',{type:'button',text:'▼ 顯示解說'});
@@ -776,42 +588,29 @@
         this.$right.appendChild(this.$expl);
       } else { this.$expl = null; }
 
-      this.$collapseBtn = mk('div','qp-collapse-btn',{
-        role:'button', tabindex:'0',
-        title:'收合','aria-label':'收合',
-        html: o.expandIcon,
-      });
-
-      this.$panel.appendChild(this.$question);
-      this.$panel.appendChild(this.$right);
-      this.$panel.appendChild(this.$collapseBtn);
-      this.$wrap.appendChild(this.$trigger);
+      this.$panel.append(this.$question, this.$right);
       this.$wrap.appendChild(this.$panel);
       this.$wrap.__qp = this;
       this._src.replaceWith(this.$wrap);
-      if (o.startOpen) this.open();
     }
 
     _makeBtn(type) {
       const o   = this.o;
       const icon = type==='check' ? o.checkIcon : o.resetIcon;
       const lbl  = type==='check' ? o.checkLabel : o.resetLabel;
-      const btn  = mk('button',`qp-btn qp-btn-${type}`,{
-        type:'button', title:lbl, 'aria-label':lbl,
-      });
+      const btn  = mk('button',`qp-btn qp-btn-${type}`,{type:'button',title:lbl,'aria-label':lbl});
       if (o.btnStyle==='text') {
         btn.textContent = lbl;
       } else if (o.btnStyle==='both') {
-        const ico = mk('span'); ico.innerHTML = icon;
-        const txt = mk('span','qp-btn-label',{text:lbl});
-        btn.appendChild(ico); btn.appendChild(txt);
+        const ico=mk('span'); ico.innerHTML=icon;
+        btn.append(ico, mk('span','qp-btn-label',{text:lbl}));
       } else {
-        btn.innerHTML = icon;   // icon（預設）
+        btn.innerHTML = icon;
       }
       return btn;
     }
 
-    /* ─ 群組 ─────────────────────────────── */
+    /* ─ 群組 ──────────────────────────────── */
     _registerGroup() {
       const name = this.o.group;
       if (!_groups[name]) _groups[name]={panels:[],start:null,noNumber:false};
@@ -831,11 +630,11 @@
       } else { this._numEl.textContent = n+'.'; }
     }
 
-    /* ─ 比對 ─────────────────────────────── */
+    /* ─ 答案比對 ──────────────────────────── */
     _match(u) {
-      const {answer,caseSensitive,matchMode} = this.o;
+      const {answer,caseSensitive,matchMode}=this.o;
       if (!answer) return false;
-      const n = s=>caseSensitive?s.trim():s.trim().toLowerCase();
+      const n=s=>caseSensitive?s.trim():s.trim().toLowerCase();
       const ua=n(u);
       if (matchMode==='contains')
         return answer.split('|').some(a=>{const c=n(a);return c&&(c.includes(ua)||ua.includes(c));});
@@ -844,16 +643,8 @@
       return answer.split('|').map(a=>n(a)).includes(ua);
     }
 
-    /* ─ 事件 ─────────────────────────────── */
+    /* ─ 事件綁定 ──────────────────────────── */
     _bindEvents() {
-      this.$trigger.addEventListener('click',()=>this.open());
-      this.$trigger.addEventListener('keydown',e=>{
-        if(e.key==='Enter'||e.key===' '){e.preventDefault();this.open();}
-      });
-      this.$collapseBtn.addEventListener('click',()=>this.close());
-      this.$collapseBtn.addEventListener('keydown',e=>{
-        if(e.key==='Enter'||e.key===' '){e.preventDefault();this.close();}
-      });
       if (!this.o.readonlyAnswer) {
         this.$btnCheck.addEventListener('click',()=>this.check());
         this.$btnReset.addEventListener('click',()=>this.reset());
@@ -869,22 +660,7 @@
       }
     }
 
-    /* ─ 公開 API ─────────────────────────── */
-    open() {
-      this.$wrap.style.width = this.o.panelWidth;  // ← 直接寫 800px / 620px 等
-      this.$trigger.style.display='none';
-      this.$panel.classList.add('qp-open');
-      this._isOpen=true;
-      if(this.$input) setTimeout(()=>this.$input.focus(),50);
-      this._emit('quiz-panel-open',{});
-    }
-    close() {
-      this.$panel.classList.remove('qp-open');
-      this.$trigger.style.display='';
-      this.$wrap.style.width = this.o.triggerW;    // ← 還原成觸發器寬度
-      this._isOpen=false;
-      this._emit('quiz-panel-close',{});
-    }
+    /* ─ 公開 API ──────────────────────────── */
     check() {
       if(!this.$input) return;
       const ua=this.$input.value, ok=this._match(ua);
@@ -903,84 +679,39 @@
       if(this.$expl) this.$expl.classList.remove('qp-show');
       this._emit('quiz-panel-reset',{});
     }
-    isOpen()         { return this._isOpen; }
     getGroupNumber() { return this._autoNum; }
     setQuestion(t)   { this.o.question=t; this._qTextEl.innerHTML=md(t); }
     setAnswer(t)     { this.o.answer=t; }
     setExplanation(t){ this.o.explanation=t; if(this.$expl) this.$expl.innerHTML=md(t); }
     _emit(name,detail){ this.$wrap.dispatchEvent(new CustomEvent(name,{bubbles:true,detail})); }
 
+    /* ─ 靜態 API ──────────────────────────── */
     static getGroup(name)        { return (_groups[name]?.panels||[]).slice(); }
     static resetGroup(name)      { QuizPanel.getGroup(name).forEach(p=>p.reset()); }
     static renumberGroup(name,n) { if(_groups[name]){_groups[name].start=n;applyGroupNums(name);} }
 
-    /**
-     * collectAnswers([options]) → Array
-     * 蒐集頁面上所有題目的使用者輸入與正解，回傳物件陣列。
-     *
-     * 每筆紀錄欄位：
-     *   index       {number}        頁面上的順序（0起算）
-     *   number      {string|null}   顯示的題號（group自動號 / show-number / null）
-     *   group       {string|null}   所屬群組名稱
-     *   question    {string}        題目原始文字
-     *   userInput   {string}        使用者輸入（未輸入為空字串）
-     *   expected    {string}        正解（| 分隔多個）
-     *   correct     {boolean|null}  是否答對（readonly-answer 題型為 null）
-     *   isOpen      {boolean}       面板目前是否展開
-     *
-     * options（選用）：
-     *   onlyAnswered {boolean} true → 只含已輸入的題目（預設 false）
-     *   group        {string}  只蒐集指定群組（預設全部）
-     *
-     * 用法：
-     *   const rows = QuizPanel.collectAnswers();
-     *   const json = JSON.stringify(rows, null, 2);
-     *
-     *   // 只蒐集答過的題目
-     *   const done = QuizPanel.collectAnswers({ onlyAnswered: true });
-     *
-     *   // 只蒐集某群組
-     *   const g = QuizPanel.collectAnswers({ group: '網路概論' });
-     */
-    static collectAnswers(options = {}) {
-      const { onlyAnswered = false, group: filterGroup = null } = options;
-      const results = [];
-      let index = 0;
-
-      document.querySelectorAll('.qp-wrapper').forEach(wrapper => {
-        const p = wrapper.__qp;
-        if (!p) return;
-        if (filterGroup && p.o.group !== filterGroup) return;
-
-        const userInput = p.$input ? p.$input.value : '';
-        if (onlyAnswered && !userInput.trim()) return;
-
-        const numLabel = p._autoNum != null
-          ? String(p._autoNum)
-          : (p.o.showNum || null);
-
+    static collectAnswers(options={}) {
+      const {onlyAnswered=false, group:fg=null}=options;
+      const results=[]; let idx=0;
+      document.querySelectorAll('.qp-wrapper').forEach(w=>{
+        const p=w.__qp;
+        if(!p) return;
+        if(fg && p.o.group!==fg) return;
+        const ui=p.$input?p.$input.value:'';
+        if(onlyAnswered && !ui.trim()) return;
+        const num=p._autoNum!=null?String(p._autoNum):(p.o.showNum||null);
         results.push({
-          index,
-          number   : numLabel,
-          group    : p.o.group || null,
-          question : p.o.question,
-          userInput,
-          expected : p.o.expected ?? p.o.answer,
-          correct  : p.o.readonlyAnswer ? null : p._match(userInput),
-          isOpen   : p.isOpen(),
+          index:idx, number:num, group:p.o.group||null,
+          question:p.o.question, userInput:ui,
+          expected:p.o.answer,
+          correct:p.o.readonlyAnswer?null:p._match(ui),
         });
-        index++;
+        idx++;
       });
-
       return results;
     }
-
-    /**
-     * collectAnswersJSON([options]) → string
-     * collectAnswers() 的 JSON 字串版本（縮排 2 格）。
-     */
-    static collectAnswersJSON(options = {}) {
-      return JSON.stringify(QuizPanel.collectAnswers(options), null, 2);
+    static collectAnswersJSON(options={}) {
+      return JSON.stringify(QuizPanel.collectAnswers(options),null,2);
     }
   }
 
