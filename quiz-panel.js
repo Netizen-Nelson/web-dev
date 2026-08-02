@@ -523,6 +523,9 @@
       else if (o.btnStyle==='both')  this.$wrap.classList.add('qp-bstyle-both');
 
       /* ── 寬度直接設定（不依賴 CSS var）── */
+      /* 百分比寬度（如 100%）改用 display:block，避免 inline-block 的百分比計算問題 */
+      const isPercent = /^\d+(\.\d+)?%$/.test(String(o.panelWidth).trim());
+      if (isPercent) this.$wrap.style.display = 'block';
       this.$wrap.style.width = o.panelWidth;
 
       /* ── CSS 自訂屬性 ── */
