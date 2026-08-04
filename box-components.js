@@ -1,72 +1,6 @@
-/*!
- * box-components.js
- * QuizPanel（常駐展開題目面板）+ QuizStrip（色條多層切換器）
- * 整合新功能：caption 浮動標籤 / bg-color + bg-opacity 背景透明度
- *
- * ── 新增屬性（QuizPanel & QuizStrip 通用）───────────────────────────────────
- *
- * bg-color="colorName|#hex"   背景底色（品牌色名稱或 hex）
- * bg-opacity="0.6"            背景透明度 0–1（轉為 rgba，不影響子元素 opacity）
- *
- * caption="標籤文字"            浮動標籤，貼合容器上邊框（類似 fieldset/legend）
- * caption-pos="top|left"       top（預設）：標籤在頂部邊框上
- *                              left：標籤垂直貼左邊框
- * caption-align="left|center|right"  頂部模式的水平對齊（預設 left）
- * caption-bg="colorName|#hex"  標籤背景色（預設 #1e1f1e）
- * caption-color="colorName|#hex" 標籤文字色（預設跟隨主題色）
- *
- * ── QuizPanel 屬性 ───────────────────────────────────────────────────────────
- *
- * panel-width="620px"      總寬（支援 px / %）
- * ratio="1:1"              左:右比例，與 right-width 擇一
- * right-width="220px"      固定右欄寬
- * min-height="96px"
- * theme="colorName"        品牌主題色
- * theme-style="dark|filled"
- * question / answer / explanation / placeholder
- * case-sensitive / match-mode（exact|contains|regex）
- * input-type / input-rows / readonly-answer
- * correct-message / incorrect-message
- * btn-style / btn-size / check-icon / reset-icon / check-label / reset-label
- * fs-question / fs-number / fs-input / fs-result / fs-explanation
- * show-number / group / group-start / group-no-number / skip-number
- *
- * ── QuizStrip 屬性 ───────────────────────────────────────────────────────────
- *
- * panel-width="620px" / min-height / height
- * theme / strip-width / strip-position（left|right）
- * show-dots / show-badge
- * mode（manual|carousel）/ carousel-interval / no-loop
- * progress-height / progress-style（bar|fuse）/ anim-ms
- * 子元素：<div data-strip-level>…</div>
- *
- * ── 事件 ─────────────────────────────────────────────────────────────────────
- *
- * quiz-panel-check  { answer, correct, expected }
- * quiz-panel-reset
- * qs-change         { level, total }
- *
- * ── 全域設定 ─────────────────────────────────────────────────────────────────
- *
- * window.QuizPanelConfig = { … }
- * window.QuizStripConfig = { … }
- *
- * ── 實例 API ─────────────────────────────────────────────────────────────────
- *
- * [data-quiz-panel] wrapper.__qp → .check() .reset() .setQuestion() .setAnswer()
- *                                   .setExplanation() .getGroupNumber()
- * [data-quiz-strip] wrapper.__qs → .goTo(idx) .next() .prev()
- *                                   .startCarousel() .stopCarousel() .currentLevel
- * QuizPanel.collectAnswers([opts]) / .collectAnswersJSON()
- * QuizPanel.getGroup(n) / .resetGroup(n) / .renumberGroup(n,start)
- */
 
 (function () {
   'use strict';
-
-  /* ══════════════════════════════════════════
-     色票
-  ══════════════════════════════════════════ */
   const BRAND = {
     lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
     salmon  :'#E5C3B3', sky    :'#08A9D1', safe   :'#40C99A',
@@ -81,10 +15,6 @@
     warning:'#F08080', vanilla:'#DBEDD8', focus:'#A0CF72',
     stone:'#95BDD7', indigo:'#7B6CF0',
   };
-
-  /* ══════════════════════════════════════════
-     色彩工具
-  ══════════════════════════════════════════ */
   function _rgb(hex) {
     hex = hex.replace('#','');
     return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
@@ -95,7 +25,6 @@
   function _lum(hex) { const [r,g,b]=_rgb(hex); return 0.299*r+0.587*g+0.114*b; }
   function _textOn(hex) { return _lum(hex)>145?'#0C0D0C':'#e8e9e4'; }
 
-  /** bg-color + bg-opacity → CSS 背景色字串（不影響子元素 opacity）*/
   function buildBg(colorKey, opacityStr) {
     const color = BRAND[colorKey] || (colorKey&&colorKey.startsWith('#') ? colorKey : null);
     if (!color || color==='transparent') return null;
@@ -106,10 +35,6 @@
     }
     return color;
   }
-
-  /* ══════════════════════════════════════════
-     主題變數（quiz-panel 專用）
-  ══════════════════════════════════════════ */
   function _themeVars(name, style) {
     const color = BRAND[name];
     if (!color) return {};
@@ -138,11 +63,6 @@
       '--qp-rs-fg':_rgba(color,.60), '--qp-rs-bd':_rgba(color,.18),
     };
   }
-
-  /* ══════════════════════════════════════════
-     Caption 系統
-     宿主元素須有 position:relative 且 overflow:visible
-  ══════════════════════════════════════════ */
   function syncCaption(wrapEl, innerEl, opts) {
     /* opts: { caption, captionPos, captionAlign, captionBg, captionColor,
                accentColor, borderWidth } */
@@ -193,7 +113,7 @@
         bottom      : `${-bw}px`,
         left        : `${-bw}px`,
         right       : 'auto',
-        padding     : '10px 3px',
+        padding     : '8px 3px',
         display     : 'flex',
         alignItems  : 'center',
         justifyContent:'center',
@@ -223,7 +143,7 @@
         left         : al.left,
         right        : al.right,
         transform    : al.transform,
-        padding      : '2px 8px',
+        padding      : '2px 7px',
         width        : 'auto',
         whiteSpace   : 'nowrap',
       });
@@ -235,16 +155,8 @@
       });
     }
   }
-
-  /* ══════════════════════════════════════════
-     SVG 圖示
-  ══════════════════════════════════════════ */
   const ICON_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
   const ICON_RESET = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`;
-
-  /* ══════════════════════════════════════════
-     全域樣式（一次注入）
-  ══════════════════════════════════════════ */
   const STYLE_ID = 'box-components-v1';
   if (!document.getElementById(STYLE_ID)) {
     const s = document.createElement('style');
@@ -290,13 +202,13 @@
       .qp-question {
         flex       : 1 1 auto;
         min-width  : 0;
-        padding    : 12px 16px;
+        padding    : 8px 12px;
         color      : var(--qp-q-color);
         font-size  : var(--qp-fs-q);
-        line-height: 1.7;
+        line-height: 1.55;
         display    : flex;
         align-items: center;
-        gap        : 8px;
+        gap        : 6px;
         border-right: 2px dashed var(--qp-divider);
         word-break : break-word;
         box-sizing : border-box;
@@ -308,15 +220,15 @@
         font-weight: 700;
         min-width  : 18px;
         align-self : flex-start;
-        padding-top: 2px;
+        padding-top: 1px;
       }
       .qp-right {
         flex       : 0 0 var(--qp-right-w);
         min-width  : 0;
         display    : flex;
         flex-direction: column;
-        padding    : 10px;
-        gap        : 6px;
+        padding    : 8px;
+        gap        : 5px;
         background : var(--qp-bg1);
         box-sizing : border-box;
       }
@@ -327,13 +239,13 @@
         border-radius: 4px;
         color        : var(--qp-vanilla);
         font-size    : var(--qp-fs-inp);
-        padding      : 5px 8px;
+        padding      : 4px 7px;
         outline      : none;
         box-sizing   : border-box;
         transition   : border-color .18s, background .18s;
         resize       : vertical;
         font-family  : inherit;
-        line-height  : 1.5;
+        line-height  : 1.4;
       }
       .qp-input::placeholder  { color: #55555a; }
       .qp-input:focus         { border-color: var(--qp-focus); }
@@ -342,7 +254,7 @@
       .qp-action-row {
         display    : flex;
         align-items: center;
-        gap        : 6px;
+        gap        : 5px;
         min-height : var(--qp-btn-size);
       }
       .qp-btn {
@@ -367,7 +279,7 @@
       .qp-btn-check  { background: var(--qp-ck-bg, var(--qp-accent)); color: var(--qp-ck-fg, #fff); }
       .qp-btn-reset  { background: var(--qp-rs-bg, var(--qp-bg3)); color: var(--qp-rs-fg, var(--qp-stone)); border: 1px solid var(--qp-rs-bd, #ffffff1a); }
       .qp-wrapper.qp-bstyle-text .qp-btn,
-      .qp-wrapper.qp-bstyle-both .qp-btn { flex:1; width:auto; padding:0 8px; gap:5px; }
+      .qp-wrapper.qp-bstyle-both .qp-btn { flex:1; width:auto; padding:0 7px; gap:4px; }
       .qp-btn-label { display:none; font-size:.82rem; letter-spacing:.04em; }
       .qp-wrapper.qp-bstyle-both .qp-btn-label,
       .qp-wrapper.qp-bstyle-text .qp-btn-label { display:inline; }
@@ -381,13 +293,13 @@
       .qp-result.qp-incorrect { color: var(--qp-warning); }
       .qp-explanation {
         display:none; font-size:var(--qp-fs-expl); color:var(--qp-expl-color);
-        line-height:1.6; padding:7px 9px; background:var(--qp-expl-bg,#120d19);
+        line-height:1.5; padding:5px 7px; background:var(--qp-expl-bg,#120d19);
         border-left:3px solid var(--qp-expl-color); border-radius:3px; word-break:break-word;
       }
       .qp-explanation.qp-show { display:block; }
       .qp-explanation code { background:var(--qp-bg2); padding:1px 5px; border-radius:3px; color:var(--qp-special,#C8DD5A); font-size:.9em; }
       .qp-reveal-btn {
-        width:100%; padding:6px 0; background:var(--qp-bg3);
+        width:100%; padding:4px 0; background:var(--qp-bg3);
         border:1.5px dashed var(--qp-divider); border-radius:4px;
         color:var(--qp-stone); font-size:var(--qp-fs-res); cursor:pointer;
         font-family:inherit; transition:background .15s,color .15s;
@@ -530,11 +442,11 @@
   const QP_D = {
     checkIcon:ICON_CHECK, resetIcon:ICON_RESET,
     checkLabel:'核對答案', resetLabel:'重設',
-    btnStyle:'icon', btnSize:'30px',
+    btnStyle:'icon', btnSize:'26px',
     placeholder:'請輸入答案…',
     correctMessage:'✓ 正確！', incorrectMsg:'✗ 錯誤',
     caseSensitive:false, matchMode:'exact',
-    panelWidth:'620px', ratio:'1:1', rightWidth:null, minHeight:'96px',
+    panelWidth:'620px', ratio:'1:1', rightWidth:null, minHeight:'80px',
     questionColor:C.shell, explColor:'#C3A5E5',
     accentColor:C.indigo, dividerColor:C.stone,
     animDuration:200, theme:'', themeStyle:'dark',
@@ -551,7 +463,6 @@
       this._readCfg(); this._build(); this._bindEvents();
       if(this.o.group) this._registerGroup();
     }
-
     _readCfg() {
       const e=this._src, G=window.QuizPanelConfig||{};
       const r=(attr,key,fb)=>_gcfg(e,attr,key,G,fb!==undefined?fb:QP_D[key]);
@@ -562,7 +473,6 @@
       else if(G.ratio!=null)            ratioStr  =G.ratio;
       else if(G.rightWidth!=null)       rightWidth=G.rightWidth;
       else                              ratioStr  =QP_D.ratio;
-
       this.o={
         question    :e.getAttribute('question')   ||'（未設定題目）',
         answer      :e.getAttribute('answer')     ||'',
@@ -616,13 +526,9 @@
       if(ratio)                   this.$wrap.classList.add('qp-ratio');
       if(o.btnStyle==='text')     this.$wrap.classList.add('qp-bstyle-text');
       else if(o.btnStyle==='both')this.$wrap.classList.add('qp-bstyle-both');
-
-      /* 寬度 */
       const isPercent=/^\d+(\.\d+)?%$/.test(String(o.panelWidth).trim());
       this.$wrap.style.display=isPercent?'block':'inline-block';
       this.$wrap.style.width=o.panelWidth;
-
-      /* CSS 自訂屬性 */
       const vars={
         '--qp-bg':C.bg,'--qp-bg1':C.bg1,'--qp-bg2':C.bg2,'--qp-bg3':C.bg3,
         '--qp-shell':C.shell,'--qp-accent':o.accent,'--qp-divider':o.divider,
@@ -637,23 +543,14 @@
       if(ratio){ vars['--qp-ratio-l']=String(ratio[0]); vars['--qp-ratio-r']=String(ratio[1]); }
       else { vars['--qp-right-w']=o.rightWidth||'220px'; }
       if(o.theme) Object.assign(vars,_themeVars(o.theme,o.themeStyle));
-
-      /* ── bg-color + bg-opacity：覆蓋背景 ── */
       const customBg=buildBg(o.bgColor,o.bgOpacity);
       if(customBg){ vars['--qp-bg']=customBg; }
-
       for(const [k,v] of Object.entries(vars)) this.$wrap.style.setProperty(k,v);
-
-      /* 面板 */
       this.$panel=mk('div','qp-panel',{role:'region','aria-label':'題目面板'});
-
-      /* 題目區 */
       this.$question=mk('div','qp-question');
       if(o.showNum){ this._numEl=mk('span','qp-num',{text:o.showNum+'.'}); this.$question.appendChild(this._numEl); }
       this._qTextEl=mk('span'); this._qTextEl.innerHTML=md(o.question);
       this.$question.appendChild(this._qTextEl);
-
-      /* 右側 */
       this.$right=mk('div','qp-right');
       if(!o.readonlyAnswer){
         this.$input=(o.inputType==='textarea')
@@ -675,13 +572,10 @@
         this.$expl=mk('div','qp-explanation'); this.$expl.innerHTML=md(o.explanation);
         this.$right.appendChild(this.$expl);
       } else { this.$expl=null; }
-
       this.$panel.append(this.$question,this.$right);
       this.$wrap.appendChild(this.$panel);
       this.$wrap.__qp=this;
       this._src.replaceWith(this.$wrap);
-
-      /* ── caption ── */
       if(o.caption){
         syncCaption(this.$wrap, this.$panel, {
           caption:o.caption, captionPos:o.captionPos,
@@ -778,21 +672,13 @@
     }
     static collectAnswersJSON(opts={}){ return JSON.stringify(QuizPanel.collectAnswers(opts),null,2); }
   }
-
-  /* ══════════════════════════════════════════
-     QuizStrip 預設值
-  ══════════════════════════════════════════ */
   const QS_D = {
     theme:'lavender', stripWidth:8, stripPosition:'left',
     showDots:false, showBadge:false,
     mode:'manual', carouselInterval:3000, loop:true,
     progressHeight:2, progressStyle:'bar', animMs:240,
-    panelWidth:'620px', minHeight:'60px', height:'auto',
+    panelWidth:'620px', minHeight:'50px', height:'auto',
   };
-
-  /* ══════════════════════════════════════════
-     QuizStrip 類別
-  ══════════════════════════════════════════ */
   class QuizStrip {
     constructor(src){
       this._src=src; this._curIdx=0; this._carouselTid=null; this._levels=[];
@@ -818,7 +704,6 @@
         panelWidth   :r('panel-width','panelWidth'),
         minHeight    :r('min-height','minHeight'),
         height       :r('height','height'),
-        /* ── 新增 ── */
         bgColor  :e.getAttribute('bg-color')     ||'',
         bgOpacity:e.getAttribute('bg-opacity')   ||'',
         caption      :e.getAttribute('caption')      ||'',
@@ -835,8 +720,6 @@
       const isPercent=/^\d+(\.\d+)?%$/.test(String(o.panelWidth).trim());
       this.$wrap.style.display=isPercent?'block':'inline-block';
       this.$wrap.style.width=o.panelWidth;
-
-      /* 基本背景色 */
       const baseBg = buildBg(o.bgColor,o.bgOpacity) || '#0C0D0C';
 
       const vars={
@@ -969,9 +852,6 @@
     get currentLevel(){ return this._curIdx; }
   }
 
-  /* ══════════════════════════════════════════
-     自動初始化
-  ══════════════════════════════════════════ */
   function initAll(root) {
     const r=root||document;
     r.querySelectorAll('[data-quiz-panel]').forEach(n=>{ if(!n._qpInit){n._qpInit=true;new QuizPanel(n);} });
