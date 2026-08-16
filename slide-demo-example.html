@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>語塊拆解示範 — slide-demo.js</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+/* ══ 配色變數 ══════════════════════════════════ */
+:root {
+  --bg:       #0C0D0C;
+  --shell:    #C6C7BD;
+  --special:  #C8DD5A;
+  --safe:     #40C99A;
+  --lavender: #C3A5E5;
+  --sky:      #08A9D1;
+  --stone:    #95BDD7;
+  --warning:  #F08080;
+  --indigo:   #7B6CF0;
+  --orange:   #EDA109;
+}
+
+*, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--shell);
+  font-family: 'Segoe UI', 'PingFang TC', system-ui, sans-serif;
+  font-size: 1.125rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 40px;
+}
+
+/* ══ 頁頭 ══════════════════════════════════════ */
+.ph {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 960px;
+  flex-wrap: wrap;
+}
+.ph-title { color: var(--special); font-size: 1rem; font-weight: 700; letter-spacing: .04em; }
+.ph-src   { color: var(--stone); font-size: .78rem; opacity: .65; }
+
+/* ══ 元件容器 ══════════════════════════════════ */
+.wrap { width: 100%; max-width: 960px; }
+
+/* ══════════════════════════════════════════════
+   Slide 內容專用樣式（只在此頁用）
+══════════════════════════════════════════════ */
+
+/* 句子框 */
+.sent-box {
+  background: #131413;
+  border: 1px solid #272927;
+  border-radius: 10px;
+  padding: 16px 24px;
+  font-size: 1.12rem;
+  line-height: 2.1;
+  width: 100%;
+  user-select: text;
+}
+
+/* 句子著色 */
+.sp  { color: var(--shell); }
+.sd  { color: var(--shell); opacity: .13; }
+.so  { color: var(--stone); }
+.ss  { color: var(--safe);  font-weight: 700; }
+.sm  { color: var(--lavender); }
+.sv  { color: var(--special); font-weight: 700; }
+.sc  { color: var(--sky); }
+
+/* 角色微標 */
+.rl {
+  font-size: .6rem; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  vertical-align: super; margin-left: 2px; opacity: .8;
+}
+.rl-o { color: var(--stone); }
+.rl-s { color: var(--safe); }
+.rl-m { color: var(--lavender); }
+.rl-v { color: var(--special); }
+.rl-c { color: var(--sky); }
+
+/* Callout 框 */
+.callout {
+  display: flex; align-items: flex-start; gap: 11px;
+  background: #1a1b1a;
+  border-left: 3px solid var(--special);
+  border-radius: 0 8px 8px 0;
+  padding: 11px 16px;
+  width: 100%; font-size: .93rem; line-height: 1.6;
+}
+.c-ico { font-size: 1.05rem; flex-shrink: 0; margin-top: 1px; }
+.c-stone  { border-color: var(--stone); }
+.c-safe   { border-color: var(--safe); }
+.c-lav    { border-color: var(--lavender); }
+.c-sky    { border-color: var(--sky); }
+.c-warn   { border-color: var(--warning); }
+
+/* 34次 badge */
+.b34 {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--warning); color: #111;
+  font-weight: 800; border-radius: 6px;
+  padding: 2px 12px; font-size: 1.15rem;
+  vertical-align: middle;
+}
+
+/* 主幹骨架 */
+.skeleton {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; justify-content: center;
+  background: #131413;
+  border: 2px solid var(--special);
+  border-radius: 10px;
+  padding: 14px 24px; width: 100%;
+  font-size: 1.2rem; font-weight: 700;
+}
+.sk-sep { color: #444; font-size: .85rem; font-weight: 400; }
+
+/* 換行縮排框 */
+.indent-box {
+  background: #0f100f;
+  border: 1px solid #252825;
+  border-radius: 10px;
+  padding: 18px 28px; width: 100%;
+  font-family: 'Consolas','Cascadia Code','Monaco', monospace;
+  font-size: 1.02rem; line-height: 2.0;
+  user-select: text;
+}
+.ln  { display: block; }
+.i1  { padding-left: 2.2em; }
+.i2  { padding-left: 4.4em; }
+
+/* 圖例 */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+}
+.leg { display: flex; align-items: center; gap: 5px; font-size: .78rem; }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* chunk-demo 在 slide 裡 */
+.slide-cd { width: 100%; }
+.cd-hint {
+  color: rgba(198,199,189,.42);
+  font-size: .8rem; text-align: center;
+}
+
+/* 中央大問號 */
+.big-q {
+  font-size: 1.7rem; font-weight: 700;
+  color: var(--special); text-align: center;
+}
+
+/* bp-popnote 觸發詞 */
+[data-popover-content] {
+  --xpop-hint-color: var(--lavender) !important;
+}
+</style>
+</head>
+<body>
+
+<div class="ph">
+  <div class="ph-title"><i class="bi bi-layers-fill"></i> 語塊拆解示範 — 雅思閱讀長難句</div>
+  <div class="ph-src">資料來源：Pew Research Center</div>
+</div>
+
+<div class="wrap">
+<slide-demo
+  theme="focus"
+  height="480px"
+  progress-bar="true"
+  progress-bar-size="1px"
+  thumbnails="true"
+  thumbnails-position="bottom"
+  show-controls="true"
+  show-arrows="true"
+  show-dots="true"
+  show-notes="true"
+  controls-position="bottom"
+  controls-size="md"
+  line-height="1.5"
+  notes-gap="32px">
+
+  <!-- ══ 1. 原句 + 問題 ══════════════════════ -->
+  <sd-slide layout="sentence" thumb-label="閱讀挑戰">
+    <slide-note>開場：拋出問題，讓觀眾先試著自己找。不要急著往下。</slide-note>
+    <sd-eyebrow>閱讀挑戰</sd-eyebrow>
+    <sd-title class="big-q">誰做了什麼事？</sd-title>
+    <sd-body>
+      <div class="sent-box">
+        <span class="sp">Like their peers in traditional full-time employment, freelancers navigating the gig economy and regularly managing multiple short-term projects report that this has had a more positive than negative impact on their overall work-life balance.</span>
+      </div>
+    </sd-body>
+  </sd-slide>
+
+  <!-- ══ 2. 34次痛點 ═══════════════════════ -->
+  <sd-slide layout="sentence" thumb-label="34次問題">
+    <slide-note>強調「34次」這個數字，讓觀眾感受逐字閱讀的低效。這句話剛好34個字，不是隨意捏造的數字。</slide-note>
+    <sd-eyebrow>問題所在</sd-eyebrow>
+    <sd-title>逐字讀，要掃幾次？</sd-title>
+    <sd-body>
+      <div class="callout c-warn">
+        <span class="c-ico" style="color:var(--warning)"><i class="bi bi-exclamation-triangle-fill"></i></span>
+        <div>逐字閱讀，眼睛要掃 <span class="b34">34 次</span> 才能回答「誰做了什麼事」</div>
+      </div>
+      <div class="sent-box" style="margin-top:12px">
+        <span class="sp">Like their peers in traditional full-time employment, freelancers navigating the gig economy and regularly managing multiple short-term projects report that this has had a more positive than negative impact on their overall work-life balance.</span>
+      </div>
+      <div class="callout c-sky" style="margin-top:10px">
+        <span class="c-ico" style="color:var(--sky)"><i class="bi bi-lightning-charge-fill"></i></span>
+        <div>語塊讀者的眼睛只落幾個地方。接下來的四個動作，帶你切出主幹。</div>
+      </div>
+    </sd-body>
+  </sd-slide>
+
+  <!-- ══ 3. 第一刀：句首語塊 ═══════════════ -->
+  <sd-slide layout="sentence" thumb-label="第一刀">
+    <slide-note>重點：句首凡是比較、讓步、對比的語塊，一律先切。這是英文句型最常見的開場方式。</slide-note>
+    <sd-eyebrow>第一刀</sd-eyebrow>
+    <sd-title>切掉句首語塊</sd-title>
+    <sd-body>
+      <div class="sent-box">
+        <span class="so">Like their peers in traditional full-time employment,</span><span class="rl rl-o">背景</span>
+        <span class="sd"> freelancers navigating the gig economy and regularly managing multiple short-term projects report that this has had a more positive than negative impact on their overall work-life balance.</span>
+      </div>
+      <div class="callout c-stone" style="margin-top:12px">
+        <span class="c-ico" style="color:var(--stone)"><i class="bi bi-scissors"></i></span>
+        <div style="color:var(--stone)">
+          <strong>Like / Although / Despite / In contrast / Apart from…</strong>
+          <br>句首這類語塊一律先切，主幹在它後面。
+        </div>
+      </div>
+    </sd-body>
+  </sd-slide>
+
+  <!-- ══ 4. 第二刀：主語 ═══════════════════ -->
+  <sd-slide layout="sentence" thumb-label="第二刀">
+    <slide-note>切掉句首之後，眼睛往右找第一個名詞，那就是主語。這裡是 freelancers。</slide-note>
+    <sd-eyebrow>第二刀</sd-eyebrow>
+    <sd-title>找主語</sd-title>
+    <sd-body>
+      <div class="sent-box">
+        <span class="sd">Like their peers in traditional full-time employment, </span><span class="ss">freelancers</span><span class="rl rl-s">主語</span>
+        <span class="sd"> navigating the gig economy and regularly managing multiple short-term projects report that this has had a more positive than negative impact on their overall work-life balance.</span>
+      </div>
+      <div class="callout c-safe" style="margin-top:12px">
+        <span class="c-ico" style="color:var(--safe)"><i class="bi bi-person-fill"></i></span>
+        <div>切掉句首語塊後，第一個名詞 <strong style="color:var(--safe)">freelancers</strong> 就是主語——「誰」做了事。</div>
+      </div>
+    </sd-body>
+  </sd-slide>
+
+  <!-- ══ 5. 第三刀：後位修飾 ══════════════ -->
+  <sd-slide layout="sentence" thumb-label="第三刀">
+    <slide-note>後位修飾是中文母語者最容易卡住的地方。中文把修飾語放前面，英文放後面。遇到就跳過，繼續找動詞。</slide-note>
+    <sd-eyebrow>第三刀</sd-eyebrow>
+    <sd-title>跳過後位修飾</sd-title>
+    <sd-body>
+      <div class="sent-box">
+        <span class="sd">Like their peers in traditional full-time employment, </span><span class="ss">freelancers </span><span class="sm">navigating the gig economy and regularly managing multiple short-term projects</span><span class="rl rl-m">後位修飾</span>
+        <span class="sd"> report that this has had a more positive than negative impact on their overall work-life balance.</span>
+      </div>
+      <div class="callout c-lav" style="margin-top:12px">
+        <span class="c-ico" style="color:var(--lavender)"><i class="bi bi-skip-forward-fill"></i></span>
+        <div>
+          主語後緊跟
+          <span data-popover-title="後位修飾"
+                data-popover-content="英文習慣把修飾語放在被修飾詞後面，與中文相反。主語後若緊跟分詞片語或定語從句，那一塊修飾的是主語本身，不是動詞。跳過它，繼續往右找動詞。">後位修飾</span>——
+          跳過！找後面的動詞。
+        </div>
+      </div>
+    </sd-body>
+  </sd-slide>
+
+  <!-- ══ 6. 主幹浮現 ═══════════════════════ -->
+  <sd-slide layout="sentence" thumb-label="主幹浮現">
+    <slide-note>這是整個拆解過程的高潮。主幹只有三個語塊：freelancers → report → that 子句。其他32個字都是修飾。</slide-note>
+    <sd-eyebrow>主幹浮現</sd-eyebrow>
+    <sd-title>找到動詞</sd-title>
+    <sd-body>
+      <div class="sent-box">
+        <span class="sd">Like their peers in traditional full-time employment, </span><span class="ss">freelancers </span><span class="sd">navigating the gig economy and regularly managing multiple short-term projects </span><span class="sv">report</span><span class="rl rl-v">動詞</span>
+        <span class="sc"> that this has had a more positive than negative impact on their overall work-life balance.</span>
+      </div>
+      <div class="skeleton" style="margin-top:12px">
+        <span class="ss">freelancers</span>
+        <span class="sk-sep">──</span>
+        <span class="sv">report</span>
+        <span class="sk-sep">──</span>
+        <span class="sc" style="font-size:1rem;font-weight:400">that this has had…</span>
+      </div>
+    </sd-body>
+  </sd-slide>
+
+  <!-- ══ 7. 換行縮排 ═══════════════════════ -->
+  <sd-slide layout="sentence" thumb-label="換行縮排" line-height="1.5">
+    <slide-note>這是視覺化語塊結構的核心技術。縮排代表層次，不需要任何文字說明，結構自己說話。</slide-note>
+    <sd-eyebrow>換行縮排</sd-eyebrow>
+    <sd-title>結構一覽</sd-title>
+    <sd-body>
+      <div class="indent-box">
+        <span class="ln sd">Like their peers in traditional full-time employment,</span>
+        <span class="ln ss">freelancers</span>
+        <span class="ln i1 sm">navigating the gig economy</span>
+        <span class="ln i1 sm">and regularly managing multiple short-term projects</span>
+        <span class="ln sv">report</span>
+        <span class="ln i1 sc">that this has had</span>
+        <span class="ln i2 sc">a more positive than negative impact</span>
+        <span class="ln i2 sc">on their overall work-life balance.</span>
+      </div>
+      <div class="legend" style="margin-top:10px">
+        <div class="leg"><div class="leg-dot" style="background:var(--shell);opacity:.2"></div><span style="opacity:.4">背景語塊</span></div>
+        <div class="leg"><div class="leg-dot" style="background:var(--safe)"></div><span style="color:var(--safe)">主語</span></div>
+        <div class="leg"><div class="leg-dot" style="background:var(--lavender)"></div><span style="color:var(--lavender)">後位修飾</span></div>
+        <div class="leg"><div class="leg-dot" style="background:var(--special)"></div><span style="color:var(--special)">動詞</span></div>
+        <div class="leg"><div class="leg-dot" style="background:var(--sky)"></div><span style="color:var(--sky)">that 子句</span></div>
+      </div>
+    </sd-body>
+  </sd-slide>
+
+  <!-- ══ 8. chunk-demo 互動 ════════════════ -->
+  <sd-slide layout="sentence" thumb-label="互動練習">
+    <slide-note>最後一張讓觀眾自己動手。Level 1 是原文，Level 2 是語法角色，Level 3 是閱讀策略。鼓勵觀眾在留言說說看哪個 Level 最有幫助。</slide-note>
+    <sd-eyebrow>互動練習</sd-eyebrow>
+    <sd-title>點擊語塊，切換說明</sd-title>
+    <sd-body>
+      <chunk-demo class="slide-cd"
+        sentence="{1} {2} {3} {4} {5}"
+        theme="special"
+        show-preview="false"
+        level-colors="#95BDD7, #40C99A, #C8DD5A"
+        button-width="100px">
+        <cd-chunk id="1" label="句首語塊">
+          <cd-level level="1" text="Like their peers…,"/>
+          <cd-level level="2" text="句首比較語塊 ✂"/>
+          <cd-level level="3" text="先切掉 → 找後面主幹"/>
+        </cd-chunk>
+        <cd-chunk id="2" label="主語">
+          <cd-level level="1" text="freelancers"/>
+          <cd-level level="2" text="主語 Subject ✓"/>
+          <cd-level level="3" text="「誰」做了什麼事"/>
+        </cd-chunk>
+        <cd-chunk id="3" label="後位修飾">
+          <cd-level level="1" text="navigating … projects"/>
+          <cd-level level="2" text="後位修飾（分詞片語）"/>
+          <cd-level level="3" text="跳過！修飾 freelancers"/>
+        </cd-chunk>
+        <cd-chunk id="4" label="動詞">
+          <cd-level level="1" text="report"/>
+          <cd-level level="2" text="主要動詞 Verb ✓"/>
+          <cd-level level="3" text="「做了」什麼事"/>
+        </cd-chunk>
+        <cd-chunk id="5" label="that 子句">
+          <cd-level level="1" text="that this has had … balance."/>
+          <cd-level level="2" text="that 子句（受詞）"/>
+          <cd-level level="3" text="report 的完整內容"/>
+        </cd-chunk>
+      </chunk-demo>
+      <div class="cd-hint" style="margin-top:10px">
+        點擊語塊 → 切換 Level 1 原文 ／ Level 2 語法角色 ／ Level 3 閱讀策略
+      </div>
+    </sd-body>
+  </sd-slide>
+
+</slide-demo>
+</div>
+
+<script src="slide-demo.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/chunk-demo.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/netizen-nelson/web-dev/bp-popnote.js"></script>
+</body>
+</html>
