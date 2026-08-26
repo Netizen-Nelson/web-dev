@@ -84,16 +84,16 @@ class DualCell {
   static getThemeConfig(name) {
     // ── 個人品牌配色系統 ─────────────────────────────────────────
     // shell:#C6C7BD  lavender:#C3A5E5  special:#C8DD5A  warning:#F08080
-    // salmon:#E5C3B3 sky:#08A9D1       safe:#40C99A     vanilla:#D4C5A9
-    // yellow:#DECA4B info:#4285EB      stone:#95BDD7    indigo:#7B6CF0
-    // pink:#FFB3D9   orange:#EDA109
+    // salmon:#E5C3B3 sky:#0ABDC6       safe:#40C99A     vanilla:#DBEDD8
+    // yellow:#DECA4B info:#4285EB      stone:#95BDD7    indigo:#9B72CF
+    // pink:#FFB3D9   orange:#EDA109    focus:#A0CF72
     // ────────────────────────────────────────────────────────────
     const T = {
       // ── 既有品牌色（已全數對齊）──────────────────────────────
       lavender:  { borderColor:'#C3A5E5', cellBgColor:'#2a2435', hoverBgColor:'#3d344a', textColor:'#e8dff5', menuButtonColor:'#C3A5E5', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C3A5E5' },
       special:   { borderColor:'#C8DD5A', cellBgColor:'#2a2e1a', hoverBgColor:'#3d4329', textColor:'#edf0d9', menuButtonColor:'#C8DD5A', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#C8DD5A' },
       warning:   { borderColor:'#F08080', cellBgColor:'#2e2422', hoverBgColor:'#443532', textColor:'#f5e8e6', menuButtonColor:'#F08080', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#F08080' },
-      sky:       { borderColor:'#08A9D1', cellBgColor:'#1a2830', hoverBgColor:'#263948', textColor:'#d9f0f8', menuButtonColor:'#08A9D1', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#08A9D1' },
+      sky:       { borderColor:'#0ABDC6', cellBgColor:'#182e30', hoverBgColor:'#244044', textColor:'#d9f4f5', menuButtonColor:'#0ABDC6', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#0ABDC6' },
       safe:      { borderColor:'#40C99A', cellBgColor:'#1e2d25', hoverBgColor:'#2c4035', textColor:'#daf5ec', menuButtonColor:'#40C99A', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#40C99A' },
       salmon:    { borderColor:'#E5C3B3', cellBgColor:'#2e2824', hoverBgColor:'#443d36', textColor:'#f5ede8', menuButtonColor:'#E5C3B3', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#E5C3B3' },
       pink:      { borderColor:'#FFB3D9', cellBgColor:'#2e2228', hoverBgColor:'#44323d', textColor:'#ffe8f5', menuButtonColor:'#FFB3D9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#FFB3D9' },
@@ -109,10 +109,12 @@ class DualCell {
       attention: { borderColor:'#DECA4B', cellBgColor:'#2b2a12', hoverBgColor:'#3d3c1e', textColor:'#f5f0d0', menuButtonColor:'#DECA4B', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#DECA4B' },
 
       // ── 新增品牌主題（✦）────────────────────────────────────
-      // vanilla: #D4C5A9（暖灰米）
-      vanilla:   { borderColor:'#D4C5A9', cellBgColor:'#2a2820', hoverBgColor:'#3d3a30', textColor:'#f0ece4', menuButtonColor:'#D4C5A9', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#D4C5A9' },
-      // indigo: #7B6CF0（藍紫靛）
-      indigo:    { borderColor:'#7B6CF0', cellBgColor:'#201d38', hoverBgColor:'#302c50', textColor:'#e2dcff', menuButtonColor:'#7B6CF0', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#7B6CF0' },
+      // vanilla: #DBEDD8（薄荷米綠）
+      vanilla:   { borderColor:'#DBEDD8', cellBgColor:'#1e2b1e', hoverBgColor:'#2b3d2a', textColor:'#e8f5e5', menuButtonColor:'#DBEDD8', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#DBEDD8' },
+      // indigo: #9B72CF（紫羅蘭）
+      indigo:    { borderColor:'#9B72CF', cellBgColor:'#221838', hoverBgColor:'#33254e', textColor:'#eedff8', menuButtonColor:'#9B72CF', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#9B72CF' },
+      // focus: #A0CF72（草綠）✦ 新增
+      focus:     { borderColor:'#A0CF72', cellBgColor:'#1e2d1a', hoverBgColor:'#2c4025', textColor:'#e2f5d0', menuButtonColor:'#A0CF72', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#A0CF72' },
 
       // ── 保留向後相容（非品牌色）──────────────────────────────
       brown:     { borderColor:'#d9b375', cellBgColor:'#2b2621', hoverBgColor:'#3f3931', textColor:'#f2ebe3', menuButtonColor:'#d9b375', groupTitleColor:'#1C1C1E', groupTitleBgColor:'#d9b375' },
@@ -131,13 +133,14 @@ class DualCell {
       special:   '#C8DD5A',
       warning:   '#F08080',
       salmon:    '#E5C3B3',
-      sky:       '#08A9D1',
+      sky:       '#0ABDC6',   // ★ #08A9D1 → #0ABDC6
       safe:      '#40C99A',
-      vanilla:   '#D4C5A9',   // ✦ 新增
+      vanilla:   '#DBEDD8',   // ★ #D4C5A9 → #DBEDD8
       yellow:    '#DECA4B',
+      focus:     '#A0CF72',   // ✦ 新增
       info:      '#4285EB',   // ★ #5fafed → #4285EB
       stone:     '#95BDD7',   // ★ #7090A8 → #95BDD7
-      indigo:    '#7B6CF0',   // ✦ 新增
+      indigo:    '#9B72CF',   // ★ #7B6CF0 → #9B72CF
       pink:      '#FFB3D9',
       orange:    '#EDA109',
       attention: '#DECA4B',   // ★ #E5E5A6 → #DECA4B（向後相容，同 yellow）
