@@ -106,19 +106,19 @@
         font-size: 0.8rem;
         font-weight: 700;
         text-transform: uppercase;
-        opacity: 0.75;
+        opacity: 0.8;
         margin-bottom: 10px;
       }
 
       .sa-sentence-text {
-        line-height: 1.75;
+        line-height: 1.6;
         word-break: break-word;
       }
 
       .sa-content-panel {
         position: relative;
         background: rgba(198,199,189,0.05);
-        padding: 28px;
+        padding: 18px;
         overflow: hidden;
         transition: border-color 0.25s;
       }
@@ -162,7 +162,7 @@
         color: rgba(198,199,189,0.5);
         font-style: italic;
         font-size: 1rem;
-        padding: 20px 0;
+        padding: 12px 0;
         text-align: center;
       }
 
