@@ -1,30 +1,9 @@
-/*!
- * SentenceAnalyzer v1.3.0
- * 宣告式 HTML 標籤句子標注分析元件
- * 支援 Bootstrap Icons（bi-xxx）與 emoji 圖示
- *
- * v1.3.0 新增屬性：
- *   dot-size        — active 圓點大小（px，預設 7）
- *   content-gap     — 下方頁籤與詳細資訊方塊的間距（px，預設 0）
- *   content-border  — 詳細資訊方塊邊框樣式：'left'（預設）| 'box'
- *   border-width    — 邊框粗細（px，left 預設 3，box 預設 1）
- */
 (function (global) {
   'use strict';
-
-  /* ══════════════════════════════════════════
-     § 常數
-  ══════════════════════════════════════════ */
-
   const DEFAULT_COLORS = [
     '#C3A5E5', '#08A9D1', '#40C99A',
     '#DECA4B', '#EDA109', '#FFB3D9',
   ];
-
-  /* ══════════════════════════════════════════
-     § CSS 注入
-  ══════════════════════════════════════════ */
-
   let _cssInjected = false;
 
   function injectCSS() {
@@ -40,7 +19,7 @@
       .sa-wrapper {
         display: flex;
         flex-direction: column;
-        font-size: 1.125rem;
+        font-size: 1rem;
         font-family: inherit;
       }
 
@@ -71,7 +50,7 @@
           0 100%
         );
         background: var(--sa-panel-bg, #111211);
-        padding: 22px 28px;
+        padding: 20px;
         flex: 1;
         min-width: 0;
         transition: background 0.22s ease;
@@ -103,8 +82,8 @@
          大小透過 CSS 變數 --sa-dot-size 設定 */
       .sa-tab-dot {
         display: inline-block;
-        width:  var(--sa-dot-size, 7px);
-        height: var(--sa-dot-size, 7px);
+        width:  var(--sa-dot-size, 12px);
+        height: var(--sa-dot-size, 12px);
         border-radius: 50%;
         flex-shrink: 0;
         opacity: 0;
@@ -124,27 +103,22 @@
       }
 
       .sa-panel-eyebrow {
-        font-size: 0.78rem;
+        font-size: 0.8rem;
         font-weight: 700;
-        letter-spacing: 0.1em;
         text-transform: uppercase;
-        opacity: 0.72;
+        opacity: 0.75;
         margin-bottom: 10px;
       }
 
       .sa-sentence-text {
-        line-height: 2;
+        line-height: 1.75;
         word-break: break-word;
       }
-
-      /* ══════════════════════════════════════
-         詳細資訊方塊（兩種邊框模式）
-      ══════════════════════════════════════ */
 
       .sa-content-panel {
         position: relative;
         background: rgba(198,199,189,0.05);
-        padding: 28px 32px;
+        padding: 28px;
         overflow: hidden;
         transition: border-color 0.25s;
       }
@@ -172,7 +146,7 @@
         /* border-width 由 JS 設定 */
       }
       .sa-content-panel[data-border="box"]::before {
-        display: none;                               /* box 模式不需要左側粗條 */
+        display: none;
       }
 
       /* 內容淡入 */
@@ -185,7 +159,7 @@
       }
 
       .sa-empty-hint {
-        color: rgba(198,199,189,0.45);
+        color: rgba(198,199,189,0.5);
         font-style: italic;
         font-size: 1rem;
         padding: 20px 0;
@@ -193,16 +167,15 @@
       }
 
       .sa-content-label {
-        font-size: 0.82rem;
+        font-size: 0.85rem;
         font-weight: 700;
-        letter-spacing: 0.08em;
         text-transform: uppercase;
-        margin-bottom: 14px;
+        margin-bottom: 8px;
         padding-bottom: 8px;
         border-bottom: 1px solid rgba(198,199,189,0.18);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
       }
     `;
     document.head.appendChild(style);
@@ -229,10 +202,6 @@
     return hex2rgb(hex).split(',').map(Number);
   }
 
-  /**
-   * 將 HEX 顏色以 alpha 混合到 base 底色，回傳不透明 HEX。
-   * 用於計算 active 頁籤背景（必須不透明，否則邊框殼灰底透出）。
-   */
   function blendHex(hex, alpha, base) {
     const [r, g, b]   = hex2arr(hex);
     const [br, bg_, bb] = hex2arr(base);
@@ -313,9 +282,7 @@
     return { wrap, panel };
   }
 
-  /* ══════════════════════════════════════════
-     § 掛載主邏輯
-  ══════════════════════════════════════════ */
+  /* § 掛載主邏輯 */
 
   function mount(root) {
     injectCSS();
@@ -357,8 +324,8 @@
     const sentEl   = root.querySelector('sa-sentence');
     const sentence = sentEl ? sentEl.textContent.trim() : '';
     const eyebrow  = sentEl?.getAttribute('panel-label') || '';
-    const fontSize = sentEl?.getAttribute('font-size')   || '1.125rem';
-    const lineH    = sentEl?.getAttribute('line-height') || '2';
+    const fontSize = sentEl?.getAttribute('font-size')   || '1rem';
+    const lineH    = sentEl?.getAttribute('line-height') || '1.8';
 
     /* ── 3. <sa-mark> → annotations ── */
     const annotations = Array.from(root.querySelectorAll('sa-mark'))
@@ -490,7 +457,7 @@
           : cfg.panelBg;
         wrapEls[i].style.background = on
           ? a.color
-          : 'rgba(198,199,189,0.85)';
+          : 'rgba(198,199,189,0.9)';
         /* 重疊模式：active 頁籤置頂，其餘維持左側在上的預設順序 */
         if (negOverlap) {
           wrapEls[i].style.zIndex = on
@@ -511,10 +478,8 @@
 
       /* 詳細資訊方塊：更新顏色 */
       if (cfg.contentBorderStyle === 'left') {
-        /* left 模式：更新 CSS 變數讓 ::before 變色 */
         contentPanel.style.setProperty('--sa-bar-color', ann.color);
       } else {
-        /* box 模式：直接更新四邊邊框色 */
         contentPanel.style.borderColor = ann.color;
       }
 
@@ -576,10 +541,6 @@
 
     root._sa = { setActive, getAnnotations: () => annotations };
   }
-
-  /* ══════════════════════════════════════════
-     § 自動初始化
-  ══════════════════════════════════════════ */
 
   function init() {
     document.querySelectorAll('sa-root:not([data-sa-init])').forEach(root => {
