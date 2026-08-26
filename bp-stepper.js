@@ -1,66 +1,83 @@
 (function () {
   'use strict';
 
+  // ─── 品牌色盤 ─────────────────────────────────────────────────────────────────
+  // 以使用者定義的色系為準，vanilla / focus / indigo 為新增色票
   const BRAND = {
-    bg:       '#0c0d0c',
-    shell:    '#c6c7bd',
+    bg:       '#0C0D0C',
+    shell:    '#C6C7BD',
     lavender: '#C3A5E5',
     special:  '#C8DD5A',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#08a9d1',
-    safe:     '#40c99a',
+    sky:      '#0ABDC6',  // 修正：原 #08a9d1
+    safe:     '#40C99A',
+    vanilla:  '#DBEDD8',  // 新增
     yellow:   '#DECA4B',
-    info:     '#5fafed',
-    stone:    '#7090A8',
+    focus:    '#A0CF72',  // 新增
+    info:     '#4285EB',  // 修正：原 #5fafed
+    stone:    '#95BDD7',  // 修正：原 #7090A8
+    indigo:   '#9B72CF',  // 新增
     pink:     '#FFB3D9',
-    orange:   '#eda109',
+    orange:   '#EDA109',
   };
 
+  // ─── 主題預設集 ───────────────────────────────────────────────────────────────
+  // color        = 邊框 / badge 預設色
+  // colorActive  = 進行中狀態色
+  // colorDone    = 完成狀態色
+  // titleColor   = 標題文字色
+  // badgeBg      = badge 背景（rgba 透明度 ≥ 0.72 規則豁免：此為底層裝飾層）
   const THEMES = {
     lavender: { color: BRAND.lavender, colorActive: BRAND.special,  colorDone: BRAND.safe,    titleColor: BRAND.lavender, badgeBg: 'rgba(195,165,229,0.15)' },
-    sky:      { color: BRAND.sky,      colorActive: BRAND.info,     colorDone: BRAND.safe,    titleColor: BRAND.sky,      badgeBg: 'rgba(8,169,209,0.12)'   },
+    sky:      { color: BRAND.sky,      colorActive: BRAND.info,     colorDone: BRAND.safe,    titleColor: BRAND.sky,      badgeBg: 'rgba(10,189,198,0.12)'  },  // rgba 已對齊 #0ABDC6
     safe:     { color: BRAND.safe,     colorActive: BRAND.yellow,   colorDone: BRAND.special, titleColor: BRAND.safe,     badgeBg: 'rgba(64,201,154,0.12)'  },
     special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.safe,    titleColor: BRAND.special,  badgeBg: 'rgba(200,221,90,0.12)'  },
     warning:  { color: BRAND.warning,  colorActive: BRAND.orange,   colorDone: BRAND.salmon,  titleColor: BRAND.warning,  badgeBg: 'rgba(240,128,128,0.12)' },
     salmon:   { color: BRAND.salmon,   colorActive: BRAND.pink,     colorDone: BRAND.safe,    titleColor: BRAND.salmon,   badgeBg: 'rgba(229,195,179,0.12)' },
-    stone:    { color: BRAND.stone,    colorActive: BRAND.sky,      colorDone: BRAND.safe,    titleColor: BRAND.stone,    badgeBg: 'rgba(112,144,168,0.14)' },
+    stone:    { color: BRAND.stone,    colorActive: BRAND.sky,      colorDone: BRAND.safe,    titleColor: BRAND.stone,    badgeBg: 'rgba(149,189,215,0.14)' },  // rgba 已對齊 #95BDD7
     pink:     { color: BRAND.pink,     colorActive: BRAND.lavender, colorDone: BRAND.safe,    titleColor: BRAND.pink,     badgeBg: 'rgba(255,179,217,0.12)' },
     orange:   { color: BRAND.orange,   colorActive: BRAND.yellow,   colorDone: BRAND.safe,    titleColor: BRAND.orange,   badgeBg: 'rgba(237,161,9,0.12)'   },
     shell:    { color: BRAND.shell,    colorActive: BRAND.info,     colorDone: BRAND.safe,    titleColor: BRAND.shell,    badgeBg: 'rgba(198,199,189,0.13)' },
+    vanilla:  { color: BRAND.vanilla,  colorActive: BRAND.focus,    colorDone: BRAND.safe,    titleColor: BRAND.vanilla,  badgeBg: 'rgba(219,237,216,0.12)' },  // 新主題
+    focus:    { color: BRAND.focus,    colorActive: BRAND.special,  colorDone: BRAND.safe,    titleColor: BRAND.focus,    badgeBg: 'rgba(160,207,114,0.12)' },  // 新主題
+    indigo:   { color: BRAND.indigo,   colorActive: BRAND.lavender, colorDone: BRAND.safe,    titleColor: BRAND.indigo,   badgeBg: 'rgba(155,114,207,0.12)' },  // 新主題
   };
 
+  // ─── 全域預設值 ───────────────────────────────────────────────────────────────
   const defaults = {
-    color:          BRAND.lavender,
-    colorActive:    BRAND.special,
-    colorDone:      BRAND.safe,
-    colorError:     BRAND.warning,
-    textColor:      BRAND.shell,
-    titleColor:     BRAND.lavender,
-    badgeBg:        'rgba(195,165,229,0.15)',
-    cardBg:         'rgba(12,13,12,0.55)',
-    cardBgActive:   'rgba(200,221,90,0.07)',
-    cardBgDone:     'rgba(64,201,154,0.07)',
-    cardBgError:    'rgba(240,128,128,0.07)',
-    stroke:         '2px',
-    radius:         '12px',
-    cardWidth:      '220px',
-    cardPadding:    '16px 18px',
-    gap:            '36px',
-    badgeSize:      '28px',
-    fontSize:       '0.9rem',
-    titleSize:      '1rem',
-    badgeFontSize:  '0.82rem',
-    connectorStyle: 'solid',
-    arrowSize:      '6px',
-    arrowMinLen:    '0px',
-    padTop:         '32px',
-    padBottom:      '32px',
-    padX:           '12px',
-    theme:          null,
-    autoNumber:     true,
+    color:               BRAND.lavender,
+    colorActive:         BRAND.special,
+    colorDone:           BRAND.safe,
+    colorError:          BRAND.warning,
+    textColor:           BRAND.shell,
+    titleColor:          BRAND.lavender,
+    badgeBg:             'rgba(195,165,229,0.15)',
+    cardBg:              'rgba(12,13,12,0.55)',
+    cardBgActive:        'rgba(200,221,90,0.07)',
+    cardBgDone:          'rgba(64,201,154,0.07)',
+    cardBgError:         'rgba(240,128,128,0.07)',
+    stroke:              '2px',
+    radius:              '12px',
+    cardWidth:           '220px',
+    cardPadding:         '16px 18px',
+    gap:                 '36px',
+    badgeSize:           '28px',
+    fontSize:            '0.9rem',
+    titleSize:           '1rem',
+    badgeFontSize:       '0.82rem',
+    connectorStyle:      'solid',
+    arrowSize:           '6px',
+    arrowMinLen:         '0px',
+    padTop:              '32px',
+    padBottom:           '32px',
+    padX:                '12px',
+    connectorLabelColor: BRAND.shell,
+    theme:               null,
+    autoNumber:          true,
   };
 
+  // ─── CSS 樣式表產生器 ──────────────────────────────────────────────────────────
   function buildCSS() {
     return `
 bp-stepper {
@@ -75,32 +92,33 @@ bp-stepper {
   scrollbar-width: thin;
   scrollbar-color: var(--bps-color) rgba(255,255,255,0.05);
   box-sizing: border-box;
-  --bps-pad-top:        32px;
-  --bps-pad-bottom:     32px;
-  --bps-pad-x:          12px;
-  --bps-color:          ${BRAND.lavender};
-  --bps-color-active:   ${BRAND.special};
-  --bps-color-done:     ${BRAND.safe};
-  --bps-color-error:    ${BRAND.warning};
-  --bps-text:           ${BRAND.shell};
-  --bps-title:          ${BRAND.lavender};
-  --bps-badge-bg:       rgba(195,165,229,0.15);
-  --bps-card-bg:        rgba(12,13,12,0.55);
-  --bps-card-bg-act:    rgba(200,221,90,0.07);
-  --bps-card-bg-done:   rgba(64,201,154,0.07);
-  --bps-card-bg-err:    rgba(240,128,128,0.07);
-  --bps-stroke:         2px;
-  --bps-radius:         12px;
-  --bps-width:          220px;
-  --bps-padding:        16px 18px;
-  --bps-gap:            36px;
-  --bps-arrow-min-len:  0px;
-  --bps-effective-gap:  max(var(--bps-gap), var(--bps-arrow-min-len));
-  --bps-badge-sz:       28px;
-  --bps-fs:             0.9rem;
-  --bps-title-fs:       1rem;
-  --bps-badge-fs:       0.82rem;
-  --bps-arrow:          6px;
+  --bps-pad-top:               32px;
+  --bps-pad-bottom:            32px;
+  --bps-pad-x:                 12px;
+  --bps-color:                 ${BRAND.lavender};
+  --bps-color-active:          ${BRAND.special};
+  --bps-color-done:            ${BRAND.safe};
+  --bps-color-error:           ${BRAND.warning};
+  --bps-text:                  ${BRAND.shell};
+  --bps-title:                 ${BRAND.lavender};
+  --bps-badge-bg:              rgba(195,165,229,0.15);
+  --bps-card-bg:               rgba(12,13,12,0.55);
+  --bps-card-bg-act:           rgba(200,221,90,0.07);
+  --bps-card-bg-done:          rgba(64,201,154,0.07);
+  --bps-card-bg-err:           rgba(240,128,128,0.07);
+  --bps-stroke:                2px;
+  --bps-radius:                12px;
+  --bps-width:                 220px;
+  --bps-padding:               16px 18px;
+  --bps-gap:                   36px;
+  --bps-arrow-min-len:         0px;
+  --bps-effective-gap:         max(var(--bps-gap), var(--bps-arrow-min-len));
+  --bps-badge-sz:              28px;
+  --bps-fs:                    0.9rem;
+  --bps-title-fs:              1rem;
+  --bps-badge-fs:              0.82rem;
+  --bps-arrow:                 6px;
+  --bps-connector-label-color: ${BRAND.stone};
 }
 
 bp-stepper[data-wrapped] {
@@ -177,7 +195,7 @@ bp-step[data-state="active"] {
 bp-step[data-state="active"] .bp-step-badge {
   background:   var(--bps-color-active);
   border-color: var(--bps-color-active);
-  color:        #0c0d0c;
+  color:        #0C0D0C;
 }
 bp-step[data-state="active"] bp-step-title { color: var(--bps-color-active); }
 
@@ -188,7 +206,7 @@ bp-step[data-state="done"] {
 bp-step[data-state="done"] .bp-step-badge {
   background:   var(--bps-color-done);
   border-color: var(--bps-color-done);
-  color:        #0c0d0c;
+  color:        #0C0D0C;
 }
 bp-step[data-state="done"] bp-step-title   { color: var(--bps-color-done); }
 bp-step[data-state="done"] bp-step-content { opacity: .65; }
@@ -201,7 +219,7 @@ bp-step[data-state="error"] {
 bp-step[data-state="error"] .bp-step-badge {
   background:   var(--bps-color-error);
   border-color: var(--bps-color-error);
-  color:        #0c0d0c;
+  color:        #0C0D0C;
 }
 bp-step[data-state="error"] bp-step-title { color: var(--bps-color-error); }
 
@@ -236,7 +254,7 @@ bp-step-content {
   font-size:   var(--bps-fs);
   color:       var(--bps-text);
   opacity:     .82;
-  line-height: 1.55;
+  line-height: 1.5;
   transition:  opacity .28s;
 }
 
@@ -296,9 +314,9 @@ bp-stepper[data-connector="dashed"] .bps-row > bp-step[data-state="error"]:not(:
   background: repeating-linear-gradient(to right, var(--bps-color-error) 0, var(--bps-color-error) 6px, transparent 6px, transparent 13px);
 }
 bp-stepper[data-connector="dashed"] .bps-u-turn {
-  border-right-style: dashed;
+  border-right-style:  dashed;
   border-bottom-style: dashed;
-  border-left-style: dashed;
+  border-left-style:   dashed;
 }
 
 bp-stepper[data-connector="dotted"] > bp-step:not(:last-child)::after,
@@ -318,9 +336,9 @@ bp-stepper[data-connector="dotted"] .bps-row > bp-step[data-state="error"]:not(:
   background: repeating-linear-gradient(to right, var(--bps-color-error) 0, var(--bps-color-error) 3px, transparent 3px, transparent 8px);
 }
 bp-stepper[data-connector="dotted"] .bps-u-turn {
-  border-right-style: dotted;
+  border-right-style:  dotted;
   border-bottom-style: dotted;
-  border-left-style: dotted;
+  border-left-style:   dotted;
 }
 
 bp-stepper[data-layout="vertical"] {
@@ -380,6 +398,15 @@ bp-stepper[data-layout="vertical"][data-connector="dashed"] > bp-step[data-state
 bp-stepper[data-layout="vertical"][data-connector="dotted"] > bp-step:not(:last-child)::after {
   background: repeating-linear-gradient(to bottom, var(--bps-color) 0, var(--bps-color) 3px, transparent 3px, transparent 8px);
 }
+bp-stepper[data-layout="vertical"][data-connector="dotted"] > bp-step[data-state="done"]:not(:last-child)::after {
+  background: repeating-linear-gradient(to bottom, var(--bps-color-done) 0, var(--bps-color-done) 3px, transparent 3px, transparent 8px);
+}
+bp-stepper[data-layout="vertical"][data-connector="dotted"] > bp-step[data-state="active"]:not(:last-child)::after {
+  background: repeating-linear-gradient(to bottom, var(--bps-color-active) 0, var(--bps-color-active) 3px, transparent 3px, transparent 8px);
+}
+bp-stepper[data-layout="vertical"][data-connector="dotted"] > bp-step[data-state="error"]:not(:last-child)::after {
+  background: repeating-linear-gradient(to bottom, var(--bps-color-error) 0, var(--bps-color-error) 3px, transparent 3px, transparent 8px);
+}
 
 bp-stepper[data-clickable="true"] > bp-step,
 bp-stepper[data-clickable="true"] .bps-row > bp-step {
@@ -400,37 +427,72 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
   outline:        2px solid var(--bps-color);
   outline-offset: 3px;
 }
+
+/* ── 連接器說明標籤 (connector label) ─────────────────────────────────────────
+   預設隱藏；僅在非末端 bp-step 且有設定文字時顯示。
+   ─────────────────────────────────────────────────────────────────────────── */
+.bps-connector-label {
+  display:        none;
+  position:       absolute;
+  font-size:      var(--bps-fs);
+  color:          var(--bps-connector-label-color, var(--bps-text));
+  white-space:    nowrap;
+  pointer-events: none;
+  z-index:        2;
+  line-height:    1.4;
+  transition:     color .28s, opacity .28s;
+}
+
+/* 垂直版型：標籤顯示在連接線右側、垂直置中於間距中央 */
+bp-stepper[data-layout="vertical"] > bp-step:not(:last-child) .bps-connector-label {
+  display:   block;
+  left:      calc(var(--bps-badge-sz) / 2 + 12px);
+  top:       calc(100% + var(--bps-effective-gap) / 2);
+  transform: translateY(-50%);
+}
+
+/* 水平版型：標籤顯示在連接線正上方、水平置中於間距中央 */
+bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connector-label {
+  display:    block;
+  left:       calc(100% + var(--bps-effective-gap) / 2);
+  top:        50%;
+  transform:  translate(-50%, calc(-100% - 5px));
+  text-align: center;
+}
 `;
   }
 
+  // ─── JS 屬性名稱 → CSS 變數名稱對照表 ──────────────────────────────────────────
   const DATA_MAP = {
-    color:         '--bps-color',
-    colorActive:   '--bps-color-active',
-    colorDone:     '--bps-color-done',
-    colorError:    '--bps-color-error',
-    textColor:     '--bps-text',
-    titleColor:    '--bps-title',
-    badgeBg:       '--bps-badge-bg',
-    cardBg:        '--bps-card-bg',
-    cardBgActive:  '--bps-card-bg-act',
-    cardBgDone:    '--bps-card-bg-done',
-    cardBgError:   '--bps-card-bg-err',
-    stroke:        '--bps-stroke',
-    radius:        '--bps-radius',
-    cardWidth:     '--bps-width',
-    cardPadding:   '--bps-padding',
-    gap:           '--bps-gap',
-    badgeSize:     '--bps-badge-sz',
-    fontSize:      '--bps-fs',
-    titleSize:     '--bps-title-fs',
-    badgeFontSize: '--bps-badge-fs',
-    arrowSize:     '--bps-arrow',
-    arrowMinLen:   '--bps-arrow-min-len',
-    padTop:        '--bps-pad-top',
-    padBottom:     '--bps-pad-bottom',
-    padX:          '--bps-pad-x',
+    color:               '--bps-color',
+    colorActive:         '--bps-color-active',
+    colorDone:           '--bps-color-done',
+    colorError:          '--bps-color-error',
+    textColor:           '--bps-text',
+    titleColor:          '--bps-title',
+    badgeBg:             '--bps-badge-bg',
+    cardBg:              '--bps-card-bg',
+    cardBgActive:        '--bps-card-bg-act',
+    cardBgDone:          '--bps-card-bg-done',
+    cardBgError:         '--bps-card-bg-err',
+    stroke:              '--bps-stroke',
+    radius:              '--bps-radius',
+    cardWidth:           '--bps-width',
+    cardPadding:         '--bps-padding',
+    gap:                 '--bps-gap',
+    badgeSize:           '--bps-badge-sz',
+    fontSize:            '--bps-fs',
+    titleSize:           '--bps-title-fs',
+    badgeFontSize:       '--bps-badge-fs',
+    arrowSize:           '--bps-arrow',
+    arrowMinLen:         '--bps-arrow-min-len',
+    padTop:              '--bps-pad-top',
+    padBottom:           '--bps-pad-bottom',
+    padX:                '--bps-pad-x',
+    connectorLabelColor: '--bps-connector-label-color',  // 連接器標籤色
   };
 
+  // ─── 注入全域 CSS（僅執行一次）────────────────────────────────────────────────
   function injectCSS() {
     if (document.getElementById('bp-stepper-style')) return;
     const s = document.createElement('style');
@@ -439,6 +501,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     document.head.appendChild(s);
   }
 
+  // ─── 取得 stepper 內所有 bp-step 元素 ─────────────────────────────────────────
   function getSteps(el) {
     if (el.hasAttribute('data-wrapped')) {
       return el.querySelectorAll('.bps-row > bp-step');
@@ -446,6 +509,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     return el.querySelectorAll(':scope > bp-step');
   }
 
+  // ─── 同步換行連接器顏色（wrap 模式）──────────────────────────────────────────
   function syncWrapConnector(el) {
     if (!el.hasAttribute('data-wrapped')) return;
     const wrapN = parseInt(el.dataset.wrap, 10);
@@ -464,6 +528,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     }
   }
 
+  // ─── 處理 data-wrap 換行布局 ──────────────────────────────────────────────────
   function applyWrap(el) {
     const wrapN = parseInt(el.dataset.wrap, 10);
     if (!wrapN || wrapN < 1) return;
@@ -497,7 +562,9 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     syncWrapConnector(el);
   }
 
+  // ─── 初始化單一 bp-stepper 元素 ───────────────────────────────────────────────
   function initEl(el) {
+    // 1. 套用主題預設與 data-* 屬性覆寫
     const cfg = Object.assign({}, defaults);
     const theme = el.dataset.theme || cfg.theme;
     if (theme && THEMES[theme]) Object.assign(cfg, THEMES[theme]);
@@ -507,11 +574,13 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
       if (val) el.style.setProperty(cssVar, val);
     });
 
+    // 2. connector 樣式
     if (!el.dataset.connector) {
       const cs = el.dataset.connectorStyle || cfg.connectorStyle;
       if (cs && cs !== 'solid') el.dataset.connector = cs;
     }
 
+    // 3. 自動編號 badge
     const autoNum = el.dataset.autoNumber !== undefined
       ? el.dataset.autoNumber !== 'false'
       : cfg.autoNumber;
@@ -530,6 +599,26 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
       });
     }
 
+    // 4. 連接器說明標籤 (connector label)
+    //    優先順序：step 層級 data-connector-label > stepper 層級 data-connector-label
+    //    - 設定空字串 "" 可在 step 層覆蓋並隱藏全域標籤
+    //    - data-connector-label-color 可在 step 層覆寫標籤文字色
+    el.querySelectorAll(':scope > bp-step').forEach((step) => {
+      if (step.querySelector('.bps-connector-label')) return; // 避免重複注入
+      const labelText = step.dataset.connectorLabel !== undefined
+        ? step.dataset.connectorLabel
+        : el.dataset.connectorLabel;
+      if (!labelText) return; // 未設定或空字串則略過
+      const lbl = document.createElement('span');
+      lbl.className = 'bps-connector-label';
+      lbl.textContent = labelText;
+      // 允許逐步驟覆寫標籤色
+      const lblColor = step.dataset.connectorLabelColor;
+      if (lblColor) lbl.style.color = lblColor;
+      step.appendChild(lbl);
+    });
+
+    // 5. 可點擊模式
     if (el.dataset.clickable === 'true') {
       el.querySelectorAll(':scope > bp-step').forEach((step, i) => {
         step.setAttribute('tabindex', '0');
@@ -543,13 +632,16 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
       });
     }
 
+    // 6. 換行布局
     if (el.dataset.wrap) applyWrap(el);
   }
 
+  // ─── 初始化頁面中所有 bp-stepper（或指定根元素內的） ───────────────────────────
   function init(root) {
     (root || document).querySelectorAll('bp-stepper').forEach(initEl);
   }
 
+  // ─── API：設定進行中步驟 ───────────────────────────────────────────────────────
   function setActive(el, index) {
     const steps = getSteps(el);
     const prevIndex = [...steps].findIndex(s => s.dataset.state === 'active');
@@ -561,10 +653,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
         if (badge) badge.textContent = '✓';
       });
       syncWrapConnector(el);
-      el.dispatchEvent(new CustomEvent('bps:complete', {
-        bubbles: true,
-        detail: { el },
-      }));
+      el.dispatchEvent(new CustomEvent('bps:complete', { bubbles: true, detail: { el } }));
       return;
     }
 
@@ -583,13 +672,13 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     });
 
     syncWrapConnector(el);
-
     el.dispatchEvent(new CustomEvent('bps:change', {
       bubbles: true,
       detail: { index, prevIndex, el },
     }));
   }
 
+  // ─── API：標記錯誤步驟 ─────────────────────────────────────────────────────────
   function setError(el, index) {
     const steps = getSteps(el);
     if (!steps[index]) return;
@@ -599,6 +688,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     syncWrapConnector(el);
   }
 
+  // ─── API：重設所有步驟狀態 ─────────────────────────────────────────────────────
   function resetStates(el) {
     getSteps(el).forEach((step, i) => {
       delete step.dataset.state;
@@ -608,6 +698,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
     syncWrapConnector(el);
   }
 
+  // ─── 自訂元素定義 ──────────────────────────────────────────────────────────────
   customElements.define('bp-stepper', class extends HTMLElement {
     connectedCallback() { setTimeout(() => initEl(this), 0); }
   });
@@ -615,6 +706,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
   customElements.define('bp-step-title',   class extends HTMLElement {});
   customElements.define('bp-step-content', class extends HTMLElement {});
 
+  // ─── 公開 API ─────────────────────────────────────────────────────────────────
   window.BPStepper = { defaults, BRAND, THEMES, init, setActive, setError, resetStates };
 
   injectCSS();
