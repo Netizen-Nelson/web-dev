@@ -346,14 +346,16 @@ class CardBadge extends HTMLElement {
     if (existingAlert) existingAlert.remove();
 
     const brandColors = this.getBrandColors();
-    const alertColors = {
+    // 語意別名（保留慣用寫法）
+    const alertAliases = {
       'info'   : brandColors.info,
       'success': brandColors.safe,
-      'warning': brandColors.yellow,   // ★ 對應 yellow（原 attention）
+      'warning': brandColors.yellow,
       'danger' : brandColors.warning
     };
 
-    const bgColor   = alertColors[type] || brandColors.info;
+    // 優先查語意別名 → 再查品牌色名稱 → 最後 fallback 到 info
+    const bgColor   = alertAliases[type] || brandColors[type] || brandColors.info;
     const textColor = this.getContrastColor(bgColor);
 
     const positionStyles = {
