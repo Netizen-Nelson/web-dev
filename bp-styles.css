@@ -122,6 +122,13 @@
 .bp-ind-5 { padding-left: 2.5em; }
 .bp-ind-6 { padding-left: 3.0em; }
 
+.bp-lnh-1 { line-height: 2.5rem; }
+.bp-lnh-2 { line-height: 2rem; }
+.bp-lnh-3 { line-height: 1.6rem; }
+.bp-lnh-4 { line-height: 1.3rem; }
+.bp-lnh-5 { line-height: 1.1rem; }
+.bp-lnh-6 { line-height: 1rem; }
+
 blockquote {
     margin: 16px 0;
     font-size: 1.25rem;
