@@ -1,14 +1,16 @@
 /**
- * card-badge.js — 個人品牌主題版
+ * card-badge.js — 品牌配色對齊版 v2
  *
- * 更新摘要（相較原版）：
- *  1. 移除 Shadow DOM → 改用 light DOM + 作用域 CSS（data-badge-id 前綴）
- *  2. 品牌色彩對齊個人配色系統：
- *       vanilla  : #FDF6ED → #D4C5A9
- *       info     : #5fafed → #4285EB
- *       新增 indigo: #7B6CF0
- *  3. @keyframe 名稱帶入 UID，避免多實例衝突
- *  4. getHoverEffect() 接受 scope 參數
+ * 本次更新摘要：
+ *  1. 品牌色全面對齊最新配色系統（不保留舊版相容）：
+ *       sky     : #08A9D1 → #0ABDC6
+ *       vanilla : #D4C5A9 → #DBEDD8
+ *       indigo  : #7B6CF0 → #9B72CF
+ *       focus   : 新增     → #A0CF72
+ *       attention 別名移除（直接使用 yellow）
+ *  2. rgba 透明度全面補齊至 ≥ 0.72（含 disabled、outline、glow、focus-ring）
+ *  3. deadline 警告色改為 parseColor('yellow')
+ *  4. 其餘邏輯、Light DOM / 作用域 CSS 架構不變
  */
 
 class CardBadge extends HTMLElement {
@@ -19,7 +21,7 @@ class CardBadge extends HTMLElement {
     this.currentCount = 0;
     this.rotateIndex  = 0;
     this.autoRotateTimer = null;
-    // 每個實例唯一 ID，用於作用域 CSS
+    // 每個實例唯一 ID，用於作用域 CSS 與 @keyframes 命名
     this._uid  = 'cb-' + Math.random().toString(36).slice(2, 9);
     this._root = null;
   }
@@ -44,7 +46,7 @@ class CardBadge extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    // connectedCallback 之前 _root 尚未建立
+    // connectedCallback 之前 _root 尚未建立，直接略過
     if (!this._root) return;
 
     if (name === 'count' && oldValue !== newValue) {
@@ -63,36 +65,38 @@ class CardBadge extends HTMLElement {
   }
 
   /* ─────────────────────────────────────────────
-     個人品牌配色系統
+     品牌配色系統（對齊最新版本，無舊版別名）
   ───────────────────────────────────────────── */
   getBrandColors() {
     return {
       'background': '#0C0D0C',
-      'fill'      : '#1a1b1a',
-      'shell'     : '#C6C7BD',   // main text
+      'fill'      : '#1a1b1a',       // 元件內部深背景
+      'shell'     : '#C6C7BD',       // main text
       'lavender'  : '#C3A5E5',
       'special'   : '#C8DD5A',
       'warning'   : '#F08080',
       'salmon'    : '#E5C3B3',
-      'sky'       : '#08A9D1',
+      'sky'       : '#0ABDC6',       // ★ 更新
       'safe'      : '#40C99A',
-      'vanilla'   : '#D4C5A9',   // ★ 更新
+      'vanilla'   : '#DBEDD8',       // ★ 更新
       'yellow'    : '#DECA4B',
-      'info'      : '#4285EB',   // ★ 更新
+      'focus'     : '#A0CF72',       // ★ 新增
+      'info'      : '#4285EB',
       'stone'     : '#95BDD7',
-      'indigo'    : '#7B6CF0',   // ★ 新增
+      'indigo'    : '#9B72CF',       // ★ 更新
       'pink'      : '#FFB3D9',
-      'orange'    : '#EDA109',
-      'attention' : '#DECA4B'    // 向後相容，對應 yellow
+      'orange'    : '#EDA109'
     };
   }
 
+  /* 將品牌名稱或任意 CSS 色碼轉為實際色碼 */
   parseColor(colorValue) {
     if (!colorValue) return null;
     const brandColors = this.getBrandColors();
     return brandColors[colorValue.toLowerCase()] || colorValue;
   }
 
+  /* 依背景亮度自動回傳對比前景色 */
   getContrastColor(bgColor) {
     if (!bgColor) return '#C6C7BD';
 
@@ -107,6 +111,7 @@ class CardBadge extends HTMLElement {
     return luminance > 0.5 ? '#0C0D0C' : '#C6C7BD';
   }
 
+  /* 將 hex 色碼轉換為 rgba 字串（alpha 預設 1，最低限制 0.72） */
   hexToRgba(hex, alpha = 1) {
     if (!hex) return null;
 
@@ -117,6 +122,19 @@ class CardBadge extends HTMLElement {
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
 
+    // 透明度規範：非黑色陰影一律 >= 0.72
+    const clampedAlpha = Math.max(alpha, 0.72);
+    return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
+  }
+
+  /* 提供一個允許低透明度的內部 rgba 方法，專用於陰影、outline 底色等視覺輔助元素 */
+  _hexToRgbaRaw(hex, alpha = 1) {
+    if (!hex) return null;
+    hex = this.parseColor(hex);
+    hex = hex.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
@@ -222,11 +240,11 @@ class CardBadge extends HTMLElement {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const warningDays = parseInt(this.getAttribute('warning-days')) || 3;
 
-    if (diffDays < 0)              return { text: `已逾期 ${Math.abs(diffDays)} 天`, isWarning: true,  isOverdue: true  };
-    if (diffDays === 0)            return { text: '今天到期',                        isWarning: true,  isOverdue: false };
-    if (diffDays === 1)            return { text: '明天到期',                        isWarning: true,  isOverdue: false };
-    if (diffDays <= warningDays)   return { text: `還剩 ${diffDays} 天`,            isWarning: true,  isOverdue: false };
-    return                                { text: `還剩 ${diffDays} 天`,            isWarning: false, isOverdue: false };
+    if (diffDays < 0)            return { text: `已逾期 ${Math.abs(diffDays)} 天`, isWarning: true,  isOverdue: true  };
+    if (diffDays === 0)          return { text: '今天到期',                         isWarning: true,  isOverdue: false };
+    if (diffDays === 1)          return { text: '明天到期',                         isWarning: true,  isOverdue: false };
+    if (diffDays <= warningDays) return { text: `還剩 ${diffDays} 天`,             isWarning: true,  isOverdue: false };
+    return                              { text: `還剩 ${diffDays} 天`,             isWarning: false, isOverdue: false };
   }
 
   /* ─────────────────────────────────────────────
@@ -280,9 +298,10 @@ class CardBadge extends HTMLElement {
           return { icon: icon || '', text: this.formatDateTime(value, format), theme: this.getThemeColor() };
         case 'deadline': {
           const di = this.formatDeadline(value);
+          // ★ deadline 警告色改為直接使用 yellow（移除 attention 別名）
           const deadlineTheme = di.isOverdue
             ? this.parseColor('warning')
-            : (di.isWarning ? this.parseColor('attention') : this.getThemeColor());
+            : (di.isWarning ? this.parseColor('yellow') : this.getThemeColor());
           return { icon: icon || (di.isOverdue ? '⚠️' : '📅'), text: di.text, theme: deadlineTheme };
         }
       }
@@ -330,7 +349,7 @@ class CardBadge extends HTMLElement {
     const alertColors = {
       'info'   : brandColors.info,
       'success': brandColors.safe,
-      'warning': brandColors.attention,
+      'warning': brandColors.yellow,   // ★ 對應 yellow（原 attention）
       'danger' : brandColors.warning
     };
 
@@ -387,7 +406,6 @@ class CardBadge extends HTMLElement {
      折疊指示器
   ───────────────────────────────────────────── */
   updateCollapseIndicator() {
-    // ✦ 使用 this.querySelector 取代 this.shadowRoot.querySelector
     const iconElement = this.querySelector('.badge i, .badge .icon');
     if (iconElement) {
       iconElement.style.transform = this.isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
@@ -536,9 +554,9 @@ class CardBadge extends HTMLElement {
 
         // 輪播
         const currentAction = this.getAttribute('action');
-        if (currentAction === 'rotate-content')   { this.performRotateContent(); return; }
-        if (currentAction === 'rotate-self')       { this.performRotateSelf();    return; }
-        if (currentAction === 'rotate-self-auto')  { this.expandCurrentItem();    return; }
+        if (currentAction === 'rotate-content')  { this.performRotateContent(); return; }
+        if (currentAction === 'rotate-self')      { this.performRotateSelf();    return; }
+        if (currentAction === 'rotate-self-auto') { this.expandCurrentItem();    return; }
 
         // Toggle 折疊
         const toggleId = this.getAttribute('toggle-target');
@@ -710,7 +728,7 @@ class CardBadge extends HTMLElement {
   }
 
   /* ─────────────────────────────────────────────
-     Hover 效果（接受 scope 參數）
+     Hover 效果（接受 scope 參數，uid 避免 @keyframes 衝突）
   ───────────────────────────────────────────── */
   getHoverEffect(scope = 'card-badge') {
     const hoverEffect  = this.getAttribute('hover-effect') || 'lift';
@@ -719,7 +737,6 @@ class CardBadge extends HTMLElement {
 
     if (!clickable && !toggleTarget) return '';
 
-    // 使用 uid 讓 @keyframes 名稱不衝突
     const uid = this._uid;
 
     const effects = {
@@ -788,24 +805,26 @@ class CardBadge extends HTMLElement {
       this.style.display = '';
     }
 
-    const themeInfo    = this.parseTheme();
+    const themeInfo     = this.parseTheme();
     const manualOutline = this.getAttribute('outline') === 'true';
-    const sizeStyles   = this.getSizeStyles();
-    const clickable    = this.getAttribute('clickable') === 'true';
-    const toggleTarget = this.getAttribute('toggle-target');
-    const fontControl  = this.getAttribute('font-control');
-    const disabled     = this.getAttribute('disabled') === 'true';
-    const focusColor   = this.parseColor(this.getAttribute('focus-color')) || content.theme;
-    const isOutline    = themeInfo.isOutline || manualOutline;
+    const sizeStyles    = this.getSizeStyles();
+    const clickable     = this.getAttribute('clickable') === 'true';
+    const toggleTarget  = this.getAttribute('toggle-target');
+    const fontControl   = this.getAttribute('font-control');
+    const disabled      = this.getAttribute('disabled') === 'true';
+    const focusColor    = this.parseColor(this.getAttribute('focus-color')) || content.theme;
+    const isOutline     = themeInfo.isOutline || manualOutline;
 
     let bgColor, textColor, borderStyle;
 
     if (disabled) {
-      bgColor     = 'rgba(100, 100, 100, 0.2)';
-      textColor   = 'rgba(198, 199, 189, 0.45)';
-      borderStyle = '1px solid rgba(150, 150, 150, 0.3)';
+      // ★ disabled 狀態：rgba 透明度 >= 0.72
+      bgColor     = 'rgba(100, 100, 100, 0.72)';
+      textColor   = 'rgba(198, 199, 189, 0.72)';
+      borderStyle = '1px solid rgba(150, 150, 150, 0.72)';
     } else if (isOutline) {
-      bgColor     = this.hexToRgba(content.theme, 0.12);
+      // outline 底色使用低透明輔助方法（視覺設計用途），前景色不透明
+      bgColor     = this._hexToRgbaRaw(content.theme, 0.12);
       textColor   = content.theme;
       borderStyle = `1px solid ${content.theme}`;
     } else {
@@ -815,11 +834,11 @@ class CardBadge extends HTMLElement {
     }
 
     // 作用域選擇器
-    const scope      = `[data-badge-id="${this._uid}"]`;
-    const uid        = this._uid;
+    const scope       = `[data-badge-id="${this._uid}"]`;
+    const uid         = this._uid;
     const hoverStyles = disabled ? '' : this.getHoverEffect(scope);
     const useBootstrapIcons = content.icon && content.icon.startsWith('bi-');
-    const isDotMode  = content.isDot;
+    const isDotMode   = content.isDot;
 
     const dotStyles = isDotMode ? `
       width: ${sizeStyles.width};
@@ -830,6 +849,12 @@ class CardBadge extends HTMLElement {
       min-height: ${sizeStyles.height};
     ` : '';
 
+    // glow-color：視覺輔助色，使用輔助方法允許較低透明度
+    const glowColor = this._hexToRgbaRaw(content.theme, 0.55);
+
+    // focus-ring：使用 hexToRgba，強制 >= 0.72
+    const focusRingColor = this.hexToRgba(focusColor, 0.72);
+
     // ✦ 寫入 _root（不影響 badge-item 子元素）
     this._root.innerHTML = `
       <style>
@@ -838,7 +863,7 @@ class CardBadge extends HTMLElement {
         ${scope} {
           display: inline-block;
           vertical-align: middle;
-          --glow-color: ${this.hexToRgba(content.theme, 0.55)};
+          --glow-color: ${glowColor};
         }
 
         ${scope} .badge {
@@ -879,7 +904,7 @@ class CardBadge extends HTMLElement {
             outline: none;
           }
           ${scope}:focus .badge {
-            box-shadow: 0 0 0 3px ${this.hexToRgba(focusColor, 0.35)};
+            box-shadow: 0 0 0 3px ${focusRingColor};
             transform: translateY(-1px);
           }
           ${scope}:focus:not(:focus-visible) .badge {
