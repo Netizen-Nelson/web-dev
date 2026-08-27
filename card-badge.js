@@ -1,34 +1,14 @@
-/**
- * card-badge.js — 品牌配色對齊版 v2
- *
- * 本次更新摘要：
- *  1. 品牌色全面對齊最新配色系統（不保留舊版相容）：
- *       sky     : #08A9D1 → #0ABDC6
- *       vanilla : #D4C5A9 → #DBEDD8
- *       indigo  : #7B6CF0 → #9B72CF
- *       focus   : 新增     → #A0CF72
- *       attention 別名移除（直接使用 yellow）
- *  2. rgba 透明度全面補齊至 ≥ 0.72（含 disabled、outline、glow、focus-ring）
- *  3. deadline 警告色改為 parseColor('yellow')
- *  4. 其餘邏輯、Light DOM / 作用域 CSS 架構不變
- */
-
 class CardBadge extends HTMLElement {
   constructor() {
     super();
-    // ✦ 不使用 Shadow DOM
     this.isCollapsed  = false;
     this.currentCount = 0;
     this.rotateIndex  = 0;
     this.autoRotateTimer = null;
-    // 每個實例唯一 ID，用於作用域 CSS 與 @keyframes 命名
     this._uid  = 'cb-' + Math.random().toString(36).slice(2, 9);
     this._root = null;
   }
 
-  /* ─────────────────────────────────────────────
-     觀察屬性
-  ───────────────────────────────────────────── */
   static get observedAttributes() {
     return [
       'type', 'value', 'text', 'icon',
@@ -46,7 +26,6 @@ class CardBadge extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    // connectedCallback 之前 _root 尚未建立，直接略過
     if (!this._root) return;
 
     if (name === 'count' && oldValue !== newValue) {
@@ -64,9 +43,6 @@ class CardBadge extends HTMLElement {
     }
   }
 
-  /* ─────────────────────────────────────────────
-     品牌配色系統（對齊最新版本，無舊版別名）
-  ───────────────────────────────────────────── */
   getBrandColors() {
     return {
       'background': '#0C0D0C',
@@ -76,11 +52,11 @@ class CardBadge extends HTMLElement {
       'special'   : '#C8DD5A',
       'warning'   : '#F08080',
       'salmon'    : '#E5C3B3',
-      'sky'       : '#0ABDC6',       // ★ 更新
+      'sky'       : '#0ABDC6',
       'safe'      : '#40C99A',
-      'vanilla'   : '#DBEDD8',       // ★ 更新
+      'vanilla'   : '#DBEDD8', 
       'yellow'    : '#DECA4B',
-      'focus'     : '#A0CF72',       // ★ 新增
+      'focus'     : '#A0CF72',
       'info'      : '#4285EB',
       'stone'     : '#95BDD7',
       'indigo'    : '#9B72CF',       // ★ 更新
@@ -89,14 +65,12 @@ class CardBadge extends HTMLElement {
     };
   }
 
-  /* 將品牌名稱或任意 CSS 色碼轉為實際色碼 */
   parseColor(colorValue) {
     if (!colorValue) return null;
     const brandColors = this.getBrandColors();
     return brandColors[colorValue.toLowerCase()] || colorValue;
   }
 
-  /* 依背景亮度自動回傳對比前景色 */
   getContrastColor(bgColor) {
     if (!bgColor) return '#C6C7BD';
 
@@ -111,7 +85,6 @@ class CardBadge extends HTMLElement {
     return luminance > 0.5 ? '#0C0D0C' : '#C6C7BD';
   }
 
-  /* 將 hex 色碼轉換為 rgba 字串（alpha 預設 1，最低限制 0.72） */
   hexToRgba(hex, alpha = 1) {
     if (!hex) return null;
 
@@ -138,9 +111,6 @@ class CardBadge extends HTMLElement {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  /* ─────────────────────────────────────────────
-     主題解析
-  ───────────────────────────────────────────── */
   getInheritedTheme() {
     let parent = this.parentElement;
     while (parent) {
@@ -168,9 +138,6 @@ class CardBadge extends HTMLElement {
     return this.parseColor(theme.replace('-outline', ''));
   }
 
-  /* ─────────────────────────────────────────────
-     計數 / 格式化
-  ───────────────────────────────────────────── */
   formatCount(count) {
     const maxCount = parseInt(this.getAttribute('max-count')) || 99;
     return count > maxCount ? `${maxCount}+` : count.toString();
@@ -298,7 +265,6 @@ class CardBadge extends HTMLElement {
           return { icon: icon || '', text: this.formatDateTime(value, format), theme: this.getThemeColor() };
         case 'deadline': {
           const di = this.formatDeadline(value);
-          // ★ deadline 警告色改為直接使用 yellow（移除 attention 別名）
           const deadlineTheme = di.isOverdue
             ? this.parseColor('warning')
             : (di.isWarning ? this.parseColor('yellow') : this.getThemeColor());
@@ -311,9 +277,6 @@ class CardBadge extends HTMLElement {
     return { icon: icon || '', text: text || '', theme: this.getThemeColor() };
   }
 
-  /* ─────────────────────────────────────────────
-     尺寸樣式
-  ───────────────────────────────────────────── */
   getSizeStyles() {
     const size           = this.getAttribute('size') || 'md';
     const customFontSize = this.getAttribute('font-size');
@@ -338,15 +301,11 @@ class CardBadge extends HTMLElement {
     };
   }
 
-  /* ─────────────────────────────────────────────
-     頁面提示（使用品牌色）
-  ───────────────────────────────────────────── */
   showPageAlert(message, type = 'info', duration = 4000, position = 'top') {
     const existingAlert = document.querySelector('.card-badge-page-alert');
     if (existingAlert) existingAlert.remove();
 
     const brandColors = this.getBrandColors();
-    // 語意別名（保留慣用寫法）
     const alertAliases = {
       'info'   : brandColors.info,
       'success': brandColors.safe,
@@ -354,7 +313,6 @@ class CardBadge extends HTMLElement {
       'danger' : brandColors.warning
     };
 
-    // 優先查語意別名 → 再查品牌色名稱 → 最後 fallback 到 info
     const bgColor   = alertAliases[type] || brandColors[type] || brandColors.info;
     const textColor = this.getContrastColor(bgColor);
 
@@ -375,8 +333,7 @@ class CardBadge extends HTMLElement {
       z-index: 10000;
       background: ${bgColor};
       color: ${textColor};
-      padding: 12px 24px;
-      border-radius: 8px;
+      padding: 12px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
       font-size: 1rem;
       font-weight: 500;
@@ -404,9 +361,6 @@ class CardBadge extends HTMLElement {
     }, duration);
   }
 
-  /* ─────────────────────────────────────────────
-     折疊指示器
-  ───────────────────────────────────────────── */
   updateCollapseIndicator() {
     const iconElement = this.querySelector('.badge i, .badge .icon');
     if (iconElement) {
@@ -414,9 +368,6 @@ class CardBadge extends HTMLElement {
     }
   }
 
-  /* ─────────────────────────────────────────────
-     生命週期
-  ───────────────────────────────────────────── */
   connectedCallback() {
     // 設置作用域 ID
     this.setAttribute('data-badge-id', this._uid);
@@ -440,9 +391,6 @@ class CardBadge extends HTMLElement {
     this.stopAutoRotate();
   }
 
-  /* ─────────────────────────────────────────────
-     Badge Items（輪播子元素）
-  ───────────────────────────────────────────── */
   getBadgeItems() {
     return Array.from(this.querySelectorAll('badge-item'));
   }
@@ -524,9 +472,6 @@ class CardBadge extends HTMLElement {
     }));
   }
 
-  /* ─────────────────────────────────────────────
-     事件處理
-  ───────────────────────────────────────────── */
   setupEventHandlers() {
     const clickable    = this.getAttribute('clickable') === 'true';
     const action       = this.getAttribute('action');
@@ -719,9 +664,6 @@ class CardBadge extends HTMLElement {
     }
   }
 
-  /* ─────────────────────────────────────────────
-     圖示渲染
-  ───────────────────────────────────────────── */
   renderIcon(iconValue) {
     if (!iconValue) return '';
     return iconValue.startsWith('bi-')
@@ -729,9 +671,6 @@ class CardBadge extends HTMLElement {
       : `<span class="icon">${iconValue}</span>`;
   }
 
-  /* ─────────────────────────────────────────────
-     Hover 效果（接受 scope 參數，uid 避免 @keyframes 衝突）
-  ───────────────────────────────────────────── */
   getHoverEffect(scope = 'card-badge') {
     const hoverEffect  = this.getAttribute('hover-effect') || 'lift';
     const clickable    = this.getAttribute('clickable') === 'true';
@@ -835,7 +774,6 @@ class CardBadge extends HTMLElement {
       borderStyle = 'none';
     }
 
-    // 作用域選擇器
     const scope       = `[data-badge-id="${this._uid}"]`;
     const uid         = this._uid;
     const hoverStyles = disabled ? '' : this.getHoverEffect(scope);
@@ -851,13 +789,8 @@ class CardBadge extends HTMLElement {
       min-height: ${sizeStyles.height};
     ` : '';
 
-    // glow-color：視覺輔助色，使用輔助方法允許較低透明度
     const glowColor = this._hexToRgbaRaw(content.theme, 0.55);
-
-    // focus-ring：使用 hexToRgba，強制 >= 0.72
     const focusRingColor = this.hexToRgba(focusColor, 0.72);
-
-    // ✦ 寫入 _root（不影響 badge-item 子元素）
     this._root.innerHTML = `
       <style>
         ${useBootstrapIcons ? '@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");' : ''}
@@ -960,9 +893,6 @@ class CardBadge extends HTMLElement {
   }
 }
 
-/* ─────────────────────────────────────────────
-   BadgeItem（輪播子元素，隱藏於 light DOM）
-───────────────────────────────────────────── */
 class BadgeItem extends HTMLElement {
   connectedCallback() {
     this.style.display = 'none';
