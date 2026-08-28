@@ -1,17 +1,3 @@
-/*!
- * ui-table.js  v1.0.0
- * 語意表格 / 格子顯示元件
- *
- * 自訂標籤：
- *   <ui-table>   — 最外層容器
- *   <ui-group>   — 分組（可折疊）
- *   <ui-row>     — 列
- *   <ui-col>     — 欄
- *   <cell-item>  — 輪播子項目
- *
- * 全域設定（在引入前宣告 window.UiTableConfig = {...} 可覆寫預設值）
- * 公開 API：window.UiTable.init()  window.UiTable.config  window.UiTable.colors
- */
 (function (global) {
   'use strict';
 
@@ -30,7 +16,8 @@
     stone:    '#95BDD7',
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
-    orange:   '#EDA109'
+    orange:   '#EDA109',
+    teal: '#0DA591'
   };
 
   var BG = '#0C0D0C';
