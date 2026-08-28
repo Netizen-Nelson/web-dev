@@ -59,15 +59,16 @@
 .bp-border-orange     { border: 1px solid #EDA109; }
 .bp-border-teal     { border: 1px solid #0DA591; }
 /* ── Font sizes ──────────────────────────── */
-.fs-extralarge        { font-size: 3.3rem; }
-.fs-xlarge            { font-size: 2.8rem; }
-.fs-larger            { font-size: 1.8rem; }
-.fs-large             { font-size: 1.35rem; }
+.fs-superlarge        { font-size: 3.75rem; }
+.fs-extralarge        { font-size: 3rem; }
+.fs-xlarge            { font-size: 2.5rem; }
+.fs-larger            { font-size: 2rem; }
+.fs-large             { font-size: 1.5rem; }
 .fs-regular           { font-size: 1rem; }
-.fs-small,  .fs-6     { font-size: 0.85rem; }
-.fs-smaller,.fs-7     { font-size: 0.75rem; }
-.fs-xsmall, .fs-8     { font-size: 0.65rem; }
-.fs-extrasmall,.fs-9  { font-size: 0.5rem; }
+.fs-small,  .fs-7     { font-size: 0.85rem; }
+.fs-smaller,.fs-8     { font-size: 0.75rem; }
+.fs-xsmall, .fs-9     { font-size: 0.6rem; }
+.fs-extrasmall,.fs-10  { font-size: 0.5rem; }
 
 /* ── Widths ──────────────────────────────── */
 .w-90 { width: 90%; }
@@ -123,12 +124,13 @@
 .bp-ind-5 { padding-left: 2.5em; }
 .bp-ind-6 { padding-left: 3.0em; }
 
-.bp-lnh-1 { line-height: 2.5rem; }
-.bp-lnh-2 { line-height: 2rem; }
-.bp-lnh-3 { line-height: 1.6rem; }
-.bp-lnh-4 { line-height: 1.3rem; }
-.bp-lnh-5 { line-height: 1.1rem; }
-.bp-lnh-6 { line-height: 1rem; }
+.bp-lnh-1 { line-height: 3rem; }
+.bp-lnh-2 { line-height: 2.5rem; }
+.bp-lnh-3 { line-height: 2rem; }
+.bp-lnh-4 { line-height: 1.75rem; }
+.bp-lnh-5 { line-height: 1.5rem; }
+.bp-lnh-6 { line-height: 1.25rem; }
+.bp-lnh-7 { line-height: 1rem; }
 
 blockquote {
     margin: 16px 0;
