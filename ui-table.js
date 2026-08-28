@@ -1,6 +1,22 @@
+/**
+ * ui-table.js  v1.3.0
+ * ─────────────────────────────────────────────────────────────────────
+ * 自訂元素表格元件
+ *
+ * 修正 v1.3.0
+ *   - mask-order 現在支援跨 <ui-row> 的全域順序解鎖（原本僅限同一列）
+ *   - icon 屬性直接支援 Bootstrap Icons：icon="bi-star" 即可
+ *
+ * 全域配置（在引入此檔案之前設定）：
+ *   window.UiTableConfig = { theme, cellPadding, fontSize, alertDuration }
+ * ─────────────────────────────────────────────────────────────────────
+ */
 (function (global) {
   'use strict';
 
+  /* ================================================================
+   * 品牌色票
+   * ================================================================ */
   var BRAND = {
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
@@ -17,17 +33,22 @@
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
     orange:   '#EDA109',
-    teal: '#0DA591'
+    teal:     '#0DA591'
   };
 
   var BG = '#0C0D0C';
+
+  /* 全域配置（可在引入前透過 window.UiTableConfig 覆寫） */
   var CFG = global.UiTableConfig = Object.assign({
     theme:         'shell',  // 預設主題色
-    cellPadding:   '6px',    // 預設 cell 內距
-    fontSize:      '1rem',   // 預設字體大小
-    alertDuration: 2500      // alert 顯示時長（毫秒）
+    cellPadding:   '6px',   // 預設 cell 內距
+    fontSize:      '1rem',  // 預設字體大小
+    alertDuration: 2500     // alert 顯示時長（毫秒）
   }, global.UiTableConfig || {});
 
+  /* ================================================================
+   * 內建 SVG 圖示
+   * ================================================================ */
   var ICO = {
     'i-arrow-down':  icoP('M6 9 12 15 18 9'),
     'i-arrow-up':    icoP('M18 15 12 9 6 15'),
@@ -46,13 +67,16 @@
     ].join('')
   };
 
-  function icoP(pts) {
+  function icoP(d) {
     return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"' +
       ' stroke="currentColor" stroke-width="2.5"' +
       ' stroke-linecap="round" stroke-linejoin="round">' +
-      '<polyline points="' + pts + '"/></svg>';
+      '<path d="' + d + '"/></svg>';
   }
 
+  /* ================================================================
+   * 工具函式
+   * ================================================================ */
   function resolveColor(v) {
     if (!v) return null;
     v = String(v).trim();
@@ -60,6 +84,7 @@
   }
 
   function hexRgba(hex, a) {
+    /* 透明度最低 0.72（符合品牌規範） */
     a = Math.max(+a || 0, 0.72);
     var h = hex.replace('#', '');
     var r = parseInt(h.slice(0, 2), 16);
@@ -68,7 +93,25 @@
     return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
   }
 
+  /**
+   * mkIco：產生圖示 HTML 字串
+   *
+   * 優先序：
+   *  1. Bootstrap Icons  — icon="bi-star"      → <i class="bi bi-star">
+   *  2. 內建 SVG 圖示    — icon="i-arrow-down" → 內建 SVG
+   *  3. 不符合任何規則   → 空字串（靜默忽略）
+   *
+   * Bootstrap Icons 需在頁面引入官方 CSS，本元件僅負責輸出 <i> 標籤。
+   */
   function mkIco(name) {
+    if (!name) return '';
+    /* Bootstrap Icons：以 'bi-' 開頭 */
+    if (/^bi-/.test(name)) {
+      return '<span class="uit-ico">' +
+        '<i class="bi ' + name + '" aria-hidden="true"></i>' +
+        '</span>';
+    }
+    /* 內建 SVG 圖示 */
     return ICO[name] ? '<span class="uit-ico">' + ICO[name] + '</span>' : '';
   }
 
@@ -94,6 +137,9 @@
     setTimeout(function () { once(); setInterval(once, interval); }, interval);
   }
 
+  /* ================================================================
+   * 全域 CSS（注入一次）
+   * ================================================================ */
   var CSS = [
 
     'ui-table,ui-group,ui-row,ui-col,cell-item{display:none}',
@@ -136,9 +182,7 @@
     '.uit-mask{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;gap:8px;font-weight:600;transition:opacity .3s ease;font-size:var(--uit-fs);border-radius:inherit}',
     '.uit-mask.unlockable{cursor:pointer}',
     '.uit-mask.unlockable:hover{filter:brightness(1.08)}',
-    /* 鎖定狀態：整體略透明 + 鎖頭圖示 */
     '.uit-mask.locked{cursor:not-allowed;opacity:.80}',
-    /* 揭開後淡出 */
     '.uit-mask.revealed{opacity:0;pointer-events:none}',
     '.uit-mlock{display:inline-flex;align-items:center}',
 
@@ -152,10 +196,8 @@
     '@keyframes uit-prog{from{transform:scaleX(1)}to{transform:scaleX(0)}}',
 
     /* ── Alert ── */
-    /* A：在欄內覆蓋（absolute） */
     '.uit-alert-A{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:6px 12px;white-space:normal;text-align:center;opacity:0;transition:opacity .35s ease;pointer-events:none;font-weight:600;font-size:var(--uit-fs)}',
     '.uit-alert-A.vis{opacity:1}',
-    /* B / C：fixed 定位，附掛於 body */
     '.uit-alert-ext{position:fixed;z-index:9999;pointer-events:none;padding:5px 14px;border-radius:6px;font-weight:600;line-height:1.5;white-space:nowrap;opacity:0;transition:opacity .35s ease;font-size:var(--uit-fs,1rem)}',
     '.uit-alert-ext.vis{opacity:1}',
 
@@ -177,6 +219,9 @@
 
   injectCSS();
 
+  /* ================================================================
+   * UiTable 建構子
+   * ================================================================ */
   function UiTable(el) {
     this.el     = el;
     this.theme  = el.getAttribute('theme') || CFG.theme;
@@ -185,6 +230,7 @@
     this.dataId = el.getAttribute('data-id');
     this.colN   = 0; // 欄數，由第一列決定
 
+    /* 蒐集內容來源欄（hidden + id） */
     this.srcMap = {};
     var self = this;
     el.querySelectorAll('ui-col[id][hidden]').forEach(function (c) {
@@ -192,6 +238,9 @@
     });
   }
 
+  /* ----------------------------------------------------------------
+   * init：決定資料來源後啟動渲染
+   * ---------------------------------------------------------------- */
   UiTable.prototype.init = function () {
     var self = this;
     if (this.src) {
@@ -212,9 +261,11 @@
     }
   };
 
+  /* ----------------------------------------------------------------
+   * _fromJSON：從 JSON 物件建立 DOM，再呼叫 _render
+   * ---------------------------------------------------------------- */
   UiTable.prototype._fromJSON = function (data) {
     var self = this;
-    /* 表格層級 font-size（JSON 版） */
     if (data.fontSize) this.el.setAttribute('font-size', data.fontSize);
     this.el.innerHTML = '';
     (data.groups || []).forEach(function (gd) {
@@ -246,7 +297,7 @@
           if (cd.maskOrder != null) c.setAttribute('mask-order',        String(cd.maskOrder));
           if (cd.carouselInterval)  c.setAttribute('carousel-interval', String(cd.carouselInterval));
           if (cd.progressBar)       c.setAttribute('progress-bar',      '');
-          if (cd.progressBarColor)  c.setAttribute('progress-bar-color',cd.progressBarColor);
+          if (cd.progressBarColor)  c.setAttribute('progress-bar-color', cd.progressBarColor);
           if (cd.alertMsg)          c.setAttribute('alert-msg',         cd.alertMsg);
           if (cd.alertColor)        c.setAttribute('alert-color',       cd.alertColor);
           if (cd.alertInterval)     c.setAttribute('alert-interval',    String(cd.alertInterval));
@@ -276,11 +327,9 @@
   UiTable.prototype._render = function () {
     this.colN = this._getColCount();
 
-    /* 建立外層 wrapper，注入 CSS 自訂屬性 */
-    var wrap   = mk('div', 'uit-wrap');
-    var c      = this.color;
-    /* font-size 優先序：<ui-table font-size> → UiTableConfig.fontSize */
-    var fs     = this.el.getAttribute('font-size') || CFG.fontSize;
+    var wrap = mk('div', 'uit-wrap');
+    var c    = this.color;
+    var fs   = this.el.getAttribute('font-size') || CFG.fontSize;
     wrap.style.cssText = [
       '--uit-tm:'   + c,
       '--uit-fs:'   + fs,
@@ -308,7 +357,6 @@
 
   /* ----------------------------------------------------------------
    * _getColCount：取第一個含有作用欄的 ui-row 的欄數
-   *   排除「內容來源欄」（id + hidden）
    * ---------------------------------------------------------------- */
   UiTable.prototype._getColCount = function () {
     var rows = qsa('ui-row', this.el);
@@ -325,11 +373,11 @@
    * _renderGroup：渲染 ui-group（含折疊）
    * ---------------------------------------------------------------- */
   UiTable.prototype._renderGroup = function (gEl) {
-    var self  = this;
-    var div   = mk('div', 'uit-group');
-    var tl    = gEl.getAttribute('title-left')  || '';
-    var tr    = gEl.getAttribute('title-right') || '';
-    var ini   = gEl.hasAttribute('ini-collapse');
+    var self = this;
+    var div  = mk('div', 'uit-group');
+    var tl   = gEl.getAttribute('title-left')  || '';
+    var tr   = gEl.getAttribute('title-right') || '';
+    var ini  = gEl.hasAttribute('ini-collapse');
 
     /* ── Header ── */
     var gh = mk('div', 'uit-gh');
@@ -370,33 +418,68 @@
   };
 
   /* ----------------------------------------------------------------
-   * _renderRows：渲染多列，回傳 [{el, src}] 供 _bindSN 使用
+   * _renderRows：渲染多列，並在所有列完成後統一建立全域遮罩鏈
+   *
+   * ★ 修正重點：mask-order 的重複偵測與鏈結設定改在此層進行，
+   *   以「容器（container）範圍」為基準，支援跨 <ui-row> 的順序解鎖。
+   *   同一 ui-group（或無 group 時整個表格）內的 mask-order 為同一條鏈。
    * ---------------------------------------------------------------- */
   UiTable.prototype._renderRows = function (rowEls, container) {
     var self = this;
     var rds  = [];
+
+    /* ── Step 1：跨列全域預計算 mask-order 出現次數 ── */
+    var globalMoCount = {};
     rowEls.forEach(function (r) {
-      var d = self._renderRow(r);
+      qsa(':scope > ui-col', r)
+        .filter(function (c) { return !isSrcCol(c); })
+        .forEach(function (c) {
+          var mo = parseInt(c.getAttribute('mask-order'));
+          if (!isNaN(mo)) globalMoCount[mo] = (globalMoCount[mo] || 0) + 1;
+        });
+    });
+
+    /* ── Step 2：渲染各列（將 globalMoCount 傳入，避免在列層重複計算） ── */
+    rowEls.forEach(function (r) {
+      var d = self._renderRow(r, globalMoCount);
       if (d) {
         rds.push({ el: d, src: r });
         container.appendChild(d);
       }
     });
+
+    /* ── Step 3：在 container 範圍內蒐集所有有效的有序遮罩，排序後建鏈 ── */
+    var masks = Array.from(
+      container.querySelectorAll('.uit-mask[data-mask-order]')
+    ).sort(function (a, b) {
+      return +a.dataset.maskOrder - +b.dataset.maskOrder;
+    });
+
+    /* 連續性警告（方便開發除錯） */
+    for (var i = 1; i < masks.length; i++) {
+      var prev = +masks[i - 1].dataset.maskOrder;
+      var curr = +masks[i].dataset.maskOrder;
+      if (curr !== prev + 1) {
+        console.warn('[ui-table] mask-order 不連續: ' + prev + ' → ' + curr);
+      }
+    }
+
+    self._setupMaskChain(masks);
     return rds;
   };
 
   /* ----------------------------------------------------------------
    * _renderRow：渲染單列
+   *   @param {Element} rowEl        — 原始 ui-row 元素
+   *   @param {Object}  globalMoCount — 全域 mask-order 計數表（由 _renderRows 傳入）
    * ---------------------------------------------------------------- */
-  UiTable.prototype._renderRow = function (rowEl) {
+  UiTable.prototype._renderRow = function (rowEl, globalMoCount) {
     var self = this;
 
     /* 篩出作用欄（排除內容來源欄） */
     var active = qsa(':scope > ui-col', rowEl).filter(function (c) {
       return !isSrcCol(c);
     });
-
-    /* 整列都是來源欄 → 跳過，不渲染 */
     if (!active.length) return null;
 
     /* ── 驗證 col-widths ── */
@@ -415,19 +498,19 @@
     var div = mk('div', 'uit-row');
     if (rowEl.hasAttribute('hidden')) div.classList.add('uit-hidden');
 
-    /* Grid 欄寬：col-widths 優先，否則均等 */
+    /* Grid 欄寬 */
     var tpl = cw
       ? cw.split(':').map(function (v) { return parseFloat(v) + 'fr'; }).join(' ')
       : 'repeat(' + this.colN + ',1fr)';
     div.style.gridTemplateColumns = tpl;
 
-    /* 邊框（色彩繼承 theme） */
+    /* 邊框 */
     var bdr = rowEl.getAttribute('border');
     if (bdr) div.style.border = bdr + ' ' + this.color;
 
     var pad = rowEl.getAttribute('cell-padding') || CFG.cellPadding;
 
-    /* ── 列層級文字樣式（僅套用至 .uit-ct） ── */
+    /* 列層級文字樣式 */
     var rowStyle = {
       fontSize:   rowEl.getAttribute('font-size'),
       lineHeight: rowEl.getAttribute('line-height'),
@@ -435,70 +518,37 @@
       colBorder:  rowEl.getAttribute('col-border')
     };
 
-    /* ── 蒐集 mask-order 重複數字 ── */
-    var moCount = {};
-    active.forEach(function (c) {
-      var mo = parseInt(c.getAttribute('mask-order'));
-      if (!isNaN(mo)) moCount[mo] = (moCount[mo] || 0) + 1;
-    });
-
-    /* ── 渲染各欄，同時建立 orderMap ── */
-    var orderMap = {};
+    /* 渲染各欄，將 globalMoCount 傳入 _renderCol */
     var colTotal = active.length;
     active.forEach(function (colEl, idx) {
-      var cd = self._renderCol(colEl, pad, rowStyle);
+      var cd = self._renderCol(colEl, pad, rowStyle, globalMoCount);
       div.appendChild(cd);
 
-      /* col-border：每欄右側加線，最後一欄跳過，色彩繼承 theme */
       if (rowStyle.colBorder && idx < colTotal - 1) {
         cd.style.borderRight = rowStyle.colBorder + ' ' + self.color;
       }
-
-      var moRaw = colEl.getAttribute('mask-order');
-      if (moRaw !== null) {
-        var mo = parseInt(moRaw);
-        if (!isNaN(mo)) {
-          if (moCount[mo] > 1) {
-            /* 重複編號 → 兩者皆視為無序，各自可點擊 */
-            console.error('[ui-table] mask-order="' + mo + '" 重複，兩者皆視為無序。');
-            var m = cd.querySelector('.uit-mask');
-            if (m) {
-              m.classList.remove('locked');
-              m.classList.add('unlockable');
-              var lk = m.querySelector('.uit-mlock');
-              if (lk) lk.remove();
-              m.addEventListener('click', function () { m.classList.add('revealed'); });
-            }
-          } else {
-            orderMap[mo] = cd;
-          }
-        }
-      }
     });
 
-    this._setupMaskChain(orderMap);
+    /* ★ 不在此呼叫 _setupMaskChain，改由 _renderRows 統一全域處理 */
     return div;
   };
 
   /* ----------------------------------------------------------------
-   * _setupMaskChain：建立遮罩順序鏈
-   *   keys 由小到大排序，依序解鎖
+   * _setupMaskChain：依序解鎖遮罩陣列
+   *
+   * ★ 介面變更（v1.3.0）：
+   *   原本接受 orderMap（{key: colDiv}），現在接受已排序的遮罩元素陣列。
+   *   由 _renderRows 排序後傳入，責任更清晰。
+   *
+   * @param {Element[]} masks — 已按 mask-order 數值升冪排列的遮罩元素
    * ---------------------------------------------------------------- */
-  UiTable.prototype._setupMaskChain = function (orderMap) {
-    var keys = Object.keys(orderMap).map(Number).sort(function (a, b) { return a - b; });
-
-    /* 偵測不連續編號 */
-    for (var i = 1; i < keys.length; i++) {
-      if (keys[i] !== keys[i - 1] + 1) {
-        console.warn('[ui-table] mask-order 不連續: ' + keys[i - 1] + ' → ' + keys[i]);
-      }
-    }
+  UiTable.prototype._setupMaskChain = function (masks) {
+    if (!masks.length) return;
 
     /* 遞迴解鎖：解鎖 idx 位置的遮罩，點擊後解鎖下一個 */
     function unlockAt(idx) {
-      if (idx >= keys.length) return;
-      var m = orderMap[keys[idx]].querySelector('.uit-mask');
-      if (!m) return;
+      if (idx >= masks.length) return;
+      var m = masks[idx];
 
       m.classList.remove('locked');
       m.classList.add('unlockable');
@@ -518,8 +568,12 @@
 
   /* ----------------------------------------------------------------
    * _renderCol：渲染單欄
+   *   @param {Element} colEl        — 原始 ui-col 元素
+   *   @param {string}  pad          — cell 內距
+   *   @param {Object}  rowStyle     — 列層級文字樣式
+   *   @param {Object}  globalMoCount — 全域 mask-order 計數表
    * ---------------------------------------------------------------- */
-  UiTable.prototype._renderCol = function (colEl, pad, rowStyle) {
+  UiTable.prototype._renderCol = function (colEl, pad, rowStyle, globalMoCount) {
     var self = this;
     var div  = mk('div', 'uit-col');
     div.style.padding = pad;
@@ -544,7 +598,6 @@
     if (hasMask  && hasCar)  console.warn('[ui-table] mask-text+carousel-interval 互斥，carousel-interval 已忽略。');
     if (hasAlert && hasCar)  console.warn('[ui-table] alert-msg+carousel-interval 互斥，carousel-interval 已忽略。');
 
-    /* 互斥後的實際使用旗標 */
     var useCar = hasCar && !hasMask && !hasAlert;
     var useExp = hasExp && !hasMask;
 
@@ -554,11 +607,11 @@
     var ci = mk('div', 'uit-ci');
     ci.style.color = this.color;
 
+    /* 圖示（支援內建 SVG 及 Bootstrap Icons） */
     var ico = colEl.getAttribute('icon');
     if (ico) ci.insertAdjacentHTML('beforeend', mkIco(ico));
 
     if (useCar) {
-      /* 輪播模式：先將 ci 附加到 div，再建立輪播（進度條會接在 ci 後面） */
       div.appendChild(ci);
       var items  = Array.from(colEl.querySelectorAll('cell-item'));
       var ms     = parseInt(colEl.getAttribute('carousel-interval')) || 3000;
@@ -566,12 +619,10 @@
       var pbClr  = resolveColor(colEl.getAttribute('progress-bar-color')) || this.color;
       this._setupCarousel(ci, div, items, ms, hasPb, pbClr);
     } else {
-      /* 一般文字模式：複製 colEl，移除 cell-item */
       var clone = colEl.cloneNode(true);
       clone.querySelectorAll('cell-item').forEach(function (c) { c.remove(); });
       var ct = mk('div', 'uit-ct');
       ct.innerHTML = clone.innerHTML.trim();
-      /* 套用列層級文字樣式（僅 .uit-ct，不影響輪播或其他子元件） */
       if (rowStyle) {
         if (rowStyle.fontSize)   ct.style.fontSize   = rowStyle.fontSize;
         if (rowStyle.lineHeight) ct.style.lineHeight  = rowStyle.lineHeight;
@@ -585,7 +636,6 @@
         tog.innerHTML = ICO['i-expand'] || '▾';
         ci.appendChild(tog);
 
-        /* 點擊文字或箭頭都可展開，stopPropagation 防止觸發 show-next */
         ;[ct, tog].forEach(function (t) {
           t.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -594,10 +644,11 @@
           });
         });
       }
+
       div.appendChild(ci);
     }
 
-    /* ── 遮罩層（覆蓋在 ci 上方） ── */
+    /* ── 遮罩層 ── */
     if (hasMask) {
       var mc = resolveColor(colEl.getAttribute('mask-color')) || this.color;
       var m  = mk('div', 'uit-mask');
@@ -609,16 +660,28 @@
       m.appendChild(lbl);
 
       if (hasMO) {
-        /* 有順序：預設鎖定，由 _setupMaskChain 統一管理 */
-        m.classList.add('locked');
-        var lockIcon = mk('span', 'uit-mlock');
-        lockIcon.innerHTML = ICO['i-lock'] || '🔒';
-        m.appendChild(lockIcon);
+        var moVal = parseInt(colEl.getAttribute('mask-order'));
+        var isDup = !isNaN(moVal) && globalMoCount && globalMoCount[moVal] > 1;
+
+        if (isDup) {
+          /* ★ 全域重複編號：兩者皆視為無序，直接可點擊 */
+          console.error('[ui-table] mask-order="' + moVal + '" 重複，視為無序。');
+          m.classList.add('unlockable');
+          m.addEventListener('click', function () { m.classList.add('revealed'); });
+        } else {
+          /* ★ 合法有序：鎖定狀態，並打上 data-mask-order 供 _renderRows 的全域鏈掃描 */
+          m.classList.add('locked');
+          m.dataset.maskOrder = String(isNaN(moVal) ? 0 : moVal);
+          var lockIcon = mk('span', 'uit-mlock');
+          lockIcon.innerHTML = ICO['i-lock'] || '🔒';
+          m.appendChild(lockIcon);
+        }
       } else {
-        /* 無順序：立即可點擊，單向揭開 */
+        /* 無順序：直接可點擊，單向揭開 */
         m.classList.add('unlockable');
         m.addEventListener('click', function () { m.classList.add('revealed'); });
       }
+
       div.appendChild(m);
     }
 
@@ -630,25 +693,18 @@
 
   /* ----------------------------------------------------------------
    * _setupCarousel：輪播（垂直由下往上捲入）
-   * @param {HTMLElement} ci      — 內容 flex 列（wrap 附加於此）
-   * @param {HTMLElement} colDiv  — 欄容器（進度條附加於此）
-   * @param {NodeList}    items   — cell-item 元素陣列
-   * @param {number}      ms      — 輪播間隔毫秒
-   * @param {boolean}     hasPb   — 是否顯示進度條
-   * @param {string}      pbClr   — 進度條色彩
    * ---------------------------------------------------------------- */
   UiTable.prototype._setupCarousel = function (ci, colDiv, items, ms, hasPb, pbClr) {
     if (!items.length) return;
 
     var wrap = mk('div', 'uit-car');
 
-    /* 初始顯示第一筆 */
     var curEl = mk('div', 'uit-car-item');
     curEl.innerHTML = items[0].innerHTML;
     wrap.appendChild(curEl);
     ci.appendChild(wrap);
 
-    /* ── 進度條（附加在 colDiv，在 ci 下方） ── */
+    /* 進度條 */
     var pbFill = null;
     if (hasPb) {
       var pb = mk('div', 'uit-pb');
@@ -660,11 +716,9 @@
       pbFill = pf;
     }
 
-    if (items.length <= 1) return; // 只有一筆，不輪播
+    if (items.length <= 1) return;
 
     var idx = 0;
-
-    /* 防止同時執行多個動畫 */
     var animating = false;
 
     setInterval(function () {
@@ -673,11 +727,9 @@
 
       idx = (idx + 1) % items.length;
 
-      /* 鎖定 wrap 高度，防止動畫期間容器塌陷 */
       var h = wrap.offsetHeight || 24;
       wrap.style.height = h + 'px';
 
-      /* 建立下一張，從底部進入 */
       var nxt = mk('div', 'uit-car-item');
       nxt.innerHTML = items[idx].innerHTML;
       nxt.style.cssText = [
@@ -687,14 +739,12 @@
       ].join(';');
       wrap.appendChild(nxt);
 
-      /* 當前項目準備離場（向上飛出） */
       var old = curEl;
       old.style.cssText = [
         'position:absolute', 'top:0', 'left:0', 'width:100%',
         'transition:transform .4s ease'
       ].join(';');
 
-      /* 兩幀延遲確保 transition 生效 */
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           old.style.transform = 'translateY(-100%)';
@@ -704,15 +754,14 @@
 
       setTimeout(function () {
         old.remove();
-        nxt.style.cssText = ''; // 清除行內樣式，回歸正常流
+        nxt.style.cssText = '';
         curEl = nxt;
         wrap.style.height = '';
         animating = false;
 
-        /* 重置進度條動畫 */
         if (pbFill) {
           pbFill.style.animation = 'none';
-          void pbFill.offsetHeight; // 強制 reflow
+          void pbFill.offsetHeight;
           pbFill.style.animation = 'uit-prog ' + ms + 'ms linear infinite';
         }
       }, 440);
@@ -721,11 +770,8 @@
 
   /* ----------------------------------------------------------------
    * _setupAlert：週期性 alert 顯示
-   * @param {HTMLElement} colDiv — 欄容器
-   * @param {HTMLElement} colEl  — 原始 ui-col 元素（讀屬性用）
    * ---------------------------------------------------------------- */
   UiTable.prototype._setupAlert = function (colDiv, colEl) {
-    var self     = this;
     var msg      = colEl.getAttribute('alert-msg') || '';
     var clr      = resolveColor(colEl.getAttribute('alert-color')) || this.color;
     var interval = parseInt(colEl.getAttribute('alert-interval'));
@@ -736,14 +782,11 @@
       return;
     }
 
-    /* 解析內容：優先從 srcMap 取 ID 對應的 innerHTML，否則視為純字串 */
     var content = (this.srcMap[msg] !== undefined) ? this.srcMap[msg] : msg;
-
-    var dur = CFG.alertDuration;
+    var dur     = CFG.alertDuration;
     var bgStyle = 'background:' + hexRgba(clr, 0.92) + ';color:' + BG + ';';
 
     if (pos === 'A') {
-      /* ── 位置 A：在欄內覆蓋（absolute） ── */
       var al = mk('div', 'uit-alert-A');
       al.style.cssText = bgStyle;
       al.style.fontSize = CFG.fontSize;
@@ -757,7 +800,6 @@
         interval, dur
       );
     } else {
-      /* ── 位置 B / C：fixed 定位，附掛於 body ── */
       var ext = mk('div', 'uit-alert-ext');
       ext.style.cssText = bgStyle + 'font-size:' + CFG.fontSize + ';';
       ext.innerHTML = content;
@@ -767,11 +809,9 @@
         function () {
           var r = colDiv.getBoundingClientRect();
           if (pos === 'B') {
-            /* 欄上方 */
             ext.style.left = r.left + 'px';
             ext.style.top  = (r.top - (ext.offsetHeight || 34) - 6) + 'px';
           } else {
-            /* 欄右側（C） */
             ext.style.left = (r.right + 8) + 'px';
             ext.style.top  = (r.top + r.height / 2 - (ext.offsetHeight || 18) / 2) + 'px';
           }
@@ -785,7 +825,6 @@
 
   /* ----------------------------------------------------------------
    * _bindSN：綁定 show-next 點擊事件
-   *   點擊有 .has-sn 的欄 → toggle 下一列的 .uit-hidden
    * ---------------------------------------------------------------- */
   UiTable.prototype._bindSN = function (rds) {
     rds.forEach(function (rd, i) {
@@ -806,6 +845,9 @@
     });
   };
 
+  /* ================================================================
+   * 自動啟動
+   * ================================================================ */
   function boot() {
     document.querySelectorAll('ui-table').forEach(function (el) {
       if (!el._uit) {
