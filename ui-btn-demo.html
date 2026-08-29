@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ui-btn v1.1.0 Demo</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 18px; }
+  body {
+    background: #0C0D0C; color: #C6C7BD;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.5; padding: 36px 48px; min-height: 100vh;
+  }
+  .page-title { font-size: 1.6rem; font-weight: 700; color: #C3A5E5; margin-bottom: 6px; }
+  .page-sub   { color: #95BDD7; font-size: 0.88rem; margin-bottom: 40px; }
+  .section    { margin-bottom: 48px; }
+  .section-title {
+    font-size: 1rem; font-weight: 700; color: #C8DD5A;
+    margin-bottom: 4px; letter-spacing: .04em; text-transform: uppercase;
+  }
+  .section-desc { font-size: 0.85rem; color: #95BDD7; margin-bottom: 18px; line-height: 1.5; }
+  code {
+    font-family: Consolas, monospace; font-size: 0.82rem;
+    background: #1A1C1A; color: #C8DD5A; padding: 1px 5px; border-radius: 3px;
+  }
+  .row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .info-card {
+    background: #171918; border: 1px solid #2A2C2A; border-radius: 8px;
+    padding: 14px 18px; margin-top: 8px; color: #C6C7BD;
+    font-size: 0.95rem; line-height: 1.5;
+  }
+  .info-card b { color: #C8DD5A; }
+  .info-card p + p { margin-top: 8px; }
+  .sep { border: none; border-top: 1px solid #1E201E; margin: 40px 0; }
+  .ilabel {
+    display: inline-block; font-size: 0.76rem; color: #95BDD7;
+    background: #141614; border: 1px solid #2A2C2A;
+    border-radius: 3px; padding: 2px 6px; margin-right: 4px;
+    vertical-align: middle; white-space: nowrap;
+  }
+  .fix-badge {
+    display: inline-block; font-size: 0.74rem; font-weight: 700;
+    background: #1a2a1a; color: #40C99A; border: 1px solid #40C99A;
+    border-radius: 3px; padding: 1px 7px; margin-left: 8px; vertical-align: middle;
+  }
+  .demo-trigger {
+    background: #1A1C1A; color: #C8DD5A;
+    border: 1px solid #2A2C2A; border-radius: 6px;
+    padding: 6px 14px; cursor: pointer; font-size: 0.85rem;
+    font-family: inherit; transition: background .15s;
+  }
+  .demo-trigger:hover { background: #232523; }
+</style>
+</head>
+<body>
+
+<p class="page-title">ui-btn <span style="font-size:1rem;color:#95BDD7;font-weight:400">v1.1.0</span></p>
+<p class="page-sub">
+  v1.1.0 修正：① Chevron/open 切換失效（並排按鈕 next-sibling 偵測問題）
+  ② animOpen 殘留 opacity inline style ③ 快速連點動畫衝突。新增：UiBtn.alert() 通知 API。
+</p>
+
+<!-- ── SECTION 1 ── -->
+<div class="section">
+  <p class="section-title">① 純圖示按鈕（無文字 → 自動圓形）</p>
+  <p class="section-desc">無文字時渲染圓形，右下角圓點指示展開狀態。</p>
+  <div class="row">
+    <ui-btn icon="bi-star-fill"                 theme="yellow"   tooltip="收藏"></ui-btn>
+    <ui-btn icon="bi-info-circle-fill"          theme="sky"      tooltip="詳細資訊"></ui-btn>
+    <ui-btn icon="bi-check-circle-fill"         theme="safe"     tooltip="確認"></ui-btn>
+    <ui-btn icon="bi-exclamation-triangle-fill" theme="warning"  tooltip="警告"></ui-btn>
+    <ui-btn icon="bi-lightning-fill"            theme="lavender" tooltip="快速操作"></ui-btn>
+  </div>
+  <div style="display:none;" class="info-card"><b>⭐ 收藏</b><p>已加入收藏清單。</p></div>
+  <div style="display:none;" class="info-card"><b>ℹ️ 詳細資訊</b><p>版本 v1.1.0，MIT 授權。</p></div>
+  <div style="display:none;" class="info-card"><b>✅ 確認</b><p>所有步驟驗證通過。</p></div>
+  <div style="display:none;" class="info-card"><b>⚠️ 警告</b><p>此操作不可逆，請確認後繼續。</p></div>
+  <div style="display:none;" class="info-card"><b>⚡ 快速操作</b><p>執行批次處理，預計耗時 3 秒。</p></div>
+</div>
+
+<hr class="sep">
+
+<!-- ── SECTION 2 ── -->
+<div class="section">
+  <p class="section-title">② 圖示 + 文字</p>
+  <p class="section-desc"><code>icon-active</code> 展開後切換圖示，<code>label-open</code> 切換文字。</p>
+  <div class="row">
+    <ui-btn icon="bi-eye" icon-active="bi-eye-slash" theme="sky" label-open="隱藏說明">查看說明</ui-btn>
+    <ui-btn icon="bi-chat-dots-fill" theme="indigo" label-open="收起留言">展開留言</ui-btn>
+    <ui-btn icon="bi-file-earmark-text" theme="stone">查看完整內容</ui-btn>
+  </div>
+  <div style="display:none;" class="info-card">
+    <b>📖 說明文件</b>
+    <p>本元件支援 Bootstrap Icons、<code>slide</code>/<code>fade</code> 動畫、手風琴群組模式。</p>
+  </div>
+  <div style="display:none;" class="info-card">
+    <b>💬 留言區</b>
+    <p>「這個元件設計得非常直覺！」— 測試使用者</p>
+  </div>
+  <div style="display:none;" class="info-card">
+    <b>📄 完整內容</b>
+    <p>包含所有設定選項、使用範例與搭配建議。</p>
+  </div>
+</div>
+
+<hr class="sep">
+
+<!-- ── SECTION 3 ── -->
+<div class="section">
+  <p class="section-title">③ Variant × Size</p>
+  <div class="row" style="margin-bottom:8px">
+    <span class="ilabel">fill</span>
+    <ui-btn icon="bi-box-arrow-in-right" theme="focus" size="sm" variant="fill" target="v-fill-sm">登入 sm</ui-btn>
+    <ui-btn icon="bi-box-arrow-in-right" theme="focus" size="md" variant="fill" target="v-fill-md">登入 md</ui-btn>
+    <ui-btn icon="bi-box-arrow-in-right" theme="focus" size="lg" variant="fill" target="v-fill-lg">登入 lg</ui-btn>
+  </div>
+  <div class="row" style="margin-bottom:8px">
+    <span class="ilabel">outline</span>
+    <ui-btn icon="bi-envelope" theme="salmon" size="sm" variant="outline" target="v-out">聯絡 sm</ui-btn>
+    <ui-btn icon="bi-envelope" theme="salmon" size="md" variant="outline" target="v-out">聯絡 md</ui-btn>
+    <ui-btn icon="bi-envelope" theme="salmon" size="lg" variant="outline" target="v-out">聯絡 lg</ui-btn>
+  </div>
+  <div class="row">
+    <span class="ilabel">ghost</span>
+    <ui-btn icon="bi-question-circle" theme="vanilla" size="sm" variant="ghost" target="v-ghost">FAQ sm</ui-btn>
+    <ui-btn icon="bi-question-circle" theme="vanilla" size="md" variant="ghost" target="v-ghost">FAQ md</ui-btn>
+    <ui-btn icon="bi-question-circle" theme="vanilla" size="lg" variant="ghost" target="v-ghost">FAQ lg</ui-btn>
+  </div>
+  <div id="v-fill-sm" style="display:none;" class="info-card"><b>fill sm</b></div>
+  <div id="v-fill-md" style="display:none;" class="info-card"><b>fill md（預設）</b></div>
+  <div id="v-fill-lg" style="display:none;" class="info-card"><b>fill lg</b></div>
+  <div id="v-out"     style="display:none;" class="info-card"><b>outline 共用目標</b><p>三個按鈕共用 <code>target="v-out"</code>。</p></div>
+  <div id="v-ghost"   style="display:none;" class="info-card"><b>ghost 共用目標</b></div>
+</div>
+
+<hr class="sep">
+
+<!-- ── SECTION 4 ── -->
+<div class="section">
+  <p class="section-title">④ 動畫模式</p>
+  <div class="row">
+    <ui-btn icon="bi-arrow-down-circle-fill" theme="orange" animation="slide" label-open="收起">Slide</ui-btn>
+    <ui-btn icon="bi-circle-half"            theme="pink"   animation="fade"  label-open="收起">Fade</ui-btn>
+    <ui-btn icon="bi-skip-forward-fill"      theme="teal"   animation="none"  label-open="收起">無動畫</ui-btn>
+  </div>
+  <div style="display:none;" class="info-card"><b>Slide</b><p>max-height + opacity 雙軌動畫，適合大多數場景。</p></div>
+  <div style="display:none;" class="info-card"><b>Fade</b><p>純 opacity 淡入淡出。</p></div>
+  <div style="display:none;" class="info-card"><b>None</b><p>即時切換，適合快速響應。</p></div>
+</div>
+
+<hr class="sep">
+
+<!-- ── SECTION 5：已修正 ── -->
+<div class="section">
+  <p class="section-title">
+    ⑤ Chevron 指示器 ＆ 預設展開
+    <span class="fix-badge">v1.1.0 修正</span>
+  </p>
+  <p class="section-desc">
+    <b>原因</b>：按鈕並排在 <code>.row</code> 容器內時，<code>nextElementSibling</code> 指向的是同容器的下一個按鈕，而非外部目標。<br>
+    <b>修正</b>：並排按鈕一律加 <code>target="id"</code> 明確指定目標，元件也會在 console 提示找不到目標。
+  </p>
+
+  <div class="row">
+    <ui-btn icon="bi-gear-fill"   theme="stone"    chevron label-open="隱藏設定"  target="s5-gear">進階設定</ui-btn>
+    <ui-btn icon="bi-info-circle" theme="lavender" chevron open label-open="收起公告" target="s5-announce">系統公告（預設展開）</ui-btn>
+  </div>
+
+  <div id="s5-gear" style="display:none;" class="info-card">
+    <b>⚙️ 進階設定</b>
+    <p>主題色、字體大小、動畫速度均可透過 <code>window.UiBtnConfig</code> 全域設定。</p>
+  </div>
+  <div id="s5-announce" class="info-card">
+    <b>📢 系統公告</b>
+    <p>v1.1.0 修正 Chevron 切換失效，並新增 Alert 通知 API。</p>
+  </div>
+</div>
+
+<hr class="sep">
+
+<!-- ── SECTION 6：手風琴 ── -->
+<div class="section">
+  <p class="section-title">⑥ 手風琴群組（group）</p>
+  <div class="row">
+    <ui-btn icon="bi-1-circle-fill"  theme="yellow"   group="faq" chevron label-open="收起" target="faq-a">問題 A</ui-btn>
+    <ui-btn icon="bi-2-circle-fill"  theme="sky"      group="faq" chevron label-open="收起" target="faq-b">問題 B</ui-btn>
+    <ui-btn icon="bi-3-circle-fill"  theme="lavender" group="faq" chevron label-open="收起" target="faq-c">問題 C</ui-btn>
+  </div>
+  <div id="faq-a" style="display:none;" class="info-card"><b>問題 A</b><p>ui-btn 支援所有 Bootstrap Icons。</p></div>
+  <div id="faq-b" style="display:none;" class="info-card"><b>問題 B</b><p>動畫可個別設定或全域設定。</p></div>
+  <div id="faq-c" style="display:none;" class="info-card"><b>問題 C</b><p>手風琴只需加相同 <code>group</code> 值。</p></div>
+</div>
+
+<hr class="sep">
+
+<!-- ── SECTION 7：Alert ── -->
+<div class="section">
+  <p class="section-title">⑦ Alert 通知系統 <span class="fix-badge">v1.1.0 新增</span></p>
+  <p class="section-desc">
+    <code>UiBtn.alert(message, { theme, position, duration, icon })</code><br>
+    自動滑入頁面頂部或底部，點擊整條或 × 可提早關閉。<code>duration:0</code> 不自動消失。<code>UiBtn.alert.clear()</code> 清除全部。
+  </p>
+
+  <p style="color:#95BDD7;font-size:0.85rem;margin-bottom:8px">▸ 頂部通知（預設 position:"top"）</p>
+  <div class="row">
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('操作成功！', { theme:'safe', icon:'bi-check-circle-fill' })">
+      ✅ safe
+    </button>
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('請注意此項目', { theme:'warning', icon:'bi-exclamation-triangle-fill' })">
+      ⚠️ warning
+    </button>
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('系統已更新至最新版本', { theme:'sky', icon:'bi-arrow-up-circle-fill' })">
+      🔵 sky
+    </button>
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('收藏成功', { theme:'yellow', icon:'bi-star-fill', duration:1500 })">
+      ⭐ 1.5s
+    </button>
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('這則通知不會自動消失', { theme:'lavender', icon:'bi-pin-fill', duration:0 })">
+      📌 不自動消失
+    </button>
+  </div>
+
+  <p style="color:#95BDD7;font-size:0.85rem;margin:16px 0 8px">▸ 底部通知（position:"bottom"）</p>
+  <div class="row">
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('檔案已儲存', { theme:'teal', icon:'bi-floppy-fill', position:'bottom' })">
+      💾 teal
+    </button>
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('已複製到剪貼板', { theme:'focus', icon:'bi-clipboard-check-fill', position:'bottom' })">
+      📋 focus
+    </button>
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('發生錯誤，請稍後再試', { theme:'warning', icon:'bi-x-circle-fill', position:'bottom' })">
+      ❌ bottom warning
+    </button>
+    <button class="demo-trigger"
+      onclick="UiBtn.alert('已傳送', { theme:'info', icon:'bi-send-fill', position:'bottom', duration:1800 })">
+      📤 info 1.8s
+    </button>
+  </div>
+
+  <p style="color:#95BDD7;font-size:0.85rem;margin:16px 0 8px">▸ 連續堆疊 ＆ 清除</p>
+  <div class="row">
+    <button class="demo-trigger" onclick="
+      UiBtn.alert('第一則通知', { theme:'shell', icon:'bi-1-circle-fill' });
+      setTimeout(function(){ UiBtn.alert('第二則通知', { theme:'stone', icon:'bi-2-circle-fill' }); }, 300);
+      setTimeout(function(){ UiBtn.alert('第三則通知', { theme:'salmon', icon:'bi-3-circle-fill' }); }, 600);
+    ">連發三則（頂部）</button>
+    <button class="demo-trigger" onclick="
+      UiBtn.alert('A', { theme:'orange', position:'bottom' });
+      setTimeout(function(){ UiBtn.alert('B', { theme:'pink', position:'bottom' }); }, 300);
+    ">連發兩則（底部）</button>
+    <button class="demo-trigger" style="border-color:#F08080;color:#F08080"
+      onclick="UiBtn.alert.clear()">× 清除全部</button>
+  </div>
+</div>
+
+<hr class="sep">
+
+<!-- ── SECTION 8 ── -->
+<div class="section">
+  <p class="section-title">⑧ Disabled 狀態</p>
+  <div class="row">
+    <ui-btn icon="bi-lock-fill" theme="shell"   disabled>已鎖定（fill）</ui-btn>
+    <ui-btn icon="bi-lock-fill" theme="warning" variant="outline" disabled>已鎖定（outline）</ui-btn>
+    <ui-btn icon="bi-lock-fill" theme="stone"   variant="ghost"   disabled>已鎖定（ghost）</ui-btn>
+  </div>
+</div>
+
+<script src="ui-btn.js"></script>
+</body>
+</html>
