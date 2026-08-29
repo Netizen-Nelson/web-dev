@@ -314,6 +314,7 @@
         (rd.cols || []).forEach(function (cd) {
           var c = mk('ui-col');
           if (cd.icon)              c.setAttribute('icon',              cd.icon);
+          if (cd.span)              c.setAttribute('span',              String(cd.span));
           if (cd.width)             c.setAttribute('width',             cd.width);
           if (cd.fixed)             c.setAttribute('fixed',             cd.fixed);
           if (cd.showNext)          c.setAttribute('show-next',         'true');
@@ -508,8 +509,12 @@
     });
     if (!active.length) return null;
 
-    /* ── 驗證 col-widths ── */
-    var cw = rowEl.getAttribute('col-widths');
+    /* ── 是否含有 span 欄 ──
+     * 有 span 時：跳過欄數驗證，col-widths 也忽略（強制等寬格對齊其他列） */
+    var hasSpan = active.some(function (c) { return c.hasAttribute('span'); });
+
+    /* ── 驗證 col-widths（span 列跳過） ── */
+    var cw = hasSpan ? null : rowEl.getAttribute('col-widths');
     if (cw) {
       var parts = cw.split(':');
       if (parts.length !== this.colN) {
@@ -524,8 +529,9 @@
     var div = mk('div', 'uit-row');
     if (rowEl.hasAttribute('hidden')) div.classList.add('uit-hidden');
 
-    /* Grid 欄寬 */
-    var tpl = cw
+    /* Grid 欄寬
+     * span 列強制 repeat(colN,1fr)，確保 grid 格線與其他列對齊 */
+    var tpl = (cw && !hasSpan)
       ? cw.split(':').map(function (v) { return parseFloat(v) + 'fr'; }).join(' ')
       : 'repeat(' + this.colN + ',1fr)';
     div.style.gridTemplateColumns = tpl;
@@ -541,7 +547,7 @@
       fontSize:   rowEl.getAttribute('font-size'),
       lineHeight: rowEl.getAttribute('line-height'),
       textIndent: rowEl.getAttribute('text-indent'),
-      colBorder:  rowEl.getAttribute('col-border')
+      colBorder:  hasSpan ? null : rowEl.getAttribute('col-border') /* span 列不套 col-border */
     };
 
     /* 渲染各欄，將 globalMoCount 傳入 _renderCol */
@@ -603,6 +609,21 @@
     var self = this;
     var div  = mk('div', 'uit-col');
     div.style.padding = pad;
+
+    /* ── span 跨欄（需在 renderRow 的 repeat(colN,1fr) 格線下使用） ──
+     *   span="all"  → grid-column: 1 / -1   （橫跨整列）
+     *   span="N"    → grid-column: span N    （佔 N 個格位）  */
+    var spanVal = colEl.getAttribute('span');
+    if (spanVal) {
+      if (spanVal === 'all') {
+        div.style.gridColumn = '1 / -1';
+      } else {
+        var spanN = parseInt(spanVal);
+        if (!isNaN(spanN) && spanN > 1) {
+          div.style.gridColumn = 'span ' + spanN;
+        }
+      }
+    }
 
     /* 欄寬 & 固定欄 */
     var w = colEl.getAttribute('width');
