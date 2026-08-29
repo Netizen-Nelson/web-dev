@@ -523,6 +523,13 @@
     var dur   = (opts.duration != null) ? +opts.duration : 3000;
     var icon  = opts.icon || '';
 
+    /* ── width：接受 px 或 % 值，例如 "400px" / "80%" ── */
+    var width = opts.width ? String(opts.width).trim() : '';
+    if (width && !/^\d+(\.\d+)?(px|%)$/.test(width)) {
+      console.warn('[ui-btn] alert width 格式無效（應為 px 或 %，例如 "400px"、"80%"），已忽略。');
+      width = '';
+    }
+
     var stack = ensureAlertStack(pos);
 
     /* 條目 */
@@ -530,6 +537,13 @@
     item.className = 'ubtn-alert';
     item.style.background = color;
     item.style.color      = BG;
+
+    /* 套用寬度：有寬度時取消 max-width 限制並允許換行 */
+    if (width) {
+      item.style.width      = width;
+      item.style.maxWidth   = 'none';
+      item.style.whiteSpace = 'normal';
+    }
 
     /* 圖示 */
     if (icon && /^bi-/.test(icon)) {
