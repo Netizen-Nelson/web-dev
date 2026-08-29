@@ -1,22 +1,6 @@
-/**
- * ui-table.js  v1.3.0
- * ─────────────────────────────────────────────────────────────────────
- * 自訂元素表格元件
- *
- * 修正 v1.3.0
- *   - mask-order 現在支援跨 <ui-row> 的全域順序解鎖（原本僅限同一列）
- *   - icon 屬性直接支援 Bootstrap Icons：icon="bi-star" 即可
- *
- * 全域配置（在引入此檔案之前設定）：
- *   window.UiTableConfig = { theme, cellPadding, fontSize, alertDuration }
- * ─────────────────────────────────────────────────────────────────────
- */
 (function (global) {
   'use strict';
 
-  /* ================================================================
-   * 品牌色票
-   * ================================================================ */
   var BRAND = {
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
@@ -38,7 +22,6 @@
 
   var BG = '#0C0D0C';
 
-  /* 全域配置（可在引入前透過 window.UiTableConfig 覆寫） */
   var CFG = global.UiTableConfig = Object.assign({
     theme:         'shell',  // 預設主題色
     cellPadding:   '6px',   // 預設 cell 內距
@@ -46,9 +29,6 @@
     alertDuration: 2500     // alert 顯示時長（毫秒）
   }, global.UiTableConfig || {});
 
-  /* ================================================================
-   * 內建 SVG 圖示
-   * ================================================================ */
   var ICO = {
     'i-arrow-down':  icoP('M6 9 12 15 18 9'),
     'i-arrow-up':    icoP('M18 15 12 9 6 15'),
@@ -96,12 +76,8 @@
     '5': 'linear-gradient(135deg,#041208 0%,#083820 50%,#0DA591 100%)',
     '6': 'linear-gradient(135deg,#060c1e 0%,#1a3580 50%,#4285EB 80%,#9B72CF 100%)'
   };
-  /* 漸層遮罩文字色（深色漸層上使用淺色字） */
-  var MASK_GRAD_TEXT = '#DBEDD8'; /* vanilla */
 
-  /* ================================================================
-   * 工具函式
-   * ================================================================ */
+  var MASK_GRAD_TEXT = '#DBEDD8';
   function resolveColor(v) {
     if (!v) return null;
     v = String(v).trim();
@@ -109,8 +85,7 @@
   }
 
   function hexRgba(hex, a) {
-    /* 透明度最低 0.72（符合品牌規範） */
-    a = Math.max(+a || 0, 0.72);
+    a = Math.max(+a || 0, 0.76);
     var h = hex.replace('#', '');
     var r = parseInt(h.slice(0, 2), 16);
     var g = parseInt(h.slice(2, 4), 16);
@@ -118,16 +93,6 @@
     return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
   }
 
-  /**
-   * mkIco：產生圖示 HTML 字串
-   *
-   * 優先序：
-   *  1. Bootstrap Icons  — icon="bi-star"      → <i class="bi bi-star">
-   *  2. 內建 SVG 圖示    — icon="i-arrow-down" → 內建 SVG
-   *  3. 不符合任何規則   → 空字串（靜默忽略）
-   *
-   * Bootstrap Icons 需在頁面引入官方 CSS，本元件僅負責輸出 <i> 標籤。
-   */
   function mkIco(name) {
     if (!name) return '';
     /* Bootstrap Icons：以 'bi-' 開頭 */
@@ -136,7 +101,6 @@
         '<i class="bi ' + name + '" aria-hidden="true"></i>' +
         '</span>';
     }
-    /* 內建 SVG 圖示 */
     return ICO[name] ? '<span class="uit-ico">' + ICO[name] + '</span>' : '';
   }
 
@@ -162,9 +126,6 @@
     setTimeout(function () { once(); setInterval(once, interval); }, interval);
   }
 
-  /* ================================================================
-   * 全域 CSS（注入一次）
-   * ================================================================ */
   var CSS = [
 
     'ui-table,ui-group,ui-row,ui-col,cell-item{display:none}',
@@ -206,9 +167,9 @@
     /* ── 遮罩 ── */
     '.uit-mask{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;gap:8px;font-weight:600;transition:opacity .3s ease;font-size:var(--uit-fs);border-radius:inherit}',
     '.uit-mask.unlockable{cursor:pointer}',
-    '.uit-mask.unlockable:hover{filter:brightness(1.08)}',
+    '.uit-mask.unlockable:hover{filter:brightness(1.1)}',
     /* locked：改用 brightness 壓暗，不再降低 opacity（避免內容透出） */
-    '.uit-mask.locked{cursor:not-allowed;filter:brightness(0.72)}',
+    '.uit-mask.locked{cursor:not-allowed;filter:brightness(0.76)}',
     '.uit-mask.revealed{opacity:0;pointer-events:none}',
     '.uit-mlock{display:inline-flex;align-items:center}',
 
@@ -245,16 +206,13 @@
 
   injectCSS();
 
-  /* ================================================================
-   * UiTable 建構子
-   * ================================================================ */
   function UiTable(el) {
     this.el     = el;
     this.theme  = el.getAttribute('theme') || CFG.theme;
     this.color  = resolveColor(this.theme) || BRAND.shell;
     this.src    = el.getAttribute('src');
     this.dataId = el.getAttribute('data-id');
-    this.colN   = 0; // 欄數，由第一列決定
+    this.colN   = 0;
 
     /* 蒐集內容來源欄（hidden + id） */
     this.srcMap = {};
@@ -824,9 +782,6 @@
     }, ms);
   };
 
-  /* ----------------------------------------------------------------
-   * _setupAlert：週期性 alert 顯示
-   * ---------------------------------------------------------------- */
   UiTable.prototype._setupAlert = function (colDiv, colEl) {
     var msg      = colEl.getAttribute('alert-msg') || '';
     var clr      = resolveColor(colEl.getAttribute('alert-color')) || this.color;
@@ -879,9 +834,6 @@
     }
   };
 
-  /* ----------------------------------------------------------------
-   * _bindSN：綁定 show-next 點擊事件
-   * ---------------------------------------------------------------- */
   UiTable.prototype._bindSN = function (rds) {
     rds.forEach(function (rd, i) {
       var snCols = rd.el.querySelectorAll('.has-sn');
@@ -901,9 +853,6 @@
     });
   };
 
-  /* ================================================================
-   * 自動啟動
-   * ================================================================ */
   function boot() {
     document.querySelectorAll('ui-table').forEach(function (el) {
       if (!el._uit) {
