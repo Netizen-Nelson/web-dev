@@ -56,6 +56,11 @@
         transition: background 0.22s ease;
       }
 
+      /* ── 底列頁籤（解釋標注標題）可獨立設定 padding ── */
+      .sa-bottom-row .sa-ch-panel {
+        padding: var(--sa-tab-padding, 8px);
+      }
+
       /* 上列 */
       .sa-top-row { display: flex; }
       .sa-top-row .sa-border-wrap { flex: 1; }
@@ -317,6 +322,12 @@
       contentBorderStyle,
       borderWidth:      parseInt(root.getAttribute('border-width'))     || defaultBorderWidth,
 
+      /* v1.4.0 新增：底列頁籤四邊 padding（解釋 tab 標題區塊），預設 8px */
+      tabPadding: (() => {
+        const v = root.getAttribute('tab-padding');
+        return v !== null ? parseInt(v) : 8;
+      })(),
+
       colorCycle,
     };
 
@@ -349,10 +360,11 @@
     const wrapper = document.createElement('div');
     wrapper.className = 'sa-wrapper';
     /* CSS 變數統一設在 wrapper 上，供子元素取用 */
-    wrapper.style.setProperty('--sa-chamfer',  `${cfg.chamfer}px`);
-    wrapper.style.setProperty('--sa-panel-bg', cfg.panelBg);
-    wrapper.style.setProperty('--sa-dot-size', `${cfg.dotSize}px`);
-    wrapper.style.setProperty('--sa-bar-width', `${cfg.borderWidth}px`);
+    wrapper.style.setProperty('--sa-chamfer',    `${cfg.chamfer}px`);
+    wrapper.style.setProperty('--sa-panel-bg',   cfg.panelBg);
+    wrapper.style.setProperty('--sa-dot-size',   `${cfg.dotSize}px`);
+    wrapper.style.setProperty('--sa-bar-width',  `${cfg.borderWidth}px`);
+    wrapper.style.setProperty('--sa-tab-padding', `${cfg.tabPadding}px`);
 
     /* 上列 */
     const topRow = document.createElement('div');
