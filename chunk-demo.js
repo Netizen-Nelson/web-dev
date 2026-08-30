@@ -19,7 +19,20 @@ chunk-demo { display: block; }
 }
 
 /* ── 語塊錨點（下拉定位容器）────────────── */
-.cd-anchor { position: relative; display: inline-flex; }
+.cd-anchor { position: relative; display: inline-flex; align-items: center; }
+
+/*
+  長語塊獨佔整行：
+  cd-anchor-grp  = 錨點 + 緊接標點的包裝層（同為直接 flex 子項）
+  cd-anchor--full 套用於 .cd-anchor 或 .cd-anchor-grp，讓其獨佔整行
+*/
+.cd-anchor-grp {
+  display: inline-flex;
+  align-items: center;
+}
+.cd-anchor--full {
+  flex-basis: 100%;
+}
 
 /* ── 語塊按鈕 ───────────────────────────── */
 .cd-btn {
@@ -42,12 +55,6 @@ chunk-demo { display: block; }
 .cd-btn.is-open .cd-b-arr { transform: rotate(180deg); }
 
 /* ── 遮罩模式（mask-mode）────────────────── */
-/*
-  is-masked 套用在 .cd-btn 上：
-    - .cd-b-text 以深色背景 + color:transparent 遮蓋文字
-    - 文字仍在 DOM 中（輔助技術可讀），視覺上不可見
-    - 點選 Level 後 is-masked 移除，文字顯現
-*/
 .cd-btn.is-masked .cd-b-text {
   background   : var(--cd-mask-bg, #252625);
   color        : transparent;
@@ -58,26 +65,34 @@ chunk-demo { display: block; }
   user-select  : none;
   transition   : none;
 }
-/* hover 時遮罩略微提亮，讓使用者知道可點擊 */
 .cd-btn.is-masked:hover .cd-b-text {
   background: color-mix(in srgb, var(--cd-mask-bg, #252625) 80%, white);
 }
-/* 下拉開啟中，遮罩維持（直到選取 Level 才揭露）*/
 .cd-btn.is-masked.is-open {
   box-shadow: 0 0 0 3px rgba(255,255,255,.12);
 }
 
 /* ── 下拉選單 ───────────────────────────── */
 .cd-dd {
-  position: absolute; top: calc(100% + 6px); left: 0;
-  z-index: 9999; border: 1px solid; border-radius: 10px; overflow: hidden;
+  position: absolute;
+  top: calc(100% + 6px); left: 0;
+  z-index: 9999;
+  border: 1px solid; border-radius: 10px; overflow: hidden;
   box-shadow: 0 16px 44px rgba(0,0,0,.72);
   min-width: 240px; max-width: 420px;
+  /* 預設往下展開：起始稍高並縮小 */
   opacity: 0; transform: translateY(-5px) scale(.985);
   pointer-events: none;
   transition: opacity .17s ease, transform .17s ease;
 }
-.cd-dd.is-open { opacity: 1; transform: none; pointer-events: auto; }
+/* 往上翻轉：起始稍低並縮小，動畫方向對調 */
+.cd-dd.cd-dd--up {
+  top: auto;
+  transform: translateY(5px) scale(.985);
+}
+.cd-dd.is-open {
+  opacity: 1; transform: none; pointer-events: auto;
+}
 
 /* 下拉標題（僅在 chunk.label 非空時渲染）*/
 .cd-dd-head {
@@ -106,7 +121,7 @@ chunk-demo { display: block; }
   width: 3px; background: var(--sel-bar, var(--lc, #C6C7BD)); border-radius: 0 2px 2px 0;
 }
 
-/* 圓點（show-dots=false 時不渲染此元素，無需 CSS 隱藏）*/
+/* 圓點（show-dots=false 時不渲染此元素）*/
 .cd-lv-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--lc, #C6C7BD); flex-shrink: 0; margin-top: 5px;
@@ -149,10 +164,26 @@ chunk-demo { display: block; }
   font-size: .85rem; color: var(--notec, #6e7270);
   letter-spacing: .02em; line-height: 1.3; font-style: italic;
 }
+
+/* ── 鎖定語塊（等待外部 ui-btn 解鎖）── */
+.cd-btn.is-locked {
+  opacity: 0.36;
+  cursor: not-allowed;
+}
+.cd-btn.is-locked:hover { filter: none !important; }
+.cd-btn.is-locked:active { transform: none !important; }
+/* 鎖定時箭頭變鎖頭圖示（CSS 替換內容）*/
+.cd-btn.is-locked .cd-b-arr {
+  opacity: 1;
+  font-style: normal;
+}
     `.trim();
     (doc.head || doc.documentElement).appendChild(s);
   }
 
+  /* ─────────────────────────────────────────────────────
+     預設設定
+  ───────────────────────────────────────────────────── */
   const DEFAULTS = {
     themes: {
       shell:    { border: '#C6C7BD', text: '#C6C7BD', bg: 'rgba(198,199,189,.09)' },
@@ -171,10 +202,22 @@ chunk-demo { display: block; }
       pink:     { border: '#FFB3D9', text: '#FFB3D9', bg: 'rgba(255,179,217,.09)' },
       orange:   { border: '#EDA109', text: '#EDA109', bg: 'rgba(237,161,9,.09)'   },
     },
-    defaultTheme:       'special',
-    chunkBorderWidth:   '1.5px',
-    chunkBorderStyle:   'solid',
-    levelDotColors:     { 1: '#40C99A', 2: '#DECA4B', 3: '#C3A5E5' },
+    defaultTheme:     'special',
+    chunkBorderWidth: '1.5px',
+    chunkBorderStyle: 'solid',
+
+    /* 圓點色彩：由 3 種擴充至 8 種 */
+    levelDotColors: {
+      1: '#40C99A',   /* safe    — 綠  */
+      2: '#DECA4B',   /* yellow  — 黃  */
+      3: '#C3A5E5',   /* lavender— 紫  */
+      4: '#0ABDC6',   /* sky     — 青  */
+      5: '#F08080',   /* warning — 紅  */
+      6: '#EDA109',   /* orange  — 橘  */
+      7: '#FFB3D9',   /* pink    — 粉  */
+      8: '#95BDD7',   /* stone   — 藍灰 */
+    },
+
     fixedTextColor:     '#C6C7BD',
     sentenceBg:         '#161816',
     sentenceBorder:     '#222422',
@@ -190,17 +233,29 @@ chunk-demo { display: block; }
     width:              null,
     dropdownWidth:      null,
     buttonWidth:        null,
+
+    /*
+      longChunkThreshold：
+      按鈕原生寬（scrollWidth）佔句子框可用寬的比例超過此值時，
+      自動對錨點加 .cd-anchor--full 使其獨佔整行。
+      可透過 long-chunk-threshold="0.4" 屬性覆寫。
+    */
+    longChunkThreshold: 0.52,
+
     showTranslation:        false,
     translationColor:       '#8C9088',
-    translationBorderColor: null,   // null = 跟隨主題 border 色
-    translationIndent:      0,      // px，translation 左側線條右移量
+    translationBorderColor: null,
+    translationIndent:      0,
 
-    showNote:               false,
-    noteColor:              '#6e7270',
-    noteBorderColor:        null,   // null = 跟隨主題 border 色
-    noteIndent:             0,      // px，note 左側線條右移量
+    showNote:        false,
+    noteColor:       '#6e7270',
+    noteBorderColor: null,
+    noteIndent:      0,
   };
 
+  /* ─────────────────────────────────────────────────────
+     Custom Element
+  ───────────────────────────────────────────────────── */
   class ChunkDemo extends HTMLElement {
 
     static get observedAttributes() {
@@ -211,6 +266,8 @@ chunk-demo { display: block; }
         'level-colors', 'mask-mode',
         'translation', 'show-translation', 'translation-indent',
         'note', 'show-note', 'note-indent',
+        'long-chunk-threshold',
+        'lock-chunks',
       ];
     }
 
@@ -223,7 +280,9 @@ chunk-demo { display: block; }
       this._btns     = {};
       this._dds      = {};
       this._ready    = false;
-      this._revealed = new Set();   /* v3: 已揭露的 chunk id（mask-mode 用）*/
+      this._revealed = new Set();
+      this._ro       = null;
+      this._locked   = new Set();   /* chunk id 集合，鎖定中的語塊無法開啟下拉 */
       this._docClick = () => this._close();
       this._docKey   = e => { if (e.key === 'Escape') this._close(); };
     }
@@ -231,18 +290,31 @@ chunk-demo { display: block; }
     connectedCallback() {
       doc.addEventListener('click',   this._docClick);
       doc.addEventListener('keydown', this._docKey);
+
+      /* ResizeObserver：元件寬度改變時重新判斷長語塊 */
+      if (typeof ResizeObserver !== 'undefined') {
+        this._ro = new ResizeObserver(() => {
+          const bar = this.querySelector('.cd-bar');
+          if (bar) this._checkLongBtns(bar);
+        });
+        this._ro.observe(this);
+      }
+
       setTimeout(() => { this._ready = true; this._init(); }, 0);
     }
 
     disconnectedCallback() {
       doc.removeEventListener('click',   this._docClick);
       doc.removeEventListener('keydown', this._docKey);
+      this._ro?.disconnect();
+      this._ro = null;
     }
 
     attributeChangedCallback() {
       if (this.isConnected && this._ready) this._init();
     }
 
+    /* ── 合併設定 ─────────────────────────── */
     _cfg() {
       const G = win.ChunkDemoConfig || {};
       let E = {};
@@ -290,6 +362,12 @@ chunk-demo { display: block; }
       const niAttr = this.getAttribute('note-indent');
       if (niAttr !== null) cfg.noteIndent = parseFloat(niAttr) || 0;
 
+      const lctAttr = this.getAttribute('long-chunk-threshold');
+      if (lctAttr !== null) {
+        const v = parseFloat(lctAttr);
+        if (!isNaN(v)) cfg.longChunkThreshold = v;
+      }
+
       /* 衍生值 */
       cfg._pvColor   = cfg.previewBorderColor || cfg._theme.border;
       cfg._maskColor = cfg.maskColor || DEFAULTS.maskColor;
@@ -311,7 +389,7 @@ chunk-demo { display: block; }
           levels      : cdLevels.map((lv, j) => ({
             level: parseInt(lv.getAttribute('level') || String(j + 1)),
             text : lv.innerHTML.trim(),
-            trans: lv.getAttribute('trans') ?? '',   /* v4 */
+            trans: lv.getAttribute('trans') ?? '',
           })),
         };
       });
@@ -330,6 +408,14 @@ chunk-demo { display: block; }
       this._sent   = this.getAttribute('sentence')    || '';
       this._trans  = this.getAttribute('translation') || '';
       this._chunks = chunks;
+
+      /* 重新解析鎖定清單（只在 _init 時重置，_draw 不重置）*/
+      const lcAttrRaw = this.getAttribute('lock-chunks') || '';
+      this._locked = new Set(
+        lcAttrRaw.split(',')
+          .map(s => parseInt(s.trim(), 10))
+          .filter(n => !isNaN(n))
+      );
 
       const prev  = this._state;
       this._state = chunks.map(c => {
@@ -363,26 +449,14 @@ chunk-demo { display: block; }
         this.style.removeProperty('--cd-mask-bg');
       }
 
-      /* 句子框 */
-      const bar = doc.createElement('div');
-      bar.className        = 'cd-bar';
-      bar.style.background  = cfg.sentenceBg;
-      bar.style.borderColor = cfg.sentenceBorder;
-
-      this._sent.split(/(\{\d+\})/).forEach(part => {
-        const m = part.match(/^\{(\d+)\}$/);
-        if (m) {
-          const chunk = this._chunks.find(c => c.id === +m[1]);
-          if (chunk) bar.appendChild(this._mkAnchor(chunk, cfg));
-        } else if (part) {
-          const sp        = doc.createElement('span');
-          sp.style.color  = cfg.fixedTextColor;
-          sp.textContent  = part;
-          bar.appendChild(sp);
-        }
-      });
+      /* 句子框（含長語塊解析）*/
+      const bar = this._buildBar(cfg);
       this.appendChild(bar);
 
+      /* 長語塊判斷（需等 DOM 插入後才能取得正確寬度）*/
+      requestAnimationFrame(() => this._checkLongBtns(bar, cfg));
+
+      /* 整句預覽 */
       const showPrev =
         this.getAttribute('show-preview') === 'true' ||
         (this.getAttribute('show-preview') === null && cfg.showPreview);
@@ -393,14 +467,14 @@ chunk-demo { display: block; }
         pv.style.setProperty('--pvb', cfg._pvColor);
         if (cfg.previewTextColor) pv.style.setProperty('--pvt',  cfg.previewTextColor);
         if (cfg.previewBg)        pv.style.setProperty('--pvbg', cfg.previewBg);
-
-        const t       = doc.createElement('div');
-        t.className   = 'cd-pv-text';
-        t.innerHTML   = this._full();
+        const t     = doc.createElement('div');
+        t.className = 'cd-pv-text';
+        t.innerHTML = this._full();
         pv.appendChild(t);
         this.appendChild(pv);
       }
 
+      /* 翻譯 */
       const showTrans =
         this.getAttribute('show-translation') === 'true' ||
         (this.getAttribute('show-translation') === null && cfg.showTranslation);
@@ -411,7 +485,6 @@ chunk-demo { display: block; }
         tr.style.setProperty('--trlb', cfg._trColor);
         if (cfg.translationColor)  tr.style.setProperty('--trlc', cfg.translationColor);
         if (cfg.translationIndent) tr.style.setProperty('--trl-indent', cfg.translationIndent + 'px');
-
         const tt     = doc.createElement('div');
         tt.className = 'cd-tr-text';
         tt.innerHTML = this._fullTrans();
@@ -419,10 +492,10 @@ chunk-demo { display: block; }
         this.appendChild(tr);
       }
 
+      /* 備註 */
       const showNote =
         this.getAttribute('show-note') === 'true' ||
         (this.getAttribute('show-note') === null && cfg.showNote);
-
       const noteText = this.getAttribute('note') || '';
       if (showNote && noteText) {
         const nt = doc.createElement('div');
@@ -430,13 +503,74 @@ chunk-demo { display: block; }
         nt.style.setProperty('--noteb', cfg._noteColor);
         if (cfg.noteColor)  nt.style.setProperty('--notec', cfg.noteColor);
         if (cfg.noteIndent) nt.style.setProperty('--note-indent', cfg.noteIndent + 'px');
-
         const ntx     = doc.createElement('div');
         ntx.className = 'cd-note-text';
         ntx.innerHTML = noteText;
         nt.appendChild(ntx);
         this.appendChild(nt);
       }
+    }
+
+    _buildBar(cfg) {
+      const bar = doc.createElement('div');
+      bar.className        = 'cd-bar';
+      bar.style.background  = cfg.sentenceBg;
+      bar.style.borderColor = cfg.sentenceBorder;
+
+      const PUNCT_RE = /^([.,!?;:…\u3002\uff0c\uff01\uff1f\uff1b\uff1a]+)([\s\S]*)$/;
+
+      const parts = this._sent.split(/(\{\d+\})/);
+
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        const m    = part.match(/^\{(\d+)\}$/);
+
+        if (m) {
+          const chunk = this._chunks.find(c => c.id === +m[1]);
+          if (!chunk) continue;
+
+          const anchor   = this._mkAnchor(chunk, cfg);
+          const nextPart = parts[i + 1] ?? '';
+          const punctM   = PUNCT_RE.exec(nextPart);
+
+          if (punctM) {
+            const grp = doc.createElement('span');
+            grp.className = 'cd-anchor-grp';
+            grp.appendChild(anchor);
+            const ps = doc.createElement('span');
+            ps.style.color = cfg.fixedTextColor;
+            ps.textContent = punctM[1];
+            grp.appendChild(ps);
+            bar.appendChild(grp);
+            parts[i + 1] = punctM[2];
+          } else {
+            bar.appendChild(anchor);
+          }
+
+        } else if (part) {
+          const sp = doc.createElement('span');
+          sp.style.color = cfg.fixedTextColor;
+          sp.textContent = part;
+          bar.appendChild(sp);
+        }
+      }
+
+      return bar;
+    }
+
+    _checkLongBtns(bar, cfg) {
+      if (!cfg) cfg = this._cfg();
+      const padH      = 44;   /* padding-left 22 + padding-right 22 */
+      const barW      = bar.clientWidth - padH;
+      if (barW <= 0) return;
+
+      const threshold = cfg.longChunkThreshold ?? DEFAULTS.longChunkThreshold;
+
+      bar.querySelectorAll(':scope > .cd-anchor, :scope > .cd-anchor-grp').forEach(el => {
+        const btn = el.querySelector('.cd-btn');
+        if (!btn) return;
+        el.classList.toggle('cd-anchor--full', btn.scrollWidth > barW * threshold);
+      });
     }
 
     _mkAnchor(chunk, cfg) {
@@ -447,13 +581,16 @@ chunk-demo { display: block; }
       const bw    = cfg.chunkBorderWidth || '1.5px';
       const bs    = cfg.chunkBorderStyle || 'solid';
 
-      const isMasked = cfg.maskMode && !this._revealed.has(chunk.id);
+      const isMasked  = cfg.maskMode && !this._revealed.has(chunk.id);
+      const isLocked  = this._locked.has(chunk.id);
 
       const anchor     = doc.createElement('div');
       anchor.className = 'cd-anchor';
 
       const btn     = doc.createElement('button');
-      btn.className = 'cd-btn' + (isMasked ? ' is-masked' : '');
+      btn.className = 'cd-btn' +
+        (isMasked ? ' is-masked' : '') +
+        (isLocked  ? ' is-locked'  : '');
       btn.style.cssText =
         `border-color:${th.border};border-width:${bw};border-style:${bs};` +
         `color:${th.text};background:${th.bg};`;
@@ -461,22 +598,20 @@ chunk-demo { display: block; }
       if (cfg.buttonWidth) btn.style.minWidth = cfg.buttonWidth;
 
       if (chunk.icon) {
-        const ic     = doc.createElement('span');
-        ic.className = 'cd-b-icon';
+        const ic       = doc.createElement('span');
+        ic.className   = 'cd-b-icon';
         ic.textContent = chunk.icon;
         btn.appendChild(ic);
       }
 
-      /* 文字（遮罩時視覺隱藏，但仍在 DOM 供輔助技術讀取）*/
       const tx     = doc.createElement('span');
       tx.className = 'cd-b-text';
-      tx.innerHTML  = lvD?.text ?? '—';
+      tx.innerHTML = lvD?.text ?? '—';
       btn.appendChild(tx);
 
-      /* 箭頭指示器 */
-      const arr    = doc.createElement('span');
+      const arr       = doc.createElement('span');
       arr.className   = 'cd-b-arr';
-      arr.textContent = '▾';
+      arr.textContent = isLocked ? '🔒' : '▾';
       arr.setAttribute('aria-hidden', 'true');
       btn.appendChild(arr);
 
@@ -484,7 +619,6 @@ chunk-demo { display: block; }
       this._btns[chunk.id] = btn;
       anchor.appendChild(btn);
 
-      /* 下拉選單 */
       const dd = this._mkDD(chunk, cfg, lvNum);
       this._dds[chunk.id] = dd;
       anchor.appendChild(dd);
@@ -492,7 +626,6 @@ chunk-demo { display: block; }
       return anchor;
     }
 
-    /* ── 建立下拉選單 ─────────────────────── */
     _mkDD(chunk, cfg, currentLevel) {
       const dd     = doc.createElement('div');
       dd.className = 'cd-dd';
@@ -504,24 +637,22 @@ chunk-demo { display: block; }
         dd.style.maxWidth = cfg.dropdownWidth;
       }
 
-      /* 標題（label 非空才渲染）*/
       const lbl = (typeof chunk.label === 'string') ? chunk.label.trim() : '';
       if (lbl) {
         const hd     = doc.createElement('div');
         hd.className = 'cd-dd-head';
         if (chunk.icon) {
-          const ic     = doc.createElement('span');
+          const ic       = doc.createElement('span');
           ic.textContent = chunk.icon;
           hd.appendChild(ic);
         }
-        const lb     = doc.createElement('span');
-        lb.className = 'cd-h-lbl';
+        const lb       = doc.createElement('span');
+        lb.className   = 'cd-h-lbl';
         lb.textContent = lbl;
         hd.appendChild(lb);
         dd.appendChild(hd);
       }
 
-      /* Level 列 */
       chunk.levels.forEach(lv => {
         const dotC  = cfg.levelDotColors[lv.level] || '#C6C7BD';
         const isSel = lv.level === currentLevel;
@@ -550,15 +681,35 @@ chunk-demo { display: block; }
     }
 
     _toggle(id) {
+      if (this._locked.has(id)) return;
       if (this._openId === id) { this._close(); return; }
       this._close();
       this._openId = id;
       this._btns[id]?.classList.add('is-open');
       const dd = this._dds[id];
       if (!dd) return;
+
+      const btn        = this._btns[id];
+      const btnRect    = btn.getBoundingClientRect();
+      const ddH        = dd.offsetHeight;
+      const spaceBelow = win.innerHeight - btnRect.bottom;
+      const spaceAbove = btnRect.top;
+
+      if (spaceBelow < ddH + 8 && spaceAbove > ddH + 8) {
+        dd.classList.add('cd-dd--up');
+        dd.style.top    = 'auto';
+        dd.style.bottom = 'calc(100% + 6px)';
+      } else {
+        dd.classList.remove('cd-dd--up');
+        dd.style.top    = 'calc(100% + 6px)';
+        dd.style.bottom = 'auto';
+      }
+
       dd.classList.add('is-open');
+
       requestAnimationFrame(() => {
-        const r       = dd.getBoundingClientRect();
+        if (!this._dds[id]) return;
+        const r        = dd.getBoundingClientRect();
         dd.style.left  = r.right > win.innerWidth - 8 ? 'auto' : '0';
         dd.style.right = r.right > win.innerWidth - 8 ? '0'    : 'auto';
       });
@@ -567,14 +718,20 @@ chunk-demo { display: block; }
     _close() {
       if (this._openId === null) return;
       this._btns[this._openId]?.classList.remove('is-open');
-      this._dds[this._openId]?.classList.remove('is-open');
+      const dd = this._dds[this._openId];
+      if (dd) {
+        dd.classList.remove('is-open', 'cd-dd--up');
+        dd.style.top    = '';
+        dd.style.bottom = '';
+        dd.style.left   = '';
+        dd.style.right  = '';
+      }
       this._openId = null;
     }
 
     _pick(id, level) {
       const st = this._state.find(s => s.id === id);
       if (st) st.level = level;
-
       this._revealed.add(id);
       this._close();
       this._draw();
@@ -596,10 +753,27 @@ chunk-demo { display: block; }
       this._chunks.forEach(c => {
         const lvNum = (this._state.find(st => st.id === c.id) || {}).level || 1;
         const lvD   = c.levels.find(l => l.level === lvNum) || c.levels[0];
-        /* 優先用 trans；若未設定則退回英文 text */
         result = result.replace(`{${c.id}}`, lvD?.trans || lvD?.text || '…');
       });
       return result;
+    }
+
+    unlockChunk(id) {
+      const n = parseInt(id, 10);
+      if (!isNaN(n) && this._locked.has(n)) {
+        this._locked.delete(n);
+        this._draw();
+      }
+    }
+
+    lockChunk(id) {
+      const n = parseInt(id, 10);
+      if (!isNaN(n) && !this._locked.has(n)) {
+        /* 若該 chunk 的下拉正開著，先關閉 */
+        if (this._openId === n) this._close();
+        this._locked.add(n);
+        this._draw();
+      }
     }
   }
 

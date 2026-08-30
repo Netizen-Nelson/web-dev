@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chunk Demo — 功能示範</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0C0D0C;
+  --shell:    #C6C7BD;
+  --lavender: #C3A5E5;
+  --special:  #C8DD5A;
+  --sky:      #0ABDC6;
+  --safe:     #40C99A;
+  --warning:  #F08080;
+  --salmon:   #E5C3B3;
+  --orange:   #EDA109;
+  --pink:     #FFB3D9;
+  --stone:    #95BDD7;
+  --yellow:   #DECA4B;
+  --indigo:   #9B72CF;
+  --focus:    #A0CF72;
+  --info:     #4285EB;
+}
+
+body {
+  background: var(--bg);
+  color: var(--shell);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  min-width: 800px;
+}
+
+/* ── 頁首 ─────────────────────────────── */
+.page-header {
+  background: rgba(198,199,189,.04);
+  border-bottom: 1px solid rgba(198,199,189,.1);
+  padding: 36px 64px 32px;
+}
+.page-header h1 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--special);
+  letter-spacing: .02em;
+  margin-bottom: 6px;
+}
+.page-header p {
+  font-size: 0.9rem;
+  color: rgba(198,199,189,.55);
+  line-height: 1.6;
+}
+.header-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.hbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.hbadge--new  { background: rgba(200,221,90,.12); color: var(--special); border: 1px solid rgba(200,221,90,.3); }
+.hbadge--fix  { background: rgba(10,189,198,.1);  color: var(--sky);     border: 1px solid rgba(10,189,198,.25); }
+
+/* ── 版面 ─────────────────────────────── */
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 64px;
+}
+
+/* ── 區塊 ─────────────────────────────── */
+.section {
+  padding: 52px 0 0;
+}
+.section + .section { padding-top: 48px; }
+
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(198,199,189,.08);
+  color: rgba(198,199,189,.5);
+  flex-shrink: 0;
+}
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+.new-tag {
+  display: inline-block;
+  background: rgba(200,221,90,.1);
+  color: var(--special);
+  border: 1px solid rgba(200,221,90,.28);
+  border-radius: 4px;
+  padding: 0px 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.section-title {
+  font-size: 1.12rem;
+  font-weight: 600;
+  color: var(--shell);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.section-desc {
+  font-size: 0.88rem;
+  color: rgba(198,199,189,.5);
+  line-height: 1.7;
+  margin-bottom: 22px;
+  max-width: 640px;
+}
+.section-desc code {
+  font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.82rem;
+  background: rgba(200,221,90,.08);
+  color: var(--special);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid rgba(198,199,189,.07);
+  margin-top: 52px;
+}
+
+/* ── 圓點色彩徽章 ─────────────────────── */
+.dot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.dot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  font-size: 0.8rem;
+  color: rgba(198,199,189,.7);
+}
+.dot-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-badge b {
+  color: var(--shell);
+  font-weight: 600;
+}
+
+/* ── 提示框 ───────────────────────────── */
+.tip-box {
+  background: rgba(10,189,198,.07);
+  border: 1px solid rgba(10,189,198,.2);
+  border-left: 3px solid var(--sky);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  color: rgba(198,199,189,.65);
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+.tip-box code {
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: var(--sky);
+  background: rgba(10,189,198,.1);
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+/* ── 底部留白（讓最後一個元件靠近 viewport 底部，示範往上翻轉）── */
+.bottom-spacer { height: 80vh; }
+
+/* ── 底部示範區（使用者看到這裡時，元件接近 viewport 底部）── */
+.flip-demo-wrap {
+  padding: 32px;
+  border: 1px dashed rgba(240,128,128,.3);
+  border-radius: 12px;
+  background: rgba(240,128,128,.04);
+}
+.flip-demo-wrap .flip-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--warning);
+  margin-bottom: 14px;
+}
+
+/* ── 頁尾 ─────────────────────────────── */
+.page-footer {
+  margin-top: 80px;
+  padding: 28px 64px;
+  border-top: 1px solid rgba(198,199,189,.07);
+  font-size: 0.78rem;
+  color: rgba(198,199,189,.3);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- 頁首 -->
+<div class="page-header">
+  <div class="container" style="padding:0">
+    <h1>Chunk Demo 元件示範</h1>
+    <p>語塊替換互動元件 · 本頁涵蓋所有新功能的實際展示</p>
+    <div class="header-badges">
+      <span class="hbadge hbadge--new">✦ 長語塊自動獨佔整行</span>
+      <span class="hbadge hbadge--new">✦ Dropdown 往上翻轉</span>
+      <span class="hbadge hbadge--new">✦ Level 圓點色彩 × 8</span>
+      <span class="hbadge hbadge--fix">↳ 標點緊跟語塊不分離</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ────────────────────────────────────────────
+       範例一：基本用法（短語塊，行內正常排列）
+  ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-eyebrow">
+      <span class="section-num">1</span>
+      <span class="section-label">基本用法</span>
+    </div>
+    <div class="section-title">短語塊 · 行內正常排列</div>
+    <div class="section-desc">
+      語塊文字較短時，不觸發獨佔行邏輯，所有語塊與固定文字保持行內排列。
+      下方示範兩個語塊的句子，含翻譯與預覽。
+    </div>
+
+    <chunk-demo
+      sentence="She {0} to the office every day and {1} her colleagues."
+      show-preview="true"
+      show-translation="true"
+      translation="她每天{0}去辦公室，並且{1}她的同事。"
+      theme="sky"
+    >
+      <cd-chunk id="0" label="動詞">
+        <cd-level level="1" trans="走路">walks</cd-level>
+        <cd-level level="2" trans="騎自行車">cycles</cd-level>
+        <cd-level level="3" trans="搭公車">takes the bus</cd-level>
+      </cd-chunk>
+      <cd-chunk id="1" label="動詞">
+        <cd-level level="1" trans="問候">greets</cd-level>
+        <cd-level level="2" trans="協助">assists</cd-level>
+        <cd-level level="3" trans="積極配合">collaborates with</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ────────────────────────────────────────────
+       範例二：長語塊觸發獨佔整行
+  ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-eyebrow">
+      <span class="section-num">2</span>
+      <span class="section-label">長語塊自動獨佔整行 <span class="new-tag">新</span></span>
+    </div>
+    <div class="section-title">語塊過長時自動換到獨立行</div>
+    <div class="section-desc">
+      按鈕的原始寬度（<code>scrollWidth</code>）超過句子框可用寬度的 52%（預設值），
+      錨點自動取得 <code>flex-basis: 100%</code>，整個換到新行。
+      句尾標點（<code>.</code>）透過 <code>.cd-anchor-grp</code> 與語塊包在同一格，不會單獨跑到下一行。
+      調整閾值：<code>long-chunk-threshold="0.4"</code>。
+    </div>
+
+    <chunk-demo
+      sentence="We finally got the chance to {0}."
+      show-preview="true"
+      show-translation="true"
+      translation="我們終於得到機會去{0}。"
+      theme="special"
+    >
+      <cd-chunk id="0" label="動詞片語">
+        <cd-level level="1" trans="品嚐他們一年只賣一次的招牌肉桂捲">taste their signature cinnamon rolls that are only baked once a year</cd-level>
+        <cd-level level="2" trans="體驗主廚限量供應的週末季節性品嚐菜單">sample the chef's exclusively limited seasonal tasting menu available only on weekends</cd-level>
+        <cd-level level="3" trans="深入了解這道菜背後悠久且豐富的文化傳承故事">learn about the rich cultural heritage and long history behind this iconic regional dish</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ────────────────────────────────────────────
+       範例三：長短語塊混合（同一句子）
+  ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-eyebrow">
+      <span class="section-num">3</span>
+      <span class="section-label">長短混合</span>
+    </div>
+    <div class="section-title">短語塊行內 · 長語塊換行 · 共存</div>
+    <div class="section-desc">
+      同一句子中，短語塊（Level 1/2）保持行內；選到較長的 Level 3 時，
+      該語塊自動換行，其他短語塊不受影響。
+    </div>
+    <div class="tip-box">
+      試試把 <strong>動詞片語</strong> 切換到 Level 3，觀察獨佔整行的效果。
+    </div>
+
+    <chunk-demo
+      sentence="The {0} students {1} every morning before heading to class."
+      show-preview="true"
+      theme="lavender"
+    >
+      <cd-chunk id="0" label="修飾語">
+        <cd-level level="1">dedicated</cd-level>
+        <cd-level level="2">highly motivated</cd-level>
+        <cd-level level="3">exceptionally hardworking</cd-level>
+      </cd-chunk>
+      <cd-chunk id="1" label="動詞片語">
+        <cd-level level="1">practice</cd-level>
+        <cd-level level="2">review their notes</cd-level>
+        <cd-level level="3">diligently review all their handwritten notes and complete every assigned practice exercise</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ────────────────────────────────────────────
+       範例四：8 種 Level 圓點色彩
+  ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-eyebrow">
+      <span class="section-num">4</span>
+      <span class="section-label">Level 圓點 × 8 色 <span class="new-tag">新</span></span>
+    </div>
+    <div class="section-title">預設圓點色彩由 3 種擴充至 8 種</div>
+    <div class="section-desc">
+      不再需要手動設定 <code>level-colors</code> 就能支援最多 8 個 Level，
+      色彩依序如下。超過 8 個 Level 時，額外項目回退為 <code>#C6C7BD</code>。
+    </div>
+
+    <div class="dot-legend">
+      <div class="dot-badge"><span class="dot-swatch" style="background:#40C99A"></span><b>L1</b> safe</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#DECA4B"></span><b>L2</b> yellow</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#C3A5E5"></span><b>L3</b> lavender</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#0ABDC6"></span><b>L4</b> sky</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#F08080"></span><b>L5</b> warning</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#EDA109"></span><b>L6</b> orange</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#FFB3D9"></span><b>L7</b> pink</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#95BDD7"></span><b>L8</b> stone</div>
+    </div>
+
+    <chunk-demo
+      sentence="Open the dropdown to see all {0} in sequence."
+      theme="safe"
+      dropdown-width="280px"
+    >
+      <cd-chunk id="0" label="8 種色彩">
+        <cd-level level="1">8 dot colors — L1 safe</cd-level>
+        <cd-level level="2">8 dot colors — L2 yellow</cd-level>
+        <cd-level level="3">8 dot colors — L3 lavender</cd-level>
+        <cd-level level="4">8 dot colors — L4 sky</cd-level>
+        <cd-level level="5">8 dot colors — L5 warning</cd-level>
+        <cd-level level="6">8 dot colors — L6 orange</cd-level>
+        <cd-level level="7">8 dot colors — L7 pink</cd-level>
+        <cd-level level="8">8 dot colors — L8 stone</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ────────────────────────────────────────────
+       範例七：Dropdown 往上翻轉
+       — 刻意用 80vh 間距把元件推到視窗底部
+  ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-eyebrow">
+      <span class="section-num">7</span>
+      <span class="section-label">Dropdown 往上翻轉 <span class="new-tag">新</span></span>
+    </div>
+    <div class="section-title">底部空間不足時，選單自動往上展開</div>
+    <div class="section-desc">
+      下方刻意插入 80vh 的空白，讓示範元件落在視窗底部附近。
+      點開下拉選單後，元件會偵測下方剩餘空間：若不足以容納選單
+      且上方空間充足，選單改為向上展開，動畫起始方向也對應調整。
+    </div>
+    <div class="tip-box">
+      ↓ 向下捲動至示範框，再點開語塊，觀察選單往上彈出的效果。
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ────────────────────────────────────────────
+       範例五：ui-btn 解鎖 chunk（新功能）
+  ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-eyebrow">
+      <span class="section-num">5</span>
+      <span class="section-label">ui-btn 聯動解鎖 <span class="new-tag">新</span></span>
+    </div>
+    <div class="section-title">按鈕開啟後才能操作對應的語塊選單</div>
+    <div class="section-desc">
+      在 <code>chunk-demo</code> 加上 <code>lock-chunks="0,1"</code> 使指定語塊初始鎖定（顯示 🔒）。
+      在 <code>ui-btn</code> 加上 <code>unlock-chunk="demoId:chunkId"</code>，
+      開啟按鈕時解鎖對應語塊，關閉時回鎖。支援跨多個 demo 與多個 chunk。
+    </div>
+
+    <div class="tip-box">
+      以下範例：<strong>語塊 0（動詞）</strong> 由左側按鈕控制，<strong>語塊 1（地點）</strong> 由右側按鈕控制。
+      兩顆按鈕各自獨立，鎖定時語塊顯示 🔒 且不可點擊。
+    </div>
+
+    <!-- 兩顆 ui-btn，各自解鎖不同語塊 -->
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+      <ui-btn
+        unlock-chunk="unlock-demo:0"
+        theme="safe"
+        icon="bi-unlock-fill"
+        label-open="鎖定動詞"
+        variant="outline"
+      >解鎖動詞</ui-btn>
+
+      <ui-btn
+        unlock-chunk="unlock-demo:1"
+        theme="lavender"
+        icon="bi-unlock-fill"
+        label-open="鎖定地點"
+        variant="outline"
+      >解鎖地點</ui-btn>
+
+      <span style="font-size:0.82rem;color:rgba(198,199,189,.45);margin-left:4px;">
+        ← 點按鈕後對應語塊才能操作
+      </span>
+    </div>
+
+    <chunk-demo
+      id="unlock-demo"
+      sentence="Every morning she {0} all the way to {1}."
+      lock-chunks="0,1"
+      show-preview="true"
+      show-translation="true"
+      translation="每天早上她{0}一路到{1}。"
+      theme="sky"
+    >
+      <cd-chunk id="0" label="動詞">
+        <cd-level level="1" trans="走路">walks</cd-level>
+        <cd-level level="2" trans="跑步">runs</cd-level>
+        <cd-level level="3" trans="騎車">cycles</cd-level>
+      </cd-chunk>
+      <cd-chunk id="1" label="地點">
+        <cd-level level="1" trans="公司">the office</cd-level>
+        <cd-level level="2" trans="附近的咖啡館">the nearby café</cd-level>
+        <cd-level level="3" trans="市中心的共享工作空間">the co-working space downtown</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ────────────────────────────────────────────
+       範例六：一次解鎖多個 chunk
+  ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-eyebrow">
+      <span class="section-num">6</span>
+      <span class="section-label">一鍵解鎖多語塊</span>
+    </div>
+    <div class="section-title">單一 ui-btn 同時控制多個語塊</div>
+    <div class="section-desc">
+      <code>unlock-chunk</code> 接受逗號分隔的多組 <code>demoId:chunkId</code>，
+      一顆按鈕可以同時解鎖同一個（或不同） chunk-demo 的多個語塊。
+    </div>
+
+    <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap;">
+      <ui-btn
+        unlock-chunk="multi-demo:0,multi-demo:1,multi-demo:2"
+        theme="special"
+        icon="bi-unlock-fill"
+        label-open="重新鎖定全部"
+        chevron
+      >解鎖所有語塊</ui-btn>
+      <span style="font-size:0.82rem;color:rgba(198,199,189,.45);">
+        ← 一次解鎖三個語塊
+      </span>
+    </div>
+
+    <chunk-demo
+      id="multi-demo"
+      sentence="The {0} team {1} their project {2}."
+      lock-chunks="0,1,2"
+      show-preview="true"
+      theme="special"
+    >
+      <cd-chunk id="0" label="形容詞">
+        <cd-level level="1">small</cd-level>
+        <cd-level level="2">dedicated</cd-level>
+        <cd-level level="3">internationally recognized</cd-level>
+      </cd-chunk>
+      <cd-chunk id="1" label="動詞">
+        <cd-level level="1">finished</cd-level>
+        <cd-level level="2">successfully delivered</cd-level>
+        <cd-level level="3">painstakingly completed and published</cd-level>
+      </cd-chunk>
+      <cd-chunk id="2" label="時間副詞">
+        <cd-level level="1">on time</cd-level>
+        <cd-level level="2">ahead of schedule</cd-level>
+        <cd-level level="3">well ahead of the original deadline</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+</div><!-- /container -->
+
+<!-- 80vh 空白：把下方元件推近視窗底部 -->
+<div class="bottom-spacer" aria-hidden="true"></div>
+
+<div class="container">
+  <div class="flip-demo-wrap">
+    <div class="flip-label">↑ 向上翻轉示範區</div>
+
+    <chunk-demo
+      sentence="Scroll down and click to see the {0} flip upward when space below is limited."
+      show-preview="true"
+      theme="warning"
+    >
+      <cd-chunk id="0" label="展開方向">
+        <cd-level level="1">dropdown</cd-level>
+        <cd-level level="2">menu panel</cd-level>
+        <cd-level level="3">selection overlay</cd-level>
+        <cd-level level="4">option list</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+</div>
+
+<div class="page-footer">
+  chunk-demo.js · 三項改版：長語塊全行 / Dropdown 翻轉 / 圓點色彩 ×8
+</div>
+
+<script src="ui-btn.js"></script>
+<script src="chunk-demo.js"></script>
+</body>
+</html>

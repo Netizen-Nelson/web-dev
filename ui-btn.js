@@ -1,45 +1,6 @@
-/**
- * ui-btn.js  v1.1.0
- * ─────────────────────────────────────────────────────────────────────
- * 通用切換按鈕元件 <ui-btn>
- *
- * 屬性：
- *   icon          Bootstrap Icons 名稱 (bi-xxx)，無文字時自動圓形鈕
- *   icon-active   展開時切換的圖示 (bi-xxx)，可選
- *   theme         色票名稱 (shell/lavender/sky…) 或 hex/rgb
- *   size          sm | md（預設）| lg
- *   variant       fill（預設）| outline | ghost
- *   animation     slide（預設）| fade | none
- *   anim-duration 動畫毫秒，預設 320
- *   target        目標元素 id（建議明確指定；省略則嘗試下一個同層元素）
- *   open          預設展開
- *   label-open    展開狀態顯示的文字，可選
- *   chevron       顯示旋轉箭頭指示器
- *   group         相同值的按鈕互斥（手風琴）
- *   tooltip       hover 提示，圖示按鈕建議填寫
- *   disabled      禁用
- *
- * ★ 注意：當多個 <ui-btn> 並排於同一個容器（如 flex row）時，
- *   next-sibling 自動偵測可能指向錯誤元素，
- *   請務必使用 target 屬性指定目標 id。
- *
- * 全域設定（引入此檔案前設定）：
- *   window.UiBtnConfig = { theme, size, variant, animation, animDuration, chevron }
- *
- * Alert API：
- *   UiBtn.alert('訊息', { theme, position, duration, icon })
- *   UiBtn.alert.clear()  // 清除所有 Alert
- *
- * 動態新增元素後重新掃描：
- *   UiBtn.init()
- * ─────────────────────────────────────────────────────────────────────
- */
 (function (global) {
   'use strict';
 
-  /* ================================================================
-   * 品牌色票
-   * ================================================================ */
   var BRAND = {
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
@@ -62,9 +23,6 @@
   var BG     = '#0C0D0C';
   var BG_RGB = [12, 13, 12];
 
-  /* ================================================================
-   * 全域配置
-   * ================================================================ */
   var CFG = global.UiBtnConfig = Object.assign({
     theme:        'shell',
     size:         'md',
@@ -74,18 +32,12 @@
     chevron:      false
   }, global.UiBtnConfig || {});
 
-  /* ================================================================
-   * 尺寸定義
-   * ================================================================ */
   var SIZES = {
     sm: { fs: '0.85rem', pad: '5px 12px',  r: '20px', dim: '32px', gap: '5px', icoFs: '1rem'    },
     md: { fs: '1rem',    pad: '8px 16px',  r: '24px', dim: '40px', gap: '6px', icoFs: '1.15rem' },
     lg: { fs: '1.1rem',  pad: '10px 20px', r: '28px', dim: '48px', gap: '8px', icoFs: '1.3rem'  }
   };
 
-  /* ================================================================
-   * 全域 CSS（注入一次）
-   * ================================================================ */
   var CSS = [
     'ui-btn{display:none}',
 
@@ -193,6 +145,31 @@
       Math.round(BG_RGB[0] + alpha * (c[0] - BG_RGB[0])) + ',' +
       Math.round(BG_RGB[1] + alpha * (c[1] - BG_RGB[1])) + ',' +
       Math.round(BG_RGB[2] + alpha * (c[2] - BG_RGB[2])) + ')';
+  }
+
+  /* ── unlock-chunk 屬性解析器 ──────────────────────────────────
+     格式：  "demoId:chunkId"
+     多個：  "demoId:0,demoId:1,otherId:2"
+     回傳 [{ demoId: string, chunkId: number }, ...]
+  ─────────────────────────────────────────────────────────── */
+  function parseUnlockChunk(val) {
+    if (!val) return [];
+    return val.split(',').reduce(function (acc, seg) {
+      seg = seg.trim();
+      var parts = seg.split(':');
+      if (parts.length !== 2) {
+        console.warn('[ui-btn] unlock-chunk 格式錯誤（應為 "demoId:chunkId"）：', seg);
+        return acc;
+      }
+      var demoId  = parts[0].trim();
+      var chunkId = parseInt(parts[1].trim(), 10);
+      if (!demoId || isNaN(chunkId)) {
+        console.warn('[ui-btn] unlock-chunk 解析失敗：', seg);
+        return acc;
+      }
+      acc.push({ demoId: demoId, chunkId: chunkId });
+      return acc;
+    }, []);
   }
 
   function mkIco(name) {
@@ -334,6 +311,8 @@
     this.group       = el.getAttribute('group')        || '';
     this.tooltip     = el.getAttribute('tooltip')      || '';
 
+    this.unlockChunkTargets = parseUnlockChunk(el.getAttribute('unlock-chunk') || '');
+
     this.color   = resolveColor(this.theme) || BRAND.shell;
     this.isOpen  = false;
     this._target = null;
@@ -380,6 +359,13 @@
     }
 
     this._syncBtn();
+
+    /* 若初始狀態已展開，立即解鎖對應 chunk
+       用 setTimeout 確保 chunk-demo 已完成初始化 */
+    if (this.isOpen && this.unlockChunkTargets.length) {
+      var self = this;
+      setTimeout(function () { self._applyChunkLock(false); }, 0);
+    }
   };
 
   /* ----------------------------------------------------------------
@@ -469,12 +455,35 @@
     this.isOpen = true;
     this._syncBtn();
     if (this._target) animOpen(this._target, this.animation, this.animDur);
+    this._applyChunkLock(false);   /* false = 解鎖 */
   };
 
   UiBtn.prototype._close = function () {
     this.isOpen = false;
     this._syncBtn();
     if (this._target) animClose(this._target, this.animation, this.animDur);
+    this._applyChunkLock(true);    /* true  = 回鎖 */
+  };
+
+  /* ── chunk-demo 解鎖 / 回鎖 ───────────────────────────────────
+     lock = false → 對每個目標呼叫 unlockChunk(chunkId)
+     lock = true  → 對每個目標呼叫 lockChunk(chunkId)
+  ─────────────────────────────────────────────────────────── */
+  UiBtn.prototype._applyChunkLock = function (lock) {
+    if (!this.unlockChunkTargets.length) return;
+    this.unlockChunkTargets.forEach(function (t) {
+      var el = document.getElementById(t.demoId);
+      if (!el) {
+        console.warn('[ui-btn] unlock-chunk：找不到 chunk-demo #' + t.demoId);
+        return;
+      }
+      var method = lock ? 'lockChunk' : 'unlockChunk';
+      if (typeof el[method] === 'function') {
+        el[method](t.chunkId);
+      } else {
+        console.warn('[ui-btn] unlock-chunk：#' + t.demoId + ' 不支援 ' + method + '()，請確認已載入 chunk-demo.js');
+      }
+    });
   };
 
   UiBtn.prototype._syncBtn = function () {
@@ -491,19 +500,6 @@
     }
   };
 
-  /* ================================================================
-   * Alert 通知系統
-   *
-   * UiBtn.alert(message, options)
-   *   message  {string}  — 訊息文字
-   *   options  {object}
-   *     theme     {string}  — 色票名稱或 hex，預設 'safe'
-   *     position  {string}  — 'top'（預設）| 'bottom'
-   *     duration  {number}  — 顯示毫秒，0 = 不自動消失，預設 3000
-   *     icon      {string}  — Bootstrap Icons 名稱 (bi-xxx)，可選
-   *
-   * UiBtn.alert.clear()  — 清除所有顯示中的 Alert
-   * ================================================================ */
   var _alertStacks = {};
 
   function ensureAlertStack(pos) {
@@ -523,7 +519,6 @@
     var dur   = (opts.duration != null) ? +opts.duration : 3000;
     var icon  = opts.icon || '';
 
-    /* ── width：接受 px 或 % 值，例如 "400px" / "80%" ── */
     var width = opts.width ? String(opts.width).trim() : '';
     if (width && !/^\d+(\.\d+)?(px|%)$/.test(width)) {
       console.warn('[ui-btn] alert width 格式無效（應為 px 或 %，例如 "400px"、"80%"），已忽略。');
@@ -532,20 +527,17 @@
 
     var stack = ensureAlertStack(pos);
 
-    /* 條目 */
     var item = document.createElement('div');
     item.className = 'ubtn-alert';
     item.style.background = color;
     item.style.color      = BG;
 
-    /* 套用寬度：有寬度時取消 max-width 限制並允許換行 */
     if (width) {
       item.style.width      = width;
       item.style.maxWidth   = 'none';
       item.style.whiteSpace = 'normal';
     }
 
-    /* 圖示 */
     if (icon && /^bi-/.test(icon)) {
       var iEl = document.createElement('i');
       iEl.className = 'bi ' + icon;
@@ -553,21 +545,15 @@
       iEl.style.flexShrink = '0';
       item.appendChild(iEl);
     }
-
-    /* 訊息文字 */
     var txt = document.createElement('span');
     txt.textContent = message;
     item.appendChild(txt);
-
-    /* 關閉按鈕 */
     var x = document.createElement('button');
     x.type = 'button';
     x.className = 'ubtn-alert-x';
     x.innerHTML = '&times;';
     x.style.color = BG;
     item.appendChild(x);
-
-    /* 淡出並移除 */
     function dismiss() {
       item.classList.remove('ubtn-alert-in');
       onTransEnd(item, 'opacity', function () { item.remove(); });
@@ -575,7 +561,6 @@
 
     x.addEventListener('click', dismiss);
     var timer = (dur > 0) ? setTimeout(dismiss, dur) : null;
-    /* 點擊整個 alert 也可提早關閉（排除點 X 的重複觸發） */
     item.addEventListener('click', function (e) {
       if (e.target !== x) { clearTimeout(timer); dismiss(); }
     });
@@ -583,7 +568,7 @@
     stack.appendChild(item);
     rAF2(function () { item.classList.add('ubtn-alert-in'); });
 
-    return { dismiss: dismiss }; /* 回傳控制物件 */
+    return { dismiss: dismiss };
   }
 
   showAlert.clear = function () {
@@ -594,16 +579,12 @@
     });
   };
 
-  /* ================================================================
-   * 啟動
-   * ================================================================ */
   function boot() {
     var instances = [];
     document.querySelectorAll('ui-btn:not([data-ubtn])').forEach(function (el) {
       el.setAttribute('data-ubtn', '');
       instances.push(new UiBtn(el));
     });
-    /* 所有建構子完成後再逐一 init，確保 _nextSib 捕捉正確 */
     instances.forEach(function (b) {
       b.init();
       if (b.group) {
@@ -619,7 +600,6 @@
     boot();
   }
 
-  /* 公開 API */
   global.UiBtn = { init: boot, alert: showAlert, config: CFG, colors: BRAND };
 
 })(window);
