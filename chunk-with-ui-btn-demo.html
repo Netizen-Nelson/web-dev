@@ -568,8 +568,193 @@ body {
   </div>
 </div>
 
-<div class="page-footer">
-  chunk-demo.js · 三項改版：長語塊全行 / Dropdown 翻轉 / 圓點色彩 ×8
+<!-- ════════════════════════════════════════════════════════
+     Scroll Gate 示範區
+     從這裡開始，每一節都需要解鎖才能繼續往下捲動
+═════════════════════════════════════════════════════════ -->
+<div style="background:rgba(200,221,90,.04);border-top:1px solid rgba(200,221,90,.15);
+            border-bottom:1px solid rgba(200,221,90,.15);
+            padding:28px 64px;margin-top:80px;">
+  <div style="max-width:920px;margin:0 auto;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
+                text-transform:uppercase;color:#C8DD5A;margin-bottom:6px;">
+      ✦ Scroll Gate 示範開始
+    </div>
+    <div style="font-size:0.88rem;color:rgba(198,199,189,.55);line-height:1.6;">
+      以下三節各有一個捲動閘門。按下每節的 <strong style="color:#C6C7BD">ui-btn</strong>
+      後才能繼續往下捲動。關閉按鈕會回鎖。捲軸拖曳、觸控、鍵盤方向鍵同樣受限。
+    </div>
+  </div>
+</div>
+
+<!-- ── Gate 1 ── -->
+<div style="max-width:920px;margin:0 auto;padding:0 64px;">
+
+  <div style="padding:64px 0 0;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
+                text-transform:uppercase;color:#95BDD7;margin-bottom:16px;">
+      Gate 1 of 3
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;
+                flex-wrap:wrap;gap:12px;">
+      <div style="font-size:1.05rem;color:#C6C7BD;">
+        Section A 的內容被鎖定。按下右側按鈕後解鎖並繼續捲動。
+      </div>
+      <ui-btn
+        scroll-gate
+        target="gate-block-1"
+        theme="safe"
+        icon="bi-lock-fill"
+        icon-active="bi-unlock-fill"
+        label-open="重新鎖定"
+        variant="fill"
+        size="md"
+      >解鎖 Section A</ui-btn>
+    </div>
+  </div>
+
+  <div id="gate-block-1" style="margin-top:24px;padding:40px;
+       border-radius:16px;border:1px solid rgba(64,201,154,.2);
+       background:rgba(64,201,154,.04);">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
+                text-transform:uppercase;color:#40C99A;margin-bottom:14px;">
+      Section A — 解鎖後可見完整內容
+    </div>
+    <p style="color:rgba(198,199,189,.8);line-height:1.7;margin-bottom:16px;">
+      這是被閘門保護的內容區塊。在 ui-btn 按下前，此區塊透明度為 50%，
+      且頁面無法往下捲動超越按鈕所在的位置。
+    </p>
+    <chunk-demo
+      sentence="The students were required to {0} before they could {1}."
+      show-preview="true"
+      theme="safe"
+    >
+      <cd-chunk id="0" label="動詞片語">
+        <cd-level level="1">complete the assignment</cd-level>
+        <cd-level level="2">submit all required documents</cd-level>
+      </cd-chunk>
+      <cd-chunk id="1" label="動詞">
+        <cd-level level="1">proceed</cd-level>
+        <cd-level level="2">advance to the next stage</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+  <!-- ── Gate 2 ── -->
+  <div style="padding:80px 0 0;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
+                text-transform:uppercase;color:#95BDD7;margin-bottom:16px;">
+      Gate 2 of 3
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;
+                flex-wrap:wrap;gap:12px;">
+      <div style="font-size:1.05rem;color:#C6C7BD;">
+        Section B 的內容被鎖定。解鎖 Section A 後才能捲動到這裡。
+      </div>
+      <ui-btn
+        scroll-gate
+        target="gate-block-2"
+        theme="lavender"
+        icon="bi-lock-fill"
+        icon-active="bi-unlock-fill"
+        label-open="重新鎖定"
+        variant="fill"
+      >解鎖 Section B</ui-btn>
+    </div>
+  </div>
+
+  <div id="gate-block-2" style="margin-top:24px;padding:40px;
+       border-radius:16px;border:1px solid rgba(195,165,229,.2);
+       background:rgba(195,165,229,.04);">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
+                text-transform:uppercase;color:#C3A5E5;margin-bottom:14px;">
+      Section B — 閘門 + chunk 鎖定同時示範
+    </div>
+    <p style="color:rgba(198,199,189,.8);line-height:1.7;margin-bottom:16px;">
+      此區塊同時示範 scroll-gate 與 lock-chunks 的組合：
+      頁面閘門由左側按鈕控制，語塊的啟用需要另外按下對應解鎖按鈕。
+    </p>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <ui-btn
+        unlock-chunk="gate-chunk-demo:0"
+        theme="sky"
+        icon="bi-unlock-fill"
+        label-open="鎖定動詞"
+        variant="outline"
+        size="sm"
+      >解鎖動詞</ui-btn>
+      <ui-btn
+        unlock-chunk="gate-chunk-demo:1"
+        theme="orange"
+        icon="bi-unlock-fill"
+        label-open="鎖定副詞"
+        variant="outline"
+        size="sm"
+      >解鎖副詞</ui-btn>
+    </div>
+    <chunk-demo
+      id="gate-chunk-demo"
+      sentence="She {0} speaks {1} in front of large audiences."
+      lock-chunks="0,1"
+      show-preview="true"
+      show-translation="true"
+      translation="她{0}在大批觀眾面前{1}講話。"
+      theme="lavender"
+    >
+      <cd-chunk id="0" label="頻率副詞">
+        <cd-level level="1" trans="總是">always</cd-level>
+        <cd-level level="2" trans="幾乎總是">almost always</cd-level>
+        <cd-level level="3" trans="毫不猶豫地">confidently and without hesitation</cd-level>
+      </cd-chunk>
+      <cd-chunk id="1" label="方式副詞">
+        <cd-level level="1" trans="流暢地">fluently</cd-level>
+        <cd-level level="2" trans="充滿自信地">with great confidence</cd-level>
+        <cd-level level="3" trans="優雅且引人入勝地">eloquently and engagingly</cd-level>
+      </cd-chunk>
+    </chunk-demo>
+  </div>
+
+  <!-- ── Gate 3 ── -->
+  <div style="padding:80px 0 0;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
+                text-transform:uppercase;color:#95BDD7;margin-bottom:16px;">
+      Gate 3 of 3
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;
+                flex-wrap:wrap;gap:12px;">
+      <div style="font-size:1.05rem;color:#C6C7BD;">
+        最後一關。解鎖後即可到達頁尾。
+      </div>
+      <ui-btn
+        scroll-gate
+        target="gate-block-3"
+        theme="special"
+        icon="bi-trophy-fill"
+        icon-active="bi-trophy"
+        label-open="重新鎖定"
+        variant="fill"
+      >完成所有關卡 🏁</ui-btn>
+    </div>
+  </div>
+
+  <div id="gate-block-3" style="margin-top:24px;padding:40px;
+       border-radius:16px;border:1px solid rgba(200,221,90,.2);
+       background:rgba(200,221,90,.04);">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
+                text-transform:uppercase;color:#C8DD5A;margin-bottom:14px;">
+      Section C — 全部解鎖
+    </div>
+    <p style="color:rgba(198,199,189,.8);line-height:1.7;">
+      所有三個閘門都已解鎖。每個 <code style="color:#C8DD5A;background:rgba(200,221,90,.08);
+      padding:0 4px;border-radius:3px;">ui-btn</code> 關閉後會回鎖該段落，
+      並禁止再次捲動經過。可試著關閉上方的按鈕觀察效果。
+    </p>
+  </div>
+
+</div>
+
+<div class="page-footer" style="margin-top:80px;">
+  chunk-demo.js · ui-btn.js · 功能：長語塊全行 / Dropdown 翻轉 / 圓點 ×8 / chunk 解鎖 / Scroll Gate
 </div>
 
 <script src="ui-btn.js"></script>

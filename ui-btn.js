@@ -1,3 +1,30 @@
+/**
+ * ui-btn.js  v1.1.0
+ * ─────────────────────────────────────────────────────────────────────
+ * 通用切換按鈕元件 <ui-btn>
+ *
+ * 屬性：
+ *   icon          Bootstrap Icons 名稱 (bi-xxx)，無文字時自動圓形鈕
+ *   icon-active   展開時切換的圖示 (bi-xxx)，可選
+ *   theme         色票名稱 (shell/lavender/sky…) 或 hex/rgb
+ *   size          sm | md（預設）| lg
+ *   variant       fill（預設）| outline | ghost
+ *   animation     slide（預設）| fade | none
+ *   anim-duration 動畫毫秒，預設 320
+ *   target        目標元素 id（建議明確指定；省略則嘗試下一個同層元素）
+ *   open          預設展開
+ *   label-open    展開狀態顯示的文字，可選
+ *   chevron       顯示旋轉箭頭指示器
+ *   group         相同值的按鈕互斥（手風琴）
+ *   tooltip       hover 提示，圖示按鈕建議填寫
+ *   disabled      禁用
+ *
+ * ★ 注意：當多個 <ui-btn> 並排於同一個容器（如 flex row）時，
+ *   next-sibling 自動偵測可能指向錯誤元素，
+ *   請務必使用 target 屬性指定目標 id。
+ *
+ * ─────────────────────────────────────────────────────────────────────
+ */
 (function (global) {
   'use strict';
 
@@ -85,6 +112,16 @@
     '.ubtn-fill .ubtn-dot{background:' + BG + '}',
     '.ubtn-outline .ubtn-dot,.ubtn-ghost .ubtn-dot{background:var(--ubtn-c)}',
     '.ubtn.is-open .ubtn-dot{opacity:1}',
+
+    /* ── Scroll Gate 捲動閘門 ── */
+    /* target 永遠顯示，僅用 opacity 控制鎖定感 */
+    '.ubtn-gate-target{transition:opacity .4s ease}',
+    /* 鎖定中：透明度減半，阻止所有互動 */
+    '.ubtn-gate-locked{opacity:.5;pointer-events:none;user-select:none}',
+    /* 解鎖按鈕提示：脈衝光暈，暗示可互動 */
+    '@keyframes ubtn-gpulse{0%,100%{box-shadow:0 0 0 0 var(--ubtn-c,' +
+      'rgba(198,199,189,.5))}60%{box-shadow:0 0 0 11px rgba(0,0,0,0)}}',
+    '.ubtn-gate-cue{animation:ubtn-gpulse 2.2s ease-in-out infinite}',
 
     /* ── Alert 通知 ── */
     /* 堆疊容器 */
@@ -291,6 +328,88 @@
   var _groups = {};
 
   /* ================================================================
+   * Scroll Gate 捲動閘門系統
+   *
+   * 全域唯一，初始化後掛上 wheel / touchmove / keydown / scroll 監聽。
+   * _gateInstances 登錄所有帶 scroll-gate 的 UiBtn 實例；
+   * _gateLimit 是目前允許的最大 scrollY（null = 無限制）。
+   * ================================================================ */
+  var _gateInstances = [];
+  var _gateInited    = false;
+  var _gateLimit     = null;
+
+  /* 找到第一個（最靠上的）未解鎖 gate 的絕對頂部位置 */
+  function _calcGateLimit() {
+    var limit = null;
+    for (var i = 0; i < _gateInstances.length; i++) {
+      var g = _gateInstances[i];
+      if (!g.isOpen && g._wrap) {
+        var rect   = g._wrap.getBoundingClientRect();
+        var absTop = rect.top + window.pageYOffset;
+        if (limit === null || absTop < limit) limit = absTop;
+      }
+    }
+    return limit;
+  }
+
+  /* 重新計算限制；若已超出則平滑捲回 */
+  function _syncGateLimit() {
+    _gateLimit = _calcGateLimit();
+    if (_gateLimit !== null && window.pageYOffset > _gateLimit) {
+      window.scrollTo({ top: _gateLimit, behavior: 'smooth' });
+    }
+  }
+
+  /* 只初始化一次的事件監聽 */
+  function _initGate() {
+    if (_gateInited) return;
+    _gateInited = true;
+
+    var MARGIN = 2; /* 防抖邊界（px），避免浮點誤差 */
+
+    function blocked(dy) {
+      /* dy > 0 = 往下捲；限制存在且已到達限制點時封鎖 */
+      return dy > 0 && _gateLimit !== null &&
+        window.pageYOffset >= _gateLimit - MARGIN;
+    }
+
+    /* 滑鼠滾輪 */
+    window.addEventListener('wheel', function (e) {
+      if (blocked(e.deltaY)) e.preventDefault();
+    }, { passive: false });
+
+    /* 觸控滑動 */
+    var _ty = 0;
+    window.addEventListener('touchstart', function (e) {
+      _ty = e.touches[0].clientY;
+    }, { passive: true });
+    window.addEventListener('touchmove', function (e) {
+      /* clientY 減少 = 手指往上滑 = 頁面往下捲 */
+      if (blocked(_ty - e.touches[0].clientY)) e.preventDefault();
+    }, { passive: false });
+
+    /* 鍵盤（↓ / PageDown / End / Space）*/
+    var _downKeys = ['ArrowDown', 'PageDown', 'End'];
+    window.addEventListener('keydown', function (e) {
+      var isDown = _downKeys.indexOf(e.key) >= 0 ||
+        (e.key === ' ' && !e.shiftKey);
+      if (isDown && blocked(1)) e.preventDefault();
+    });
+
+    /* 捲軸拖曳 / 程式化捲動（最後防線）
+       用旗標 _snapping 避免 scrollTo → scroll 事件回圈 */
+    var _snapping = false;
+    window.addEventListener('scroll', function () {
+      if (_gateLimit === null || _snapping) return;
+      if (window.pageYOffset > _gateLimit) {
+        _snapping = true;
+        window.scrollTo(0, _gateLimit);
+        setTimeout(function () { _snapping = false; }, 60);
+      }
+    }, { passive: true });
+  }
+
+  /* ================================================================
    * UiBtn 建構子
    * ================================================================ */
   function UiBtn(el) {
@@ -312,6 +431,7 @@
     this.tooltip     = el.getAttribute('tooltip')      || '';
 
     this.unlockChunkTargets = parseUnlockChunk(el.getAttribute('unlock-chunk') || '');
+    this.scrollGate         = el.hasAttribute('scroll-gate');
 
     this.color   = resolveColor(this.theme) || BRAND.shell;
     this.isOpen  = false;
@@ -348,7 +468,27 @@
     }
 
     /* 初始展開/收合狀態 */
-    if (this._target) {
+    if (this.scrollGate) {
+      /*
+        scroll-gate 模式：
+        - target 必須永遠可見（display 不控制），用 opacity 表達鎖定
+        - isOpen 只由 'open' 屬性決定（不推斷 target 的 display 狀態）
+      */
+      this.isOpen = this.startOpen;
+      if (this._target) {
+        this._target.style.display = '';                  /* 確保可見   */
+        this._target.classList.add('ubtn-gate-target');   /* 開啟 transition */
+        if (!this.isOpen) {
+          this._target.classList.add('ubtn-gate-locked'); /* 初始鎖定   */
+          this._btn.classList.add('ubtn-gate-cue');       /* 脈衝提示   */
+        }
+        _gateInstances.push(this);
+        _initGate();
+        /* 延一幀讓頁面佈局完成後再計算位置 */
+        setTimeout(_syncGateLimit, 0);
+      }
+    } else if (this._target) {
+      /* 原有邏輯：由 target 的 display 狀態推斷 isOpen */
       var hidden = this._target.style.display === 'none' ||
         (this._target.style.display === '' &&
           getComputedStyle(this._target).display === 'none');
@@ -454,15 +594,31 @@
   UiBtn.prototype._open = function () {
     this.isOpen = true;
     this._syncBtn();
-    if (this._target) animOpen(this._target, this.animation, this.animDur);
-    this._applyChunkLock(false);   /* false = 解鎖 */
+    if (this._target) {
+      if (this.scrollGate) {
+        this._target.classList.remove('ubtn-gate-locked');
+        this._btn.classList.remove('ubtn-gate-cue');
+        _syncGateLimit();
+      } else {
+        animOpen(this._target, this.animation, this.animDur);
+      }
+    }
+    this._applyChunkLock(false);
   };
 
   UiBtn.prototype._close = function () {
     this.isOpen = false;
     this._syncBtn();
-    if (this._target) animClose(this._target, this.animation, this.animDur);
-    this._applyChunkLock(true);    /* true  = 回鎖 */
+    if (this._target) {
+      if (this.scrollGate) {
+        this._target.classList.add('ubtn-gate-locked');
+        this._btn.classList.add('ubtn-gate-cue');
+        _syncGateLimit();
+      } else {
+        animClose(this._target, this.animation, this.animDur);
+      }
+    }
+    this._applyChunkLock(true);
   };
 
   /* ── chunk-demo 解鎖 / 回鎖 ───────────────────────────────────
@@ -500,6 +656,19 @@
     }
   };
 
+  /* ================================================================
+   * Alert 通知系統
+   *
+   * UiBtn.alert(message, options)
+   *   message  {string}  — 訊息文字
+   *   options  {object}
+   *     theme     {string}  — 色票名稱或 hex，預設 'safe'
+   *     position  {string}  — 'top'（預設）| 'bottom'
+   *     duration  {number}  — 顯示毫秒，0 = 不自動消失，預設 3000
+   *     icon      {string}  — Bootstrap Icons 名稱 (bi-xxx)，可選
+   *
+   * UiBtn.alert.clear()  — 清除所有顯示中的 Alert
+   * ================================================================ */
   var _alertStacks = {};
 
   function ensureAlertStack(pos) {
@@ -519,6 +688,7 @@
     var dur   = (opts.duration != null) ? +opts.duration : 3000;
     var icon  = opts.icon || '';
 
+    /* ── width：接受 px 或 % 值，例如 "400px" / "80%" ── */
     var width = opts.width ? String(opts.width).trim() : '';
     if (width && !/^\d+(\.\d+)?(px|%)$/.test(width)) {
       console.warn('[ui-btn] alert width 格式無效（應為 px 或 %，例如 "400px"、"80%"），已忽略。');
@@ -527,17 +697,20 @@
 
     var stack = ensureAlertStack(pos);
 
+    /* 條目 */
     var item = document.createElement('div');
     item.className = 'ubtn-alert';
     item.style.background = color;
     item.style.color      = BG;
 
+    /* 套用寬度：有寬度時取消 max-width 限制並允許換行 */
     if (width) {
       item.style.width      = width;
       item.style.maxWidth   = 'none';
       item.style.whiteSpace = 'normal';
     }
 
+    /* 圖示 */
     if (icon && /^bi-/.test(icon)) {
       var iEl = document.createElement('i');
       iEl.className = 'bi ' + icon;
@@ -545,15 +718,21 @@
       iEl.style.flexShrink = '0';
       item.appendChild(iEl);
     }
+
+    /* 訊息文字 */
     var txt = document.createElement('span');
     txt.textContent = message;
     item.appendChild(txt);
+
+    /* 關閉按鈕 */
     var x = document.createElement('button');
     x.type = 'button';
     x.className = 'ubtn-alert-x';
     x.innerHTML = '&times;';
     x.style.color = BG;
     item.appendChild(x);
+
+    /* 淡出並移除 */
     function dismiss() {
       item.classList.remove('ubtn-alert-in');
       onTransEnd(item, 'opacity', function () { item.remove(); });
@@ -561,6 +740,7 @@
 
     x.addEventListener('click', dismiss);
     var timer = (dur > 0) ? setTimeout(dismiss, dur) : null;
+    /* 點擊整個 alert 也可提早關閉（排除點 X 的重複觸發） */
     item.addEventListener('click', function (e) {
       if (e.target !== x) { clearTimeout(timer); dismiss(); }
     });
@@ -568,7 +748,7 @@
     stack.appendChild(item);
     rAF2(function () { item.classList.add('ubtn-alert-in'); });
 
-    return { dismiss: dismiss };
+    return { dismiss: dismiss }; /* 回傳控制物件 */
   }
 
   showAlert.clear = function () {
