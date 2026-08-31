@@ -55,18 +55,23 @@
   // 色票
   // ═══════════════════════════════════════════════════════════
   const PALETTE = {
-    shell:    '#c6c7bd',
+    shell:    '#C6C7BD',
     lavender: '#C3A5E5',
     special:  '#C8DD5A',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#08a9d1',
-    safe:     '#40c99a',
+    sky:      '#62C8F0',
+    ocean:    '#0ABDC6',
+    safe:     '#20C21D',
+    teal:     '#0DA591',
+    vanilla:  '#DBEDD8',
+    focus:    '#E0BE79',
     yellow:   '#DECA4B',
-    info:     '#5fafed',
+    info:     '#79B6FA',
+    indigo:   '#9B72CF',
     stone:    '#7090A8',
     pink:     '#FFB3D9',
-    orange:   '#eda109',
+    orange:   '#EDA109',
   };
 
   // ═══════════════════════════════════════════════════════════

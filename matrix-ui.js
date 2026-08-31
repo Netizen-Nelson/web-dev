@@ -2,12 +2,13 @@
   'use strict';
 
   const PALETTE = {
-    safe:     '#40C99A',
+    safe:     '#20C21D',
     warning:  '#F08080',
     shell:    '#C6C7BD',
     yellow:   '#DECA4B',
     orange:   '#EDA109',
-    sky:      '#0ABDC6',
+    sky:      '#62C8F0',
+    ocean:    '#0ABDC6',
     lavender: '#C3A5E5',
     vanilla:  '#DBEDD8',
     teal:     '#0DA591',
@@ -15,8 +16,8 @@
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
     stone:    '#95BDD7',
-    info:     '#4285EB',
-    focus:    '#A0CF72',
+    info:     '#79B6FA',
+    focus:    '#E0BE79',
     salmon:   '#E5C3B3',
   };
 
@@ -34,7 +35,8 @@
   const THEMES = {
     shell:    { accent: PALETTE.shell,    headerBg: '#191A18', border: '#5A5B55' },
     vanilla:  { accent: PALETTE.vanilla,  headerBg: '#161A15', border: '#5A7858' },
-    sky:      { accent: PALETTE.sky,      headerBg: '#091618', border: '#087A88' },
+    sky:      { accent: PALETTE.sky,      headerBg: '#071318', border: '#307898' },
+    ocean:    { accent: PALETTE.ocean,    headerBg: '#071518', border: '#087880' },
     lavender: { accent: PALETTE.lavender, headerBg: '#130E1A', border: '#7058A8' },
     teal:     { accent: PALETTE.teal,     headerBg: '#081613', border: '#0A7060' },
     special:  { accent: PALETTE.special,  headerBg: '#131608', border: '#7A8A2E' },
@@ -43,11 +45,11 @@
     orange:   { accent: PALETTE.orange,   headerBg: '#181208', border: '#A87008' },
     pink:     { accent: PALETTE.pink,     headerBg: '#180D14', border: '#C870A0' },
     salmon:   { accent: PALETTE.salmon,   headerBg: '#17100C', border: '#A87060' },
-    safe:     { accent: PALETTE.safe,     headerBg: '#0A1610', border: '#2A8060' },
+    safe:     { accent: PALETTE.safe,     headerBg: '#0A1508', border: '#107010' },
     warning:  { accent: PALETTE.warning,  headerBg: '#180D0D', border: '#A84040' },
     yellow:   { accent: PALETTE.yellow,   headerBg: '#161308', border: '#A08828' },
-    focus:    { accent: PALETTE.focus,    headerBg: '#0F1609', border: '#608038' },
-    info:     { accent: PALETTE.info,     headerBg: '#0A0F18', border: '#2A5CB8' },
+    focus:    { accent: PALETTE.focus,    headerBg: '#181408', border: '#907030' },
+    info:     { accent: PALETTE.info,     headerBg: '#081018', border: '#4068A0' },
   };
 
   // ── CSS ───────────────────────────────────────────────────────────────────────
