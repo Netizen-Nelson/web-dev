@@ -1,13 +1,5 @@
-/*!
- * matrix-ui.js  v1.0
- * Display-mode matrix / comparison table web component.
- * No shadow DOM. Compatible with bp-popnote.js.
- * Child tags: <matrix-header> <matrix-row> <matrix-cell> <matrix-col> <matrix-footer>
- */
 (function () {
   'use strict';
-
-  // ── Color Palette ─────────────────────────────────────────────────────────────
 
   const PALETTE = {
     safe:     '#40C99A',
@@ -28,20 +20,6 @@
     salmon:   '#E5C3B3',
   };
 
-  // ── Semantic Presets ──────────────────────────────────────────────────────────
-  //
-  // semantic="positive"  → green check
-  // semantic="negative"  → red X
-  // semantic="neutral"   → dash (grey)
-  // semantic="warning"   → triangle exclamation (yellow)
-  // semantic="star"      → star (orange)
-  // semantic="info"      → info circle (sky)
-  // semantic="thumb"     → thumbs-up (green)
-  // semantic="blank"     → nothing displayed
-  //
-  // Override icon only:  icon="bi-hand-thumbs-up-fill"
-  // Override color only: color="lavender"  (palette key or any CSS color)
-
   const SEMANTICS = {
     positive: { icon: 'bi-check-circle-fill',          color: PALETTE.safe     },
     negative:  { icon: 'bi-x-circle-fill',              color: PALETTE.warning  },
@@ -52,15 +30,6 @@
     thumb:     { icon: 'bi-hand-thumbs-up-fill',        color: PALETTE.safe     },
     blank:     { icon: '',                              color: 'transparent'    },
   };
-
-  // ── Theme Definitions ─────────────────────────────────────────────────────────
-  //
-  // accent    → header / footer text, row-label text (use brand color directly)
-  // headerBg  → header & footer row background (solid dark tint, no alpha)
-  // border    → border line color (solid mid-tone of accent, no alpha)
-  //
-  // headerBg is a very slightly tinted version of the background (#0C0D0C).
-  // border is roughly 55–65% brightness of the accent for contrast without glare.
 
   const THEMES = {
     shell:    { accent: PALETTE.shell,    headerBg: '#191A18', border: '#5A5B55' },
@@ -151,10 +120,6 @@
     document.head.appendChild(s);
   }
 
-  /**
-   * Parse a border shorthand string like "1px solid" or "2px dashed".
-   * Returns { width, style } or null if value is "none" / empty.
-   */
   function parseBorder(val) {
     if (!val || val === 'none' || val === '0') return null;
     const parts = val.trim().split(/\s+/);
@@ -179,12 +144,7 @@
     }
   }
 
-  /**
-   * Build the visual content of a <matrix-cell> into a given <td>.
-   * Handles icon + optional label rendering, or falls back to innerHTML.
-   */
   function renderCell(cellEl, theme, iconSize, labelPos, td) {
-    // Always forward data-* so bp-popnote events work on the rendered <td>
     forwardDataAttrs(cellEl, td);
 
     const semantic  = cellEl.getAttribute('semantic') || '';
@@ -192,7 +152,6 @@
     const label     = cellEl.getAttribute('label')    || '';
     const colorAttr = cellEl.getAttribute('color')    || '';
 
-    // No semantic / icon attr → treat as raw HTML cell
     if (!semantic && !iconAttr) {
       td.innerHTML = cellEl.innerHTML;
       return;
@@ -414,16 +373,6 @@
     }
   }
 
-  // ── Global Configuration API ──────────────────────────────────────────────────
-  //
-  // MatrixUIConfig.addTheme('myTheme', {
-  //   accent: '#ffffff', headerBg: 'rgba(255,255,255,0.1)', border: 'rgba(255,255,255,0.4)'
-  // });
-  //
-  // MatrixUIConfig.addSemantic('premium', {
-  //   icon: 'bi-gem', color: '#C3A5E5'
-  // });
-
   window.MatrixUIConfig = {
     addTheme(name, def) {
       if (name && def) THEMES[name] = def;
@@ -434,8 +383,6 @@
     themes:    THEMES,
     semantics: SEMANTICS,
   };
-
-  // ── Register Custom Elements ──────────────────────────────────────────────────
 
   injectCSS();
 
