@@ -124,13 +124,13 @@
 .bp-ind-5 { padding-left: 2.5em; }
 .bp-ind-6 { padding-left: 3.0em; }
 
-.bp-lnh-1 { line-height: 3; }
-.bp-lnh-2 { line-height: 2.5; }
-.bp-lnh-3 { line-height: 2; }
-.bp-lnh-4 { line-height: 1.75; }
-.bp-lnh-5 { line-height: 1.5; }
-.bp-lnh-6 { line-height: 1.25; }
-.bp-lnh-7 { line-height: 1; }
+.bp-lnh-1 { line-height: 4em; }
+.bp-lnh-2 { line-height: 3.5em; }
+.bp-lnh-3 { line-height: 3em; }
+.bp-lnh-4 { line-height: 2.5em; }
+.bp-lnh-5 { line-height: 2em; }
+.bp-lnh-6 { line-height: 1.5em; }
+.bp-lnh-7 { line-height: 1em; }
 
 blockquote {
     margin: 16px 0;
