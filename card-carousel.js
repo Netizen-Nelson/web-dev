@@ -26,8 +26,8 @@
  *   CardCarousel.config({ iconSize:'2.6rem', stackOffsetY:32, … })
  *
  * 主題清單：
- *   lavender · sky · special · salmon · safe · yellow · info
- *   stone · pink · orange · warning
+ *   lavender · sky · teal · special · salmon · safe · vanilla
+ *   yellow · focus · info · stone · indigo · pink · orange · warning
  *
  * 內建 variant：
  *   fill   → 主題色底色，sky 邊框 / 文字
@@ -64,19 +64,23 @@
      BRAND TOKENS
   ══════════════════════════════════════════════════════════ */
   const T = {
-    bg:       '#0c0d0c',
-    shell:    '#c6c7bd',
+    bg:       '#0C0D0C',
+    shell:    '#C6C7BD',
     lavender: '#C3A5E5',
     special:  '#C8DD5A',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#08a9d1',
-    safe:     '#40c99a',
+    sky:      '#0ABDC6',   // fixed: was #08a9d1
+    safe:     '#40C99A',
+    teal:     '#0DA591',   // added
+    vanilla:  '#DBEDD8',   // added
     yellow:   '#DECA4B',
-    info:     '#5fafed',
-    stone:    '#7090A8',
+    focus:    '#A0CF72',   // added
+    info:     '#4285EB',   // fixed: was #5fafed
+    stone:    '#95BDD7',   // fixed: was #7090A8
+    indigo:   '#9B72CF',   // added
     pink:     '#FFB3D9',
-    orange:   '#eda109',
+    orange:   '#EDA109',
   };
 
   /* ══════════════════════════════════════════════════════════
