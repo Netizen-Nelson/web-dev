@@ -265,9 +265,9 @@ side-menu[theme="dark"] {
   --sm-accent-sub-c    : rgba(200,221,90,0.6);
 
   /* col=2 accent（天藍）*/
-  --sm-accent-2        : #08A9D1;
-  --sm-accent-2-dim    : rgba(8,169,209,0.22);
-  --sm-accent-2-sub    : rgba(8,169,209,0.6);
+  --sm-accent-2        : #62C8F0;
+  --sm-accent-2-dim    : rgba(98,200,240,0.22);
+  --sm-accent-2-sub    : rgba(98,200,240,0.76);
 
   /* 指示條 */
   --sm-bar-hover-c     : rgba(200,221,90,0.32);
@@ -287,10 +287,10 @@ side-menu[theme="dark"] {
   --sm-dbl-bg           : rgba(198,199,189,0.04);
   --sm-dbl-bdr          : rgba(198,199,189,0.11);
   --sm-dbl-hover-bg     : rgba(198,199,189,0.07);
-  --sm-dbl-hover-bdr    : rgba(8,169,209,0.28);
-  --sm-dbl-active-bg    : rgba(8,169,209,0.1);
-  --sm-dbl-icon-active-bg : rgba(8,169,209,0.16);
-  --sm-dbl-icon-active-bdr: rgba(8,169,209,0.4);
+  --sm-dbl-hover-bdr    : rgba(98,200,240,0.28);
+  --sm-dbl-active-bg    : rgba(98,200,240,0.10);
+  --sm-dbl-icon-active-bg : rgba(98,200,240,0.16);
+  --sm-dbl-icon-active-bdr: rgba(98,200,240,0.40);
 }
 
 /* ═══════════════════════════════════════════
@@ -314,9 +314,9 @@ side-menu[theme="light"] {
   --sm-accent-sub-c    : rgba(90,122,16,0.55);
 
   /* col=2 accent（深天藍）*/
-  --sm-accent-2        : #0678a0;
-  --sm-accent-2-dim    : rgba(6,120,160,0.2);
-  --sm-accent-2-sub    : rgba(6,120,160,0.55);
+  --sm-accent-2        : #0E6882;
+  --sm-accent-2-dim    : rgba(14,104,130,0.20);
+  --sm-accent-2-sub    : rgba(14,104,130,0.55);
 
   /* 指示條 */
   --sm-bar-hover-c     : rgba(90,122,16,0.28);
@@ -336,10 +336,10 @@ side-menu[theme="light"] {
   --sm-dbl-bg           : rgba(37,38,36,0.035);
   --sm-dbl-bdr          : rgba(37,38,36,0.1);
   --sm-dbl-hover-bg     : rgba(37,38,36,0.07);
-  --sm-dbl-hover-bdr    : rgba(6,120,160,0.28);
-  --sm-dbl-active-bg    : rgba(6,120,160,0.08);
-  --sm-dbl-icon-active-bg : rgba(6,120,160,0.12);
-  --sm-dbl-icon-active-bdr: rgba(6,120,160,0.3);
+  --sm-dbl-hover-bdr    : rgba(14,104,130,0.28);
+  --sm-dbl-active-bg    : rgba(14,104,130,0.08);
+  --sm-dbl-icon-active-bg : rgba(14,104,130,0.12);
+  --sm-dbl-icon-active-bdr: rgba(14,104,130,0.30);
 }
     `;
     document.head.appendChild(s);

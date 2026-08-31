@@ -9,8 +9,8 @@
 
   /* ── 品牌色系 ── */
   var COLORS = [
-    '#C8DD5A', '#C3A5E5', '#04b5a3', '#81E6D9',
-    '#f69653', '#E5C3B3', '#FFB3D9', '#90CDF4', '#c6c7bd'
+    '#C8DD5A', '#C3A5E5', '#0DA591', '#0ABDC6',
+    '#EDA109', '#E5C3B3', '#FFB3D9', '#62C8F0', '#C6C7BD'
   ];
 
   function rand(a, b)    { return a + Math.random() * (b - a); }
@@ -237,7 +237,7 @@
       var rings = [
         { r:0, spd:5.5*scale, max:cx*.7,  color:'#C8DD5A', lw:2,   life:1, delay:0  },
         { r:0, spd:4.5*scale, max:cx*.95, color:'#C3A5E5', lw:1.5, life:1, delay:7  },
-        { r:0, spd:3.5*scale, max:cx*1.2, color:'#04b5a3', lw:1,   life:1, delay:16 },
+        { r:0, spd:3.5*scale, max:cx*1.2, color:'#0DA591', lw:1,   life:1, delay:16 },
       ];
 
       var frame = 0;
