@@ -52,14 +52,16 @@ class CardBadge extends HTMLElement {
       'special'   : '#C8DD5A',
       'warning'   : '#F08080',
       'salmon'    : '#E5C3B3',
-      'sky'       : '#0ABDC6',
-      'safe'      : '#40C99A',
-      'vanilla'   : '#DBEDD8', 
+      'sky'       : '#62C8F0',
+      'ocean'     : '#0ABDC6',
+      'safe'      : '#20C21D',
+      'vanilla'   : '#DBEDD8',
       'yellow'    : '#DECA4B',
-      'focus'     : '#A0CF72',
-      'info'      : '#4285EB',
+      'focus'     : '#E0BE79',
+      'info'      : '#79B6FA',
       'stone'     : '#95BDD7',
-      'indigo'    : '#9B72CF',       // ★ 更新
+      'teal'      : '#0DA591',
+      'indigo'    : '#9B72CF',
       'pink'      : '#FFB3D9',
       'orange'    : '#EDA109'
     };
@@ -95,8 +97,8 @@ class CardBadge extends HTMLElement {
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
 
-    // 透明度規範：非黑色陰影一律 >= 0.72
-    const clampedAlpha = Math.max(alpha, 0.72);
+    // 透明度規範：非黑色陰影一律 >= 0.76
+    const clampedAlpha = Math.max(alpha, 0.76);
     return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`;
   }
 
@@ -760,9 +762,9 @@ class CardBadge extends HTMLElement {
 
     if (disabled) {
       // ★ disabled 狀態：rgba 透明度 >= 0.72
-      bgColor     = 'rgba(100, 100, 100, 0.72)';
-      textColor   = 'rgba(198, 199, 189, 0.72)';
-      borderStyle = '1px solid rgba(150, 150, 150, 0.72)';
+      bgColor     = 'rgba(100, 100, 100, 0.76)';
+      textColor   = 'rgba(198, 199, 189, 0.76)';
+      borderStyle = '1px solid rgba(150, 150, 150, 0.76)';
     } else if (isOutline) {
       // outline 底色使用低透明輔助方法（視覺設計用途），前景色不透明
       bgColor     = this._hexToRgbaRaw(content.theme, 0.12);

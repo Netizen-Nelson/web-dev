@@ -278,10 +278,11 @@
   const THEMES = {
     dark:      { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' },
     lavender:  { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' }, // alias
-    sky:       { bg: '#091522', titleColor: '#08a9d1', borderColor: '#08a9d1' },
+    sky:       { bg: '#071318', titleColor: '#62C8F0', borderColor: '#62C8F0' },
+    ocean:     { bg: '#071518', titleColor: '#0ABDC6', borderColor: '#0ABDC6' },
     warning:   { bg: '#190d0d', titleColor: '#F08080', borderColor: '#F08080' },
-    success:   { bg: '#0a160f', titleColor: '#40c99a', borderColor: '#40c99a' },
-    safe:      { bg: '#0a160f', titleColor: '#40c99a', borderColor: '#40c99a' }, // alias
+    success:   { bg: '#091508', titleColor: '#20C21D', borderColor: '#20C21D' },
+    safe:      { bg: '#091508', titleColor: '#20C21D', borderColor: '#20C21D' }, // alias
     special:   { bg: '#111605', titleColor: '#C8DD5A', borderColor: '#C8DD5A' },
     highlight: { bg: '#111605', titleColor: '#C8DD5A', borderColor: '#C8DD5A' }, // alias
     note:      { bg: '#161205', titleColor: '#DECA4B', borderColor: '#DECA4B' },
@@ -289,9 +290,12 @@
     salmon:    { bg: '#180e0a', titleColor: '#E5C3B3', borderColor: '#E5C3B3' },
     pink:      { bg: '#180a12', titleColor: '#FFB3D9', borderColor: '#FFB3D9' },
     stone:     { bg: '#0d1620', titleColor: '#95BDD7', borderColor: '#95BDD7' },
-    orange:    { bg: '#181005', titleColor: '#eda109', borderColor: '#eda109' },
-    vanilla:   { bg: '#181614', titleColor: '#FDF6ED', borderColor: '#FDF6ED' },
-    info:      { bg: '#0a1522', titleColor: '#5fafed', borderColor: '#5fafed' },
+    orange:    { bg: '#181005', titleColor: '#EDA109', borderColor: '#EDA109' },
+    vanilla:   { bg: '#171815', titleColor: '#DBEDD8', borderColor: '#DBEDD8' },
+    teal:      { bg: '#061412', titleColor: '#0DA591', borderColor: '#0DA591' },
+    focus:     { bg: '#181408', titleColor: '#E0BE79', borderColor: '#E0BE79' },
+    indigo:    { bg: '#0e0a18', titleColor: '#9B72CF', borderColor: '#9B72CF' },
+    info:      { bg: '#08101a', titleColor: '#79B6FA', borderColor: '#79B6FA' },
   };
 
   let config = {

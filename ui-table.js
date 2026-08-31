@@ -7,12 +7,13 @@
     special:  '#C8DD5A',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#0ABDC6',
-    safe:     '#40C99A',
+    sky:      '#62C8F0',
+    ocean:    '#0ABDC6',
+    safe:     '#20C21D',
     vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
-    focus:    '#A0CF72',
-    info:     '#4285EB',
+    focus:    '#E0BE79',
+    info:     '#79B6FA',
     stone:    '#95BDD7',
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
@@ -74,7 +75,7 @@
     '3': 'linear-gradient(135deg,#1c0900 0%,#6b3000 50%,#EDA109 100%)',
     '4': 'linear-gradient(135deg,#1a0610 0%,#7a2040 50%,#FFB3D9 100%)',
     '5': 'linear-gradient(135deg,#041208 0%,#083820 50%,#0DA591 100%)',
-    '6': 'linear-gradient(135deg,#060c1e 0%,#1a3580 50%,#4285EB 80%,#9B72CF 100%)'
+    '6': 'linear-gradient(135deg,#060c1e 0%,#1a3580 50%,#79B6FA 80%,#9B72CF 100%)'
   };
 
   var MASK_GRAD_TEXT = '#DBEDD8';
