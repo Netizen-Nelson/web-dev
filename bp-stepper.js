@@ -244,7 +244,7 @@ bp-step[data-state="error"] bp-step-title { color: var(--bps-color-error); }
   font-weight:     700;
   color:           var(--bps-color);
   flex-shrink:     0;
-  margin-bottom:   4px;
+  margin-bottom:   3px;
   transition:      background .28s, color .28s, border-color .28s;
 }
 
@@ -253,7 +253,7 @@ bp-step-title {
   font-size:   var(--bps-title-fs);
   font-weight: 600;
   color:       var(--bps-title);
-  line-height: 1.3;
+  line-height: 1.4;
   transition:  color .28s;
 }
 
@@ -261,15 +261,15 @@ bp-step-content {
   display:     block;
   font-size:   var(--bps-fs);
   color:       var(--bps-text);
-  opacity:     .82;
-  line-height: 1.5;
+  opacity:     .9;
+  line-height: 1.3;
   transition:  opacity .28s;
 }
 
 .bp-step-icon {
   font-size:     1.4rem;
-  line-height:   1;
-  margin-bottom: 2px;
+  line-height:   1.1;
+  margin-bottom: 3px;
   user-select:   none;
 }
 
