@@ -9,13 +9,14 @@
     salmon:   '#E5C3B3',
     sky:      '#62C8F0',
     ocean:    '#0ABDC6',
-    safe:     '#20C21D',
+    safe:     '#319960',
     vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
     info:     '#79B6FA',
     stone:    '#95BDD7',
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
+    focus:  '#ff2a92',
     orange:   '#EDA109',
     teal:     '#0DA591'
   };
