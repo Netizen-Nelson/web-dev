@@ -172,7 +172,7 @@
     .xpop-nav-btn:disabled { opacity: 0.3; cursor: default; }
     .xpop-counter {
       min-width: 40px; text-align: center;
-      opacity: 0.7; font-variant-numeric: tabular-nums;
+      opacity: 0.8; font-variant-numeric: tabular-nums;
     }
     .xpop-progress {
       height: 2px; background: rgba(255,255,255,0.08);
@@ -207,7 +207,7 @@
       padding: 9px 16px 4px;
       font-size: 0.76rem;
       color: var(--xpop-title-color, #C3A5E5);
-      opacity: 0.62;
+      opacity: 0.78;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       display: flex;
