@@ -1,50 +1,43 @@
 (function () {
   'use strict';
 
-  // ─── 品牌色盤 ─────────────────────────────────────────────────────────────────
-  // 以使用者定義的色系為準，vanilla / focus / indigo 為新增色票
   const BRAND = {
     bg:       '#0C0D0C',
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    special:  '#C8DD5A',
+    sky:      '#62C8F0',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#0ABDC6',  // 修正：原 #08a9d1
-    safe:     '#40C99A',
-    vanilla:  '#DBEDD8',  // 新增
+    ocean:    '#0ABDC6',
+    safe:     '#20C21D',
+    teal:     '#0DA591',
+    vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
-    focus:    '#A0CF72',  // 新增
-    info:     '#4285EB',  // 修正：原 #5fafed
-    stone:    '#95BDD7',  // 修正：原 #7090A8
-    indigo:   '#9B72CF',  // 新增
+    focus:    '#E0BE79',
+    info:     '#79B6FA',
+    indigo:   '#9B72CF',
     pink:     '#FFB3D9',
     orange:   '#EDA109',
+    special:  '#C8DD5A',
   };
 
-  // ─── 主題預設集 ───────────────────────────────────────────────────────────────
-  // color        = 邊框 / badge 預設色
-  // colorActive  = 進行中狀態色
-  // colorDone    = 完成狀態色
-  // titleColor   = 標題文字色
-  // badgeBg      = badge 背景（rgba 透明度 ≥ 0.72 規則豁免：此為底層裝飾層）
   const THEMES = {
-    lavender: { color: BRAND.lavender, colorActive: BRAND.special,  colorDone: BRAND.safe,    titleColor: BRAND.lavender, badgeBg: 'rgba(195,165,229,0.15)' },
-    sky:      { color: BRAND.sky,      colorActive: BRAND.info,     colorDone: BRAND.safe,    titleColor: BRAND.sky,      badgeBg: 'rgba(10,189,198,0.12)'  },  // rgba 已對齊 #0ABDC6
-    safe:     { color: BRAND.safe,     colorActive: BRAND.yellow,   colorDone: BRAND.special, titleColor: BRAND.safe,     badgeBg: 'rgba(64,201,154,0.12)'  },
-    special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.safe,    titleColor: BRAND.special,  badgeBg: 'rgba(200,221,90,0.12)'  },
-    warning:  { color: BRAND.warning,  colorActive: BRAND.orange,   colorDone: BRAND.salmon,  titleColor: BRAND.warning,  badgeBg: 'rgba(240,128,128,0.12)' },
-    salmon:   { color: BRAND.salmon,   colorActive: BRAND.pink,     colorDone: BRAND.safe,    titleColor: BRAND.salmon,   badgeBg: 'rgba(229,195,179,0.12)' },
-    stone:    { color: BRAND.stone,    colorActive: BRAND.sky,      colorDone: BRAND.safe,    titleColor: BRAND.stone,    badgeBg: 'rgba(149,189,215,0.14)' },  // rgba 已對齊 #95BDD7
-    pink:     { color: BRAND.pink,     colorActive: BRAND.lavender, colorDone: BRAND.safe,    titleColor: BRAND.pink,     badgeBg: 'rgba(255,179,217,0.12)' },
-    orange:   { color: BRAND.orange,   colorActive: BRAND.yellow,   colorDone: BRAND.safe,    titleColor: BRAND.orange,   badgeBg: 'rgba(237,161,9,0.12)'   },
-    shell:    { color: BRAND.shell,    colorActive: BRAND.info,     colorDone: BRAND.safe,    titleColor: BRAND.shell,    badgeBg: 'rgba(198,199,189,0.13)' },
-    vanilla:  { color: BRAND.vanilla,  colorActive: BRAND.focus,    colorDone: BRAND.safe,    titleColor: BRAND.vanilla,  badgeBg: 'rgba(219,237,216,0.12)' },  // 新主題
-    focus:    { color: BRAND.focus,    colorActive: BRAND.special,  colorDone: BRAND.safe,    titleColor: BRAND.focus,    badgeBg: 'rgba(160,207,114,0.12)' },  // 新主題
-    indigo:   { color: BRAND.indigo,   colorActive: BRAND.lavender, colorDone: BRAND.safe,    titleColor: BRAND.indigo,   badgeBg: 'rgba(155,114,207,0.12)' },  // 新主題
+    lavender: { color: BRAND.lavender, colorActive: BRAND.special,  colorDone: BRAND.safe,   titleColor: BRAND.lavender, badgeBg: 'rgba(195,165,229,0.15)' },
+    sky:      { color: BRAND.sky,      colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.sky,      badgeBg: 'rgba(98,200,240,0.12)'  },
+    ocean:    { color: BRAND.ocean,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.ocean,    badgeBg: 'rgba(10,189,198,0.12)'  },
+    safe:     { color: BRAND.safe,     colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.safe,     badgeBg: 'rgba(32,194,29,0.12)'   },
+    teal:     { color: BRAND.teal,     colorActive: BRAND.ocean,    colorDone: BRAND.safe,   titleColor: BRAND.teal,     badgeBg: 'rgba(13,165,145,0.12)'  },
+    special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.safe,   titleColor: BRAND.special,  badgeBg: 'rgba(200,221,90,0.12)'  },
+    warning:  { color: BRAND.warning,  colorActive: BRAND.orange,   colorDone: BRAND.salmon, titleColor: BRAND.warning,  badgeBg: 'rgba(240,128,128,0.12)' },
+    salmon:   { color: BRAND.salmon,   colorActive: BRAND.pink,     colorDone: BRAND.safe,   titleColor: BRAND.salmon,   badgeBg: 'rgba(229,195,179,0.12)' },
+    pink:     { color: BRAND.pink,     colorActive: BRAND.lavender, colorDone: BRAND.safe,   titleColor: BRAND.pink,     badgeBg: 'rgba(255,179,217,0.12)' },
+    orange:   { color: BRAND.orange,   colorActive: BRAND.yellow,   colorDone: BRAND.safe,   titleColor: BRAND.orange,   badgeBg: 'rgba(237,161,9,0.12)'   },
+    shell:    { color: BRAND.shell,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.shell,    badgeBg: 'rgba(198,199,189,0.13)' },
+    vanilla:  { color: BRAND.vanilla,  colorActive: BRAND.focus,    colorDone: BRAND.safe,   titleColor: BRAND.vanilla,  badgeBg: 'rgba(219,237,216,0.12)' },
+    focus:    { color: BRAND.focus,    colorActive: BRAND.special,  colorDone: BRAND.safe,   titleColor: BRAND.focus,    badgeBg: 'rgba(224,190,121,0.12)' },
+    indigo:   { color: BRAND.indigo,   colorActive: BRAND.lavender, colorDone: BRAND.safe,   titleColor: BRAND.indigo,   badgeBg: 'rgba(155,114,207,0.12)' },
   };
 
-  // ─── 全域預設值 ───────────────────────────────────────────────────────────────
   const defaults = {
     color:               BRAND.lavender,
     colorActive:         BRAND.special,
@@ -55,7 +48,7 @@
     badgeBg:             'rgba(195,165,229,0.15)',
     cardBg:              'rgba(12,13,12,0.55)',
     cardBgActive:        'rgba(200,221,90,0.07)',
-    cardBgDone:          'rgba(64,201,154,0.07)',
+    cardBgDone:          'rgba(32,194,29,0.07)', 
     cardBgError:         'rgba(240,128,128,0.07)',
     stroke:              '2px',
     radius:              '12px',
@@ -75,9 +68,19 @@
     connectorLabelColor: BRAND.shell,
     theme:               null,
     autoNumber:          true,
+    // ── progress 模式推進按鈕 ──────────────────────────────────────────────────
+    //   progressIcon     : 圖示內容（HTML 字串 / emoji）；空字串 = 不顯示圖示
+    //   progressText     : 文字標籤；空字串 = 不顯示文字
+    //   progressDoneIcon : 最後一步的圖示覆寫；空字串 = 沿用 progressIcon
+    //   progressDoneText : 最後一步的文字覆寫；空字串 = 沿用 progressText
+    //   progBtnSize      : 按鈕高度（圖示模式同時為寬度）
+    progressIcon:     '&#8250;',  // ›
+    progressText:     '',
+    progressDoneIcon: '',
+    progressDoneText: '',
+    progBtnSize:      '28px',
   };
 
-  // ─── CSS 樣式表產生器 ──────────────────────────────────────────────────────────
   function buildCSS() {
     return `
 bp-stepper {
@@ -104,7 +107,7 @@ bp-stepper {
   --bps-badge-bg:              rgba(195,165,229,0.15);
   --bps-card-bg:               rgba(12,13,12,0.55);
   --bps-card-bg-act:           rgba(200,221,90,0.07);
-  --bps-card-bg-done:          rgba(64,201,154,0.07);
+  --bps-card-bg-done:          rgba(32,194,29,0.07);
   --bps-card-bg-err:           rgba(240,128,128,0.07);
   --bps-stroke:                2px;
   --bps-radius:                12px;
@@ -119,6 +122,7 @@ bp-stepper {
   --bps-badge-fs:              0.82rem;
   --bps-arrow:                 6px;
   --bps-connector-label-color: ${BRAND.stone};
+  --bps-prog-btn-sz:           28px;
 }
 
 bp-stepper[data-wrapped] {
@@ -428,9 +432,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
   outline-offset: 3px;
 }
 
-/* ── 連接器說明標籤 (connector label) ─────────────────────────────────────────
-   預設隱藏；僅在非末端 bp-step 且有設定文字時顯示。
-   ─────────────────────────────────────────────────────────────────────────── */
+/* ── 連接器說明標籤 ───────────────────────────────────────────────────────── */
 .bps-connector-label {
   display:        none;
   position:       absolute;
@@ -443,7 +445,6 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
   transition:     color .28s, opacity .28s;
 }
 
-/* 垂直版型：標籤顯示在連接線右側、垂直置中於間距中央 */
 bp-stepper[data-layout="vertical"] > bp-step:not(:last-child) .bps-connector-label {
   display:   block;
   left:      calc(var(--bps-badge-sz) / 2 + 12px);
@@ -451,7 +452,6 @@ bp-stepper[data-layout="vertical"] > bp-step:not(:last-child) .bps-connector-lab
   transform: translateY(-50%);
 }
 
-/* 水平版型：標籤顯示在連接線正上方、水平置中於間距中央 */
 bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connector-label {
   display:    block;
   left:       calc(100% + var(--bps-effective-gap) / 2);
@@ -459,10 +459,143 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
   transform:  translate(-50%, calc(-100% - 5px));
   text-align: center;
 }
+
+/* ── progress 模式推進按鈕 ────────────────────────────────────────────────── */
+/*   mode="progress" 或 data-mode="progress" 兩種寫法均支援                  */
+
+bp-stepper[data-mode="progress"]      bp-step,
+bp-stepper[mode="progress"]           bp-step,
+bp-stepper[data-mode="progress-show"] bp-step,
+bp-stepper[mode="progress-show"]      bp-step {
+  padding-bottom: calc(var(--bps-prog-btn-sz, 28px) + 18px);
+}
+
+/* ── 按鈕基礎樣式（三種變體共用） ────────────────────────────────────────── */
+.bps-prog-btn {
+  position:         absolute;
+  bottom:           10px;
+  right:            10px;
+  height:           var(--bps-prog-btn-sz, 28px);
+  min-width:        var(--bps-prog-btn-sz, 28px);
+  padding:          0 10px;
+  border:           var(--bps-stroke) solid var(--bps-color);
+  border-radius:    calc(var(--bps-prog-btn-sz, 28px) / 2);
+  background:       var(--bps-badge-bg);
+  color:            var(--bps-color);
+  cursor:           pointer;
+  display:          inline-flex;
+  align-items:      center;
+  justify-content:  center;
+  gap:              5px;
+  font-size:        var(--bps-badge-fs);
+  font-weight:      700;
+  white-space:      nowrap;
+  box-sizing:       border-box;
+  transition:       background .22s, color .22s, border-color .22s,
+                    box-shadow .22s, transform .15s;
+  z-index:          2;
+  line-height:      1;
+  user-select:      none;
+}
+
+/* 圖示模式：正圓形，無內距 */
+.bps-prog-btn[data-variant="icon"] {
+  width:         var(--bps-prog-btn-sz, 28px);
+  min-width:     var(--bps-prog-btn-sz, 28px);
+  padding:       0;
+  border-radius: 50%;
+  font-size:     calc(var(--bps-prog-btn-sz, 28px) * 0.55);
+}
+
+/* 文字模式：膠囊形，水平留白稍大 */
+.bps-prog-btn[data-variant="text"] {
+  padding: 0 14px;
+}
+
+/* 圖示＋文字模式：左右較小內距 */
+.bps-prog-btn[data-variant="both"] {
+  padding: 0 10px 0 8px;
+}
+
+.bps-prog-icon { line-height: 1; flex-shrink: 0; font-style: normal; }
+.bps-prog-text { line-height: 1; }
+
+/* ── progress-show 模式：未來步驟完全隱藏 ────────────────────────────────── */
+bp-step[data-prog-hidden] {
+  display: none;
+}
+
+/* 最後一個可見步驟不顯示指向隱藏步驟的連接線
+   需要 :has() 支援（Chrome 105+, Safari 15.4+, Firefox 121+）*/
+bp-step:not([data-prog-hidden]):has(+ bp-step[data-prog-hidden])::after,
+bp-step:not([data-prog-hidden]):has(+ bp-step[data-prog-hidden])::before {
+  display: none;
+}
+
+/* ── 揭示動畫 ────────────────────────────────────────────────────────────── */
+@keyframes bps-reveal-h {
+  from { opacity: 0; transform: translateX(30px) scale(0.94); }
+  to   { opacity: 1; transform: translateX(0)    scale(1);    }
+}
+@keyframes bps-reveal-v {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* 水平版型（預設）*/
+bp-stepper:not([data-layout="vertical"]) bp-step.bps-revealing {
+  animation: bps-reveal-h 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* 垂直版型 */
+bp-stepper[data-layout="vertical"] bp-step.bps-revealing {
+  animation: bps-reveal-v 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* hover / active 互動 */
+.bps-prog-btn:hover {
+  background: var(--bps-color);
+  color:      #0C0D0C;
+  box-shadow: 0 0 10px -2px var(--bps-color);
+}
+.bps-prog-btn:active { transform: scale(0.91); }
+
+/* 狀態覆寫：active 步驟 */
+bp-step[data-state="active"] .bps-prog-btn {
+  border-color: var(--bps-color-active);
+  color:        var(--bps-color-active);
+}
+bp-step[data-state="active"] .bps-prog-btn:hover {
+  background:  var(--bps-color-active);
+  color:       #0C0D0C;
+  box-shadow:  0 0 10px -2px var(--bps-color-active);
+}
+
+/* 狀態覆寫：done 步驟（淡化，仍可點擊）*/
+bp-step[data-state="done"] .bps-prog-btn {
+  border-color: var(--bps-color-done);
+  color:        var(--bps-color-done);
+  opacity:      0.55;
+}
+bp-step[data-state="done"] .bps-prog-btn:hover {
+  background:  var(--bps-color-done);
+  color:       #0C0D0C;
+  opacity:     1;
+  box-shadow:  0 0 10px -2px var(--bps-color-done);
+}
+
+/* 狀態覆寫：error 步驟 */
+bp-step[data-state="error"] .bps-prog-btn {
+  border-color: var(--bps-color-error);
+  color:        var(--bps-color-error);
+}
+bp-step[data-state="error"] .bps-prog-btn:hover {
+  background:  var(--bps-color-error);
+  color:       #0C0D0C;
+  box-shadow:  0 0 10px -2px var(--bps-color-error);
+}
 `;
   }
 
-  // ─── JS 屬性名稱 → CSS 變數名稱對照表 ──────────────────────────────────────────
   const DATA_MAP = {
     color:               '--bps-color',
     colorActive:         '--bps-color-active',
@@ -489,10 +622,10 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
     padTop:              '--bps-pad-top',
     padBottom:           '--bps-pad-bottom',
     padX:                '--bps-pad-x',
-    connectorLabelColor: '--bps-connector-label-color',  // 連接器標籤色
+    connectorLabelColor: '--bps-connector-label-color',
+    progBtnSize:         '--bps-prog-btn-sz',
   };
 
-  // ─── 注入全域 CSS（僅執行一次）────────────────────────────────────────────────
   function injectCSS() {
     if (document.getElementById('bp-stepper-style')) return;
     const s = document.createElement('style');
@@ -501,7 +634,10 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
     document.head.appendChild(s);
   }
 
-  // ─── 取得 stepper 內所有 bp-step 元素 ─────────────────────────────────────────
+  function getMode(el) {
+    return el.dataset.mode || el.getAttribute('mode') || '';
+  }
+
   function getSteps(el) {
     if (el.hasAttribute('data-wrapped')) {
       return el.querySelectorAll('.bps-row > bp-step');
@@ -509,7 +645,6 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
     return el.querySelectorAll(':scope > bp-step');
   }
 
-  // ─── 同步換行連接器顏色（wrap 模式）──────────────────────────────────────────
   function syncWrapConnector(el) {
     if (!el.hasAttribute('data-wrapped')) return;
     const wrapN = parseInt(el.dataset.wrap, 10);
@@ -528,7 +663,6 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
     }
   }
 
-  // ─── 處理 data-wrap 換行布局 ──────────────────────────────────────────────────
   function applyWrap(el) {
     const wrapN = parseInt(el.dataset.wrap, 10);
     if (!wrapN || wrapN < 1) return;
@@ -562,7 +696,123 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
     syncWrapConnector(el);
   }
 
-  // ─── 初始化單一 bp-stepper 元素 ───────────────────────────────────────────────
+  // ─── 注入 progress 推進按鈕 ───────────────────────────────────────────────────
+  //  按鈕支援三種顯示模式，由 icon / text 是否有內容自動判斷：
+  //    icon-only  → data-variant="icon"  → 正圓形，無文字
+  //    text-only  → data-variant="text"  → 膠囊形，無圖示
+  //    icon+text  → data-variant="both"  → 膠囊形，左圖示右文字
+  //
+  //  stepper 層級配置（data-* 屬性）：
+  //    data-progress-icon      預設圖示（預設 ›）
+  //    data-progress-text      文字標籤（預設空 = icon-only）
+  //    data-progress-done-icon 最後一步圖示覆寫（預設空 = 沿用圖示）
+  //    data-progress-done-text 最後一步文字覆寫（預設空 = 沿用文字）
+  //    data-prog-btn-size      CSS 變數 --bps-prog-btn-sz（透過 DATA_MAP）
+  //
+  //  bp-step 層級（逐步覆寫）：
+  //    data-progress-icon, data-progress-text
+  // ────────────────────────────────────────────────────────────────────────────
+  function injectProgressBtns(el, cfg) {
+    const isShow = getMode(el) === 'progress-show';
+
+    const pIcon = el.dataset.progressIcon !== undefined
+      ? el.dataset.progressIcon : cfg.progressIcon;
+    const pText = el.dataset.progressText !== undefined
+      ? el.dataset.progressText : cfg.progressText;
+
+    // 最後一步設定：若未指定則回退至一般值
+    const pDoneIcon = el.dataset.progressDoneIcon !== undefined
+      ? el.dataset.progressDoneIcon
+      : (cfg.progressDoneIcon || pIcon);
+    const pDoneText = el.dataset.progressDoneText !== undefined
+      ? el.dataset.progressDoneText
+      : (cfg.progressDoneText || pText);
+
+    const steps = getSteps(el);
+
+    steps.forEach((step, i) => {
+      if (step.querySelector('.bps-prog-btn')) return; // 避免重複注入
+      const isLast = i === steps.length - 1;
+
+      const icon = step.dataset.progressIcon !== undefined
+        ? step.dataset.progressIcon
+        : (isLast ? pDoneIcon : pIcon);
+      const text = step.dataset.progressText !== undefined
+        ? step.dataset.progressText
+        : (isLast ? pDoneText : pText);
+
+      const hasIcon = icon.length > 0;
+      const hasText = text.length > 0;
+      if (!hasIcon && !hasText) return; // 兩者皆空 → 不注入
+
+      const btn = document.createElement('button');
+      btn.className = 'bps-prog-btn';
+      btn.type      = 'button';
+
+      if (hasIcon && !hasText) {
+        // ── 圖示模式 ──────────────────────────────────────────────────────
+        btn.dataset.variant = 'icon';
+        btn.setAttribute('aria-label', isLast ? '完成' : '下一步');
+        btn.innerHTML = icon;
+
+      } else if (!hasIcon && hasText) {
+        // ── 文字模式 ──────────────────────────────────────────────────────
+        btn.dataset.variant = 'text';
+        btn.textContent = text;
+
+      } else {
+        // ── 圖示＋文字模式 ────────────────────────────────────────────────
+        btn.dataset.variant = 'both';
+        btn.innerHTML =
+          '<span class="bps-prog-icon">' + icon + '</span>' +
+          '<span class="bps-prog-text">' + text + '</span>';
+      }
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation(); // 避免與 data-clickable 模式衝突
+        if (isShow) {
+          progressShowNext(el, i); // 先揭示再推進
+        } else {
+          setActive(el, i + 1);
+        }
+      });
+
+      step.appendChild(btn);
+    });
+
+    if (isShow) {
+      const allSteps = [...getSteps(el)];
+      const curIdx = allSteps.findIndex(s => s.dataset.state !== 'done');
+      const hideFrom = curIdx >= 0 ? curIdx + 1 : allSteps.length;
+      allSteps.forEach((step, i) => {
+        if (i >= hideFrom) step.setAttribute('data-prog-hidden', '');
+      });
+    }
+  }
+
+  function progressShowNext(el, fromIndex) {
+    const steps = getSteps(el);
+    const nextIdx = fromIndex + 1;
+
+    if (nextIdx >= steps.length) {
+      setActive(el, nextIdx);
+      return;
+    }
+
+    const nextStep = steps[nextIdx];
+
+    nextStep.removeAttribute('data-prog-hidden');
+
+    void nextStep.offsetWidth;
+    nextStep.classList.add('bps-revealing');
+    nextStep.addEventListener('animationend', function handler() {
+      nextStep.classList.remove('bps-revealing');
+      nextStep.removeEventListener('animationend', handler);
+    });
+
+    setActive(el, nextIdx);
+  }
+  
   function initEl(el) {
     // 1. 套用主題預設與 data-* 屬性覆寫
     const cfg = Object.assign({}, defaults);
@@ -599,20 +849,16 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
       });
     }
 
-    // 4. 連接器說明標籤 (connector label)
-    //    優先順序：step 層級 data-connector-label > stepper 層級 data-connector-label
-    //    - 設定空字串 "" 可在 step 層覆蓋並隱藏全域標籤
-    //    - data-connector-label-color 可在 step 層覆寫標籤文字色
+    // 4. 連接器說明標籤
     el.querySelectorAll(':scope > bp-step').forEach((step) => {
-      if (step.querySelector('.bps-connector-label')) return; // 避免重複注入
+      if (step.querySelector('.bps-connector-label')) return;
       const labelText = step.dataset.connectorLabel !== undefined
         ? step.dataset.connectorLabel
         : el.dataset.connectorLabel;
-      if (!labelText) return; // 未設定或空字串則略過
+      if (!labelText) return;
       const lbl = document.createElement('span');
       lbl.className = 'bps-connector-label';
       lbl.textContent = labelText;
-      // 允許逐步驟覆寫標籤色
       const lblColor = step.dataset.connectorLabelColor;
       if (lblColor) lbl.style.color = lblColor;
       step.appendChild(lbl);
@@ -634,14 +880,17 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
 
     // 6. 換行布局
     if (el.dataset.wrap) applyWrap(el);
+
+    // 7. progress / progress-show 推進按鈕
+    //    需在 applyWrap 之後執行，使 getSteps() 能正確取得 wrap 後的步驟順序
+    const mode = getMode(el);
+    if (mode === 'progress' || mode === 'progress-show') injectProgressBtns(el, cfg);
   }
 
-  // ─── 初始化頁面中所有 bp-stepper（或指定根元素內的） ───────────────────────────
   function init(root) {
     (root || document).querySelectorAll('bp-stepper').forEach(initEl);
   }
 
-  // ─── API：設定進行中步驟 ───────────────────────────────────────────────────────
   function setActive(el, index) {
     const steps = getSteps(el);
     const prevIndex = [...steps].findIndex(s => s.dataset.state === 'active');
@@ -678,7 +927,6 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
     }));
   }
 
-  // ─── API：標記錯誤步驟 ─────────────────────────────────────────────────────────
   function setError(el, index) {
     const steps = getSteps(el);
     if (!steps[index]) return;
@@ -688,17 +936,21 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
     syncWrapConnector(el);
   }
 
-  // ─── API：重設所有步驟狀態 ─────────────────────────────────────────────────────
   function resetStates(el) {
+    const isShow = getMode(el) === 'progress-show';
     getSteps(el).forEach((step, i) => {
       delete step.dataset.state;
       const badge = step.querySelector('.bp-step-badge');
       if (badge) badge.textContent = String(i + 1);
+      if (isShow && i > 0) {
+        step.setAttribute('data-prog-hidden', '');
+      } else {
+        step.removeAttribute('data-prog-hidden');
+      }
     });
     syncWrapConnector(el);
   }
 
-  // ─── 自訂元素定義 ──────────────────────────────────────────────────────────────
   customElements.define('bp-stepper', class extends HTMLElement {
     connectedCallback() { setTimeout(() => initEl(this), 0); }
   });
@@ -706,8 +958,7 @@ bp-stepper:not([data-layout="vertical"]) > bp-step:not(:last-child) .bps-connect
   customElements.define('bp-step-title',   class extends HTMLElement {});
   customElements.define('bp-step-content', class extends HTMLElement {});
 
-  // ─── 公開 API ─────────────────────────────────────────────────────────────────
-  window.BPStepper = { defaults, BRAND, THEMES, init, setActive, setError, resetStates };
+  window.BPStepper = { defaults, BRAND, THEMES, init, setActive, setError, resetStates, progressShowNext };
 
   injectCSS();
 
