@@ -22,23 +22,28 @@
   };
 
   const THEMES = {
+    // 冷色系 → done 用 safe（清晰綠，與藍/紫拉開距離）
     lavender: { color: BRAND.lavender, colorActive: BRAND.special,  colorDone: BRAND.safe,   titleColor: BRAND.lavender, badgeBg: 'rgba(195,165,229,0.15)' },
     sky:      { color: BRAND.sky,      colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.sky,      badgeBg: 'rgba(98,200,240,0.12)'  },
-    ocean:    { color: BRAND.ocean,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.ocean,    badgeBg: 'rgba(10,189,198,0.12)'  },
-    safe:     { color: BRAND.safe,     colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.safe,     badgeBg: 'rgba(32,194,29,0.12)'   },
-    teal:     { color: BRAND.teal,     colorActive: BRAND.ocean,    colorDone: BRAND.safe,   titleColor: BRAND.teal,     badgeBg: 'rgba(13,165,145,0.12)'  },
-    special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.safe,   titleColor: BRAND.special,  badgeBg: 'rgba(200,221,90,0.12)'  },
-    warning:  { color: BRAND.warning,  colorActive: BRAND.orange,   colorDone: BRAND.salmon, titleColor: BRAND.warning,  badgeBg: 'rgba(240,128,128,0.12)' },
-    salmon:   { color: BRAND.salmon,   colorActive: BRAND.pink,     colorDone: BRAND.safe,   titleColor: BRAND.salmon,   badgeBg: 'rgba(229,195,179,0.12)' },
     stone:    { color: BRAND.stone,    colorActive: BRAND.sky,      colorDone: BRAND.safe,   titleColor: BRAND.stone,    badgeBg: 'rgba(149,189,215,0.14)' },
-    pink:     { color: BRAND.pink,     colorActive: BRAND.lavender, colorDone: BRAND.safe,   titleColor: BRAND.pink,     badgeBg: 'rgba(255,179,217,0.12)' },
-    orange:   { color: BRAND.orange,   colorActive: BRAND.yellow,   colorDone: BRAND.safe,   titleColor: BRAND.orange,   badgeBg: 'rgba(237,161,9,0.12)'   },
-    shell:    { color: BRAND.shell,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.shell,    badgeBg: 'rgba(198,199,189,0.13)' },
-    vanilla:  { color: BRAND.vanilla,  colorActive: BRAND.focus,    colorDone: BRAND.safe,   titleColor: BRAND.vanilla,  badgeBg: 'rgba(219,237,216,0.12)' },
-    focus:    { color: BRAND.focus,    colorActive: BRAND.special,  colorDone: BRAND.safe,   titleColor: BRAND.focus,    badgeBg: 'rgba(224,190,121,0.12)' },
-    indigo:   { color: BRAND.indigo,   colorActive: BRAND.lavender, colorDone: BRAND.safe,   titleColor: BRAND.indigo,   badgeBg: 'rgba(155,114,207,0.12)' },
-    yellow:   { color: BRAND.yellow,   colorActive: BRAND.orange,   colorDone: BRAND.safe,   titleColor: BRAND.yellow,   badgeBg: 'rgba(222,202,75,0.12)'  },
     info:     { color: BRAND.info,     colorActive: BRAND.indigo,   colorDone: BRAND.safe,   titleColor: BRAND.info,     badgeBg: 'rgba(121,182,250,0.12)' },
+    indigo:   { color: BRAND.indigo,   colorActive: BRAND.lavender, colorDone: BRAND.teal,   titleColor: BRAND.indigo,   badgeBg: 'rgba(155,114,207,0.12)' },
+    // 青/綠系 → done 互補（safe↔teal 交叉，兩者都是綠系但色調不同）
+    ocean:    { color: BRAND.ocean,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.ocean,    badgeBg: 'rgba(10,189,198,0.12)'  },
+    teal:     { color: BRAND.teal,     colorActive: BRAND.ocean,    colorDone: BRAND.safe,   titleColor: BRAND.teal,     badgeBg: 'rgba(13,165,145,0.12)'  },
+    safe:     { color: BRAND.safe,     colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.safe,     badgeBg: 'rgba(32,194,29,0.12)'   },
+    // 暖色系 → done 用 teal（藍綠，跳脫暖色氛圍，明確標示完成）
+    yellow:   { color: BRAND.yellow,   colorActive: BRAND.orange,   colorDone: BRAND.teal,   titleColor: BRAND.yellow,   badgeBg: 'rgba(222,202,75,0.12)'  },
+    orange:   { color: BRAND.orange,   colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.orange,   badgeBg: 'rgba(237,161,9,0.12)'   },
+    focus:    { color: BRAND.focus,    colorActive: BRAND.special,  colorDone: BRAND.teal,   titleColor: BRAND.focus,    badgeBg: 'rgba(224,190,121,0.12)' },
+    special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.special,  badgeBg: 'rgba(200,221,90,0.12)'  },
+    // 粉/暖中性 → done 用 teal
+    pink:     { color: BRAND.pink,     colorActive: BRAND.lavender, colorDone: BRAND.teal,   titleColor: BRAND.pink,     badgeBg: 'rgba(255,179,217,0.12)' },
+    salmon:   { color: BRAND.salmon,   colorActive: BRAND.pink,     colorDone: BRAND.teal,   titleColor: BRAND.salmon,   badgeBg: 'rgba(229,195,179,0.12)' },
+    warning:  { color: BRAND.warning,  colorActive: BRAND.orange,   colorDone: BRAND.salmon, titleColor: BRAND.warning,  badgeBg: 'rgba(240,128,128,0.12)' },
+    // 中性 → done 用 safe（清晰對比）
+    shell:    { color: BRAND.shell,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.shell,    badgeBg: 'rgba(198,199,189,0.13)' },
+    vanilla:  { color: BRAND.vanilla,  colorActive: BRAND.focus,    colorDone: BRAND.teal,   titleColor: BRAND.vanilla,  badgeBg: 'rgba(219,237,216,0.12)' },
   };
 
   const defaults = {
@@ -87,6 +92,33 @@
   };
 function buildCSS() {
     return `
+/* ── ui-title：標題嵌入元件內部，緊貼步驟上方 ─────────────────── */
+.bps-ui-title {
+  display:        block;
+  width:          100%;
+  font-size:      var(--bps-ui-title-fs, 1.1rem);
+  font-weight:    700;
+  color:          var(--bps-color);
+  line-height:    1.4;
+  padding-bottom: var(--bps-ui-title-pb, 10px);
+  flex:           0 0 100%;   /* 水平 flex-wrap 模式：獨佔第一行 */
+  order:          -1;
+  align-self:     flex-start;
+  box-sizing:     border-box;
+}
+
+/* 水平模式：允許換行讓標題佔第一行，步驟在第二行 */
+bp-stepper[data-has-title]:not([data-layout="vertical"]) {
+  flex-wrap:     wrap;
+  align-content: flex-start;
+}
+/* 確保步驟不因為 flex-wrap 意外換行（每個步驟各自維持定寬） */
+bp-stepper[data-has-title]:not([data-layout="vertical"]) > bp-step {
+  flex-shrink: 0;
+}
+
+/* 垂直模式：標題是 column flex 第一項，自然排列，不需額外設定 */
+
 bp-stepper {
   display: flex;
   overflow-x: auto;
@@ -282,7 +314,9 @@ bp-step-content {
 bp-step:not(:last-child)::after {
   content:          '';
   position:         absolute;
-  right:            calc(-1 * var(--bps-effective-gap));
+  /* right 補上 stroke：top/bottom 定位基準是 padding-box，
+     比 border-box 少一個 stroke；補上後線段剛好接到下一張卡的邊框 */
+  right:            calc(-1 * (var(--bps-effective-gap) + var(--bps-stroke)));
   top:              50%;
   width:            var(--bps-effective-gap);
   height:           var(--bps-stroke);
@@ -294,7 +328,7 @@ bp-step:not(:last-child)::after {
 bp-step:not(:last-child)::before {
   content:       '';
   position:      absolute;
-  right:         calc(-1 * var(--bps-effective-gap));
+  right:         calc(-1 * (var(--bps-effective-gap) + var(--bps-stroke)));
   top:           50%;
   transform:     translateY(-50%);
   border-left:   calc(var(--bps-arrow) * 1.5) solid var(--bps-color);
@@ -323,6 +357,10 @@ bp-stepper[data-connector="solid"] .bps-row > bp-step[data-state="done"]:not(:la
 bp-stepper[data-connector="solid"] > bp-step[data-state="active"]:not(:last-child)::after,
 bp-stepper[data-connector="solid"] .bps-row > bp-step[data-state="active"]:not(:last-child)::after {
   background: var(--bps-color-active);
+}
+bp-stepper[data-connector="solid"] > bp-step[data-state="error"]:not(:last-child)::after,
+bp-stepper[data-connector="solid"] .bps-row > bp-step[data-state="error"]:not(:last-child)::after {
+  background: var(--bps-color-error);
 }
 bp-stepper[data-connector="solid"] .bps-u-turn {
   border-right-style:  solid;
@@ -382,9 +420,9 @@ bp-stepper[data-layout="vertical"] {
   width:          100%;
 }
 bp-stepper[data-layout="vertical"] > bp-step {
-  flex:      1 1 auto;
-  width:     100%;
-  min-width: max(180px, var(--bps-width));
+  flex:      0 0 auto;
+  width:     var(--bps-vert-width, 100%);
+  min-width: 180px;
 }
 
 bp-stepper[data-layout="vertical"] > bp-step:not(:last-child)::after {
@@ -424,6 +462,9 @@ bp-stepper[data-layout="vertical"][data-connector="solid"] > bp-step[data-state=
 }
 bp-stepper[data-layout="vertical"][data-connector="solid"] > bp-step[data-state="active"]:not(:last-child)::after {
   background: var(--bps-color-active);
+}
+bp-stepper[data-layout="vertical"][data-connector="solid"] > bp-step[data-state="error"]:not(:last-child)::after {
+  background: var(--bps-color-error);
 }
 
 bp-stepper[data-layout="vertical"][data-connector="dashed"] > bp-step:not(:last-child)::after {
@@ -894,6 +935,31 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
       const val = el.dataset[key] !== undefined ? el.dataset[key] : cfg[key];
       if (val) el.style.setProperty(cssVar, val);
     });
+
+    // 1b. 垂直模式寬度
+    //  --bps-vert-width 只在使用者明確設定 data-card-width 時注入
+    //  未設定 → CSS fallback var(--bps-vert-width, 100%) → 卡片填滿容器
+    //  有設定 → 該值作為固定寬度（可窄於容器）
+    if (el.dataset.layout === 'vertical') {
+      if (el.dataset.cardWidth) {
+        el.style.setProperty('--bps-vert-width', el.dataset.cardWidth);
+      } else {
+        el.style.removeProperty('--bps-vert-width');
+      }
+    }
+
+    // 1c. ui-title：把標題嵌入元件內，消除外部空白造成的視覺斷層
+    //   用法：data-ui-title="<strong>標題文字</strong>"（支援 HTML）
+    //   可選：data-ui-title-fs="1.2rem"  data-ui-title-pb="14px"
+    if (el.dataset.uiTitle !== undefined && !el.querySelector('.bps-ui-title')) {
+      const uiTitleEl = document.createElement('div');
+      uiTitleEl.className = 'bps-ui-title';
+      uiTitleEl.innerHTML = el.dataset.uiTitle;
+      if (el.dataset.uiTitleFs) uiTitleEl.style.fontSize   = el.dataset.uiTitleFs;
+      if (el.dataset.uiTitlePb) uiTitleEl.style.paddingBottom = el.dataset.uiTitlePb;
+      el.insertBefore(uiTitleEl, el.firstChild);
+      el.setAttribute('data-has-title', '');
+    }
 
     // 2. connector 樣式（solid 也顯式寫入，避免被後繼卡片的 stacking context 蓋掉連接線）
     if (!el.dataset.connector) {
