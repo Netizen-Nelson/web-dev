@@ -133,7 +133,13 @@ bp-stepper[data-wrapped] {
   display: block;
   overflow-x: visible;
   overflow-y: visible;
-  width: fit-content;
+  width: 100%;
+}
+
+/* ── data-fill：水平模式卡片允許伸展，填滿 stepper 剩餘空間 ── */
+bp-stepper[data-fill] > bp-step,
+bp-stepper[data-fill] .bps-row > bp-step {
+  flex: 1 0 var(--bps-width);
 }
 
 .bps-row {
@@ -163,7 +169,7 @@ bp-stepper[data-wrapped] {
   height:   calc(50% + 1px);
   background: var(--bps-connector-color, var(--bps-color));
   transform: none;
-  z-index:  0;
+  z-index:  2;
   transition: background .28s;
 }
 
@@ -175,7 +181,7 @@ bp-stepper[data-wrapped] {
   height:     50%;
   background: var(--bps-connector-color, var(--bps-color));
   pointer-events: none;
-  z-index:    0;
+  z-index:    2;
   transition: background .28s;
 }
 
@@ -282,7 +288,7 @@ bp-step:not(:last-child)::after {
   height:           var(--bps-stroke);
   background-color: var(--bps-color);
   transform:        translateY(-50%);
-  z-index:          0;
+  z-index:          2;
   transition:       background-color .28s;
 }
 bp-step:not(:last-child)::before {
@@ -294,7 +300,7 @@ bp-step:not(:last-child)::before {
   border-left:   calc(var(--bps-arrow) * 1.5) solid var(--bps-color);
   border-top:    var(--bps-arrow) solid transparent;
   border-bottom: var(--bps-arrow) solid transparent;
-  z-index:       1;
+  z-index:       3;
   transition:    border-left-color .28s;
 }
 
@@ -305,6 +311,25 @@ bp-step[data-state="active"]:not(:last-child)::before { border-left-color: var(-
 bp-step[data-state="error"]:not(:last-child)::after   { background-color:  var(--bps-color-error);  }
 bp-step[data-state="error"]:not(:last-child)::before  { border-left-color: var(--bps-color-error);  }
 
+/* ── solid（明確宣告，確保直線可見）────────────────────────────── */
+bp-stepper[data-connector="solid"] > bp-step:not(:last-child)::after,
+bp-stepper[data-connector="solid"] .bps-row > bp-step:not(:last-child)::after {
+  background: var(--bps-color);
+}
+bp-stepper[data-connector="solid"] > bp-step[data-state="done"]:not(:last-child)::after,
+bp-stepper[data-connector="solid"] .bps-row > bp-step[data-state="done"]:not(:last-child)::after {
+  background: var(--bps-color-done);
+}
+bp-stepper[data-connector="solid"] > bp-step[data-state="active"]:not(:last-child)::after,
+bp-stepper[data-connector="solid"] .bps-row > bp-step[data-state="active"]:not(:last-child)::after {
+  background: var(--bps-color-active);
+}
+bp-stepper[data-connector="solid"] .bps-u-turn {
+  border-right-style:  solid;
+  border-bottom-style: solid;
+}
+
+/* ── dashed ────────────────────────────────────────────────────── */
 bp-stepper[data-connector="dashed"] > bp-step:not(:last-child)::after,
 bp-stepper[data-connector="dashed"] .bps-row > bp-step:not(:last-child)::after {
   background: repeating-linear-gradient(to right, var(--bps-color) 0, var(--bps-color) 6px, transparent 6px, transparent 13px);
@@ -354,12 +379,12 @@ bp-stepper[data-layout="vertical"] {
   overflow-x:     visible;
   overflow-y:     auto;
   align-items:    flex-start;
+  width:          100%;
 }
 bp-stepper[data-layout="vertical"] > bp-step {
-  flex:      0 0 auto;
+  flex:      1 1 auto;
   width:     100%;
-  max-width: var(--bps-width);
-  min-width: 180px;
+  min-width: max(180px, var(--bps-width));
 }
 
 bp-stepper[data-layout="vertical"] > bp-step:not(:last-child)::after {
@@ -389,6 +414,17 @@ bp-stepper[data-layout="vertical"] > bp-step:not(:last-child)::before {
 bp-stepper[data-layout="vertical"] > bp-step[data-state="done"]:not(:last-child)::before   { border-top-color: var(--bps-color-done);   }
 bp-stepper[data-layout="vertical"] > bp-step[data-state="active"]:not(:last-child)::before { border-top-color: var(--bps-color-active); }
 bp-stepper[data-layout="vertical"] > bp-step[data-state="error"]:not(:last-child)::before  { border-top-color: var(--bps-color-error);  }
+
+/* ── 垂直 solid ──────────────────────────────────────────────── */
+bp-stepper[data-layout="vertical"][data-connector="solid"] > bp-step:not(:last-child)::after {
+  background: var(--bps-color);
+}
+bp-stepper[data-layout="vertical"][data-connector="solid"] > bp-step[data-state="done"]:not(:last-child)::after {
+  background: var(--bps-color-done);
+}
+bp-stepper[data-layout="vertical"][data-connector="solid"] > bp-step[data-state="active"]:not(:last-child)::after {
+  background: var(--bps-color-active);
+}
 
 bp-stepper[data-layout="vertical"][data-connector="dashed"] > bp-step:not(:last-child)::after {
   background: repeating-linear-gradient(to bottom, var(--bps-color) 0, var(--bps-color) 6px, transparent 6px, transparent 13px);
@@ -859,10 +895,10 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
       if (val) el.style.setProperty(cssVar, val);
     });
 
-    // 2. connector 樣式
+    // 2. connector 樣式（solid 也顯式寫入，避免被後繼卡片的 stacking context 蓋掉連接線）
     if (!el.dataset.connector) {
       const cs = el.dataset.connectorStyle || cfg.connectorStyle;
-      if (cs && cs !== 'solid') el.dataset.connector = cs;
+      if (cs) el.dataset.connector = cs;   // solid / dashed / dotted 全部寫入
     }
 
     // 3. 自動編號 badge
