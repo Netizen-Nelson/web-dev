@@ -12,7 +12,6 @@
     safe:     '#20C21D',
     vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
-    focus:    '#E0BE79',
     info:     '#79B6FA',
     stone:    '#95BDD7',
     indigo:   '#9B72CF',
@@ -55,20 +54,6 @@
       '<path d="' + d + '"/></svg>';
   }
 
-  /* ================================================================
-   * 遮罩漸層預設組
-   *
-   * 屬性：mask-gradient="1"~"6"（數字字串），
-   *        或直接填入任意合法 CSS gradient，例如：
-   *        mask-gradient="linear-gradient(135deg,#1a0020,#9B72CF)"
-   *
-   *  1  Indigo Night  — 深夜紫藍
-   *  2  Ocean Depth   — 海洋藍綠
-   *  3  Ember Glow    — 琥珀烈焰
-   *  4  Rose Petal    — 玫瑰粉紫
-   *  5  Forest Mist   — 森林薄霧
-   *  6  Cobalt Aurora — 鈷藍極光
-   * ================================================================ */
   var MASK_GRADIENTS = {
     '1': 'linear-gradient(135deg,#100820 0%,#2d1a4a 45%,#9B72CF 100%)',
     '2': 'linear-gradient(135deg,#04121c 0%,#0a2e38 45%,#0ABDC6 100%)',
@@ -96,7 +81,6 @@
 
   function mkIco(name) {
     if (!name) return '';
-    /* Bootstrap Icons：以 'bi-' 開頭 */
     if (/^bi-/.test(name)) {
       return '<span class="uit-ico">' +
         '<i class="bi ' + name + '" aria-hidden="true"></i>' +
