@@ -1,6 +1,5 @@
 (function () {
   'use strict';
-
   const BRAND = {
     bg:       '#0C0D0C',
     shell:    '#C6C7BD',
@@ -19,6 +18,7 @@
     pink:     '#FFB3D9',
     orange:   '#EDA109',
     special:  '#C8DD5A',
+    stone:    '#95BDD7',
   };
 
   const THEMES = {
@@ -30,6 +30,7 @@
     special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.safe,   titleColor: BRAND.special,  badgeBg: 'rgba(200,221,90,0.12)'  },
     warning:  { color: BRAND.warning,  colorActive: BRAND.orange,   colorDone: BRAND.salmon, titleColor: BRAND.warning,  badgeBg: 'rgba(240,128,128,0.12)' },
     salmon:   { color: BRAND.salmon,   colorActive: BRAND.pink,     colorDone: BRAND.safe,   titleColor: BRAND.salmon,   badgeBg: 'rgba(229,195,179,0.12)' },
+    stone:    { color: BRAND.stone,    colorActive: BRAND.sky,      colorDone: BRAND.safe,   titleColor: BRAND.stone,    badgeBg: 'rgba(149,189,215,0.14)' },
     pink:     { color: BRAND.pink,     colorActive: BRAND.lavender, colorDone: BRAND.safe,   titleColor: BRAND.pink,     badgeBg: 'rgba(255,179,217,0.12)' },
     orange:   { color: BRAND.orange,   colorActive: BRAND.yellow,   colorDone: BRAND.safe,   titleColor: BRAND.orange,   badgeBg: 'rgba(237,161,9,0.12)'   },
     shell:    { color: BRAND.shell,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.shell,    badgeBg: 'rgba(198,199,189,0.13)' },
@@ -48,7 +49,7 @@
     badgeBg:             'rgba(195,165,229,0.15)',
     cardBg:              'rgba(12,13,12,0.55)',
     cardBgActive:        'rgba(200,221,90,0.07)',
-    cardBgDone:          'rgba(32,194,29,0.07)', 
+    cardBgDone:          'rgba(32,194,29,0.07)',
     cardBgError:         'rgba(240,128,128,0.07)',
     stroke:              '2px',
     radius:              '12px',
@@ -78,10 +79,11 @@
     progressText:     '',
     progressDoneIcon: '',
     progressDoneText: '',
+    progressIconClass:     '',   // e.g. "bi bi-arrow-right"（優先於 progressIcon）
+    progressDoneIconClass: '',   // e.g. "bi bi-check-circle-fill"
     progBtnSize:      '28px',
   };
-
-  function buildCSS() {
+function buildCSS() {
     return `
 bp-stepper {
   display: flex;
@@ -520,6 +522,16 @@ bp-stepper[mode="progress-show"]      bp-step {
 .bps-prog-icon { line-height: 1; flex-shrink: 0; font-style: normal; }
 .bps-prog-text { line-height: 1; }
 
+/* icon font（Bootstrap Icons / Font Awesome 等）在按鈕內的尺寸修正 */
+.bps-prog-btn i,
+.bps-prog-btn [class^="bi"],
+.bps-prog-btn [class*=" bi"] {
+  font-size:      inherit;
+  line-height:    1;
+  vertical-align: middle;
+  display:        inline-block;
+}
+
 /* ── progress-show 模式：未來步驟完全隱藏 ────────────────────────────────── */
 bp-step[data-prog-hidden] {
   display: none;
@@ -596,6 +608,7 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
 `;
   }
 
+  // ─── JS 屬性名稱 → CSS 變數名稱對照表 ──────────────────────────────────────────
   const DATA_MAP = {
     color:               '--bps-color',
     colorActive:         '--bps-color-active',
@@ -623,9 +636,10 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     padBottom:           '--bps-pad-bottom',
     padX:                '--bps-pad-x',
     connectorLabelColor: '--bps-connector-label-color',
-    progBtnSize:         '--bps-prog-btn-sz',
+    progBtnSize:         '--bps-prog-btn-sz',           // progress 按鈕尺寸
   };
 
+  // ─── 注入全域 CSS（僅執行一次）────────────────────────────────────────────────
   function injectCSS() {
     if (document.getElementById('bp-stepper-style')) return;
     const s = document.createElement('style');
@@ -634,10 +648,12 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     document.head.appendChild(s);
   }
 
+  // ─── 讀取 mode（data-mode="…" 與 mode="…" 兩種寫法均相容）───────────────────
   function getMode(el) {
     return el.dataset.mode || el.getAttribute('mode') || '';
   }
 
+  // ─── 取得 stepper 內所有 bp-step 元素 ─────────────────────────────────────────
   function getSteps(el) {
     if (el.hasAttribute('data-wrapped')) {
       return el.querySelectorAll('.bps-row > bp-step');
@@ -645,6 +661,7 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     return el.querySelectorAll(':scope > bp-step');
   }
 
+  // ─── 同步換行連接器顏色（wrap 模式）──────────────────────────────────────────
   function syncWrapConnector(el) {
     if (!el.hasAttribute('data-wrapped')) return;
     const wrapN = parseInt(el.dataset.wrap, 10);
@@ -663,6 +680,7 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     }
   }
 
+  // ─── 處理 data-wrap 換行布局 ──────────────────────────────────────────────────
   function applyWrap(el) {
     const wrapN = parseInt(el.dataset.wrap, 10);
     if (!wrapN || wrapN < 1) return;
@@ -720,18 +738,27 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     const pText = el.dataset.progressText !== undefined
       ? el.dataset.progressText : cfg.progressText;
 
-    // 最後一步設定：若未指定則回退至一般值
     const pDoneIcon = el.dataset.progressDoneIcon !== undefined
       ? el.dataset.progressDoneIcon
       : (cfg.progressDoneIcon || pIcon);
     const pDoneText = el.dataset.progressDoneText !== undefined
       ? el.dataset.progressDoneText
       : (cfg.progressDoneText || pText);
+    const pIconClass = el.dataset.progressIconClass !== undefined
+      ? el.dataset.progressIconClass : cfg.progressIconClass;
+    const pDoneIconClass = el.dataset.progressDoneIconClass !== undefined
+      ? el.dataset.progressDoneIconClass
+      : (cfg.progressDoneIconClass || pIconClass);
+
+    function toIconHTML(icon, iconClass) {
+      if (iconClass) return '<i class="' + iconClass + '" aria-hidden="true"></i>';
+      return icon;
+    }
 
     const steps = getSteps(el);
 
     steps.forEach((step, i) => {
-      if (step.querySelector('.bps-prog-btn')) return; // 避免重複注入
+      if (step.querySelector('.bps-prog-btn')) return;
       const isLast = i === steps.length - 1;
 
       const icon = step.dataset.progressIcon !== undefined
@@ -740,31 +767,33 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
       const text = step.dataset.progressText !== undefined
         ? step.dataset.progressText
         : (isLast ? pDoneText : pText);
+      const iconClass = step.dataset.progressIconClass !== undefined
+        ? step.dataset.progressIconClass
+        : (isLast ? pDoneIconClass : pIconClass);
 
-      const hasIcon = icon.length > 0;
-      const hasText = text.length > 0;
+      const hasIcon = iconClass.length > 0 || icon.length > 0;
+      const hasText  = text.length > 0;
       if (!hasIcon && !hasText) return; // 兩者皆空 → 不注入
+
+      const iconHTML = toIconHTML(icon, iconClass);
 
       const btn = document.createElement('button');
       btn.className = 'bps-prog-btn';
       btn.type      = 'button';
 
       if (hasIcon && !hasText) {
-        // ── 圖示模式 ──────────────────────────────────────────────────────
         btn.dataset.variant = 'icon';
         btn.setAttribute('aria-label', isLast ? '完成' : '下一步');
-        btn.innerHTML = icon;
+        btn.innerHTML = iconHTML;
 
       } else if (!hasIcon && hasText) {
-        // ── 文字模式 ──────────────────────────────────────────────────────
         btn.dataset.variant = 'text';
         btn.textContent = text;
 
       } else {
-        // ── 圖示＋文字模式 ────────────────────────────────────────────────
         btn.dataset.variant = 'both';
         btn.innerHTML =
-          '<span class="bps-prog-icon">' + icon + '</span>' +
+          '<span class="bps-prog-icon">' + iconHTML + '</span>' +
           '<span class="bps-prog-text">' + text + '</span>';
       }
 
@@ -795,14 +824,17 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     const nextIdx = fromIndex + 1;
 
     if (nextIdx >= steps.length) {
+      // 最後一步按下：全部標記完成，觸發 bps:complete
       setActive(el, nextIdx);
       return;
     }
 
     const nextStep = steps[nextIdx];
 
+    // 1. 解除隱藏（必須在加動畫類別前完成，元素需先渲染才能 animate）
     nextStep.removeAttribute('data-prog-hidden');
 
+    // 2. 強制 reflow 後再加動畫類，確保瀏覽器正確觸發 animation
     void nextStep.offsetWidth;
     nextStep.classList.add('bps-revealing');
     nextStep.addEventListener('animationend', function handler() {
@@ -810,9 +842,10 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
       nextStep.removeEventListener('animationend', handler);
     });
 
+    // 3. 推進狀態
     setActive(el, nextIdx);
   }
-  
+
   function initEl(el) {
     // 1. 套用主題預設與 data-* 屬性覆寫
     const cfg = Object.assign({}, defaults);
