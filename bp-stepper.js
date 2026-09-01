@@ -37,6 +37,8 @@
     vanilla:  { color: BRAND.vanilla,  colorActive: BRAND.focus,    colorDone: BRAND.safe,   titleColor: BRAND.vanilla,  badgeBg: 'rgba(219,237,216,0.12)' },
     focus:    { color: BRAND.focus,    colorActive: BRAND.special,  colorDone: BRAND.safe,   titleColor: BRAND.focus,    badgeBg: 'rgba(224,190,121,0.12)' },
     indigo:   { color: BRAND.indigo,   colorActive: BRAND.lavender, colorDone: BRAND.safe,   titleColor: BRAND.indigo,   badgeBg: 'rgba(155,114,207,0.12)' },
+    yellow:   { color: BRAND.yellow,   colorActive: BRAND.orange,   colorDone: BRAND.safe,   titleColor: BRAND.yellow,   badgeBg: 'rgba(222,202,75,0.12)'  },
+    info:     { color: BRAND.info,     colorActive: BRAND.indigo,   colorDone: BRAND.safe,   titleColor: BRAND.info,     badgeBg: 'rgba(121,182,250,0.12)' },
   };
 
   const defaults = {
