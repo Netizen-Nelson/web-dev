@@ -131,9 +131,9 @@ bp-stepper {
   scrollbar-width: thin;
   scrollbar-color: var(--bps-color) rgba(255,255,255,0.05);
   box-sizing: border-box;
-  --bps-pad-top:               32px;
-  --bps-pad-bottom:            32px;
-  --bps-pad-x:                 12px;
+  --bps-pad-top:               8px;
+  --bps-pad-bottom:            8px;
+  --bps-pad-x:                 10px;
   --bps-color:                 ${BRAND.lavender};
   --bps-color-active:          ${BRAND.special};
   --bps-color-done:            ${BRAND.safe};
@@ -146,9 +146,9 @@ bp-stepper {
   --bps-card-bg-done:          rgba(32,194,29,0.07);
   --bps-card-bg-err:           rgba(240,128,128,0.07);
   --bps-stroke:                2px;
-  --bps-radius:                12px;
-  --bps-width:                 220px;
-  --bps-padding:               16px 18px;
+  --bps-radius:                8px;
+  --bps-width:                 300px;
+  --bps-padding:               8px;
   --bps-gap:                   36px;
   --bps-arrow-min-len:         0px;
   --bps-effective-gap:         max(var(--bps-gap), var(--bps-arrow-min-len));
@@ -156,7 +156,7 @@ bp-stepper {
   --bps-fs:                    0.9rem;
   --bps-title-fs:              1rem;
   --bps-badge-fs:              0.82rem;
-  --bps-arrow:                 6px;
+  --bps-arrow:                 9px;
   --bps-connector-label-color: ${BRAND.stone};
   --bps-prog-btn-sz:           28px;
 }
