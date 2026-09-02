@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ui-reading 使用手冊</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<style>
+:root { font-size: 18px; }
+* { box-sizing: border-box; }
+
+body {
+  background: #0C0D0C;
+  color: #C6C7BD;
+  font-family: 'Inter', 'Noto Sans TC', 'PingFang TC', system-ui;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── 頂部導覽 ──────────────────────────── */
+.manual-nav {
+  position: sticky;
+  top: 0;
+  z-index: 7000;
+  background: rgba(12,13,12,.93);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #252620;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.nav-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.nav-sep {
+  width: 1px;
+  height: 18px;
+  background: #252620;
+  margin: 0 12px;
+}
+.nav-file {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #C3A5E5;
+  margin-right: 8px;
+  opacity: .7;
+}
+.nav-link {
+  font-size: .78rem;
+  font-weight: 600;
+  color: #C6C7BD;
+  text-decoration: none;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: all .15s ease;
+  opacity: .65;
+}
+.nav-link:hover {
+  opacity: 1;
+  border-color: #252620;
+  color: #C6C7BD;
+  background: #14150f;
+}
+
+/* ── 主體 ──────────────────────────────── */
+.manual-body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+}
+
+/* ── 章節標題 ──────────────────────────── */
+.file-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: #C3A5E5;
+  opacity: .7;
+  margin-bottom: 4px;
+}
+.comp-anchor {
+  display: block;
+  position: relative;
+  top: -72px;
+  visibility: hidden;
+}
+.comp-section {
+  margin-bottom: 64px;
+}
+.comp-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.comp-tag {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  border: 1px solid;
+  opacity: .7;
+}
+.comp-desc {
+  font-size: .95rem;
+  opacity: .62;
+  margin-bottom: 28px;
+  max-width: 680px;
+}
+
+/* ── 範例區塊 ──────────────────────────── */
+.example {
+  margin-bottom: 28px;
+}
+.ex-label {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #0ABDC6;
+  opacity: .7;
+  margin-bottom: 8px;
+}
+.ex-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 10px;
+  overflow: visible;
+  border: 1px solid #252620;
+}
+/* 全寬預覽（spotlight用） */
+.ex-row.ex-full {
+  grid-template-columns: 1fr;
+}
+.ex-row.ex-full .ex-preview {
+  border-left: none;
+  border-top: 2px solid #252620;
+}
+.ex-code {
+  background: #080908;
+  padding: 20px 22px;
+  border-radius: 10px 0 0 10px;
+  min-width: 0;
+}
+.ex-code pre {
+  margin: 0;
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: .75rem;
+  color: #DECA4B;
+  line-height: 1.65;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 2;
+}
+.ex-preview {
+  background: #0f100f;
+  padding: 24px 28px;
+  border-left: 2px solid #1e1f1e;
+  border-radius: 0 10px 10px 0;
+  min-width: 0;
+  overflow: visible;
+}
+/* preview 用的基本樣式 */
+.ex-preview p { margin: 0; }
+
+/* chalk-mark / col-pair 需要更大行高 */
+.ex-lh { line-height: 2.4; }
+
+/* read-pulse 需要左邊稍微縮進 */
+.ex-pulse { padding-left: 4px; }
+
+/* attr 速查 */
+.attr-quick {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.attr-chip {
+  font-size: .72rem;
+  font-family: monospace;
+  background: #14150f;
+  border: 1px solid #252620;
+  border-radius: 6px;
+  padding: 3px 10px;
+  color: #DECA4B;
+}
+.attr-chip span {
+  color: #0DA591;
+  font-weight: 600;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #1e1f1e;
+  margin: 48px 0 40px;
+}
+
+/* spotlight preview 佈局 */
+.sp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.sp-card {
+  background: #14150f;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: .9rem;
+  line-height: 1.65;
+}
+.sp-card-label {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .5;
+  margin-bottom: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ── 頂部導覽 ──────────────────────────────────────────── -->
+<nav class="manual-nav">
+  <div class="nav-group">
+    <span class="nav-file">ui-reading.js</span>
+    <a class="nav-link" href="#s-morph">text-morph</a>
+    <a class="nav-link" href="#s-pin">margin-pin</a>
+    <a class="nav-link" href="#s-pulse">read-pulse</a>
+    <a class="nav-link" href="#s-chalk">chalk-mark</a>
+    <a class="nav-link" href="#s-col">col-pair</a>
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-group">
+    <span class="nav-file">ui-reading2.js</span>
+    <a class="nav-link" href="#s-diff">text-diff</a>
+    <a class="nav-link" href="#s-layer">layer-switch</a>
+    <a class="nav-link" href="#s-spot">spotlight</a>
+  </div>
+</nav>
+
+
+<!-- ── 主體 ──────────────────────────────────────────────── -->
+<div class="manual-body">
+
+<!-- ══════════════════════════════════════════════════════════
+     ui-reading.js
+══════════════════════════════════════════════════════════════ -->
+<div class="file-heading mb-4">ui-reading.js</div>
+
+
+<!-- ── text-morph ───────────────────────────────────────── -->
+<span class="comp-anchor" id="s-morph"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-arrow-left-right" style="color:#62c8f0;"></i>
+    text-morph
+    <span class="comp-tag" style="color:#62c8f0;border-color:#62c8f0;">文字原地變形</span>
+  </div>
+  <div class="comp-desc">
+    兩個版本在同一位置淡出淡入切換。<code>&lt;morph-from&gt;</code> 是預設顯示的版本，<code>&lt;morph-to&gt;</code> 是點擊後切換到的版本。巢狀的 margin-pin、chalk-mark、read-pulse 在切換後會自動重新初始化。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — 基本用法</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-tm-a"></pre></div>
+      <div class="ex-preview" id="p-tm-a"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">theme<span>="sky"</span></div>
+      <div class="attr-chip">duration<span>="380"</span></div>
+    </div>
+    <script type="text/template" data-for="tm-a"><text-morph theme="sky">
+  <morph-from>
+    I enjoy cooking because it is a useful skill.
+    I learned how to cook when I was young.
+  </morph-from>
+  <morph-to>
+    Cooking, for me, started as a survival skill
+    during a chaotic semester abroad — and somewhere
+    between failed risottos and edible dumplings,
+    it quietly became one of the few things that
+    fully switches my brain off.
+  </morph-to>
+</text-morph></script>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 B — 自訂按鈕文字與速度</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-tm-b"></pre></div>
+      <div class="ex-preview" id="p-tm-b"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">label-from<span>="← 還原低分"</span></div>
+      <div class="attr-chip">label-to<span>="看高分版 →"</span></div>
+      <div class="attr-chip">duration<span>="600"</span></div>
+      <div class="attr-chip">theme<span>="ocean"</span></div>
+    </div>
+    <script type="text/template" data-for="tm-b"><text-morph theme="ocean"
+  label-from="← 還原低分"
+  label-to="看高分版 →"
+  duration="600">
+  <morph-from>
+    I think technology is very important
+    for modern people's lives.
+  </morph-from>
+  <morph-to>
+    Technology has transformed the way modern people
+    work, communicate, and access information —
+    often in ways they never anticipated.
+  </morph-to>
+</text-morph></script>
+  </div>
+</div>
+
+
+<!-- ── margin-pin ───────────────────────────────────────── -->
+<div class="divider"></div>
+<span class="comp-anchor" id="s-pin"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-pin-angle" style="color:#DECA4B;"></i>
+    margin-pin
+    <span class="comp-tag" style="color:#DECA4B;border-color:#DECA4B;">右邊界浮動註解</span>
+  </div>
+  <div class="comp-desc">
+    標記詞底部出現虛線，hover 時說明浮現於視窗右側，虛線從標記詞連至說明框。
+    <code>note</code> 屬性支援 <code>&lt;br&gt;</code>、<code>&lt;b&gt;</code> 等 HTML 標籤。
+    說明框使用 <code>position: fixed</code>，因此在任何版面配置下都固定出現在螢幕右側。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — fill 版（實心色塊）</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-pin-a"></pre></div>
+      <div class="ex-preview" id="p-pin-a" style="line-height:1.8;">
+      </div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">note<span>="說明文字"</span></div>
+      <div class="attr-chip">theme<span>="yellow"</span></div>
+    </div>
+    <script type="text/template" data-for="pin-a">A well-<margin-pin
+  note="crafted = 精心設計的。<br>比 good / nice 更具詞彙深度。"
+  theme="yellow">crafted</margin-pin>
+response demonstrates the speaker's ability to
+<margin-pin
+  note="sustain = 維持（較長時間）<br>比 keep / maintain 正式。"
+  theme="teal">sustain</margin-pin>
+a coherent line of thought.</script>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 B — outline 版（描邊樣式）</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-pin-b"></pre></div>
+      <div class="ex-preview" id="p-pin-b" style="line-height:1.8;"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">theme<span>="sky-outline"</span></div>
+      <div class="attr-chip">theme<span>="ocean-outline"</span></div>
+      <div class="attr-chip" style="opacity:.6;">格式：色票名稱 + -outline</div>
+    </div>
+    <script type="text/template" data-for="pin-b">Governments need to
+<margin-pin
+  note="make a decision：固定搭配。<br>★ take a decision 也可接受。"
+  theme="sky-outline">make a decision</margin-pin>
+before they can
+<margin-pin
+  note="reach a consensus：達成共識<br>搭配詞：broad / general consensus"
+  theme="ocean-outline">reach a consensus</margin-pin>
+with the public.</script>
+  </div>
+</div>
+
+
+<!-- ── read-pulse ───────────────────────────────────────── -->
+<div class="divider"></div>
+<span class="comp-anchor" id="s-pulse"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-activity" style="color:#0DA591;"></i>
+    read-pulse
+    <span class="comp-tag" style="color:#0DA591;border-color:#0DA591;">閱讀節奏掃描線</span>
+  </div>
+  <div class="comp-desc">
+    段落左側出現一條線從上往下掃過，速度對應建議閱讀時長。
+    預設進入視窗自動觸發，也可設為點擊或 hover 觸發。加上 <code>repeat</code> 屬性則可重複播放。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — visible 觸發（進入視窗自動播放，repeat）</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-pulse-a"></pre></div>
+      <div class="ex-preview ex-pulse" id="p-pulse-a"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">color<span>="teal"</span></div>
+      <div class="attr-chip">speed<span>="3000"</span></div>
+      <div class="attr-chip">trigger<span>="visible"</span></div>
+      <div class="attr-chip">repeat</div>
+    </div>
+    <script type="text/template" data-for="pulse-a"><read-pulse color="teal" speed="3000"
+  trigger="visible" repeat>
+  <p>
+    The most common mistake is not a lack of
+    vocabulary — it is the inability to connect
+    ideas in a way that sounds natural and
+    unrehearsed. Coherence is not about using
+    linking words like "firstly."
+  </p>
+</read-pulse></script>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 B — click 觸發，自訂線寬與左側縮排</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-pulse-b"></pre></div>
+      <div class="ex-preview ex-pulse" id="p-pulse-b"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">trigger<span>="click"</span></div>
+      <div class="attr-chip">pulse-width<span>="5px"</span></div>
+      <div class="attr-chip">gap<span>="20"</span></div>
+      <div class="attr-chip">color<span>="lavender"</span></div>
+    </div>
+    <script type="text/template" data-for="pulse-b"><read-pulse color="lavender"
+  speed="2000"
+  trigger="click"
+  pulse-width="5px"
+  gap="20"
+  repeat>
+  <p>
+    點擊此段落觸發掃描線（trigger="click"）。
+    pulse-width 和 gap 可自訂線寬與左側留白。
+  </p>
+</read-pulse></script>
+  </div>
+</div>
+
+
+<!-- ── chalk-mark ───────────────────────────────────────── -->
+<div class="divider"></div>
+<span class="comp-anchor" id="s-chalk"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-pen" style="color:#e0be79;"></i>
+    chalk-mark
+    <span class="comp-tag" style="color:#e0be79;border-color:#e0be79;">手繪圈選弧線</span>
+  </div>
+  <div class="comp-desc">
+    點擊詞彙後，一條 SVG 弧線從左往右動態畫出於文字上方。再點一次消除。
+    加上 <code>active</code> 屬性則頁面載入後自動畫出。適合預先標示重點詞，讓讀者也能自行操作。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — 多色、預設啟動（active）、自訂線寬</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-chalk-a"></pre></div>
+      <div class="ex-preview ex-lh" id="p-chalk-a"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">theme<span>="focus"</span></div>
+      <div class="attr-chip">thickness<span>="3"</span></div>
+      <div class="attr-chip">active<span>（預設啟動）</span></div>
+      <div class="attr-chip">duration<span>="500"</span></div>
+    </div>
+    <script type="text/template" data-for="chalk-a">I go jogging every day,
+<chalk-mark theme="focus" active>rain or shine</chalk-mark>.
+This <chalk-mark theme="sky" thickness="3">healthy habit</chalk-mark>
+started in the
+<chalk-mark theme="lavender" duration="500">pandemic</chalk-mark>.
+點擊任一詞彙可切換圈選。</script>
+  </div>
+</div>
+
+
+<!-- ── col-pair ─────────────────────────────────────────── -->
+<div class="divider"></div>
+<span class="comp-anchor" id="s-col"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-link-45deg" style="color:#DECA4B;"></i>
+    col-pair
+    <span class="comp-tag" style="color:#DECA4B;border-color:#DECA4B;">搭配詞同色印記</span>
+  </div>
+  <div class="comp-desc">
+    同組搭配詞各自上方有同色小圓點。hover 任何一個成員，同組全部亮起並顯示 title 提示。顏色自動從色盤依序分配，也可用 <code>theme</code> 手動指定。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — 同段多組搭配詞，自動色盤</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-col-a"></pre></div>
+      <div class="ex-preview ex-lh" id="p-col-a"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">group<span>="識別碼"（必填）</span></div>
+      <div class="attr-chip">label<span>="提示文字"</span></div>
+      <div class="attr-chip">theme<span>="sky"（選填，覆蓋色盤）</span></div>
+    </div>
+    <script type="text/template" data-for="col-a">Governments need to
+<col-pair group="cp1" label="make a decision">make</col-pair>
+a <col-pair group="cp1" label="make a decision">decision</col-pair>
+before they can
+<col-pair group="cp2" label="reach a consensus">reach</col-pair>
+a <col-pair group="cp2" label="reach a consensus">consensus</col-pair>.
+It is crucial to
+<col-pair group="cp3" label="raise awareness" theme="teal">raise</col-pair>
+<col-pair group="cp3" label="raise awareness" theme="teal">awareness</col-pair>
+and
+<col-pair group="cp4" label="have an impact">have</col-pair>
+a lasting
+<col-pair group="cp4" label="have an impact">impact</col-pair>.</script>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     ui-reading2.js
+══════════════════════════════════════════════════════════════ -->
+<div class="divider" style="margin-top:60px;"></div>
+<div class="file-heading mb-4">ui-reading2.js</div>
+
+
+<!-- ── text-diff ────────────────────────────────────────── -->
+<span class="comp-anchor" id="s-diff"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-file-diff" style="color:#F08080;"></i>
+    text-diff
+    <span class="comp-tag" style="color:#F08080;border-color:#F08080;">版本差分對比</span>
+  </div>
+  <div class="comp-desc">
+    word-level LCS 演算法比對兩段文字，刪除與插入同時呈現。<code>inline</code> 模式在同一行顯示，<code>side</code> 模式兩欄並列。內容以 <code>textContent</code> 進行差分，建議放純文字。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — inline 模式（刪除線 + 插入底色）</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-diff-a"></pre></div>
+      <div class="ex-preview" id="p-diff-a"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">mode<span>="inline"（預設）</span></div>
+      <div class="attr-chip">del-style<span>="strikethrough"</span></div>
+      <div class="attr-chip">theme-del<span>="warning"</span></div>
+      <div class="attr-chip">theme-ins<span>="safe"</span></div>
+    </div>
+    <script type="text/template" data-for="diff-a"><text-diff>
+  <diff-from>
+    I think technology is very important
+    for modern people because it helps them.
+  </diff-from>
+  <diff-to>
+    Technology has transformed the way modern
+    people work, communicate, and access
+    information — often in ways they never
+    anticipated.
+  </diff-to>
+</text-diff></script>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 B — inline + del-style="fade"（刪除淡出）</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-diff-b"></pre></div>
+      <div class="ex-preview" id="p-diff-b"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">del-style<span>="fade"</span></div>
+      <div class="attr-chip">theme-ins<span>="sky"</span></div>
+      <div class="attr-chip">ins-bg<span>="0.3"</span></div>
+    </div>
+    <script type="text/template" data-for="diff-b"><text-diff del-style="fade"
+  theme-ins="sky"
+  ins-bg="0.3">
+  <diff-from>
+    I enjoy cooking because it is a useful skill.
+    I learned how to cook when I was young.
+  </diff-from>
+  <diff-to>
+    Cooking started as a survival skill during
+    a chaotic semester abroad — and somewhere
+    between failed risottos and edible dumplings,
+    it became one of the few things that fully
+    switches my brain off.
+  </diff-to>
+</text-diff></script>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 C — side 模式 + 標籤</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-diff-c"></pre></div>
+      <div class="ex-preview" id="p-diff-c"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">mode<span>="side"</span></div>
+      <div class="attr-chip">show-label<span>="true"</span></div>
+      <div class="attr-chip">label-from<span>="原版"</span></div>
+      <div class="attr-chip">label-to<span>="升級版"</span></div>
+    </div>
+    <script type="text/template" data-for="diff-c"><text-diff mode="side"
+  show-label="true"
+  label-from="原版"
+  label-to="升級版"
+  theme-del="salmon"
+  theme-ins="teal">
+  <diff-from>
+    I think people should exercise more
+    because it is good for health.
+  </diff-from>
+  <diff-to>
+    Regular exercise does more than improve
+    physical health — it reshapes the way
+    people manage stress and sustain focus
+    over the long term.
+  </diff-to>
+</text-diff></script>
+  </div>
+</div>
+
+
+<!-- ── layer-switch ─────────────────────────────────────── -->
+<div class="divider"></div>
+<span class="comp-anchor" id="s-layer"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-stack" style="color:#DECA4B;"></i>
+    layer-switch
+    <span class="comp-tag" style="color:#DECA4B;border-color:#DECA4B;">多層次分析切換</span>
+  </div>
+  <div class="comp-desc">
+    在同一段文字上疊加多個分析維度。切換 toggle 後對應層的標記亮起，其他標記降低透明度。一個 <code>&lt;ls-mark&gt;</code> 可以用空格分隔同時屬於多個層。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — highlight 樣式，單選，預設啟動 coherence</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-layer-a"></pre></div>
+      <div class="ex-preview" id="p-layer-a"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">default<span>="coherence"</span></div>
+      <div class="attr-chip">mark-style<span>="highlight"（預設）</span></div>
+      <div class="attr-chip">layer（ls-mark）<span>="層名稱 [多層用空格]"</span></div>
+    </div>
+    <script type="text/template" data-for="layer-a"><layer-switch default="coherence">
+  <ls-text>
+    I go jogging every day,
+    <ls-mark layer="coherence"
+      note="rain or shine：口語感強，比 every day
+      多傳達「即使天氣差也堅持」的層次">
+      rain or shine</ls-mark>.
+    This <ls-mark layer="grammar">healthy habit</ls-mark>
+    started in the
+    <ls-mark layer="collocation"
+      note="pandemic：高頻時事詞，搭配 back in">
+      COVID-19 pandemic</ls-mark>.
+    <ls-mark layer="coherence grammar"
+      note="Ever since then：時間連接詞，同時有語法功能">
+      Ever since then</ls-mark>,
+    <ls-mark layer="collocation">keeping fit</ls-mark>
+    has become a natural part of my life.
+  </ls-text>
+  <ls-layer name="coherence"
+    label="連貫詞" theme="sky"></ls-layer>
+  <ls-layer name="collocation"
+    label="搭配詞" theme="yellow"></ls-layer>
+  <ls-layer name="grammar"
+    label="語法結構" theme="lavender"></ls-layer>
+</layer-switch></script>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 B — underline 樣式，多選（multi），底部 toggle</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-layer-b"></pre></div>
+      <div class="ex-preview" id="p-layer-b"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">multi<span>="true"</span></div>
+      <div class="attr-chip">mark-style<span>="underline"</span></div>
+      <div class="attr-chip">toggle-position<span>="bottom"</span></div>
+      <div class="attr-chip">body-dim<span>="true"</span></div>
+    </div>
+    <script type="text/template" data-for="layer-b"><layer-switch multi="true"
+  mark-style="underline"
+  toggle-position="bottom"
+  body-dim="true"
+  body-dim-val="0.45"
+  dim="0.2">
+  <ls-text>
+    Governments need to
+    <ls-mark layer="col2">make a decision</ls-mark>
+    before they can
+    <ls-mark layer="coh2">reach a consensus</ls-mark>
+    with the public. Any policy that fails to
+    <ls-mark layer="col2 coh2">have a lasting impact</ls-mark>
+    will struggle to
+    <ls-mark layer="gram2">gain widespread support</ls-mark>.
+  </ls-text>
+  <ls-layer name="coh2"
+    label="連貫詞" theme="ocean"></ls-layer>
+  <ls-layer name="col2"
+    label="搭配詞" theme="focus"></ls-layer>
+  <ls-layer name="gram2"
+    label="語法" theme="indigo"></ls-layer>
+</layer-switch></script>
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 C — box 樣式，dot toggle，啟動時整體文字降透明</div>
+    <div class="ex-row">
+      <div class="ex-code"><pre id="c-layer-c"></pre></div>
+      <div class="ex-preview" id="p-layer-c"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">mark-style<span>="box"</span></div>
+      <div class="attr-chip">toggle-style<span>="dot"</span></div>
+      <div class="attr-chip">weight="bold"（ls-mark）</div>
+    </div>
+    <script type="text/template" data-for="layer-c"><layer-switch toggle-style="dot"
+  mark-style="box"
+  body-dim="true">
+  <ls-text>
+    The most common mistake is not a
+    <ls-mark layer="voc3" weight="bold"
+      note="lack of：固定搭配名詞片語">
+      lack of vocabulary</ls-mark>
+    — it is the
+    <ls-mark layer="gram3">
+      inability to connect ideas</ls-mark>
+    in a way that sounds
+    <ls-mark layer="voc3" weight="bold"
+      note="unrehearsed：非背稿、自然流露">
+      unrehearsed</ls-mark>.
+  </ls-text>
+  <ls-layer name="voc3"
+    label="詞彙" theme="salmon"></ls-layer>
+  <ls-layer name="gram3"
+    label="語法" theme="teal"></ls-layer>
+</layer-switch></script>
+  </div>
+</div>
+
+
+<!-- ── spotlight ────────────────────────────────────────── -->
+<div class="divider"></div>
+<span class="comp-anchor" id="s-spot"></span>
+<div class="comp-section">
+  <div class="comp-title">
+    <i class="bi bi-circle-half" style="color:#e0be79;"></i>
+    spotlight
+    <span class="comp-tag" style="color:#e0be79;border-color:#e0be79;">段落聚焦</span>
+  </div>
+  <div class="comp-desc">
+    點擊任何 <code>&lt;spotlight&gt;</code> 段落後，全頁面其他內容被半透明遮罩蓋住，只有被點擊的段落浮出。同頁所有 spotlight 共用一組遮罩，可以直接點擊另一段落切換聚焦。按 Escape 或點背景關閉。
+  </div>
+
+  <div class="example">
+    <div class="ex-label">範例 A — 四種不同配置，點擊任一段落聚焦</div>
+    <div class="ex-row ex-full">
+      <div class="ex-code"><pre id="c-spot-a"></pre></div>
+      <div class="ex-preview" id="p-spot-a"></div>
+    </div>
+    <div class="attr-quick">
+      <div class="attr-chip">theme<span>="focus"</span></div>
+      <div class="attr-chip">ring-style<span>="solid | dashed | dotted"</span></div>
+      <div class="attr-chip">dim<span>="0.08 ~ 0.3"</span></div>
+      <div class="attr-chip">ring<span>="false"（無邊框）</span></div>
+      <div class="attr-chip">hint<span>="false"（無提示圖示）</span></div>
+    </div>
+    <script type="text/template" data-for="spot-a"><div class="sp-grid">
+
+  <spotlight theme="focus">
+    <div class="sp-card">
+      <div class="sp-card-label">solid 邊框（預設）</div>
+      The most common mistake among IELTS
+      candidates is not a lack of vocabulary.
+    </div>
+  </spotlight>
+
+  <spotlight theme="sky" ring-style="dashed" dim="0.08">
+    <div class="sp-card">
+      <div class="sp-card-label">dashed 邊框，dim=0.08</div>
+      Coherence is not about using linking
+      words — it is whether one sentence
+      genuinely leads to the next.
+    </div>
+  </spotlight>
+
+  <spotlight theme="lavender" ring-style="dotted" ring-width="3px">
+    <div class="sp-card">
+      <div class="sp-card-label">dotted 邊框，ring-width=3px</div>
+      A well-crafted response demonstrates
+      the speaker's ability to sustain a
+      coherent line of thought.
+    </div>
+  </spotlight>
+
+  <spotlight theme="teal" ring="false" hint="false">
+    <div class="sp-card">
+      <div class="sp-card-label">ring=false，hint=false</div>
+      Writing Task 2 requires you to present
+      a well-structured argument and reach
+      a clear conclusion.
+    </div>
+  </spotlight>
+
+</div></script>
+  </div>
+</div>
+
+</div><!-- manual-body -->
+
+
+<!-- ── JS 引用 ────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+<script src="ui-reading.js"></script>
+<script src="ui-reading2.js"></script>
+
+<!-- ── 範例渲染腳本 ─────────────────────────────────────── -->
+<script>
+(function () {
+  // 1. 收集所有 script[type="text/template"]
+  document.querySelectorAll('script[type="text/template"][data-for]').forEach(function (tmpl) {
+    var key     = tmpl.dataset.for;
+    var code    = tmpl.textContent.trim();
+    var preEl   = document.getElementById('c-' + key);
+    var prevEl  = document.getElementById('p-' + key);
+
+    // 顯示程式碼（textContent 自動 escape）
+    if (preEl) preEl.textContent = code;
+
+    // 渲染預覽
+    if (prevEl) prevEl.innerHTML = code;
+  });
+
+  // 2. 初始化所有元件
+  UiReading.init();
+  UiReading2.init();
+})();
+</script>
+
+</body>
+</html>
