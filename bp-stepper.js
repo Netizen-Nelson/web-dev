@@ -71,7 +71,7 @@
     arrowSize:           '6px',
     arrowMinLen:         '0px',
     padTop:              '8px',
-    padBottom:           '20px',
+    padBottom:           '8px',
     padX:                '8px',
     connectorLabelColor: BRAND.shell,
     theme:               null,
@@ -522,7 +522,7 @@ bp-stepper[data-clickable="true"] .bps-row > bp-step:focus-visible {
   white-space:    nowrap;
   pointer-events: none;
   z-index:        2;
-  line-height:    1.4;
+  line-height:    1.3;
   transition:     color .28s, opacity .28s;
 }
 
