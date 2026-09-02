@@ -352,7 +352,7 @@
       _pa.style.left     = '';
       _pa.style.maxWidth = CFG.pinWidth + 'px';
       _pa.style.top      = Math.max(8, mr.top + mr.height / 2 - 20) + 'px';
-      _pa.textContent    = note;
+      _pa.innerHTML      = note;   /* innerHTML 支援 <br> 等標籤 */
       _pa.classList.add('urm-pv');
 
       /* 等標注框渲染後再計算連接線位置 */
