@@ -291,7 +291,6 @@ bp-step-title {
   font-size:   var(--bps-title-fs);
   font-weight: 600;
   color:       var(--bps-title);
-  line-height: 1.4;
   transition:  color .28s;
 }
 
