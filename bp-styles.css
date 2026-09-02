@@ -179,3 +179,44 @@ blockquote::before {
     white-space: nowrap;
     color: var(--note-color, #8E8E93);
 }
+
+/* ── bp-hatch：45° 斜線框（不支援 border-radius） ────────── */
+.bp-hatch {
+  --hatch-color: #DECA4B;
+  --hatch-line:  3px;
+  --hatch-gap:   7px;
+  border: 14px solid transparent;
+  border-image: repeating-linear-gradient(
+    45deg,
+    var(--hatch-color) 0px,
+    var(--hatch-color) var(--hatch-line),
+    transparent        var(--hatch-line),
+    transparent        calc(var(--hatch-line) + var(--hatch-gap))
+  ) 14;
+}
+
+/* 粗細（border-width 和 slice 要一起改，且 slice 必須無單位） */
+.bp-hatch-sm { border-width: 8px;  border-image-slice: 8;  }
+.bp-hatch-lg { border-width: 20px; border-image-slice: 20; }
+
+/* 密度 */
+.bp-hatch-tight { --hatch-line: 2px; --hatch-gap:  4px; }
+.bp-hatch-loose { --hatch-line: 4px; --hatch-gap: 12px; }
+
+/* 色票（全部品牌色） */
+.bp-hatch-shell    { --hatch-color: #C6C7BD; }
+.bp-hatch-lavender { --hatch-color: #C3A5E5; }
+.bp-hatch-sky      { --hatch-color: #62c8f0; }
+.bp-hatch-warning  { --hatch-color: #F08080; }
+.bp-hatch-salmon   { --hatch-color: #E5C3B3; }
+.bp-hatch-ocean    { --hatch-color: #0ABDC6; }
+.bp-hatch-safe     { --hatch-color: #20c21d; }
+.bp-hatch-teal     { --hatch-color: #0DA591; }
+.bp-hatch-vanilla  { --hatch-color: #DBEDD8; }
+.bp-hatch-yellow   { --hatch-color: #DECA4B; }
+.bp-hatch-focus    { --hatch-color: #e0be79; }
+.bp-hatch-info     { --hatch-color: #79B6FA; }
+.bp-hatch-indigo   { --hatch-color: #9B72CF; }
+.bp-hatch-pink     { --hatch-color: #FFB3D9; }
+.bp-hatch-orange   { --hatch-color: #EDA109; }
+.bp-hatch-special  { --hatch-color: #C8DD5A; }
