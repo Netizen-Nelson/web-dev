@@ -89,6 +89,7 @@
     progressIconClass:     '',   // e.g. "bi bi-arrow-right"（優先於 progressIcon）
     progressDoneIconClass: '',   // e.g. "bi bi-check-circle-fill"
     progBtnSize:      '28px',
+    uiTitleGap:       '8px',    // ui-title 與元件之間的間距（獨立於 data-gap）
   };
 function buildCSS() {
     return `
@@ -101,23 +102,32 @@ function buildCSS() {
   color:          var(--bps-color);
   line-height:    1.3;
   padding-bottom: var(--bps-ui-title-pb, 3px);
+  margin-bottom:  var(--bps-ui-title-gap, 8px);  /* 獨立控制標題到步驟的距離 */
   flex:           0 0 100%;   /* 水平 flex-wrap 模式：獨佔第一行 */
   order:          -1;
   align-self:     flex-start;
   box-sizing:     border-box;
 }
 
-/* 水平模式：允許換行讓標題佔第一行，步驟在第二行 */
+/* 水平模式：允許換行讓標題佔第一行，步驟在第二行
+   row-gap 設為 0，標題到步驟的間距完全由 .bps-ui-title 的 margin-bottom 決定
+   與 data-gap（column-gap）完全脫鉤                                         */
 bp-stepper[data-has-title]:not([data-layout="vertical"]) {
   flex-wrap:     wrap;
   align-content: flex-start;
+  row-gap:       0;
 }
 /* 確保步驟不因為 flex-wrap 意外換行（每個步驟各自維持定寬） */
 bp-stepper[data-has-title]:not([data-layout="vertical"]) > bp-step {
   flex-shrink: 0;
 }
 
-/* 垂直模式：標題是 column flex 第一項，自然排列，不需額外設定 */
+/* 垂直模式：flex gap 無法分行設定，用補償 margin 抵銷 --bps-effective-gap
+   最終間距 = --bps-effective-gap + (--bps-ui-title-gap - --bps-effective-gap)
+            = --bps-ui-title-gap（獨立生效，與 data-gap 脫鉤）               */
+bp-stepper[data-layout="vertical"][data-has-title] .bps-ui-title {
+  margin-bottom: calc(var(--bps-ui-title-gap, 8px) - var(--bps-effective-gap));
+}
 
 bp-stepper {
   display: flex;
@@ -159,6 +169,7 @@ bp-stepper {
   --bps-arrow:                 9px;
   --bps-connector-label-color: ${BRAND.stone};
   --bps-prog-btn-sz:           28px;
+  --bps-ui-title-gap:          8px;
 }
 
 bp-stepper[data-wrapped] {
@@ -715,6 +726,7 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     padX:                '--bps-pad-x',
     connectorLabelColor: '--bps-connector-label-color',
     progBtnSize:         '--bps-prog-btn-sz',           // progress 按鈕尺寸
+    uiTitleGap:          '--bps-ui-title-gap',          // ui-title 與元件的獨立間距
   };
 
   // ─── 注入全域 CSS（僅執行一次）────────────────────────────────────────────────
