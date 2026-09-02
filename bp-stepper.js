@@ -99,8 +99,8 @@ function buildCSS() {
   font-size:      var(--bps-ui-title-fs, 1.1rem);
   font-weight:    700;
   color:          var(--bps-color);
-  line-height:    1.4;
-  padding-bottom: var(--bps-ui-title-pb, 10px);
+  line-height:    1.3;
+  padding-bottom: var(--bps-ui-title-pb, 3px);
   flex:           0 0 100%;   /* 水平 flex-wrap 模式：獨佔第一行 */
   order:          -1;
   align-self:     flex-start;
