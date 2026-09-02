@@ -132,8 +132,10 @@
 .bp-lnh-3 { line-height: 3em; }
 .bp-lnh-4 { line-height: 2.5em; }
 .bp-lnh-5 { line-height: 2em; }
-.bp-lnh-6 { line-height: 1.5em; }
-.bp-lnh-7 { line-height: 1em; }
+.bp-lnh-6 { line-height: 1.75em; }
+.bp-lnh-7 { line-height: 1.5em; }
+.bp-lnh-8 { line-height: 1em; }
+.bp-lnh-9 { line-height: 0.75em; }
 
 blockquote {
     margin: 16px 0;
