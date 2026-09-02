@@ -11,7 +11,7 @@
 .bp-text-vanilla  { color: #DBEDD8; }
 .bp-text-yellow   { color: #DECA4B; }
 .bp-text-focus    { color: #E0BE79; }
-.bp-text-info     { color: #79B6FA; }
+.bp-text-info     { color: #788CDE; }
 .bp-text-stone    { color: #95BDD7; }
 .bp-text-indigo   { color: #9B72CF; }
 .bp-text-pink     { color: #FFB3D9; }
@@ -33,7 +33,7 @@
 .bp-bg-vanilla    { background-color: #DBEDD8; }
 .bp-bg-yellow     { background-color: #DECA4B; }
 .bp-bg-focus      { background-color: #E0BE79; }
-.bp-bg-info       { background-color: #79B6FA; }
+.bp-bg-info       { background-color: #788CDE; }
 .bp-bg-stone      { background-color: #95BDD7; }
 .bp-bg-indigo     { background-color: #9B72CF; }
 .bp-bg-pink       { background-color: #FFB3D9; }
@@ -54,7 +54,7 @@
 .bp-border-vanilla    { border: 1px solid #DBEDD8; }
 .bp-border-yellow     { border: 1px solid #DECA4B; }
 .bp-border-focus      { border: 1px solid #E0BE79; }
-.bp-border-info       { border: 1px solid #79B6FA; }
+.bp-border-info       { border: 1px solid #788CDE; }
 .bp-border-stone      { border: 1px solid #95BDD7; }
 .bp-border-indigo     { border: 1px solid #9B72CF; }
 .bp-border-pink       { border: 1px solid #FFB3D9; }
@@ -68,10 +68,10 @@
 .fs-larger            { font-size: 2rem; }
 .fs-large             { font-size: 1.5rem; }
 .fs-regular           { font-size: 1rem; }
-.fs-small,  .fs-7     { font-size: 0.85rem; }
-.fs-smaller,.fs-8     { font-size: 0.75rem; }
-.fs-xsmall, .fs-9     { font-size: 0.6rem; }
-.fs-extrasmall,.fs-10  { font-size: 0.45rem; }
+.fs-small,  .fs-7     { font-size: 0.8rem; }
+.fs-smaller,.fs-8     { font-size: 0.7rem; }
+.fs-xsmall, .fs-9     { font-size: 0.55rem; }
+.fs-extrasmall,.fs-10  { font-size: 0.4rem; }
 
 /* ── Widths ──────────────────────────────── */
 .w-90 { width: 90%; }
@@ -217,7 +217,7 @@ blockquote::before {
 .bp-hatch-vanilla  { --hatch-color: #DBEDD8; }
 .bp-hatch-yellow   { --hatch-color: #DECA4B; }
 .bp-hatch-focus    { --hatch-color: #e0be79; }
-.bp-hatch-info     { --hatch-color: #79B6FA; }
+.bp-hatch-info     { --hatch-color: #788CDE; }
 .bp-hatch-indigo   { --hatch-color: #9B72CF; }
 .bp-hatch-pink     { --hatch-color: #FFB3D9; }
 .bp-hatch-orange   { --hatch-color: #EDA109; }
