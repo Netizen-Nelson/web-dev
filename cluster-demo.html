@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ui-cluster Demo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0C0D0C;
+  --shell:#C6C7BD;
+  --lavender:#C3A5E5;
+  --sky:#95c9de;
+  --teal:#0DA591;
+  --stone:#95BDD7;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--shell);
+  font-family:'Segoe UI',system-ui,sans-serif;
+  font-size:1.125rem;
+  line-height:1.5;
+  display:flex;
+  min-height:100vh;
+}
+
+/* ── Sidebar ── */
+#sidebar{
+  width:220px;flex-shrink:0;
+  background:rgba(195,165,229,0.04);
+  border-right:1px solid rgba(195,165,229,0.12);
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  padding:24px 0 48px;
+  scrollbar-width:thin;scrollbar-color:rgba(195,165,229,0.2) transparent;
+}
+.brand{padding:0 20px 18px;font-size:1rem;font-weight:700;color:var(--lavender);
+  border-bottom:1px solid rgba(195,165,229,0.1);margin-bottom:10px}
+.brand small{display:block;font-size:0.72rem;font-weight:400;color:rgba(149,189,215,0.7);margin-top:2px}
+nav a{display:block;padding:6px 20px;font-size:0.88rem;color:rgba(198,199,189,0.72);
+  text-decoration:none;border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s}
+nav a:hover{color:var(--lavender);background:rgba(195,165,229,0.06);border-left-color:rgba(195,165,229,0.4)}
+.nav-g{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(149,189,215,0.55);padding:12px 20px 4px}
+
+/* ── Content ── */
+#content{flex:1;min-width:0;padding:48px 56px 120px}
+
+/* ── Typography ── */
+.page-title{font-size:2rem;font-weight:700;color:var(--lavender);letter-spacing:-0.02em;margin-bottom:6px}
+.page-sub{font-size:1rem;color:rgba(149,189,215,0.7);margin-bottom:48px}
+h2.sh{font-size:1.3rem;font-weight:700;color:var(--shell);
+  margin:52px 0 8px;padding-bottom:10px;
+  border-bottom:1px solid rgba(149,189,215,0.14);scroll-margin-top:20px}
+.desc{font-size:0.92rem;color:rgba(198,199,189,0.78);margin-bottom:24px;line-height:1.55}
+
+/* ── Demo block ── */
+.demo{
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(149,189,215,0.12);
+  border-radius:8px;overflow:hidden;margin-bottom:32px;
+}
+.demo-header{
+  display:flex;align-items:center;
+  padding:10px 16px;background:rgba(149,189,215,0.05);
+  border-bottom:1px solid rgba(149,189,215,0.1);
+}
+.demo-label{font-size:0.75rem;font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;color:rgba(149,189,215,0.7)}
+.demo-body{
+  padding:40px 32px;
+  display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;
+}
+
+/* ── Code ── */
+code{background:rgba(195,165,229,0.1);color:var(--lavender);padding:1px 6px;
+  border-radius:4px;font-family:'Cascadia Code','Fira Code',monospace;font-size:0.85em}
+pre.snippet{
+  background:#0e100e;border-radius:6px;padding:14px 18px;
+  font-size:0.82rem;line-height:1.6;overflow-x:auto;margin:0 0 24px;
+  font-family:'Cascadia Code','Fira Code',monospace;color:#c8ccc0;
+  border:1px solid rgba(149,189,215,0.08);
+}
+.tk-tag{color:var(--lavender)}.tk-attr{color:var(--sky)}.tk-val{color:#DECA4B}
+.tk-cmt{color:rgba(149,189,215,0.4);font-style:italic}
+
+/* ── Attr table ── */
+.attr-table{width:100%;border-collapse:collapse;font-size:0.88rem;margin-bottom:32px}
+.attr-table th{background:rgba(149,189,215,0.08);color:rgba(149,189,215,0.8);
+  font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  padding:8px 12px;text-align:left}
+.attr-table td{padding:9px 12px;border-bottom:1px solid rgba(149,189,215,0.07);
+  color:var(--shell);vertical-align:top}
+.attr-table tr:last-child td{border-bottom:none}
+.attr-table td:first-child code{color:var(--sky)}
+.attr-table td:nth-child(3){color:#DECA4B;font-family:monospace;font-size:0.82rem}
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="brand">ui-cluster<small>Burst Cluster 元件 Demo</small></div>
+  <nav>
+    <div class="nav-g">功能</div>
+    <a href="#basic">基本用法</a>
+    <a href="#theme">theme 色系</a>
+    <a href="#size">尺寸與間距</a>
+    <a href="#mixed">子圓各色</a>
+    <a href="#reset">重設按鈕</a>
+    <a href="#multi">多元件同頁</a>
+    <a href="#ielts">雅思教學範例</a>
+    <div class="nav-g">參考</div>
+    <a href="#api">屬性速查</a>
+  </nav>
+</aside>
+
+<main id="content">
+<h1 class="page-title">ui-cluster</h1>
+<p class="page-sub">兩層 Burst Cluster 元件——圓點數字暗示內容量，點擊逐層展開</p>
+
+
+<!-- ── 基本用法 ── -->
+<h2 class="sh" id="basic">基本用法</h2>
+<p class="desc">
+  主圓數字自動計算 <code>&lt;cluster-node&gt;</code> 數量；
+  子圓數字自動計算 <code>&lt;cluster-item&gt;</code> 數量。
+  點擊主圓後爆開，子圓依序出現；點擊子圓展開內容列表。
+</p>
+
+<pre class="snippet"><span class="tk-tag">&lt;ui-cluster</span> <span class="tk-attr">theme</span>=<span class="tk-val">"lavender"</span> <span class="tk-attr">label</span>=<span class="tk-val">"寫作題型"</span><span class="tk-tag">&gt;</span>
+
+  <span class="tk-tag">&lt;cluster-node</span> <span class="tk-attr">label</span>=<span class="tk-val">"Task 1 圖表"</span><span class="tk-tag">&gt;</span>
+    <span class="tk-tag">&lt;cluster-item&gt;</span>長條圖比較練習<span class="tk-tag">&lt;/cluster-item&gt;</span>
+    <span class="tk-tag">&lt;cluster-item&gt;</span>折線圖趨勢描述<span class="tk-tag">&lt;/cluster-item&gt;</span>
+    <span class="tk-tag">&lt;cluster-item&gt;</span>圓餅圖百分比<span class="tk-tag">&lt;/cluster-item&gt;</span>
+  <span class="tk-tag">&lt;/cluster-node&gt;</span>
+
+  <span class="tk-tag">&lt;cluster-node</span> <span class="tk-attr">label</span>=<span class="tk-val">"Task 2 議論"</span><span class="tk-tag">&gt;</span>
+    <span class="tk-tag">&lt;cluster-item&gt;</span>同意/不同意<span class="tk-tag">&lt;/cluster-item&gt;</span>
+    <span class="tk-tag">&lt;cluster-item&gt;</span>討論兩個觀點<span class="tk-tag">&lt;/cluster-item&gt;</span>
+  <span class="tk-tag">&lt;/cluster-node&gt;</span>
+
+  <span class="tk-tag">&lt;cluster-node</span> <span class="tk-attr">label</span>=<span class="tk-val">"Task 2 混合"</span><span class="tk-tag">&gt;</span>
+    <span class="tk-tag">&lt;cluster-item&gt;</span>問題與解決方案<span class="tk-tag">&lt;/cluster-item&gt;</span>
+  <span class="tk-tag">&lt;/cluster-node&gt;</span>
+
+<span class="tk-tag">&lt;/ui-cluster&gt;</span></pre>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">點擊主圓 → 點擊子圓</span></div>
+  <div class="demo-body">
+    <ui-cluster theme="lavender" label="寫作題型" reset>
+      <cluster-node label="Task 1 圖表">
+        <cluster-item>長條圖比較練習</cluster-item>
+        <cluster-item>折線圖趨勢描述</cluster-item>
+        <cluster-item>圓餅圖百分比說明</cluster-item>
+      </cluster-node>
+      <cluster-node label="Task 2 議論">
+        <cluster-item>同意／不同意題型</cluster-item>
+        <cluster-item>討論兩個觀點</cluster-item>
+      </cluster-node>
+      <cluster-node label="Task 2 混合">
+        <cluster-item>問題與解決方案</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+  </div>
+</div>
+
+
+<!-- ── theme 色系 ── -->
+<h2 class="sh" id="theme">theme 色系</h2>
+<p class="desc">
+  <code>theme</code> 屬性接受所有品牌色名稱或 HEX 值。
+  子圓若未設定 <code>theme</code>，自動繼承主圓顏色。
+</p>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">各主題色展示（點擊主圓互動）</span></div>
+  <div class="demo-body">
+
+    <ui-cluster theme="teal" label="teal" reset>
+      <cluster-node label="項目 A">
+        <cluster-item>內容一</cluster-item>
+        <cluster-item>內容二</cluster-item>
+      </cluster-node>
+      <cluster-node label="項目 B">
+        <cluster-item>內容一</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+    <ui-cluster theme="sky" label="sky" reset>
+      <cluster-node label="項目 A">
+        <cluster-item>內容一</cluster-item>
+        <cluster-item>內容二</cluster-item>
+      </cluster-node>
+      <cluster-node label="項目 B">
+        <cluster-item>內容一</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+    <ui-cluster theme="indigo" label="indigo" reset>
+      <cluster-node label="項目 A">
+        <cluster-item>內容一</cluster-item>
+        <cluster-item>內容二</cluster-item>
+      </cluster-node>
+      <cluster-node label="項目 B">
+        <cluster-item>內容一</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+    <ui-cluster theme="orange" label="orange" reset>
+      <cluster-node label="項目 A">
+        <cluster-item>內容一</cluster-item>
+        <cluster-item>內容二</cluster-item>
+      </cluster-node>
+      <cluster-node label="項目 B">
+        <cluster-item>內容一</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+    <ui-cluster theme="warning" label="warning" reset>
+      <cluster-node label="項目 A">
+        <cluster-item>內容一</cluster-item>
+        <cluster-item>內容二</cluster-item>
+      </cluster-node>
+      <cluster-node label="項目 B">
+        <cluster-item>內容一</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+    <ui-cluster theme="pink" label="pink" reset>
+      <cluster-node label="項目 A">
+        <cluster-item>內容一</cluster-item>
+        <cluster-item>內容二</cluster-item>
+      </cluster-node>
+      <cluster-node label="項目 B">
+        <cluster-item>內容一</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+  </div>
+</div>
+
+
+<!-- ── 尺寸與間距 ── -->
+<h2 class="sh" id="size">尺寸與間距</h2>
+<p class="desc">
+  <code>size</code> 控制主圓直徑，<code>node-size</code> 控制子圓直徑，
+  <code>gap</code> 控制子圓間距。三者皆可接受任意 CSS 長度值。
+</p>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">size="90px" node-size="68px" gap="36px"</span></div>
+  <div class="demo-body">
+    <ui-cluster theme="ocean" label="大尺寸" size="90px" node-size="68px" gap="36px" reset>
+      <cluster-node label="Listening">
+        <cluster-item>Multiple Choice</cluster-item>
+        <cluster-item>Map Labelling</cluster-item>
+        <cluster-item>Form Completion</cluster-item>
+        <cluster-item>Sentence Completion</cluster-item>
+      </cluster-node>
+      <cluster-node label="Reading">
+        <cluster-item>True / False / NG</cluster-item>
+        <cluster-item>Matching Headings</cluster-item>
+        <cluster-item>Summary Completion</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+  </div>
+</div>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">size="54px" node-size="42px" gap="14px"（緊湊版）</span></div>
+  <div class="demo-body">
+    <ui-cluster theme="shell" label="緊湊" size="54px" node-size="42px" gap="14px" reset>
+      <cluster-node label="A">
+        <cluster-item>項目 1</cluster-item>
+        <cluster-item>項目 2</cluster-item>
+      </cluster-node>
+      <cluster-node label="B">
+        <cluster-item>項目 1</cluster-item>
+      </cluster-node>
+      <cluster-node label="C">
+        <cluster-item>項目 1</cluster-item>
+        <cluster-item>項目 2</cluster-item>
+        <cluster-item>項目 3</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+  </div>
+</div>
+
+
+<!-- ── 子圓各色 ── -->
+<h2 class="sh" id="mixed">子圓各自設定 theme</h2>
+<p class="desc">
+  每個 <code>&lt;cluster-node&gt;</code> 可獨立設定 <code>theme</code>（或 <code>color</code>），
+  未設定時繼承主圓顏色。展開區塊的邊框顏色跟隨子圓顏色。
+</p>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">四個子圓各自不同色</span></div>
+  <div class="demo-body">
+    <ui-cluster theme="vanilla" label="雅思四科" size="80px" reset>
+      <cluster-node label="Listening" theme="sky">
+        <cluster-item>Section 1：社交場景對話</cluster-item>
+        <cluster-item>Section 2：獨白說明</cluster-item>
+        <cluster-item>Section 3：學術討論</cluster-item>
+        <cluster-item>Section 4：學術講座</cluster-item>
+      </cluster-node>
+      <cluster-node label="Reading" theme="teal">
+        <cluster-item>Academic：三篇長文章</cluster-item>
+        <cluster-item>General：廣告、書信、文章</cluster-item>
+      </cluster-node>
+      <cluster-node label="Writing" theme="lavender">
+        <cluster-item>Task 1：圖表/書信描述</cluster-item>
+        <cluster-item>Task 2：議論文</cluster-item>
+      </cluster-node>
+      <cluster-node label="Speaking" theme="orange">
+        <cluster-item>Part 1：自我介紹與日常問答</cluster-item>
+        <cluster-item>Part 2：長篇獨白（Cue Card）</cluster-item>
+        <cluster-item>Part 3：深度討論</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+  </div>
+</div>
+
+
+<!-- ── 重設按鈕 ── -->
+<h2 class="sh" id="reset">重設按鈕</h2>
+<p class="desc">
+  在 <code>&lt;ui-cluster&gt;</code> 加上 <code>reset</code> 屬性，
+  右上角出現重設按鈕，點擊後整個元件回到初始圓形狀態，可重新互動。
+</p>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">有 reset 屬性 — 展開後點右上角「↺ 重設」</span></div>
+  <div class="demo-body">
+    <ui-cluster theme="focus" label="詞彙主題" reset>
+      <cluster-node label="Environment">
+        <cluster-item>pollution（污染）</cluster-item>
+        <cluster-item>renewable energy（可再生能源）</cluster-item>
+        <cluster-item>carbon footprint（碳足跡）</cluster-item>
+      </cluster-node>
+      <cluster-node label="Technology">
+        <cluster-item>artificial intelligence（人工智慧）</cluster-item>
+        <cluster-item>automation（自動化）</cluster-item>
+      </cluster-node>
+      <cluster-node label="Health">
+        <cluster-item>sedentary lifestyle（久坐生活方式）</cluster-item>
+        <cluster-item>preventive medicine（預防醫學）</cluster-item>
+        <cluster-item>mental wellbeing（心理健康）</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+  </div>
+</div>
+
+
+<!-- ── 多元件同頁 ── -->
+<h2 class="sh" id="multi">多元件同頁，各自獨立</h2>
+<p class="desc">
+  同頁多個 <code>&lt;ui-cluster&gt;</code> 完全獨立運作，互不干擾。
+</p>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">三個獨立 ui-cluster 並排</span></div>
+  <div class="demo-body">
+
+    <ui-cluster theme="sky" label="Listening" reset>
+      <cluster-node label="填空題">
+        <cluster-item>Form Completion</cluster-item>
+        <cluster-item>Sentence Completion</cluster-item>
+        <cluster-item>Note Completion</cluster-item>
+      </cluster-node>
+      <cluster-node label="選擇題">
+        <cluster-item>Single Answer</cluster-item>
+        <cluster-item>Multiple Answers</cluster-item>
+      </cluster-node>
+      <cluster-node label="配對題">
+        <cluster-item>Matching Features</cluster-item>
+        <cluster-item>Map / Plan Labelling</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+    <ui-cluster theme="teal" label="Reading" reset>
+      <cluster-node label="判斷題">
+        <cluster-item>True / False / Not Given</cluster-item>
+        <cluster-item>Yes / No / Not Given</cluster-item>
+      </cluster-node>
+      <cluster-node label="配對題">
+        <cluster-item>Matching Headings</cluster-item>
+        <cluster-item>Matching Information</cluster-item>
+        <cluster-item>Matching Features</cluster-item>
+      </cluster-node>
+      <cluster-node label="填空題">
+        <cluster-item>Summary Completion</cluster-item>
+        <cluster-item>Sentence Completion</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+    <ui-cluster theme="indigo" label="Speaking" reset>
+      <cluster-node label="Part 1">
+        <cluster-item>個人資訊問答</cluster-item>
+        <cluster-item>日常生活話題</cluster-item>
+      </cluster-node>
+      <cluster-node label="Part 2">
+        <cluster-item>Cue Card 獨白 2 分鐘</cluster-item>
+        <cluster-item>準備時間 1 分鐘</cluster-item>
+      </cluster-node>
+      <cluster-node label="Part 3">
+        <cluster-item>抽象議題延伸討論</cluster-item>
+        <cluster-item>觀點表達與辯論</cluster-item>
+        <cluster-item>社會議題分析</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+  </div>
+</div>
+
+
+<!-- ── 雅思教學完整範例 ── -->
+<h2 class="sh" id="ielts">雅思教學完整場景</h2>
+<p class="desc">
+  模擬真實教學頁面：一個主題下有多個子題，
+  <code>cluster-item</code> 內容支援任意 HTML，可放題目、例句、連結等。
+</p>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">Writing Task 2 — 議論文評分詳解</span></div>
+  <div class="demo-body">
+    <ui-cluster theme="lavender" label="Task 2 評分" size="84px" node-size="62px" gap="32px" reset>
+
+      <cluster-node label="Task Achievement" theme="lavender">
+        <cluster-item>是否完整回答題目的所有要求</cluster-item>
+        <cluster-item>立場是否明確、一致</cluster-item>
+        <cluster-item>論點是否有支撐細節和例子</cluster-item>
+        <cluster-item>是否切題，不跑題</cluster-item>
+      </cluster-node>
+
+      <cluster-node label="Coherence &amp; Cohesion" theme="sky">
+        <cluster-item>段落組織是否清晰（intro / body / conclusion）</cluster-item>
+        <cluster-item>銜接詞使用是否自然（However, Furthermore...）</cluster-item>
+        <cluster-item>代名詞指代是否清楚</cluster-item>
+      </cluster-node>
+
+      <cluster-node label="Lexical Resource" theme="teal">
+        <cluster-item>詞彙多樣性：避免重複用字</cluster-item>
+        <cluster-item>學術詞彙準確使用（collocations）</cluster-item>
+        <cluster-item>拼字錯誤數量</cluster-item>
+      </cluster-node>
+
+      <cluster-node label="Grammatical Range" theme="indigo">
+        <cluster-item>句型多樣性：簡單句、複合句、複雜句並用</cluster-item>
+        <cluster-item>時態使用正確</cluster-item>
+        <cluster-item>標點符號使用規範</cluster-item>
+      </cluster-node>
+
+    </ui-cluster>
+  </div>
+</div>
+
+
+<!-- ── 屬性速查 ── -->
+<h2 class="sh" id="api">屬性速查</h2>
+
+<p class="desc" style="margin-bottom:12px"><code>&lt;ui-cluster&gt;</code></p>
+<table class="attr-table">
+<thead><tr><th>屬性</th><th>說明</th><th>預設</th></tr></thead>
+<tbody>
+  <tr><td><code>theme</code></td><td>主圓顏色（品牌色名或 HEX）</td><td><code>shell</code></td></tr>
+  <tr><td><code>label</code></td><td>主圓下方標籤文字</td><td>—</td></tr>
+  <tr><td><code>size</code></td><td>主圓直徑</td><td><code>72px</code></td></tr>
+  <tr><td><code>node-size</code></td><td>子圓直徑</td><td><code>56px</code></td></tr>
+  <tr><td><code>gap</code></td><td>子圓之間的間距</td><td><code>24px</code></td></tr>
+  <tr><td><code>font-size</code></td><td>標籤與內容字體大小</td><td><code>1rem</code></td></tr>
+  <tr><td><code>reset</code></td><td>顯示重設按鈕（屬性旗標）</td><td>無</td></tr>
+</tbody>
+</table>
+
+<p class="desc" style="margin-bottom:12px"><code>&lt;cluster-node&gt;</code></p>
+<table class="attr-table">
+<thead><tr><th>屬性</th><th>說明</th><th>預設</th></tr></thead>
+<tbody>
+  <tr><td><code>theme</code></td><td>子圓顏色，未設定時繼承主圓</td><td>繼承</td></tr>
+  <tr><td><code>label</code></td><td>子圓下方標籤文字</td><td>—</td></tr>
+</tbody>
+</table>
+
+<p class="desc" style="margin-bottom:12px"><code>&lt;cluster-item&gt;</code></p>
+<table class="attr-table">
+<thead><tr><th>內容</th><th>說明</th></tr></thead>
+<tbody>
+  <tr><td>任意 HTML</td><td>展開後逐條顯示，支援文字、連結、標籤等</td></tr>
+</tbody>
+</table>
+
+<p class="desc" style="margin-top:24px">全局設定（引入前宣告）：</p>
+<pre class="snippet"><span class="tk-tag">&lt;script&gt;</span>
+  window.UiClusterConfig = {
+    theme:    <span class="tk-val">'lavender'</span>,
+    size:     <span class="tk-val">'80px'</span>,
+    nodeSize: <span class="tk-val">'60px'</span>,
+    gap:      <span class="tk-val">'28px'</span>,
+    fontSize: <span class="tk-val">'1rem'</span>
+  };
+<span class="tk-tag">&lt;/script&gt;</span>
+<span class="tk-tag">&lt;script</span> <span class="tk-attr">src</span>=<span class="tk-val">"ui-cluster.js"</span><span class="tk-tag">&gt;&lt;/script&gt;</span></pre>
+
+</main>
+
+<script src="ui-cluster.js"></script>
+</body>
+</html>
