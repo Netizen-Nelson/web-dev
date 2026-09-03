@@ -433,6 +433,14 @@ class CardToggle extends HTMLElement {
                 margin-bottom: 10px;
             }
 
+            /* ── grid mode ── */
+            card-toggle-group[mode^="grid"] {
+                display: grid;
+            }
+            card-toggle-group[mode^="grid"] card-toggle {
+                display: block;
+            }
+
             /* 導航按鈕樣式 */
             .ct-nav-buttons {
                 display: flex;
@@ -1157,7 +1165,22 @@ class CardToggleGroup extends HTMLElement {
 
         if (mode === 'slide') {
             this._setupSlideMode();
+        } else if (mode.startsWith('grid')) {
+            this._setupGridMode(mode);
         }
+    }
+
+    _setupGridMode(modeAttr) {
+        /* 解析 mode="grid" 或 mode="grid:12px" */
+        const parts = modeAttr.split(':');
+        const gap   = parts[1] ? parts[1].trim() : '12px';
+
+        /* cols：優先讀屬性，否則用卡片數量 */
+        const cols  = parseInt(this.getAttribute('cols')) || this._cards.length;
+
+        this.style.display              = 'grid';
+        this.style.gridTemplateColumns  = `repeat(${cols}, 1fr)`;
+        this.style.gap                  = gap;
     }
 
     _setupSlideMode() {
