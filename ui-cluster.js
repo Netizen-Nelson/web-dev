@@ -28,11 +28,15 @@
    * 全域設定
    * ---------------------------------------------------------------- */
   var CFG = global.UiClusterConfig = Object.assign({
-    theme:    'shell',   // 預設主題色
-    size:     '72px',   // 主圓直徑
-    nodeSize: '56px',   // 子圓直徑
-    gap:      '24px',   // 子圓間距
-    fontSize: '1rem'    // 標籤字體大小
+    theme:          'shell',  // 預設主題色
+    size:           '72px',  // 主圓直徑
+    nodeSize:       '56px',  // 子圓直徑
+    gap:            '24px',  // 子圓間距
+    fontSize:       '1rem',  // 標籤字體大小
+    labelGap:       '4px',   // 主圓 → 標籤距離
+    labelWidth:     '90px',  // 主圓標籤最大寬度
+    nodeLabelGap:   '6px',   // 子圓 → 標籤距離（全域預設）
+    nodeLabelWidth: '76px'   // 子圓標籤最大寬度（全域預設）
   }, global.UiClusterConfig || {});
 
   /* ── 工具函式 ── */
@@ -111,7 +115,7 @@
       '100%{transform:scale(0);opacity:0}}',
 
     /* ── 子圓 ── */
-    '.uc-node-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}',
+    '.uc-node-wrap{display:flex;flex-direction:column;align-items:center}',
     '.uc-node-circle{' +
       'width:var(--uc-nsz,56px);height:var(--uc-nsz,56px);' +
       'background:var(--uc-nclr,var(--uc-clr));color:' + BG + ';' +
@@ -128,10 +132,18 @@
     '.uc-num-sm{font-size:calc(var(--uc-fs,1rem)*0.95);font-weight:700;line-height:1;letter-spacing:-0.02em}',
 
     /* ── 圓下方文字標籤 ── */
+    /* --uc-lg   : 主圓到標籤的距離（預設 4px）  */
+    /* --uc-lw   : 主圓標籤最大寬度（預設 90px） */
+    /* --uc-nlg  : 子圓到標籤的距離（預設 6px）  */
+    /* --uc-nlw  : 子圓標籤最大寬度（預設 76px） */
     '.uc-label{font-size:calc(var(--uc-fs,1rem)*0.78);color:var(--uc-clr);' +
-      'font-weight:600;text-align:center;max-width:90px;word-break:break-word;opacity:0.9}',
+      'font-weight:600;text-align:center;' +
+      'max-width:var(--uc-lw,90px);word-break:break-word;opacity:0.9;' +
+      'margin-top:var(--uc-lg,4px)}',
     '.uc-label-sm{font-size:calc(var(--uc-fs,1rem)*0.72);color:var(--uc-nclr,var(--uc-clr));' +
-      'font-weight:600;text-align:center;max-width:76px;word-break:break-word;opacity:0.88}',
+      'font-weight:600;text-align:center;' +
+      'max-width:var(--uc-nlw,76px);word-break:break-word;opacity:0.88;' +
+      'margin-top:var(--uc-nlg,6px)}',
 
     /* ── 內容展開區 ── */
     '.uc-content{' +
@@ -170,7 +182,7 @@
     /* ── 子圓到內容的連接線 ── */
     '.uc-node-connector{' +
       'width:2px;height:0;background:var(--uc-nclr,var(--uc-clr));' +
-      'opacity:0;margin:0 auto;' +
+      'opacity:0;margin:6px auto 0;' +
       'transition:height .28s ease,opacity .25s ease}',
     '.uc-node-connector.show{height:12px;opacity:0.76}'
 
@@ -192,15 +204,20 @@
    * UiCluster 主類別
    * ================================================================ */
   function UiCluster(el) {
-    this.el      = el;
-    this.color   = resolveColor(el.getAttribute('theme') || el.getAttribute('color') || CFG.theme) || BRAND.shell;
-    this.size    = el.getAttribute('size')      || CFG.size;
-    this.nodeSize= el.getAttribute('node-size') || CFG.nodeSize;
-    this.gap     = el.getAttribute('gap')       || CFG.gap;
-    this.fs      = el.getAttribute('font-size') || CFG.fontSize;
-    this.label   = el.getAttribute('label')     || '';
-    this.hasReset= el.hasAttribute('reset');
-    this.root    = null;  // 渲染後的根 div
+    this.el             = el;
+    this.color          = resolveColor(el.getAttribute('theme') || el.getAttribute('color') || CFG.theme) || BRAND.shell;
+    this.size           = el.getAttribute('size')             || CFG.size;
+    this.nodeSize       = el.getAttribute('node-size')        || CFG.nodeSize;
+    this.gap            = el.getAttribute('gap')              || CFG.gap;
+    this.fs             = el.getAttribute('font-size')        || CFG.fontSize;
+    this.label          = el.getAttribute('label')            || '';
+    /* ── 新增：標籤間距 & 寬度 ── */
+    this.labelGap       = el.getAttribute('label-gap')        || CFG.labelGap;       // 主圓 → 標籤距離
+    this.labelWidth     = el.getAttribute('label-width')      || CFG.labelWidth;     // 主圓標籤最大寬度
+    this.nodeLabelGap   = el.getAttribute('node-label-gap')   || CFG.nodeLabelGap;   // 子圓全域預設距離
+    this.nodeLabelWidth = el.getAttribute('node-label-width') || CFG.nodeLabelWidth; // 子圓全域預設寬度
+    this.hasReset       = el.hasAttribute('reset');
+    this.root           = null;  // 渲染後的根 div
   }
 
   UiCluster.prototype.init = function () {
@@ -232,7 +249,9 @@
     root.style.cssText = [
       '--uc-clr:' + this.color,
       '--uc-sz:'  + this.size,
-      '--uc-fs:'  + this.fs
+      '--uc-fs:'  + this.fs,
+      '--uc-lg:'  + this.labelGap,
+      '--uc-lw:'  + this.labelWidth
     ].join(';');
     this.root = root;
 
@@ -299,7 +318,9 @@
       '--uc-sz:'   + this.size,
       '--uc-nsz:'  + this.nodeSize,
       '--uc-gap:'  + this.gap,
-      '--uc-fs:'   + this.fs
+      '--uc-fs:'   + this.fs,
+      '--uc-lg:'   + this.labelGap,       // 主圓 → 標籤距離
+      '--uc-lw:'   + this.labelWidth      // 主圓標籤最大寬度
     ].join(';');
     this.root = root;
 
@@ -360,6 +381,12 @@
       /* 子圓外層 wrap（圓 + label + connector + content） */
       var wrap = mk('div', 'uc-node-wrap');
       wrap.style.setProperty('--uc-nclr', nodeColor);
+
+      /* ── 子圓標籤距離 & 寬度：個別節點優先，其次 ui-cluster 全域預設 ── */
+      var nLabelGap   = nodeEl.getAttribute('label-gap')   || self.nodeLabelGap;
+      var nLabelWidth = nodeEl.getAttribute('label-width')  || self.nodeLabelWidth;
+      wrap.style.setProperty('--uc-nlg',  nLabelGap);
+      wrap.style.setProperty('--uc-nlw',  nLabelWidth);
 
       /* 子圓 */
       var circle = mk('div', 'uc-circle uc-node-circle');

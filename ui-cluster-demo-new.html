@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>ui-cluster — label-gap / label-width 新屬性展示</title>
+<style>
+:root {
+  --bg:    #0C0D0C;
+  --shell: #C6C7BD;
+  --sky:   #95c9de;
+  --pink:  #FFB3D9;
+  --sp:    #C8DD5A;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--shell);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  margin: 0;
+  padding: 40px 48px 80px;
+}
+h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--sp);
+  margin: 0 0 6px;
+}
+.subtitle {
+  color: rgba(198,199,189,0.70);
+  font-size: 1rem;
+  margin: 0 0 48px;
+}
+/* ── Section ── */
+.section { margin-bottom: 60px; }
+h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--sky);
+  border-left: 4px solid var(--sky);
+  padding: 2px 0 2px 12px;
+  margin: 0 0 8px;
+}
+.desc {
+  color: rgba(198,199,189,0.80);
+  font-size: 0.95rem;
+  margin: 0 0 20px;
+  max-width: 680px;
+}
+/* ── attr table ── */
+.attr-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-bottom: 20px; }
+.attr-table th { background: rgba(149,201,222,0.09); color: var(--sky); padding: 8px 14px; text-align: left; font-weight: 600; border-bottom: 1px solid rgba(149,201,222,0.22); }
+.attr-table td { padding: 7px 14px; border-bottom: 1px solid rgba(198,199,189,0.07); color: rgba(198,199,189,0.84); vertical-align: top; }
+.attr-table tr:last-child td { border-bottom: none; }
+.attr-name { color: var(--sp); font-family: monospace; font-size: 0.85em; }
+.attr-type { color: var(--sky); font-family: monospace; font-size: 0.82em; }
+.pill { display:inline-block; font-size:0.7rem; padding:1px 7px; border-radius:99px; font-weight:700; }
+.pill-opt  { color:var(--shell); background:rgba(198,199,189,0.12); }
+.pill-grp  { color:var(--sp);   background:rgba(200,221,90,0.12); }
+/* ── demo row ── */
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.demo-card {
+  background: #111211;
+  border: 1px solid rgba(149,201,222,0.18);
+  border-radius: 8px;
+  padding: 24px 28px;
+  min-width: 220px;
+}
+.demo-label {
+  font-size: 0.8rem;
+  color: rgba(149,201,222,0.60);
+  margin-bottom: 14px;
+  font-family: monospace;
+  letter-spacing: 0.03em;
+}
+/* ── code block ── */
+.cb { background: #141514; border: 1px solid rgba(198,199,189,0.10); border-radius: 6px; padding: 14px 18px; font-family: 'Cascadia Code','Fira Code',monospace; font-size: 0.82rem; color: #abb2bf; line-height: 1.5; overflow-x: auto; margin-bottom: 20px; }
+.cb .a { color: var(--sky); }    /* attribute */
+.cb .v { color: var(--sp); }     /* value */
+.cb .t { color: var(--pink); }   /* tag */
+/* ── divider ── */
+hr { border: none; border-top: 1px solid rgba(198,199,189,0.07); margin: 0 0 52px; }
+p code { color:var(--sp); background:rgba(200,221,90,0.10); padding:1px 6px; border-radius:4px; font-size:0.85em; font-family:monospace; }
+</style>
+</head>
+<body>
+
+<h1>ui-cluster.js — 新屬性說明</h1>
+<p class="subtitle">label-gap &amp; label-width：精確控制圓形到標籤的距離與標籤寬度</p>
+
+
+<!-- ═══ 屬性總覽 ═══ -->
+<div class="section">
+  <h2>新增屬性總覽</h2>
+  <table class="attr-table">
+    <thead>
+      <tr><th>屬性</th><th>套用對象</th><th>型別</th><th>預設值</th><th>說明</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="attr-name">label-gap</span></td>
+        <td><span class="pill pill-opt">&lt;ui-cluster&gt;</span></td>
+        <td><span class="attr-type">CSS 長度</span></td>
+        <td><code>4px</code></td>
+        <td>主圓與其下方標籤的距離（<code>margin-top</code>）。</td>
+      </tr>
+      <tr>
+        <td><span class="attr-name">label-width</span></td>
+        <td><span class="pill pill-opt">&lt;ui-cluster&gt;</span></td>
+        <td><span class="attr-type">CSS 長度</span></td>
+        <td><code>90px</code></td>
+        <td>主圓標籤的最大寬度（<code>max-width</code>）。</td>
+      </tr>
+      <tr>
+        <td><span class="attr-name">node-label-gap</span></td>
+        <td><span class="pill pill-opt">&lt;ui-cluster&gt;</span></td>
+        <td><span class="attr-type">CSS 長度</span></td>
+        <td><code>6px</code></td>
+        <td>所有子圓與其標籤距離的<strong>全域預設值</strong>，可被個別 <code>&lt;cluster-node&gt;</code> 的 <code>label-gap</code> 覆蓋。</td>
+      </tr>
+      <tr>
+        <td><span class="attr-name">node-label-width</span></td>
+        <td><span class="pill pill-opt">&lt;ui-cluster&gt;</span></td>
+        <td><span class="attr-type">CSS 長度</span></td>
+        <td><code>76px</code></td>
+        <td>所有子圓標籤最大寬度的<strong>全域預設值</strong>，可被個別 <code>&lt;cluster-node&gt;</code> 的 <code>label-width</code> 覆蓋。</td>
+      </tr>
+      <tr>
+        <td><span class="attr-name">label-gap</span></td>
+        <td><span class="pill pill-grp">&lt;cluster-node&gt;</span></td>
+        <td><span class="attr-type">CSS 長度</span></td>
+        <td>繼承全域預設</td>
+        <td>覆蓋該子圓到其標籤的距離。</td>
+      </tr>
+      <tr>
+        <td><span class="attr-name">label-width</span></td>
+        <td><span class="pill pill-grp">&lt;cluster-node&gt;</span></td>
+        <td><span class="attr-type">CSS 長度</span></td>
+        <td>繼承全域預設</td>
+        <td>覆蓋該子圓標籤的最大寬度。</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.9rem; color:rgba(198,199,189,0.70); margin:0">
+    優先順序：<code>&lt;cluster-node label-gap&gt;</code>
+    &gt; <code>&lt;ui-cluster node-label-gap&gt;</code>
+    &gt; <code>UiClusterConfig.nodeLabelGap</code>
+  </p>
+</div>
+<hr>
+
+
+<!-- ═══ 範例 1：主圓 label-gap ═══ -->
+<div class="section">
+  <h2>範例一：主圓的圓形 → 標籤距離（單層模式）</h2>
+  <p class="desc">
+    在 <code>&lt;ui-cluster&gt;</code> 上設定 <code>label-gap</code>，控制主圓底部到文字標籤的垂直距離。
+    值為任何有效 CSS 長度（<code>px</code>、<code>rem</code>、<code>em</code>）。
+  </p>
+
+  <div class="demo-row">
+    <div class="demo-card">
+      <div class="demo-label">label-gap="4px"（預設）</div>
+      <ui-cluster theme="sky" label="雅思點子寶庫，尤其適合口說Part 3" label-gap="4px" reset>
+        <cluster-item>技術寫作：AI 在教育中的角色</cluster-item>
+        <cluster-item>城市設計：行人友善空間規劃</cluster-item>
+        <cluster-item>社會公平：數位鴻溝的成因</cluster-item>
+        <cluster-item>環境政策：碳稅的利與弊</cluster-item>
+      </ui-cluster>
+    </div>
+
+    <div class="demo-card">
+      <div class="demo-label">label-gap="16px"</div>
+      <ui-cluster theme="sky" label="雅思點子寶庫，尤其適合口說Part 3" label-gap="16px" reset>
+        <cluster-item>技術寫作：AI 在教育中的角色</cluster-item>
+        <cluster-item>城市設計：行人友善空間規劃</cluster-item>
+        <cluster-item>社會公平：數位鴻溝的成因</cluster-item>
+        <cluster-item>環境政策：碳稅的利與弊</cluster-item>
+      </ui-cluster>
+    </div>
+
+    <div class="demo-card">
+      <div class="demo-label">label-gap="32px"</div>
+      <ui-cluster theme="sky" label="雅思點子寶庫，尤其適合口說Part 3" label-gap="32px" reset>
+        <cluster-item>技術寫作：AI 在教育中的角色</cluster-item>
+        <cluster-item>城市設計：行人友善空間規劃</cluster-item>
+        <cluster-item>社會公平：數位鴻溝的成因</cluster-item>
+        <cluster-item>環境政策：碳稅的利與弊</cluster-item>
+      </ui-cluster>
+    </div>
+  </div>
+
+  <div class="cb">
+<span class="t">&lt;ui-cluster</span> <span class="a">theme</span>=<span class="v">"sky"</span>
+             <span class="a">label</span>=<span class="v">"雅思點子寶庫，尤其適合口說Part 3"</span>
+             <span class="a">label-gap</span>=<span class="v">"16px"</span>
+             <span class="a">reset</span><span class="t">&gt;</span>
+  <span class="t">&lt;cluster-item&gt;</span>技術寫作：AI 在教育中的角色<span class="t">&lt;/cluster-item&gt;</span>
+  <span class="t">&lt;cluster-item&gt;</span>城市設計：行人友善空間規劃<span class="t">&lt;/cluster-item&gt;</span>
+<span class="t">&lt;/ui-cluster&gt;</span>
+  </div>
+</div>
+<hr>
+
+
+<!-- ═══ 範例 2：主圓 label-width ═══ -->
+<div class="section">
+  <h2>範例二：主圓的標籤寬度（單層模式）</h2>
+  <p class="desc">
+    <code>label-width</code> 控制標籤 <code>max-width</code>，決定文字在哪裡折行。
+    較寬的值讓文字分佈更均勻；較窄的值讓標籤更緊湊，折行更早。
+  </p>
+
+  <div class="demo-row">
+    <div class="demo-card">
+      <div class="demo-label">label-width="60px"（窄）</div>
+      <ui-cluster theme="pink" label="雅思點子寶庫，尤其適合口說Part 3" label-width="60px" reset>
+        <cluster-item>環境政策</cluster-item>
+        <cluster-item>科技倫理</cluster-item>
+        <cluster-item>社會公平</cluster-item>
+      </ui-cluster>
+    </div>
+
+    <div class="demo-card">
+      <div class="demo-label">label-width="90px"（預設）</div>
+      <ui-cluster theme="pink" label="雅思點子寶庫，尤其適合口說Part 3" label-width="90px" reset>
+        <cluster-item>環境政策</cluster-item>
+        <cluster-item>科技倫理</cluster-item>
+        <cluster-item>社會公平</cluster-item>
+      </ui-cluster>
+    </div>
+
+    <div class="demo-card">
+      <div class="demo-label">label-width="140px"（寬）</div>
+      <ui-cluster theme="pink" label="雅思點子寶庫，尤其適合口說Part 3" label-width="140px" reset>
+        <cluster-item>環境政策</cluster-item>
+        <cluster-item>科技倫理</cluster-item>
+        <cluster-item>社會公平</cluster-item>
+      </ui-cluster>
+    </div>
+  </div>
+
+  <div class="cb">
+<span class="t">&lt;ui-cluster</span> <span class="a">theme</span>=<span class="v">"pink"</span>
+             <span class="a">label</span>=<span class="v">"雅思點子寶庫，尤其適合口說Part 3"</span>
+             <span class="a">label-width</span>=<span class="v">"140px"</span>
+             <span class="a">reset</span><span class="t">&gt;</span>
+  ...
+<span class="t">&lt;/ui-cluster&gt;</span>
+  </div>
+</div>
+<hr>
+
+
+<!-- ═══ 範例 3：子圓 node-label-gap 全域預設 ═══ -->
+<div class="section">
+  <h2>範例三：雙層模式 — 子圓全域標籤距離（node-label-gap）</h2>
+  <p class="desc">
+    在 <code>&lt;ui-cluster&gt;</code> 上設定 <code>node-label-gap</code>，可統一調整所有子圓到標籤的距離，
+    不需每個 <code>&lt;cluster-node&gt;</code> 分別設定。
+  </p>
+
+  <div class="demo-row">
+    <div class="demo-card">
+      <div class="demo-label">node-label-gap="6px"（預設）</div>
+      <ui-cluster theme="shell" node-label-gap="6px" reset>
+        <cluster-node theme="sky" label="口說Part 3">
+          <cluster-item>社會議題類題型</cluster-item>
+          <cluster-item>比較分析技巧</cluster-item>
+        </cluster-node>
+        <cluster-node theme="pink" label="寫作Task 2">
+          <cluster-item>論點結構鋪排</cluster-item>
+          <cluster-item>字彙多樣性提升</cluster-item>
+        </cluster-node>
+      </ui-cluster>
+    </div>
+
+    <div class="demo-card">
+      <div class="demo-label">node-label-gap="18px"</div>
+      <ui-cluster theme="shell" node-label-gap="18px" reset>
+        <cluster-node theme="sky" label="口說Part 3">
+          <cluster-item>社會議題類題型</cluster-item>
+          <cluster-item>比較分析技巧</cluster-item>
+        </cluster-node>
+        <cluster-node theme="pink" label="寫作Task 2">
+          <cluster-item>論點結構鋪排</cluster-item>
+          <cluster-item>字彙多樣性提升</cluster-item>
+        </cluster-node>
+      </ui-cluster>
+    </div>
+  </div>
+
+  <div class="cb">
+<span class="t">&lt;ui-cluster</span> <span class="a">theme</span>=<span class="v">"shell"</span>
+             <span class="a">node-label-gap</span>=<span class="v">"18px"</span>
+             <span class="a">reset</span><span class="t">&gt;</span>
+  <span class="t">&lt;cluster-node</span> <span class="a">theme</span>=<span class="v">"sky"</span> <span class="a">label</span>=<span class="v">"口說Part 3"</span><span class="t">&gt;</span>
+    <span class="t">&lt;cluster-item&gt;</span>社會議題類題型<span class="t">&lt;/cluster-item&gt;</span>
+  <span class="t">&lt;/cluster-node&gt;</span>
+  <span class="t">&lt;cluster-node</span> <span class="a">theme</span>=<span class="v">"pink"</span> <span class="a">label</span>=<span class="v">"寫作Task 2"</span><span class="t">&gt;</span>
+    <span class="t">&lt;cluster-item&gt;</span>論點結構鋪排<span class="t">&lt;/cluster-item&gt;</span>
+  <span class="t">&lt;/cluster-node&gt;</span>
+<span class="t">&lt;/ui-cluster&gt;</span>
+  </div>
+</div>
+<hr>
+
+
+<!-- ═══ 範例 4：子圓個別 label-gap / label-width ═══ -->
+<div class="section">
+  <h2>範例四：雙層模式 — 子圓個別覆蓋（label-gap / label-width on cluster-node）</h2>
+  <p class="desc">
+    每個 <code>&lt;cluster-node&gt;</code> 可獨立設定 <code>label-gap</code> 和 <code>label-width</code>，
+    覆蓋 <code>&lt;ui-cluster&gt;</code> 的全域預設。
+    可用來讓標籤文字較長的子圓單獨加寬。
+  </p>
+
+  <div class="demo-row">
+    <div class="demo-card" style="min-width:320px">
+      <div class="demo-label">節點各自設定不同寬度與距離</div>
+      <ui-cluster theme="special" node-label-gap="8px" node-label-width="60px" reset>
+        <cluster-node theme="sky" label="口說Part 3" label-gap="14px" label-width="88px">
+          <cluster-item>社會議題類題型</cluster-item>
+          <cluster-item>比較分析技巧</cluster-item>
+          <cluster-item>個人觀點表達</cluster-item>
+        </cluster-node>
+        <cluster-node theme="pink" label="寫作">
+          <cluster-item>論點結構鋪排</cluster-item>
+          <cluster-item>字彙多樣性</cluster-item>
+        </cluster-node>
+        <cluster-node theme="shell" label="閱讀" label-width="50px">
+          <cluster-item>選擇題技巧</cluster-item>
+        </cluster-node>
+      </ui-cluster>
+    </div>
+  </div>
+
+  <div class="cb">
+<span class="t">&lt;ui-cluster</span>
+  <span class="a">theme</span>=<span class="v">"special"</span>
+  <span class="a">node-label-gap</span>=<span class="v">"8px"</span>      <span style="color:rgba(198,199,189,0.38)">← 全域預設距離</span>
+  <span class="a">node-label-width</span>=<span class="v">"60px"</span>    <span style="color:rgba(198,199,189,0.38)">← 全域預設寬度</span>
+  <span class="a">reset</span><span class="t">&gt;</span>
+
+  <span class="t">&lt;cluster-node</span>
+    <span class="a">theme</span>=<span class="v">"sky"</span>
+    <span class="a">label</span>=<span class="v">"口說Part 3"</span>
+    <span class="a">label-gap</span>=<span class="v">"14px"</span>       <span style="color:rgba(198,199,189,0.38)">← 覆蓋全域距離</span>
+    <span class="a">label-width</span>=<span class="v">"88px"</span>    <span style="color:rgba(198,199,189,0.38)">← 覆蓋全域寬度</span><span class="t">&gt;</span>
+    <span class="t">&lt;cluster-item&gt;</span>社會議題類題型<span class="t">&lt;/cluster-item&gt;</span>
+    <span class="t">&lt;cluster-item&gt;</span>比較分析技巧<span class="t">&lt;/cluster-item&gt;</span>
+  <span class="t">&lt;/cluster-node&gt;</span>
+
+  <span class="t">&lt;cluster-node</span> <span class="a">theme</span>=<span class="v">"pink"</span> <span class="a">label</span>=<span class="v">"寫作"</span><span class="t">&gt;</span>
+    <span style="color:rgba(198,199,189,0.38)">← 套用全域預設 8px / 60px</span>
+    <span class="t">&lt;cluster-item&gt;</span>論點結構鋪排<span class="t">&lt;/cluster-item&gt;</span>
+  <span class="t">&lt;/cluster-node&gt;</span>
+
+<span class="t">&lt;/ui-cluster&gt;</span>
+  </div>
+</div>
+<hr>
+
+
+<!-- ═══ 範例 5：全域設定 ═══ -->
+<div class="section">
+  <h2>範例五：透過 UiClusterConfig 設定全站預設值</h2>
+  <p class="desc">
+    在載入 <code>ui-cluster.js</code> 前，先設定 <code>window.UiClusterConfig</code>，
+    可改變整個頁面的預設值，無需在每個元素上重複寫屬性。
+  </p>
+  <div class="cb">
+<span style="color:rgba(198,199,189,0.45)">/* 在 ui-cluster.js 之前執行 */</span>
+window.UiClusterConfig = {
+  labelGap:       <span class="v">'8px'</span>,    <span style="color:rgba(198,199,189,0.38)">// 主圓預設距離</span>
+  labelWidth:     <span class="v">'110px'</span>,  <span style="color:rgba(198,199,189,0.38)">// 主圓預設寬度</span>
+  nodeLabelGap:   <span class="v">'10px'</span>,   <span style="color:rgba(198,199,189,0.38)">// 子圓預設距離</span>
+  nodeLabelWidth: <span class="v">'90px'</span>    <span style="color:rgba(198,199,189,0.38)">// 子圓預設寬度</span>
+};
+  </div>
+</div>
+
+<script src="ui-cluster.js"></script>
+</body>
+</html>
