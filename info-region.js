@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  /* ── 工具函式 ────────────────────────────────────────────────────── */
   const cap     = s => s.charAt(0).toUpperCase() + s.slice(1);
   const addUnit = (val, unit) => {
     if (!val) return null;
@@ -8,26 +9,30 @@
     return val + unit;
   };
 
+  /* ── 品牌色 ─────────────────────────────────────────────────────── */
   const BrandColors = {
     bg:       '#0C0D0C',
     region:   '#333333',
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    special:  '#C8DD5A',
+    sky:      '#95c9de',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#08A9D1',
-    safe:     '#40C99A',
+    ocean:    '#0ABDC6',
+    safe:     '#20c21d',
+    teal:     '#0DA591',
     vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
-    focus:    '#A0CF72',
-    info:     '#4285EB',
-    stone:    '#95BDD7',
-    indigo:   '#7B6CF0',
+    focus:    '#e0be79',
+    info:     '#788cde',
+    indigo:   '#9B72CF',
     pink:     '#FFB3D9',
     orange:   '#EDA109',
+    special:  '#C8DD5A',
+    stone:    '#95BDD7',
   };
 
+  /* ── 全域預設值 ─────────────────────────────────────────────────── */
   const defaults = {
     defaultColor:       'sky',
     animDuration:       500,
@@ -71,51 +76,86 @@
     resetBtnHeight:     null,
     resetBtnFontSize:   null,
     resetBtnPadding:    null,
-    // ── 測驗模式新增預設值 ─────────────────────────────
-    quizRevealLabel:   '👁 揭曉答案',
-    quizRevealColor:   null,      // null = 繼承 region color
-    quizOkLabel:       '✓ 記住了',
-    quizRetryLabel:    '↺ 再看一次',
-    quizOkColor:       'safe',
-    quizRetryColor:    'warning',
-    quizContinueLabel: '▶ 繼續',
-    quizCompleteTitle: '🎉 測驗完成！',
   };
 
   window.InfoRegionConfig = Object.assign({}, defaults, window.InfoRegionConfig || {});
 
-  // ── 樣式注入 ───────────────────────────────────────────
-
+  /* ================================================================
+   * 靜態 CSS（不在執行期動態生成色彩 variant 迴圈）
+   * 動畫時長讀自 cfg，注入一次後不再重算
+   * ================================================================ */
   let _stylesInjected = false;
 
   function injectStyles() {
     if (_stylesInjected) return;
     _stylesInjected = true;
 
-    const cfg = window.InfoRegionConfig;
+    const cfg  = window.InfoRegionConfig;
     const vDur = cfg.animDuration + 'ms';
     const hDur = cfg.horizontalAnimDur + 'ms';
-    const defaultBorderColor = BrandColors[cfg.defaultColor] || BrandColors.sky;
+    const defClr = BrandColors[cfg.defaultColor] || BrandColors.sky;
 
-    const irColorVariants = Object.entries(BrandColors)
-      .filter(([n]) => n !== 'bg' && n !== 'region')
-      .map(([name, hex]) =>
-        `info-region[active="true"][color="${name}"] { border-left-color: ${hex}; }`
-      ).join('\n      ');
+    /* ── 靜態色彩 variant（硬編碼，不走迴圈） ── */
+    const COLOR_VARIANTS = `
+      info-region[active="true"][color="shell"]    { border-left-color: #C6C7BD; }
+      info-region[active="true"][color="lavender"] { border-left-color: #C3A5E5; }
+      info-region[active="true"][color="sky"]      { border-left-color: #95c9de; }
+      info-region[active="true"][color="warning"]  { border-left-color: #F08080; }
+      info-region[active="true"][color="salmon"]   { border-left-color: #E5C3B3; }
+      info-region[active="true"][color="ocean"]    { border-left-color: #0ABDC6; }
+      info-region[active="true"][color="safe"]     { border-left-color: #20c21d; }
+      info-region[active="true"][color="teal"]     { border-left-color: #0DA591; }
+      info-region[active="true"][color="vanilla"]  { border-left-color: #DBEDD8; }
+      info-region[active="true"][color="yellow"]   { border-left-color: #DECA4B; }
+      info-region[active="true"][color="focus"]    { border-left-color: #e0be79; }
+      info-region[active="true"][color="info"]     { border-left-color: #788cde; }
+      info-region[active="true"][color="indigo"]   { border-left-color: #9B72CF; }
+      info-region[active="true"][color="pink"]     { border-left-color: #FFB3D9; }
+      info-region[active="true"][color="orange"]   { border-left-color: #EDA109; }
+      info-region[active="true"][color="special"]  { border-left-color: #C8DD5A; }
+      info-region[active="true"][color="stone"]    { border-left-color: #95BDD7; }`;
 
-    const btnColorVariants = Object.entries(BrandColors)
-      .filter(([n]) => n !== 'bg' && n !== 'region')
-      .map(([name, hex]) => `
-        .ir-btn--${name} { border-color: ${hex}; color: ${hex}; }
-        .ir-btn--${name}:hover { background: ${hex}22; }
-      `).join('\n      ');
+    const BTN_VARIANTS = `
+      .ir-btn--shell    { border-color: #C6C7BD; color: #C6C7BD; }
+      .ir-btn--shell:hover    { background: #C6C7BD22; }
+      .ir-btn--lavender { border-color: #C3A5E5; color: #C3A5E5; }
+      .ir-btn--lavender:hover { background: #C3A5E522; }
+      .ir-btn--sky      { border-color: #95c9de; color: #95c9de; }
+      .ir-btn--sky:hover      { background: #95c9de22; }
+      .ir-btn--warning  { border-color: #F08080; color: #F08080; }
+      .ir-btn--warning:hover  { background: #F0808022; }
+      .ir-btn--salmon   { border-color: #E5C3B3; color: #E5C3B3; }
+      .ir-btn--salmon:hover   { background: #E5C3B322; }
+      .ir-btn--ocean    { border-color: #0ABDC6; color: #0ABDC6; }
+      .ir-btn--ocean:hover    { background: #0ABDC622; }
+      .ir-btn--safe     { border-color: #20c21d; color: #20c21d; }
+      .ir-btn--safe:hover     { background: #20c21d22; }
+      .ir-btn--teal     { border-color: #0DA591; color: #0DA591; }
+      .ir-btn--teal:hover     { background: #0DA59122; }
+      .ir-btn--vanilla  { border-color: #DBEDD8; color: #DBEDD8; }
+      .ir-btn--vanilla:hover  { background: #DBEDD822; }
+      .ir-btn--yellow   { border-color: #DECA4B; color: #DECA4B; }
+      .ir-btn--yellow:hover   { background: #DECA4B22; }
+      .ir-btn--focus    { border-color: #e0be79; color: #e0be79; }
+      .ir-btn--focus:hover    { background: #e0be7922; }
+      .ir-btn--info     { border-color: #788cde; color: #788cde; }
+      .ir-btn--info:hover     { background: #788cde22; }
+      .ir-btn--indigo   { border-color: #9B72CF; color: #9B72CF; }
+      .ir-btn--indigo:hover   { background: #9B72CF22; }
+      .ir-btn--pink     { border-color: #FFB3D9; color: #FFB3D9; }
+      .ir-btn--pink:hover     { background: #FFB3D922; }
+      .ir-btn--orange   { border-color: #EDA109; color: #EDA109; }
+      .ir-btn--orange:hover   { background: #EDA10922; }
+      .ir-btn--special  { border-color: #C8DD5A; color: #C8DD5A; }
+      .ir-btn--special:hover  { background: #C8DD5A22; }
+      .ir-btn--stone    { border-color: #95BDD7; color: #95BDD7; }
+      .ir-btn--stone:hover    { background: #95BDD722; }`;
 
     const css = `
       info-region {
         display: block;
         overflow: hidden;
         max-height: 0;
-        min-height: 0;
         opacity: 0;
         transform: translateY(10px);
         pointer-events: none;
@@ -123,13 +163,12 @@
         border-left: ${cfg.borderWidth}px solid transparent;
         border-radius: ${cfg.borderRadius};
         font-size: ${cfg.fontSize};
-        line-height: 1.5;
+        line-height: 1.75;
         transition:
           max-height  ${vDur} cubic-bezier(.4, 0, .2, 1),
           opacity     ${vDur} ease,
           transform   ${vDur} ease;
       }
-
       info-region[active="true"] {
         max-height: 4000px;
         opacity: 1;
@@ -139,33 +178,35 @@
         background: ${cfg.bgColor};
         color: ${cfg.textColor};
         padding: ${cfg.padding};
-        border-left-color: ${defaultBorderColor};
+        border-left-color: ${defClr};
       }
+      ${COLOR_VARIANTS}
 
-      ${irColorVariants}
-
+      /* ── 水平佈局：改用 CSS Flexbox，不搬移 DOM ── */
+      info-region-group[layout="horizontal"] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--ir-row-gap, 16px);
+        align-items: stretch;
+      }
       info-region-group[layout="horizontal"] info-region {
+        flex: 1 1 var(--ir-col-min, 200px);
         max-height: none;
         overflow: visible;
         transform: translateX(-8px);
         padding: ${cfg.padding};
-        flex: 1;
+        margin-bottom: 0;
         transition:
           opacity   ${hDur} ease,
           transform ${hDur} ease;
-        margin-bottom: 0;
       }
-
       info-region-group[layout="horizontal"] info-region[active="true"] {
         max-height: none;
         transform: translateX(0);
         margin-bottom: 0;
       }
 
-      .ir-col {
-        display: flex;
-        flex-direction: column;
-      }
+      .ir-col { display: flex; flex-direction: column; }
 
       .ir-countdown-bar {
         position: absolute;
@@ -177,26 +218,19 @@
         border-radius: 0 2px 2px 0;
       }
 
-      .ir-manual-wrap {
-        display: flex;
-        margin-top: 10px;
-      }
-
+      .ir-manual-wrap { display: flex; margin-top: 14px; }
       .ir-manual-btn {
         font-size: 0.85rem;
-        padding: 8px;
+        padding: 6px 16px;
         animation: ir-manual-in 0.25s ease forwards;
       }
-
       @keyframes ir-manual-in {
         from { opacity: 0; transform: translateY(4px); }
         to   { opacity: 1; transform: translateY(0); }
       }
-
       .ir-manual-btn.is-leaving {
         animation: ir-manual-out 0.18s ease forwards;
       }
-
       @keyframes ir-manual-out {
         from { opacity: 1; transform: translateY(0); }
         to   { opacity: 0; transform: translateY(-4px); }
@@ -208,7 +242,7 @@
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
-        margin-bottom: 10px;
+        margin-bottom: 16px;
       }
 
       .ir-btn {
@@ -229,16 +263,9 @@
         user-select: none;
       }
       .ir-btn:hover { background: #3a3b3a; }
-      .ir-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+      ${BTN_VARIANTS}
 
-      ${btnColorVariants}
-
-      .ir-global-progress-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
+      .ir-global-progress-wrap { display: flex; align-items: center; gap: 10px; }
       .ir-global-progress-track {
         flex: 1;
         position: relative;
@@ -246,7 +273,6 @@
         background: #1e1f1e;
         overflow: hidden;
       }
-
       .ir-global-progress-bar {
         position: absolute;
         inset: 0;
@@ -254,7 +280,6 @@
         transform: scaleX(0);
         border-radius: 3px;
       }
-
       .ir-global-percent {
         font-family: 'Space Mono', monospace;
         font-size: 0.72rem;
@@ -268,133 +293,12 @@
 
       info-region h1, info-region h2, info-region h3,
       info-region h4, info-region h5, info-region h6 {
-        color: inherit;
-        margin-bottom: 3px;
-        margin-top: 0;
+        color: inherit; margin-bottom: 6px;
       }
-
-      info-region p  { margin-top: 0; margin-bottom: 3px; }
+      info-region p  { margin-bottom: 4px; }
       info-region p:last-child { margin-bottom: 0; }
-      info-region ul, info-region ol { margin-top: 0; padding-left: 18px; }
+      info-region ul, info-region ol { padding-left: 18px; }
       info-region li { margin-bottom: 3px; }
-
-      /* data-ir-ans：在 quiz region 裡預設收合 */
-      info-region[quiz] [data-ir-ans] {
-        max-height: 0;
-        overflow: hidden;
-        opacity: 0;
-        margin-top: 0;
-        padding-top: 0;
-        border-top: 0px solid #4a4b4a;
-        transition:
-          max-height  0.4s cubic-bezier(.4, 0, .2, 1),
-          opacity     0.35s ease,
-          margin-top  0.3s ease,
-          padding-top 0.3s ease;
-      }
-
-      info-region-group[quiz-mode] info-region [data-ir-ans] {
-        max-height: 0;
-        overflow: hidden;
-        opacity: 0;
-        margin-top: 0;
-        padding-top: 0;
-        border-top: 0px solid #4a4b4a;
-        transition:
-          max-height  0.4s cubic-bezier(.4, 0, .2, 1),
-          opacity     0.35s ease,
-          margin-top  0.3s ease,
-          padding-top 0.3s ease;
-      }
-
-      /* 揭曉後展開 */
-      info-region [data-ir-ans].ir-ans-revealed {
-        max-height: 2000px;
-        opacity: 1;
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top-width: 1px;
-      }
-
-      /* 測驗按鈕列 */
-      .ir-quiz-wrap {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 8px;
-        animation: ir-manual-in 0.25s ease forwards;
-      }
-
-      /* 題號標籤 */
-      .ir-quiz-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        opacity: 0.5;
-        margin-bottom: 3px;
-      }
-
-      /* 得分顯示 */
-      .ir-quiz-score {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-family: 'Space Mono', monospace;
-        font-size: 0.8rem;
-        padding: 6px 14px;
-        border-radius: 6px;
-        border: 1px solid ${BrandColors.safe};
-        color: ${BrandColors.safe};
-        white-space: nowrap;
-        margin-bottom: 14px;
-      }
-
-      .ir-quiz-score-num {
-        font-size: 1rem;
-        font-weight: 700;
-      }
-
-      /* 完成訊息框 */
-      .ir-quiz-complete {
-        padding: 24px 28px;
-        border-radius: 10px;
-        background: #1a1b1a;
-        border: 1px solid #3a3b3a;
-        margin-top: 18px;
-        text-align: center;
-        animation: ir-manual-in 0.35s ease forwards;
-      }
-
-      .ir-quiz-complete-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: ${BrandColors.special};
-        margin-bottom: 10px;
-      }
-
-      .ir-quiz-complete-detail {
-        font-size: 0.88rem;
-        color: ${BrandColors.shell};
-        opacity: 0.85;
-        line-height: 1.5;
-        margin-bottom: 18px;
-      }
-
-      .ir-quiz-complete-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      /* answered 狀態視覺 (quiz-keep-all 時使用) */
-      info-region[data-ir-answered="ok"] {
-        border-left-color: ${BrandColors.safe} !important;
-        opacity: 0.75;
-      }
-      info-region[data-ir-answered="retry"] {
-        border-left-color: ${BrandColors.warning} !important;
-        opacity: 0.75;
-      }
     `;
 
     const styleEl = document.createElement('style');
@@ -403,10 +307,9 @@
     document.head.appendChild(styleEl);
   }
 
-  // ══════════════════════════════════════════════════════
-  //  InfoRegion
-  // ══════════════════════════════════════════════════════
-
+  /* ════════════════════════════════════════════════════════════════════
+   *  InfoRegion
+   * ════════════════════════════════════════════════════════════════════ */
   class InfoRegion extends HTMLElement {
     static get observedAttributes() {
       return [
@@ -421,9 +324,14 @@
     }
 
     connectedCallback() {
+      /* ★ 守衛：CSS 只注入一次；active 狀態由 attributeChangedCallback 處理，
+           避免 DOM 搬移時重複觸發 _onActivated */
       injectStyles();
-      if (this.getAttribute('active') === 'true') {
-        requestAnimationFrame(() => this._onActivated());
+      if (!this._irConnected) {
+        this._irConnected = true;
+        if (this.getAttribute('active') === 'true') {
+          requestAnimationFrame(() => this._onActivated());
+        }
       }
     }
 
@@ -437,16 +345,9 @@
       }
     }
 
-    // ── 啟動時行為判斷 ───────────────────────────────────
-
+    /* ── 啟動流程 ─────────────────────────────────────────────────── */
     _onActivated() {
       this._applyBorderStyles();
-
-      // 測驗模式優先於所有其他行為
-      if (this.hasAttribute('quiz') || this._isInQuizGroup()) {
-        this._insertQuizUI();
-        return;
-      }
 
       if (this.hasAttribute('manual') && this.getAttribute('next')) {
         this._insertManualButton();
@@ -467,139 +368,7 @@
       }
     }
 
-    _isInQuizGroup() {
-      const g = this.closest('info-region-group');
-      return g && g.hasAttribute('quiz-mode');
-    }
-
-    // ── 測驗 UI ──────────────────────────────────────────
-
-    /**
-     * 啟動時插入測驗互動列：
-     *   - 有 [data-ir-ans] → 「揭曉答案」按鈕
-     *   - 無               → 「繼續」按鈕（純說明型 region）
-     */
-    _insertQuizUI() {
-      if (this.querySelector('.ir-quiz-wrap')) return;
-
-      const cfg       = window.InfoRegionConfig;
-      const colorName = this.getAttribute('color') || cfg.defaultColor;
-      const ansEl     = this.querySelector('[data-ir-ans]');
-
-      const wrap = document.createElement('div');
-      wrap.className = 'ir-quiz-wrap';
-
-      if (ansEl) {
-        const revealColor = this.getAttribute('quiz-reveal-color')
-                         || cfg.quizRevealColor
-                         || colorName;
-        const revealLabel = this.getAttribute('quiz-reveal-label') || cfg.quizRevealLabel;
-
-        const btn = document.createElement('button');
-        btn.className = `ir-btn ir-btn--${revealColor}`;
-        btn.textContent = revealLabel;
-        btn.addEventListener('click', () => this._revealAnswer(wrap, ansEl), { once: true });
-        wrap.appendChild(btn);
-      } else {
-        const continueColor = this.getAttribute('quiz-reveal-color')
-                           || cfg.quizRevealColor
-                           || colorName;
-        const continueLabel = this.getAttribute('quiz-continue-label') || cfg.quizContinueLabel;
-
-        const btn = document.createElement('button');
-        btn.className = `ir-btn ir-btn--${continueColor}`;
-        btn.textContent = continueLabel;
-        btn.addEventListener('click', () => {
-          wrap.remove();
-          this._onQuizAnswer(true);
-        }, { once: true });
-        wrap.appendChild(btn);
-      }
-
-      this.appendChild(wrap);
-    }
-
-    /**
-     * 展開答案後，將「揭曉」按鈕換成「記住了」/「再看一次」
-     */
-    _revealAnswer(wrap, ansEl) {
-      ansEl.classList.add('ir-ans-revealed');
-
-      const cfg        = window.InfoRegionConfig;
-      const okLabel    = this.getAttribute('quiz-ok-label')    || cfg.quizOkLabel;
-      const retryLabel = this.getAttribute('quiz-retry-label') || cfg.quizRetryLabel;
-      const okColor    = this.getAttribute('quiz-ok-color')    || cfg.quizOkColor;
-      const retryColor = this.getAttribute('quiz-retry-color') || cfg.quizRetryColor;
-
-      wrap.innerHTML = '';
-
-      const okBtn = document.createElement('button');
-      okBtn.className = `ir-btn ir-btn--${okColor}`;
-      okBtn.textContent = okLabel;
-
-      const retryBtn = document.createElement('button');
-      retryBtn.className = `ir-btn ir-btn--${retryColor}`;
-      retryBtn.textContent = retryLabel;
-
-      // ✓ 記住了：推進下一題
-      okBtn.addEventListener('click', () => {
-        okBtn.disabled = true;
-        retryBtn.disabled = true;
-        wrap.remove();
-        this._onQuizAnswer(true);
-      }, { once: true });
-
-      // ↺ 再看一次：收合答案，恢復「揭曉答案」按鈕，不推進
-      retryBtn.addEventListener('click', () => {
-        okBtn.disabled = true;
-        retryBtn.disabled = true;
-
-        // 收合答案（觸發 CSS transition）
-        ansEl.classList.remove('ir-ans-revealed');
-
-        // 等收合動畫結束後換回揭曉按鈕
-        setTimeout(() => {
-          if (!wrap.isConnected) return;
-          wrap.innerHTML = '';
-
-          const colorName   = this.getAttribute('color') || cfg.defaultColor;
-          const revealColor = this.getAttribute('quiz-reveal-color')
-                           || cfg.quizRevealColor
-                           || colorName;
-          const revealLabel = this.getAttribute('quiz-reveal-label') || cfg.quizRevealLabel;
-
-          const newRevealBtn = document.createElement('button');
-          newRevealBtn.className = `ir-btn ir-btn--${revealColor}`;
-          newRevealBtn.textContent = revealLabel;
-          newRevealBtn.addEventListener('click',
-            () => this._revealAnswer(wrap, ansEl), { once: true }
-          );
-          wrap.appendChild(newRevealBtn);
-        }, 380); // 配合 CSS transition 0.4s
-      }, { once: true });
-
-      wrap.append(okBtn, retryBtn);
-    }
-
-    /**
-     * 使用者作答後：
-     *   - 通知所屬 quiz-mode group（若有）
-     *   - 否則退化為普通 next 鏈
-     */
-    _onQuizAnswer(correct) {
-      this.setAttribute('data-ir-answered', correct ? 'ok' : 'retry');
-
-      const group = this.closest('info-region-group[quiz-mode]');
-      if (group) {
-        group._onQuizAnswer(this, correct);
-      } else {
-        // 獨立 quiz region：直接觸發 next
-        this._triggerNext(0);
-      }
-    }
-
-    // ── 邊框 ─────────────────────────────────────────────
-
+    /* ── 框線樣式套用 ─────────────────────────────────────────────── */
     _applyBorderStyles() {
       const cfg       = window.InfoRegionConfig;
       const colorName = this.getAttribute('color') || cfg.defaultColor;
@@ -628,7 +397,10 @@
                     ? this.getAttribute(`border-${side}-style`)
                     : attrAllS;
 
-        const s = attrS || cfg[`border${C}Style`] || cfg.borderStyle || 'solid';
+        const s = attrS
+               || cfg[`border${C}Style`]
+               || cfg.borderStyle
+               || 'solid';
 
         this.style[`${prop}Width`] = w + 'px';
         this.style[`${prop}Style`] = w > 0 ? s : 'none';
@@ -636,6 +408,7 @@
       });
     }
 
+    /* ── 框線樣式清除 ─────────────────────────────────────────────── */
     _clearBorderStyles() {
       ['top', 'right', 'bottom', 'left'].forEach(side => {
         const prop = 'border' + cap(side);
@@ -645,8 +418,7 @@
       });
     }
 
-    // ── 手動推進 ─────────────────────────────────────────
-
+    /* ── 手動按鈕 ─────────────────────────────────────────────────── */
     _insertManualButton() {
       if (this.querySelector('.ir-manual-wrap')) return;
 
@@ -678,8 +450,7 @@
       this.appendChild(wrap);
     }
 
-    // ── 倒數計時 ─────────────────────────────────────────
-
+    /* ── 倒數進度條 ───────────────────────────────────────────────── */
     _startCountdown() {
       const cfg       = window.InfoRegionConfig;
       const duration  = parseInt(this.getAttribute('countdown'), 10) || 2000;
@@ -710,8 +481,7 @@
       setTimeout(() => this._triggerNext(0), duration);
     }
 
-    // ── next 鏈結 ─────────────────────────────────────────
-
+    /* ── 鏈結下一個元素 ───────────────────────────────────────────── */
     _triggerNext(delay) {
       const nextId = this.getAttribute('next');
       if (!nextId) return;
@@ -727,66 +497,36 @@
           || window.InfoRegionConfig.defaultInterval;
     }
 
-    // ── 公開 API ─────────────────────────────────────────
-
     activate() { this.setAttribute('active', 'true'); }
 
-    /**
-     * 停用（保留 answered 狀態與答案揭曉狀態）
-     * 由 quiz-mode group 在跳題時呼叫
-     */
-    deactivate() {
-      this.removeAttribute('active');
-      this._clearBorderStyles();
-      const qwrap = this.querySelector('.ir-quiz-wrap');
-      const mwrap = this.querySelector('.ir-manual-wrap');
-      const bar   = this.querySelector('.ir-countdown-bar');
-      if (qwrap) qwrap.remove();
-      if (mwrap) mwrap.remove();
-      if (bar)   bar.remove();
-      // 刻意保留 [data-ir-ans].ir-ans-revealed 和 data-ir-answered
-    }
-
-    /**
-     * 完全重設，清除所有狀態
-     */
     reset() {
+      this._irConnected = false; // 允許下次 connectedCallback 重新初始化
       this.removeAttribute('active');
-      this.removeAttribute('data-ir-answered');
       this._clearBorderStyles();
-      const bar   = this.querySelector('.ir-countdown-bar');
-      const mwrap = this.querySelector('.ir-manual-wrap');
-      const qwrap = this.querySelector('.ir-quiz-wrap');
-      const ans   = this.querySelector('[data-ir-ans]');
-      if (bar)   bar.remove();
-      if (mwrap) mwrap.remove();
-      if (qwrap) qwrap.remove();
-      if (ans)   ans.classList.remove('ir-ans-revealed');
+      const bar  = this.querySelector('.ir-countdown-bar');
+      const wrap = this.querySelector('.ir-manual-wrap');
+      if (bar)  bar.remove();
+      if (wrap) wrap.remove();
     }
   }
 
-  // ══════════════════════════════════════════════════════
-  //  InfoRegionGroup
-  // ══════════════════════════════════════════════════════
-
+  /* ════════════════════════════════════════════════════════════════════
+   *  InfoRegionGroup
+   * ════════════════════════════════════════════════════════════════════ */
   class InfoRegionGroup extends HTMLElement {
     constructor() {
       super();
-      this._progressBar    = null;
-      this._percentEl      = null;
-      this._observer       = null;
-      // 測驗狀態
-      this._quizQueue      = [];
-      this._quizIndex      = 0;
-      this._quizScore      = 0;
-      this._quizAnswered   = 0;
-      this._quizScoreEl    = null;
-      this._quizCompleteEl = null;
+      this._progressBar = null;
+      this._percentEl   = null;
+      this._observer    = null;
     }
 
     connectedCallback() {
       injectStyles();
-      setTimeout(() => this._build(), 0);
+      /* ★ 守衛：_build 只跑一次，避免 DOM 操作觸發重複初始化 */
+      if (this._irGroupBuilt) return;
+      this._irGroupBuilt = true;
+      Promise.resolve().then(() => this._build());
     }
 
     disconnectedCallback() {
@@ -804,58 +544,35 @@
         this._setupGlobalProgress();
         this._setupObserver();
       }
-      if (this.hasAttribute('quiz-mode') && this.hasAttribute('quiz-score')) {
-        this._setupQuizScore();
-      }
       if (this.hasAttribute('auto-start')) {
-        setTimeout(() => this._start(), 0);
+        Promise.resolve().then(() => this._start());
       }
     }
 
-    // ── 排版 ─────────────────────────────────────────────
-
+    /* ── 水平佈局（純 CSS，不搬移 DOM）────────────────────────────── */
+    /*
+     * 改用 CSS 變數控制欄寬，完全不移動子元素。
+     * cols-per-row 轉換為 flex-basis 百分比，讓瀏覽器處理折行。
+     * row-gap / gutter 屬性仍有效，對應 CSS gap。
+     */
     _setupLayout() {
       if (this.getAttribute('layout') !== 'horizontal') return;
 
-      const children = Array.from(this.querySelectorAll(':scope > info-region'));
-      if (children.length === 0) return;
+      const cfg    = window.InfoRegionConfig;
+      const perRow = parseInt(this.getAttribute('cols-per-row'), 10)
+                  || cfg.colsPerRow || 4;
+      const gap    = this.getAttribute('gutter-size') || '16px';
+      const rowGap = this.getAttribute('row-gap')     || gap;
 
-      const cfg      = window.InfoRegionConfig;
-      const perRow   = parseInt(this.getAttribute('cols-per-row'), 10) || cfg.colsPerRow || 4;
-      const colClass = this.getAttribute('col-class') || this._autoColClass(perRow);
-      const gutter   = this.getAttribute('gutter')    || 'g-3';
-      const rowGap   = this.getAttribute('row-gap')   || '10px';
+      /* 計算每欄最小寬度（百分比留些許空間讓 gap 呼吸） */
+      const pct = Math.floor(100 / perRow) - 1;
 
-      children.forEach(child => this.removeChild(child));
-
-      for (let i = 0; i < children.length; i += perRow) {
-        const chunk = children.slice(i, i + perRow);
-        const row   = document.createElement('div');
-        row.className = `row ${gutter} align-items-stretch`;
-        if (i > 0) row.style.marginTop = rowGap;
-
-        chunk.forEach(child => {
-          const col = document.createElement('div');
-          col.className = `ir-col ${colClass}`;
-          col.appendChild(child);
-          row.appendChild(col);
-        });
-
-        this.appendChild(row);
-      }
+      this.style.setProperty('--ir-col-min', pct + '%');
+      this.style.setProperty('--ir-row-gap', rowGap);
+      this.style.gap = rowGap;
     }
 
-    _autoColClass(perRow) {
-      if (perRow === 1) return 'col-12';
-      if (perRow === 2) return 'col-md-6 col-12';
-      if (perRow === 3) return 'col-md-4 col-sm-6 col-12';
-      if (perRow === 4) return 'col-md-3 col-sm-6 col-12';
-      if (perRow === 6) return 'col-md-2 col-sm-4 col-12';
-      return 'col-md col-sm-6 col-12';
-    }
-
-    // ── 控制列 ───────────────────────────────────────────
-
+    /* ── 控制按鈕（不變） ─────────────────────────────────────────── */
     _setupControls() {
       if (this.getAttribute('show-controls') === 'false') return;
 
@@ -884,7 +601,7 @@
     }
 
     _applyBtnStyles(btn, prefix) {
-      const cfg       = window.InfoRegionConfig;
+      const cfg = window.InfoRegionConfig;
       const cfgPrefix = prefix + 'Btn';
 
       const resolve = (attr, cfgKey, fbAttr, fbCfgKey) => {
@@ -910,8 +627,7 @@
       if (padding)  btn.style.padding  = padding;
     }
 
-    // ── 全域進度條 ───────────────────────────────────────
-
+    /* ── 全體進度條（不變） ───────────────────────────────────────── */
     _setupGlobalProgress() {
       const cfg       = window.InfoRegionConfig;
       const position  = this.getAttribute('progress-position') || cfg.progressPosition;
@@ -922,7 +638,7 @@
 
       const wrap = document.createElement('div');
       wrap.className = 'ir-global-progress-wrap';
-      wrap.style[position === 'top' ? 'marginBottom' : 'marginTop'] = '8px';
+      wrap.style[position === 'top' ? 'marginBottom' : 'marginTop'] = '12px';
 
       const track = document.createElement('div');
       track.className = 'ir-global-progress-track';
@@ -953,6 +669,7 @@
       }
     }
 
+    /* ── MutationObserver（不變） ─────────────────────────────────── */
     _setupObserver() {
       this._observer = new MutationObserver(() => this._updateProgress());
       this._getChildren().forEach(child => {
@@ -962,66 +679,32 @@
 
     _updateProgress() {
       if (!this._progressBar) return;
-
-      let ratio;
-      if (this.hasAttribute('quiz-mode') && this._quizQueue.length > 0) {
-        ratio = this._quizAnswered / this._quizQueue.length;
-      } else {
-        const children  = this._getChildren();
-        const total     = children.length;
-        const activated = children.filter(el => el.getAttribute('active') === 'true').length;
-        ratio = total > 0 ? activated / total : 0;
-      }
+      const children  = this._getChildren();
+      const total     = children.length;
+      const activated = children.filter(el => el.getAttribute('active') === 'true').length;
+      const ratio     = total > 0 ? activated / total : 0;
 
       this._progressBar.style.transform = `scaleX(${ratio})`;
 
       if (this._percentEl) {
         this._percentEl.textContent = Math.round(ratio * 100) + '%';
-        this._percentEl.style.opacity = ratio > 0 ? '1' : '0';
+        if (ratio > 0) this._percentEl.style.opacity = '1';
       }
     }
-	
-    _setupQuizScore() {
-      const el = document.createElement('div');
-      el.className = 'ir-quiz-score';
-      el.innerHTML = '<span class="ir-quiz-score-num">0 / 0</span>';
-      this._quizScoreEl = el;
 
-      const controls = this.querySelector('.ir-controls');
-      if (controls) controls.insertAdjacentElement('afterend', el);
-      else          this.insertBefore(el, this.firstChild);
-    }
-
-    _updateQuizScore() {
-      if (!this._quizScoreEl) return;
-      const total = this._quizQueue.length;
-      const answered = this._quizAnswered;
-      const pct = answered > 0 ? Math.round(this._quizScore / answered * 100) : 0;
-      const remaining = total - answered;
-
-      this._quizScoreEl.innerHTML =
-        `✓ <span class="ir-quiz-score-num">${this._quizScore}</span>` +
-        ` / ${answered} 題答對` +
-        (answered > 0 ? `（${pct}%）` : '') +
-        (remaining > 0 ? `　剩 ${remaining} 題` : '');
-    }
-	
+    /* ── 開始 / 重設（不變） ──────────────────────────────────────── */
     _start() {
       this._reset(false);
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (this._progressBar) {
+            const cfg = window.InfoRegionConfig;
             this._progressBar.style.transition =
-              `transform ${window.InfoRegionConfig.progressTransition}ms ease`;
+              `transform ${cfg.progressTransition}ms ease`;
           }
 
-          if (this.hasAttribute('quiz-mode')) {
-            this._startQuiz();
-            return;
-          }
-
-          const children  = this._getChildren();
+          const children = this._getChildren();
           if (children.length === 0) return;
 
           const cascadeMs = parseInt(this.getAttribute('cascade-interval'), 10)
@@ -1038,128 +721,8 @@
       });
     }
 
-    _startQuiz(queue = null) {
-      if (this._quizCompleteEl) {
-        this._quizCompleteEl.remove();
-        this._quizCompleteEl = null;
-      }
-
-      let children = queue || this._getChildren();
-
-      // 洗牌（只在非複習輪次執行）
-      if (!queue && this.hasAttribute('quiz-shuffle')) {
-        children = [...children];
-        for (let i = children.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [children[i], children[j]] = [children[j], children[i]];
-        }
-      }
-
-      this._quizQueue  = children;
-      this._quizIndex  = 0;
-
-      if (children.length > 0) children[0].activate();
-    }
-
-    _onQuizAnswer(region, correct) {
-      if (correct) this._quizScore++;
-      this._quizAnswered++;
-      this._updateQuizScore();
-      this._updateProgress();
-
-      if (!this.hasAttribute('quiz-keep-all')) {
-        region.deactivate();
-      }
-
-      this._quizIndex++;
-
-      if (this._quizIndex < this._quizQueue.length) {
-        const delay = this.hasAttribute('quiz-keep-all') ? 300 : 160;
-        setTimeout(() => this._quizQueue[this._quizIndex].activate(), delay);
-      } else {
-        setTimeout(() => this._onQuizComplete(), 420);
-      }
-    }
-
-    _onQuizComplete() {
-      const total   = this._quizQueue.length;
-      const correct = this._quizScore;
-      const pct     = total > 0 ? Math.round(correct / total * 100) : 0;
-      const retryList = this._quizQueue.filter(r =>
-        r.getAttribute('data-ir-answered') === 'retry'
-      );
-
-      const cfg   = window.InfoRegionConfig;
-      const title = this.getAttribute('quiz-complete-title') || cfg.quizCompleteTitle;
-
-      const box = document.createElement('div');
-      box.className = 'ir-quiz-complete';
-      this._quizCompleteEl = box;
-
-      const titleEl = document.createElement('div');
-      titleEl.className = 'ir-quiz-complete-title';
-      titleEl.textContent = title;
-
-      const detailEl = document.createElement('div');
-      detailEl.className = 'ir-quiz-complete-detail';
-      detailEl.innerHTML =
-        `答對 <strong style="color:${BrandColors.safe}">${correct}</strong> 題，` +
-        `共 <strong>${total}</strong> 題（正確率 ${pct}%）` +
-        (retryList.length > 0
-          ? `<br>尚有 <strong style="color:${BrandColors.warning}">${retryList.length}</strong> 題標記為「再看一次」`
-          : `<br><span style="color:${BrandColors.special}">全部答對，太厲害了！</span>`);
-
-      const actionsEl = document.createElement('div');
-      actionsEl.className = 'ir-quiz-complete-actions';
-
-      const restartBtn = document.createElement('button');
-      restartBtn.className = 'ir-btn ir-btn--sky';
-      restartBtn.textContent = '↺ 重新開始';
-      restartBtn.addEventListener('click', () => {
-        this._getChildren().forEach(el => el.reset());
-        this._quizScore    = 0;
-        this._quizAnswered = 0;
-        this._updateQuizScore();
-        this._updateProgress();
-        this._startQuiz();
-      });
-      actionsEl.appendChild(restartBtn);
-
-      if (retryList.length > 0 && this.hasAttribute('quiz-retry-at-end')) {
-        const retryBtn = document.createElement('button');
-        retryBtn.className = 'ir-btn ir-btn--warning';
-        retryBtn.textContent = `↺ 只複習 ${retryList.length} 題`;
-        retryBtn.addEventListener('click', () => {
-          retryList.forEach(el => el.reset());
-          this._quizScore    = 0;
-          this._quizAnswered = 0;
-          this._updateQuizScore();
-          this._updateProgress();
-          this._startQuiz(retryList);
-        });
-        actionsEl.appendChild(retryBtn);
-      }
-
-      box.append(titleEl, detailEl, actionsEl);
-
-      const progressWrap = this.querySelector('.ir-global-progress-wrap');
-      if (progressWrap) progressWrap.insertAdjacentElement('afterend', box);
-      else              this.appendChild(box);
-    }
-
     _reset(reenableTransition = true) {
       this._getChildren().forEach(el => el.reset());
-
-      this._quizQueue    = [];
-      this._quizIndex    = 0;
-      this._quizScore    = 0;
-      this._quizAnswered = 0;
-      this._updateQuizScore();
-
-      if (this._quizCompleteEl) {
-        this._quizCompleteEl.remove();
-        this._quizCompleteEl = null;
-      }
 
       if (this._progressBar) {
         this._progressBar.style.transition = 'none';
@@ -1167,8 +730,9 @@
         if (reenableTransition) {
           requestAnimationFrame(() => {
             if (this._progressBar) {
+              const cfg = window.InfoRegionConfig;
               this._progressBar.style.transition =
-                `transform ${window.InfoRegionConfig.progressTransition}ms ease`;
+                `transform ${cfg.progressTransition}ms ease`;
             }
           });
         }
@@ -1184,9 +748,11 @@
     reset() { this._reset(); }
   }
 
-  customElements.define('info-region', InfoRegion);
+  /* ── 元素註冊 ────────────────────────────────────────────────────── */
+  customElements.define('info-region',       InfoRegion);
   customElements.define('info-region-group', InfoRegionGroup);
 
+  /* ── 公開 API ────────────────────────────────────────────────────── */
   window.InfoRegion = {
     activate(id) {
       const el = document.getElementById(id);

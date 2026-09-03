@@ -208,16 +208,91 @@
   };
 
   /* ----------------------------------------------------------------
-   * _render：主渲染
+   * _render：主渲染入口
+   * 分流：有 cluster-node → 雙層；只有 cluster-item → 單層
    * ---------------------------------------------------------------- */
   UiCluster.prototype.render = UiCluster.prototype._render = function () {
-    var self = this;
-
-    /* 蒐集 cluster-node */
     var nodeEls = qsa(':scope > cluster-node', this.el);
-    if (!nodeEls.length) return;
+    var itemEls = qsa(':scope > cluster-item', this.el);
+    if (!nodeEls.length && !itemEls.length) return;
+    if (!nodeEls.length && itemEls.length) {
+      this._renderSingle(itemEls);
+      return;
+    }
+    this._renderDouble(nodeEls);
+  };
 
-    /* 根容器 */
+  /* ----------------------------------------------------------------
+   * _renderSingle：單層模式
+   * 主圓數字 = cluster-item 數量，點擊後主圓消失，直接展開內容 div
+   * ---------------------------------------------------------------- */
+  UiCluster.prototype._renderSingle = function (itemEls) {
+    var self = this;
+    var root = mk('div', 'uc-root');
+    root.style.cssText = [
+      '--uc-clr:' + this.color,
+      '--uc-sz:'  + this.size,
+      '--uc-fs:'  + this.fs
+    ].join(';');
+    this.root = root;
+
+    if (this.hasReset) {
+      var resetBtn = mk('button', 'uc-reset');
+      resetBtn.innerHTML = ICO_RESET + '重設';
+      resetBtn.addEventListener('click', function () { self._reset(); });
+      root.appendChild(resetBtn);
+    }
+
+    var mainCircle = mk('div', 'uc-circle uc-main-circle');
+    mainCircle.style.background = this.color;
+    var mainNum = mk('span', 'uc-num');
+    mainNum.textContent = itemEls.length;
+    mainCircle.appendChild(mainNum);
+    root.appendChild(mainCircle);
+
+    if (this.label) {
+      var mainLabel = mk('div', 'uc-label');
+      mainLabel.textContent = this.label;
+      root.appendChild(mainLabel);
+    }
+
+    var connector = mk('div', 'uc-connector');
+    root.appendChild(connector);
+
+    var content = mk('div', 'uc-content');
+    var inner   = mk('div', 'uc-content-inner');
+    inner.style.borderColor = hexRgba(this.color, 0.76);
+    itemEls.forEach(function (itemEl) {
+      var row = mk('div', 'uc-item');
+      row.innerHTML = itemEl.innerHTML;
+      inner.appendChild(row);
+    });
+    content.appendChild(inner);
+    root.appendChild(content);
+
+    mainCircle.addEventListener('click', function () {
+      if (mainCircle.classList.contains('burst')) return;
+      mainCircle.classList.add('burst');
+      if (self.label) {
+        var lbl = root.querySelector('.uc-label');
+        if (lbl) { lbl.style.transition = 'opacity .2s'; lbl.style.opacity = '0'; }
+      }
+      setTimeout(function () {
+        mainCircle.style.display = 'none';
+        connector.classList.add('show');
+        content.classList.add('open');
+      }, 280);
+    });
+
+    this.el.before(root);
+    this.el.style.display = 'none';
+  };
+
+  /* ----------------------------------------------------------------
+   * _renderDouble：雙層模式（原有邏輯）
+   * ---------------------------------------------------------------- */
+  UiCluster.prototype._renderDouble = function (nodeEls) {
+    var self = this;
     var root = mk('div', 'uc-root');
     root.style.cssText = [
       '--uc-clr:'  + this.color,
@@ -228,7 +303,6 @@
     ].join(';');
     this.root = root;
 
-    /* 重設按鈕 */
     if (this.hasReset) {
       var resetBtn = mk('button', 'uc-reset');
       resetBtn.innerHTML = ICO_RESET + '重設';
@@ -236,7 +310,6 @@
       root.appendChild(resetBtn);
     }
 
-    /* 主圓 */
     var mainCircle = mk('div', 'uc-circle uc-main-circle');
     var mainNum    = mk('span', 'uc-num');
     mainNum.textContent = nodeEls.length;
@@ -244,55 +317,39 @@
     mainCircle.style.background = this.color;
     root.appendChild(mainCircle);
 
-    /* 主圓下方標籤 */
     if (this.label) {
       var mainLabel = mk('div', 'uc-label');
       mainLabel.textContent = this.label;
       root.appendChild(mainLabel);
     }
 
-    /* 連接線（主圓 → 子圓列，初始隱藏） */
     var connector = mk('div', 'uc-connector');
     root.appendChild(connector);
 
-    /* Stage：子圓列容器（初始隱藏） */
     var stage   = mk('div', 'uc-stage');
     stage.style.display = 'none';
     var nodesRow = mk('div', 'uc-nodes');
     stage.appendChild(nodesRow);
     root.appendChild(stage);
 
-    /* ── 主圓點擊：burst 動畫 → 展開子圓 ── */
     mainCircle.addEventListener('click', function () {
       if (mainCircle.classList.contains('burst')) return;
-
-      /* 爆開動畫 */
       mainCircle.classList.add('burst');
       if (self.label) {
         var lbl = root.querySelector('.uc-label');
         if (lbl) { lbl.style.transition = 'opacity .2s'; lbl.style.opacity = '0'; }
       }
-
       setTimeout(function () {
         mainCircle.style.display = 'none';
-
-        /* 顯示子圓列 */
         stage.style.display = 'flex';
-
-        /* 連接線 */
         connector.classList.add('show');
-
-        /* 依序動畫顯示子圓 */
         var nodeWraps = nodesRow.querySelectorAll('.uc-node-circle');
         nodeWraps.forEach(function (nc, i) {
-          setTimeout(function () {
-            nc.classList.add('appear');
-          }, i * 80);
+          setTimeout(function () { nc.classList.add('appear'); }, i * 80);
         });
       }, 280);
     });
 
-    /* ── 建立子圓 ── */
     nodeEls.forEach(function (nodeEl) {
       var nodeColor = resolveColor(
         nodeEl.getAttribute('theme') || nodeEl.getAttribute('color')

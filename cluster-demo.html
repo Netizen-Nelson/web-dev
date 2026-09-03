@@ -107,6 +107,7 @@ pre.snippet{
     <a href="#theme">theme 色系</a>
     <a href="#size">尺寸與間距</a>
     <a href="#mixed">子圓各色</a>
+    <a href="#single">單層模式</a>
     <a href="#reset">重設按鈕</a>
     <a href="#multi">多元件同頁</a>
     <a href="#ielts">雅思教學範例</a>
@@ -460,6 +461,77 @@ pre.snippet{
 
 
 <!-- ── 屬性速查 ── -->
+
+<!-- ── 單層模式 ── -->
+<h2 class="sh" id="single">單層模式 — 直接展開內容</h2>
+<p class="desc">
+  省略 <code>&lt;cluster-node&gt;</code>，直接在 <code>&lt;ui-cluster&gt;</code> 下放
+  <code>&lt;cluster-item&gt;</code>，點擊主圓後直接展開內容列表，一次完成，不需要第二層點擊。
+  數字 = <code>cluster-item</code> 數量。
+</p>
+
+<pre class="snippet"><span class="tk-tag">&lt;ui-cluster</span> <span class="tk-attr">theme</span>=<span class="tk-val">"teal"</span> <span class="tk-attr">label</span>=<span class="tk-val">"常見題型"</span> <span class="tk-attr">reset</span><span class="tk-tag">&gt;</span>
+  <span class="tk-tag">&lt;cluster-item&gt;</span>True / False / Not Given<span class="tk-tag">&lt;/cluster-item&gt;</span>
+  <span class="tk-tag">&lt;cluster-item&gt;</span>Matching Headings<span class="tk-tag">&lt;/cluster-item&gt;</span>
+  <span class="tk-tag">&lt;cluster-item&gt;</span>Summary Completion<span class="tk-tag">&lt;/cluster-item&gt;</span>
+<span class="tk-tag">&lt;/ui-cluster&gt;</span></pre>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">單層 — 點擊主圓直接展開</span></div>
+  <div class="demo-body">
+
+    <ui-cluster theme="teal" label="Reading 題型" reset>
+      <cluster-item>True / False / Not Given</cluster-item>
+      <cluster-item>Yes / No / Not Given</cluster-item>
+      <cluster-item>Matching Headings</cluster-item>
+      <cluster-item>Matching Information</cluster-item>
+      <cluster-item>Summary Completion</cluster-item>
+      <cluster-item>Sentence Completion</cluster-item>
+    </ui-cluster>
+
+    <ui-cluster theme="orange" label="高頻詞彙" reset>
+      <cluster-item>mitigate（減輕）</cluster-item>
+      <cluster-item>proliferate（激增）</cluster-item>
+      <cluster-item>exacerbate（加劇）</cluster-item>
+      <cluster-item>advocate（倡導）</cluster-item>
+      <cluster-item>detrimental（有害的）</cluster-item>
+    </ui-cluster>
+
+    <ui-cluster theme="lavender" label="評分標準" reset>
+      <cluster-item>Task Achievement — 任務完成度</cluster-item>
+      <cluster-item>Coherence &amp; Cohesion — 連貫性</cluster-item>
+      <cluster-item>Lexical Resource — 詞彙豐富度</cluster-item>
+      <cluster-item>Grammatical Range — 語法多樣性</cluster-item>
+    </ui-cluster>
+
+  </div>
+</div>
+
+<div class="demo">
+  <div class="demo-header"><span class="demo-label">單層 + 雙層同頁並存（各自獨立）</span></div>
+  <div class="demo-body">
+
+    <ui-cluster theme="sky" label="單層示例" reset>
+      <cluster-item>項目 A</cluster-item>
+      <cluster-item>項目 B</cluster-item>
+      <cluster-item>項目 C</cluster-item>
+    </ui-cluster>
+
+    <ui-cluster theme="indigo" label="雙層示例" reset>
+      <cluster-node label="群組 1">
+        <cluster-item>項目 A-1</cluster-item>
+        <cluster-item>項目 A-2</cluster-item>
+      </cluster-node>
+      <cluster-node label="群組 2">
+        <cluster-item>項目 B-1</cluster-item>
+        <cluster-item>項目 B-2</cluster-item>
+        <cluster-item>項目 B-3</cluster-item>
+      </cluster-node>
+    </ui-cluster>
+
+  </div>
+</div>
+
 <h2 class="sh" id="api">屬性速查</h2>
 
 <p class="desc" style="margin-bottom:12px"><code>&lt;ui-cluster&gt;</code></p>
