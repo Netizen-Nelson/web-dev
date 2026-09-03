@@ -12,6 +12,8 @@ class CardToggle extends HTMLElement {
     }
 
     connectedCallback() {
+        if (this._ctConnected) return;
+        this._ctConnected = true;
         this._originalColor = this.getAttribute('color') || null;
 
         if (!document.getElementById('card-toggle-styles')) {
@@ -42,12 +44,16 @@ class CardToggle extends HTMLElement {
                 --ct-color-warning:   #F08080;
                 --ct-color-salmon:    #E5C3B3;
                 --ct-color-attention: #DECA4B;
-                --ct-color-sky:       #08a9d1;
-                --ct-color-safe:      #40c99a;
-                --ct-color-vanilla:   #FDF6ED;
+                --ct-color-sky:       #95c9de;
+                --ct-color-safe:      #20c21d;
+                --ct-color-vanilla:   #DBEDD8;
                 --ct-color-yellow:    #DECA4B;
-                --ct-color-info:      #5fafed;
+                --ct-color-info:      #788cde;
                 --ct-color-stone:     #95BDD7;
+                --ct-color-ocean:     #0ABDC6;
+                --ct-color-teal:      #0DA591;
+                --ct-color-focus:     #e0be79;
+                --ct-color-indigo:    #9B72CF;
                 --ct-color-pink:      #FFB3D9;
                 --ct-color-orange:    #eda109;
                 /* 預設動態顏色變數 */
@@ -58,14 +64,14 @@ class CardToggle extends HTMLElement {
                 display: block;
                 position: relative;
                 background-color: var(--ct-bg-secondary);
-                border-radius: 8px;
-                padding: 12px 16px;
+                border-radius: 6px;
+                padding: 10px 16px 10px 14px;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
                 overflow: hidden;
                 border: 1px solid rgba(198, 199, 189, 0.2);
                 color: var(--ct-color-shell);
-                line-height: 1.8;
+                line-height: 1.5;
                 font-size: 1rem;
             }
 
@@ -73,20 +79,21 @@ class CardToggle extends HTMLElement {
                 content: '';
                 position: absolute;
                 left: 0;
-                top: 0;
-                bottom: 0;
-                width: 4px;
+                top: 20%;
+                bottom: 20%;
+                width: 3px;
+                border-radius: 0 2px 2px 0;
                 background-color: var(--ct-bg-primary);
-                transition: all 0.3s ease;
+                transition: width 0.2s ease, background-color 0.2s ease;
             }
 
             card-toggle:hover::before {
-                width: 8px;
+                width: 5px;
             }
 
             card-toggle:hover {
-                background-color: rgba(198, 199, 189, 0.03);
-                transform: translateX(2px);
+                background-color: rgba(198, 199, 189, 0.04);
+                box-shadow: 0 0 0 1px rgba(198, 199, 189, 0.12);
             }
 
             card-toggle[replaced] {
@@ -95,55 +102,59 @@ class CardToggle extends HTMLElement {
 
             card-toggle[replaced]:not([toggle]):hover {
                 background-color: var(--ct-bg-secondary);
-                transform: none;
+                box-shadow: none;
             }
 
             card-toggle[replaced]:not([toggle])::before {
-                width: 4px;
+                width: 3px;
             }
 
             card-toggle[dashed] {
                 border-style: dashed;
                 border-color: rgba(198, 199, 189, 0.5);
-                border-width: 2px;
+                border-width: 1px;
             }
 
-            card-toggle[dashed][color="safe"]      { border-color: rgba(64,201,154,0.55); }
+            card-toggle[dashed][color="safe"]      { border-color: rgba(32,194,29,0.55); }
             card-toggle[dashed][color="warning"]   { border-color: rgba(240,128,128,0.55); }
-            card-toggle[dashed][color="info"]      { border-color: rgba(95,175,237,0.55); }
+            card-toggle[dashed][color="info"]      { border-color: rgba(120,140,222,0.55); }
             card-toggle[dashed][color="special"]   { border-color: rgba(200,221,90,0.55); }
-            card-toggle[dashed][color="sky"]       { border-color: rgba(8,169,209,0.55); }
+            card-toggle[dashed][color="sky"]       { border-color: rgba(149,201,222,0.55); }
             card-toggle[dashed][color="lavender"]  { border-color: rgba(195,165,229,0.55); }
             card-toggle[dashed][color="attention"] { border-color: rgba(222,202,75,0.55); }
             card-toggle[dashed][color="salmon"]    { border-color: rgba(229,195,179,0.55); }
             card-toggle[dashed][color="pink"]      { border-color: rgba(255,179,217,0.55); }
             card-toggle[dashed][color="orange"]    { border-color: rgba(237,161,9,0.55); }
             card-toggle[dashed][color="stone"]     { border-color: rgba(149,189,215,0.55); }
+            card-toggle[dashed][color="ocean"]    { border-color: rgba(10,189,198,0.55); }
+            card-toggle[dashed][color="teal"]     { border-color: rgba(13,165,145,0.55); }
+            card-toggle[dashed][color="focus"]    { border-color: rgba(224,190,121,0.55); }
+            card-toggle[dashed][color="indigo"]   { border-color: rgba(155,114,207,0.55); }
 
             card-toggle[size="xsm"] {
-                padding: 3px 6px;
+                padding: 3px 8px 3px 7px;
                 font-size: 0.9rem;
             }
 
             card-toggle[size="sm"] {
-                padding: 6px 12px;
+                padding: 6px 14px 6px 12px;
                 font-size: 0.95rem;
             }
 
             card-toggle[size="lg"] {
-                padding: 16px 20px;
+                padding: 13px 20px 13px 18px;
                 font-size: 1.1rem;
             }
 
             card-toggle[size="xlg"] {
-                padding: 20px 24px;
+                padding: 16px 24px 16px 22px;
                 font-size: 1.2rem;
             }
 
             card-toggle[color="safe"]::before { background-color: var(--ct-color-safe); }
             card-toggle[color="safe"]:hover {
-                background-color: rgba(64, 201, 154, 0.05);
-                box-shadow: 0 0 0 1px rgba(64, 201, 154, 0.2);
+                background-color: rgba(32, 194, 29, 0.05);
+                box-shadow: 0 0 0 1px rgba(32, 194, 29, 0.2);
             }
 
             card-toggle[color="warning"]::before { background-color: var(--ct-color-warning); }
@@ -154,8 +165,8 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="info"]::before { background-color: var(--ct-color-info); }
             card-toggle[color="info"]:hover {
-                background-color: rgba(95, 175, 237, 0.05);
-                box-shadow: 0 0 0 1px rgba(95, 175, 237, 0.2);
+                background-color: rgba(120, 140, 222, 0.05);
+                box-shadow: 0 0 0 1px rgba(120, 140, 222, 0.2);
             }
 
             card-toggle[color="special"]::before { background-color: var(--ct-color-special); }
@@ -166,8 +177,8 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="sky"]::before { background-color: var(--ct-color-sky); }
             card-toggle[color="sky"]:hover {
-                background-color: rgba(8, 169, 209, 0.05);
-                box-shadow: 0 0 0 1px rgba(8, 169, 209, 0.2);
+                background-color: rgba(149, 201, 222, 0.05);
+                box-shadow: 0 0 0 1px rgba(149, 201, 222, 0.2);
             }
 
             card-toggle[color="lavender"]::before { background-color: var(--ct-color-lavender); }
@@ -211,6 +222,26 @@ class CardToggle extends HTMLElement {
                 background-color: rgba(149, 189, 215, 0.05);
                 box-shadow: 0 0 0 1px rgba(149, 189, 215, 0.2);
             }
+            card-toggle[color="ocean"]::before { background-color: var(--ct-color-ocean); }
+            card-toggle[color="ocean"]:hover {
+                background-color: rgba(10, 189, 198, 0.05);
+                box-shadow: 0 0 0 1px rgba(10, 189, 198, 0.2);
+            }
+            card-toggle[color="teal"]::before { background-color: var(--ct-color-teal); }
+            card-toggle[color="teal"]:hover {
+                background-color: rgba(13, 165, 145, 0.05);
+                box-shadow: 0 0 0 1px rgba(13, 165, 145, 0.2);
+            }
+            card-toggle[color="focus"]::before { background-color: var(--ct-color-focus); }
+            card-toggle[color="focus"]:hover {
+                background-color: rgba(224, 190, 121, 0.05);
+                box-shadow: 0 0 0 1px rgba(224, 190, 121, 0.2);
+            }
+            card-toggle[color="indigo"]::before { background-color: var(--ct-color-indigo); }
+            card-toggle[color="indigo"]:hover {
+                background-color: rgba(155, 114, 207, 0.05);
+                box-shadow: 0 0 0 1px rgba(155, 114, 207, 0.2);
+            }
 
             @keyframes ct-fade-in {
                 from { opacity: 0; }
@@ -250,7 +281,7 @@ class CardToggle extends HTMLElement {
                 width: 100%;
                 padding: 12px 16px;
                 border: 2px solid rgba(198, 199, 189, 0.2);
-                border-radius: 6px;
+                border-radius: 5px;
                 background-color: var(--ct-bg-primary);
                 color: var(--ct-color-shell);
                 font-size: 1rem;
@@ -268,20 +299,20 @@ class CardToggle extends HTMLElement {
             .ct-quiz-button {
                 padding: 10px 24px;
                 border: none;
-                border-radius: 6px;
+                border-radius: 5px;
                 background-color: var(--ct-color-special);
                 color: var(--ct-bg-primary);
                 font-size: 1rem;
                 font-weight: 600;
                 cursor: pointer;
                 margin-top: 12px;
-                transition: all 0.3s ease;
+                transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
             }
 
             .ct-quiz-button:hover {
                 background-color: var(--ct-color-sky);
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(8, 169, 209, 0.3);
+                box-shadow: 0 4px 12px rgba(149, 201, 222, 0.3);
             }
 
             .ct-quiz-button:active {
@@ -291,14 +322,14 @@ class CardToggle extends HTMLElement {
             .ct-reset-button {
                 padding: 8px 16px;
                 border: 1px solid var(--ct-color-lavender);
-                border-radius: 6px;
+                border-radius: 5px;
                 background-color: transparent;
                 color: var(--ct-color-lavender);
                 font-size: 0.9rem;
                 cursor: pointer;
                 margin-top: 12px;
                 margin-left: 8px;
-                transition: all 0.3s ease;
+                transition: background-color 0.18s ease, border-color 0.18s ease;
             }
 
             .ct-reset-button:hover {
@@ -362,7 +393,7 @@ class CardToggle extends HTMLElement {
             }
 
             card-toggle[size="xlg"] .ct-quiz-input {
-                padding: 16px 20px;
+                padding: 13px 20px 13px 18px;
                 font-size: 1.1rem;
             }
 
@@ -399,7 +430,7 @@ class CardToggle extends HTMLElement {
 
             card-toggle-group[mode="stack"] card-toggle {
                 display: block;
-                margin-bottom: 16px;
+                margin-bottom: 10px;
             }
 
             /* 導航按鈕樣式 */
@@ -413,11 +444,11 @@ class CardToggle extends HTMLElement {
             .ct-nav-btn {
                 padding: 8px 20px;
                 border: 1px solid var(--ct-color-shell);
-                border-radius: 6px;
+                border-radius: 5px;
                 background-color: transparent;
                 color: var(--ct-color-shell);
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
                 font-size: 0.95rem;
             }
 
@@ -449,7 +480,7 @@ class CardToggle extends HTMLElement {
                 background-color: transparent;
                 color: var(--ct-color-shell);
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: background-color 0.18s ease, border-color 0.18s ease;
                 font-size: 0.85rem;
                 display: flex;
                 align-items: center;
@@ -470,11 +501,11 @@ class CardToggle extends HTMLElement {
 
             /* 提示區域樣式 */
             .ct-hint-display {
-                padding: 12px 16px;
+                padding: 9px 14px;
                 background-color: rgba(195, 165, 229, 0.1);
-                border-left: 3px solid var(--ct-color-lavender);
-                border-radius: 4px;
-                margin-top: 12px;
+                border-left: 2px solid var(--ct-color-lavender);
+                border-radius: 0 4px 4px 0;
+                margin-top: 10px;
                 color: var(--ct-color-lavender);
                 animation: ct-fade-in 0.3s ease;
             }
@@ -487,7 +518,7 @@ class CardToggle extends HTMLElement {
                 right: 0;
                 height: 3px;
                 background-color: rgba(198, 199, 189, 0.1);
-                border-radius: 0 0 8px 8px;
+                border-radius: 0 0 6px 6px;
                 overflow: hidden;
             }
 
@@ -761,6 +792,10 @@ class CardToggle extends HTMLElement {
             stone:     'var(--ct-color-stone)',
             pink:      'var(--ct-color-pink)',
             orange:    'var(--ct-color-orange)',
+            ocean:     'var(--ct-color-ocean)',
+            teal:      'var(--ct-color-teal)',
+            focus:     'var(--ct-color-focus)',
+            indigo:    'var(--ct-color-indigo)',
         };
         if (!name) return null;
         // 若是已知名稱就取 CSS var；否則當作直接色彩值（hex / rgb 等）
@@ -1002,6 +1037,8 @@ class CardToggleGroup extends HTMLElement {
     }
 
     connectedCallback() {
+        if (this._ctGrpConnected) return;
+        this._ctGrpConnected = true;
         this._initialize();
     }
 
