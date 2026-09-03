@@ -499,6 +499,88 @@ class CardToggle extends HTMLElement {
                 font-weight: 600;
             }
 
+            /* ── 答題狀態頁碼 ── */
+            .ct-page-btn.answered-correct {
+                border-color: rgba(32, 194, 29, 0.6);
+                color: var(--ct-color-safe);
+                background-color: rgba(32, 194, 29, 0.08);
+            }
+            .ct-page-btn.answered-correct.active {
+                background-color: var(--ct-color-safe);
+                color: var(--ct-bg-primary);
+                border-color: var(--ct-color-safe);
+            }
+            .ct-page-btn.answered-wrong {
+                border-color: rgba(237, 161, 9, 0.6);
+                color: var(--ct-color-orange);
+                background-color: rgba(237, 161, 9, 0.08);
+            }
+            .ct-page-btn.answered-wrong.active {
+                background-color: var(--ct-color-orange);
+                color: var(--ct-bg-primary);
+                border-color: var(--ct-color-orange);
+            }
+
+            /* ── 題目計數器 ── */
+            .ct-counter {
+                text-align: center;
+                font-size: 0.8rem;
+                color: rgba(198, 199, 189, 0.55);
+                margin-bottom: 10px;
+                letter-spacing: 0.04em;
+                user-select: none;
+            }
+            .ct-counter-current {
+                color: var(--ct-active-color);
+                font-weight: 700;
+                font-size: 0.9rem;
+            }
+
+            /* ── 完成畫面 ── */
+            .ct-result-screen {
+                padding: 28px 24px;
+                border-radius: 6px;
+                background-color: var(--ct-bg-secondary);
+                border: 1px solid rgba(198, 199, 189, 0.15);
+                text-align: center;
+                animation: ct-fade-in 0.35s ease;
+            }
+            .ct-result-score {
+                font-size: 2.4rem;
+                font-weight: 700;
+                color: var(--ct-active-color);
+                line-height: 1.2;
+                margin-bottom: 6px;
+            }
+            .ct-result-label {
+                font-size: 0.88rem;
+                color: rgba(198, 199, 189, 0.6);
+                margin-bottom: 20px;
+            }
+            .ct-result-breakdown {
+                display: flex;
+                justify-content: center;
+                gap: 24px;
+                margin-bottom: 20px;
+                font-size: 0.88rem;
+            }
+            .ct-result-correct { color: var(--ct-color-safe); }
+            .ct-result-wrong   { color: var(--ct-color-orange); }
+            .ct-result-skipped { color: rgba(198, 199, 189, 0.5); }
+            .ct-result-retry {
+                padding: 8px 22px;
+                border: 1px solid var(--ct-active-color);
+                border-radius: 5px;
+                background: transparent;
+                color: var(--ct-active-color);
+                cursor: pointer;
+                font-size: 0.9rem;
+                transition: background-color 0.18s ease;
+            }
+            .ct-result-retry:hover {
+                background-color: rgba(198, 199, 189, 0.08);
+            }
+
             /* 提示區域樣式 */
             .ct-hint-display {
                 padding: 9px 14px;
@@ -949,9 +1031,14 @@ class CardToggle extends HTMLElement {
         this.setAttribute('color', successColor);
         this.classList.add('ct-fade-in');
 
+        // ★ 通知所屬 group 此題答對
+        const group = this.closest('card-toggle-group');
+        if (group && group._markAnswered) {
+            group._markAnswered(this, 'correct');
+        }
+
         if (autoNext) {
             setTimeout(() => {
-                const group = this.closest('card-toggle-group');
                 if (group && group._goNext) {
                     group._goNext();
                 }
@@ -994,6 +1081,12 @@ class CardToggle extends HTMLElement {
         this.innerHTML = finalContent;
         this.setAttribute('replaced', '');
         this.setAttribute('color', 'warning');
+
+        // ★ 通知所屬 group 此題達到上限（答錯）
+        const group = this.closest('card-toggle-group');
+        if (group && group._markAnswered) {
+            group._markAnswered(this, 'wrong');
+        }
     }
 
     reset() {
@@ -1033,7 +1126,12 @@ class CardToggleGroup extends HTMLElement {
     constructor() {
         super();
         this._currentIndex = 0;
-        this._cards = [];
+        this._cards        = [];
+        this._answerState  = [];   // 'unanswered' | 'correct' | 'wrong'
+        this._counterEl    = null;
+        this._pageButtons  = null;
+        this._prevBtn      = null;
+        this._nextBtn      = null;
     }
 
     connectedCallback() {
@@ -1054,8 +1152,9 @@ class CardToggleGroup extends HTMLElement {
             this.style.setProperty('--ct-active-color', `var(--ct-color-special)`);
         }
 
-        this._cards = Array.from(this.querySelectorAll('card-toggle'));
-        
+        this._cards       = Array.from(this.querySelectorAll('card-toggle'));
+        this._answerState = this._cards.map(() => 'unanswered');
+
         if (mode === 'slide') {
             this._setupSlideMode();
         }
@@ -1064,16 +1163,24 @@ class CardToggleGroup extends HTMLElement {
     _setupSlideMode() {
         const cardsContainer = document.createElement('div');
         cardsContainer.className = 'ct-group-cards';
-        
+
         this._cards.forEach(card => {
             cardsContainer.appendChild(card);
         });
-        
+
         this.innerHTML = '';
+
+        // ① 計數器（放在卡片上方）
+        if (!this.hasAttribute('hide-counter')) {
+            const counter = document.createElement('div');
+            counter.className = 'ct-counter';
+            counter.innerHTML = `<span class="ct-counter-current">1</span> / ${this._cards.length}`;
+            this.appendChild(counter);
+            this._counterEl = counter;
+        }
+
         this.appendChild(cardsContainer);
-        
         this._createNavigation();
-        
         this._updateSlide();
     }
 
@@ -1123,26 +1230,45 @@ class CardToggleGroup extends HTMLElement {
     _updateSlide() {
         const cardsContainer = this.querySelector('.ct-group-cards');
         if (!cardsContainer) return;
-        
+
         const offset = -this._currentIndex * 100;
         cardsContainer.style.transform = `translateX(${offset}%)`;
-        
+
+        // ① 計數器
+        if (this._counterEl) {
+            this._counterEl.innerHTML =
+                `<span class="ct-counter-current">${this._currentIndex + 1}</span> / ${this._cards.length}`;
+        }
+
+        // ② 上一頁按鈕
         if (this._prevBtn) {
             this._prevBtn.disabled = this._currentIndex === 0;
         }
+
+        // ③ 下一頁按鈕：鎖頁模式下，當前題未答不能前進
         if (this._nextBtn) {
-            this._nextBtn.disabled = this._currentIndex === this._cards.length - 1;
+            const isLast    = this._currentIndex === this._cards.length - 1;
+            const lockNav   = this.hasAttribute('lock-nav');
+            const curState  = this._answerState[this._currentIndex];
+            const locked    = lockNav && curState === 'unanswered';
+            this._nextBtn.disabled = isLast || locked;
+            this._nextBtn.title    = locked ? '請先作答才能繼續' : '';
         }
-        
+
+        // ④ 頁碼按鈕狀態
         if (this._pageButtons) {
             this._pageButtons.forEach((btn, index) => {
-                if (index === this._currentIndex) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                btn.classList.toggle('active', index === this._currentIndex);
+                // 狀態色（不蓋掉 active 的底色，由 CSS 疊加）
+                btn.classList.remove('answered-correct', 'answered-wrong');
+                const st = this._answerState[index];
+                if (st === 'correct') btn.classList.add('answered-correct');
+                if (st === 'wrong')   btn.classList.add('answered-wrong');
             });
         }
+
+        // ⑤ 檢查是否全部完成
+        this._checkAllAnswered();
     }
 
     _goPrev() {
@@ -1153,6 +1279,9 @@ class CardToggleGroup extends HTMLElement {
     }
 
     _goNext() {
+        const lockNav  = this.hasAttribute('lock-nav');
+        const curState = this._answerState[this._currentIndex];
+        if (lockNav && curState === 'unanswered') return;
         if (this._currentIndex < this._cards.length - 1) {
             this._currentIndex++;
             this._updateSlide();
@@ -1161,9 +1290,94 @@ class CardToggleGroup extends HTMLElement {
 
     _goToPage(index) {
         if (index >= 0 && index < this._cards.length) {
+            // lock-nav 模式：只能跳到已答或當前題
+            if (this.hasAttribute('lock-nav')) {
+                const targetState = this._answerState[index];
+                const isAnswered  = targetState !== 'unanswered';
+                const isCurrent   = index === this._currentIndex;
+                const isNext      = index === this._currentIndex + 1 &&
+                                    this._answerState[this._currentIndex] !== 'unanswered';
+                if (!isAnswered && !isCurrent && !isNext) return;
+            }
             this._currentIndex = index;
             this._updateSlide();
         }
+    }
+
+    /* ── ② 答題狀態追蹤 ───────────────────────────────────────── */
+    _markAnswered(cardEl, state /* 'correct' | 'wrong' */) {
+        const index = this._cards.indexOf(cardEl);
+        if (index === -1) return;
+        this._answerState[index] = state;
+        this._updateSlide();
+    }
+
+    /* ── ④ 檢查是否全部完成，觸發結果畫面 ───────────────────── */
+    _checkAllAnswered() {
+        if (!this.hasAttribute('show-result')) return;
+        const allDone = this._answerState.every(s => s !== 'unanswered');
+        if (!allDone) return;
+
+        // 避免重複顯示
+        if (this._resultShown) return;
+        this._resultShown = true;
+
+        setTimeout(() => this._showResult(), 600);
+    }
+
+    _showResult() {
+        const correct  = this._answerState.filter(s => s === 'correct').length;
+        const wrong    = this._answerState.filter(s => s === 'wrong').length;
+        const total    = this._cards.length;
+        const skipped  = total - correct - wrong;
+        const pct      = Math.round((correct / total) * 100);
+
+        const resultSource = this.getAttribute('result-source');
+        const retryLabel   = this.getAttribute('retry-label') || '↺ 重新作答';
+
+        let customHTML = '';
+        if (resultSource) {
+            const el = document.getElementById(resultSource);
+            if (el) {
+                const clone = el.cloneNode(true);
+                clone.style.display = 'block';
+                clone.removeAttribute('id');
+                customHTML = clone.outerHTML;
+            }
+        }
+
+        const resultEl = document.createElement('div');
+        resultEl.className = 'ct-result-screen';
+        resultEl.innerHTML = `
+            <div class="ct-result-score">${pct}%</div>
+            <div class="ct-result-label">共 ${total} 題答題完成</div>
+            <div class="ct-result-breakdown">
+                <span class="ct-result-correct">✓ 答對 ${correct} 題</span>
+                ${wrong   > 0 ? `<span class="ct-result-wrong">✗ 答錯 ${wrong} 題</span>`   : ''}
+                ${skipped > 0 ? `<span class="ct-result-skipped">— 略過 ${skipped} 題</span>` : ''}
+            </div>
+            ${customHTML}
+            <button class="ct-result-retry" onclick="this.closest('card-toggle-group')._retryAll()">
+                ${retryLabel}
+            </button>
+        `;
+
+        // 取代整個 group 內容
+        this.innerHTML = '';
+        this.appendChild(resultEl);
+    }
+
+    _retryAll() {
+        // 重設所有狀態重新初始化
+        this._currentIndex = 0;
+        this._answerState  = [];
+        this._resultShown  = false;
+        this._counterEl    = null;
+        this._pageButtons  = null;
+        this._prevBtn      = null;
+        this._nextBtn      = null;
+        this._ctGrpConnected = false;
+        this.connectedCallback();
     }
 }
 
