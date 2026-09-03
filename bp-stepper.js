@@ -90,6 +90,18 @@
     progressDoneIconClass: '',   // e.g. "bi bi-check-circle-fill"
     progBtnSize:      '28px',
     uiTitleGap:       '8px',    // ui-title 與元件之間的間距（獨立於 data-gap）
+    // ── compact-header 模式：badge + icon + title 排成一行 ────────────────────
+    //   compactHeader : true = 啟用；可在 bp-step 層級以 data-compact-header="false" 個別關閉
+    //   headerPadY    : header 行的上下 padding（預設 2px；比 card padding 小，視覺更緊湊）
+    //   headerGap     : badge / icon / title 三者之間的水平間距
+    compactHeader: false,
+    headerPadY:    '2px',
+    headerGap:     '6px',
+    // ── bp-step-content 透明度控制 ────────────────────────────────────────────
+    //   contentOpacity     : 一般 / active 狀態的透明度（預設 0.9）
+    //   contentOpacityDone : done 狀態的透明度（預設 0.65）；未設定時沿用 contentOpacity
+    contentOpacity:     '0.9',
+    contentOpacityDone: '0.65',
   };
 function buildCSS() {
     return `
@@ -170,6 +182,8 @@ bp-stepper {
   --bps-connector-label-color: ${BRAND.stone};
   --bps-prog-btn-sz:           28px;
   --bps-ui-title-gap:          8px;
+  --bps-content-opacity:       0.9;
+  --bps-content-opacity-done:  0.65;
 }
 
 bp-stepper[data-wrapped] {
@@ -266,7 +280,7 @@ bp-step[data-state="done"] .bp-step-badge {
   color:        #0C0D0C;
 }
 bp-step[data-state="done"] bp-step-title   { color: var(--bps-color-done); }
-bp-step[data-state="done"] bp-step-content { opacity: .65; }
+bp-step[data-state="done"] bp-step-content { opacity: var(--bps-content-opacity-done, var(--bps-content-opacity, 0.65)); }
 
 bp-step[data-state="error"] {
   border-color: var(--bps-color-error);
@@ -309,7 +323,7 @@ bp-step-content {
   display:     block;
   font-size:   var(--bps-fs);
   color:       var(--bps-text);
-  opacity:     .9;
+  opacity:     var(--bps-content-opacity, 0.9);
   line-height: 1.3;
   transition:  opacity .28s;
 }
@@ -694,6 +708,71 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
   color:       #0C0D0C;
   box-shadow:  0 0 10px -2px var(--bps-color-error);
 }
+
+/* ── compact-header 模式：badge + icon + title 單行排列 ─────────────────────
+   觸發方式：
+     bp-stepper 層級 → data-compact-header（套用全部步驟）
+     bp-step    層級 → data-compact-header="false" 可個別關閉              */
+.bps-step-header {
+  display:        flex;
+  flex-direction: row;
+  align-items:    center;
+  gap:            var(--bps-header-gap, 6px);
+  padding-top:    var(--bps-header-pad-y, 2px);
+  /* 為底部橫線預留空間：pad-y + 8px（線高 1px + 上下餘白） */
+  padding-bottom: calc(var(--bps-header-pad-y, 2px) + 8px);
+  position:       relative;
+}
+
+/* badge / icon 移入 header 後不需要原本的 margin-bottom */
+.bps-step-header .bp-step-badge { margin-bottom: 0; }
+.bps-step-header .bp-step-icon  { margin-bottom: 0; }
+
+/* ── 若隱若現的橫線（漸層淡入淡出，兩端透明） ── */
+.bps-step-header::after {
+  content:        '';
+  position:       absolute;
+  bottom:         2px;          /* 在 padding-bottom 範圍內，懸浮於內容之上 */
+  left:           0;
+  right:          0;
+  height:         1px;
+  background:     linear-gradient(
+    to right,
+    transparent  0%,
+    var(--bps-color) 20%,
+    var(--bps-color) 80%,
+    transparent 100%
+  );
+  opacity:        0.28;         /* 若隱若現 */
+  pointer-events: none;
+  transition:     opacity .28s, background .28s;
+}
+
+/* 各狀態顏色同步 */
+bp-step[data-state="active"] .bps-step-header::after {
+  background: linear-gradient(
+    to right,
+    transparent 0%, var(--bps-color-active) 20%,
+    var(--bps-color-active) 80%, transparent 100%
+  );
+  opacity: 0.48;
+}
+bp-step[data-state="done"] .bps-step-header::after {
+  background: linear-gradient(
+    to right,
+    transparent 0%, var(--bps-color-done) 20%,
+    var(--bps-color-done) 80%, transparent 100%
+  );
+  opacity: 0.30;
+}
+bp-step[data-state="error"] .bps-step-header::after {
+  background: linear-gradient(
+    to right,
+    transparent 0%, var(--bps-color-error) 20%,
+    var(--bps-color-error) 80%, transparent 100%
+  );
+  opacity: 0.50;
+}
 `;
   }
 
@@ -727,6 +806,10 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     connectorLabelColor: '--bps-connector-label-color',
     progBtnSize:         '--bps-prog-btn-sz',           // progress 按鈕尺寸
     uiTitleGap:          '--bps-ui-title-gap',          // ui-title 與元件的獨立間距
+    headerPadY:          '--bps-header-pad-y',          // compact-header 行的上下 padding
+    headerGap:           '--bps-header-gap',            // compact-header 行內的水平間距
+    contentOpacity:      '--bps-content-opacity',       // bp-step-content 一般透明度
+    contentOpacityDone:  '--bps-content-opacity-done',  // bp-step-content done 狀態透明度
   };
 
   // ─── 注入全域 CSS（僅執行一次）────────────────────────────────────────────────
@@ -936,6 +1019,43 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
     setActive(el, nextIdx);
   }
 
+  // ─── compact-header：將 badge、icon、title 包進單行 wrapper ──────────────────
+  //  stepper 層級：data-compact-header（無值 / 非 "false" → 啟用）
+  //  step   層級：data-compact-header="false" → 個別關閉
+  //              data-compact-header（有值且非 "false"）→ 個別啟用（覆寫 stepper 關閉）
+  function applyCompactHeader(el, cfg) {
+    const stepperOn = el.dataset.compactHeader !== undefined
+      ? el.dataset.compactHeader !== 'false'
+      : Boolean(cfg.compactHeader);
+
+    el.querySelectorAll(':scope > bp-step').forEach(function (step) {
+      // 已處理過則跳過
+      if (step.querySelector('.bps-step-header')) return;
+
+      // 個別 bp-step 可覆寫 stepper 層級設定
+      const stepAttr = step.dataset.compactHeader;
+      const isOn = stepAttr !== undefined
+        ? stepAttr !== 'false'
+        : stepperOn;
+
+      if (!isOn) return;
+
+      const header = document.createElement('div');
+      header.className = 'bps-step-header';
+
+      // 依序蒐集：badge → icon → title（缺席者略過）
+      const badge = step.querySelector(':scope > .bp-step-badge');
+      const icon  = step.querySelector(':scope > .bp-step-icon');
+      const title = step.querySelector(':scope > bp-step-title');
+      [badge, icon, title].forEach(function (node) {
+        if (node) header.appendChild(node);
+      });
+
+      // 插入為 bp-step 的第一個子元素
+      step.insertBefore(header, step.firstChild);
+    });
+  }
+
   function initEl(el) {
     // 1. 套用主題預設與 data-* 屬性覆寫
     const cfg = Object.assign({}, defaults);
@@ -996,6 +1116,9 @@ bp-step[data-state="error"] .bps-prog-btn:hover {
         step.insertBefore(badge, step.firstChild);
       });
     }
+
+    // 3b. compact-header：badge + icon + title 合排成單行
+    applyCompactHeader(el, cfg);
 
     // 4. 連接器說明標籤
     el.querySelectorAll(':scope > bp-step').forEach((step) => {
