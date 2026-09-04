@@ -1,28 +1,5 @@
-/**
- * ui-reading.js  v1.0.0
- * ─────────────────────────────────────────────────────────────────────
- * 四合一閱讀互動元件（不打斷閱讀流暢度）
- *
- *  <text-morph>   段落文字原地變形，低分 ↔ 高分對比切換
- *  <margin-pin>   標記字詞，hover 後說明浮現於右邊界，虛線連回標記點
- *  <read-pulse>   段落進入視窗時左側出現節奏掃描線
- *  <chalk-mark>   點擊詞彙，手繪弧線動態畫出於文字上方；再點消除
- *  <col-pair>     搭配詞同色小印記，hover 同組成員同時亮起
- *
- * 全域配置（在引入此檔前設定）：
- *   window.UiReadingConfig = { morphTheme: 'ocean', ... }
- *
- * API：
- *   UiReading.init()   — 重新掃描並初始化新節點（適合動態插入）
- *   UiReading.config   — 目前的全域配置物件（可即時修改）
- *   UiReading.colors   — 色票物件
- */
 (function (global) {
   'use strict';
-
-  /* ════════════════════════════════════════════════════════════════
-   * 色票
-   * ════════════════════════════════════════════════════════════════ */
   var BRAND = {
     shell:    '#C6C7BD', lavender: '#C3A5E5', sky:     '#62c8f0',
     warning:  '#F08080', salmon:   '#E5C3B3', ocean:   '#0ABDC6',
@@ -38,10 +15,6 @@
     v = String(v).trim();
     return BRAND[v] || (/^#|^rgb/.test(v) ? v : BRAND.shell);
   }
-
-  /* ════════════════════════════════════════════════════════════════
-   * 全域配置
-   * ════════════════════════════════════════════════════════════════ */
   var CFG = global.UiReadingConfig = Object.assign({
     /* text-morph */
     morphTheme:     'sky',
@@ -64,18 +37,18 @@
     /* chalk-mark */
     chalkTheme:     'focus',
     chalkThickness: 2.5,           /* px，弧線粗細 */
-    chalkDuration:  420            /* ms，畫出 / 消除動畫時長 */
+    chalkDuration:  420,           /* ms，畫出 / 消除動畫時長 */
+
+    /* read-progress */
+    progressTheme:    'sky',       /* 進度條顏色 */
+    progressHeight:   '3px',       /* 進度條粗細 */
+    progressPosition: 'top'        /* top | bottom */
   }, global.UiReadingConfig || {});
 
-  /* ════════════════════════════════════════════════════════════════
-   * CSS
-   * ════════════════════════════════════════════════════════════════ */
   var CSS = [
-    /* 避免初始化前閃現自訂元素 */
     'text-morph,morph-from,morph-to{display:none}',
-    'margin-pin,read-pulse,chalk-mark,col-pair{display:none}',
+    'margin-pin,read-pulse,chalk-mark,col-pair,read-progress{display:none}',
 
-    /* ── text-morph ─────────────────────────────────────────────── */
     '.urm-morph{display:block}',
 
     '.urm-morph-body{' +
@@ -101,7 +74,6 @@
       'background:currentColor;flex-shrink:0;' +
       'transition:background .3s ease}',
 
-    /* ── margin-pin ─────────────────────────────────────────────── */
     '.urm-pin{' +
       'border-bottom:1.5px dashed;cursor:help;' +
       'display:inline;transition:opacity .15s ease}',
@@ -124,7 +96,6 @@
       'opacity:0;transition:opacity .2s ease}',
     '.urm-pline.urm-pv{opacity:.5}',
 
-    /* ── read-pulse ─────────────────────────────────────────────── */
     '.urm-pulse{' +
       'position:relative;display:block;' +
       'padding-left:var(--urm-pg,14px)}',
@@ -145,8 +116,6 @@
     '.urm-pbar.urm-pd{' +
       'opacity:0;transition:opacity .9s ease .4s}',
 
-    /* ── chalk-mark ─────────────────────────────────────────────── */
-    /* inline-block + relative 確保 SVG absolute 定位可靠 */
     '.urm-chalk{' +
       'display:inline-block;position:relative;' +
       'vertical-align:baseline;cursor:crosshair;' +
@@ -159,7 +128,6 @@
     /* 弧線路徑：transition 由 JS inline style 設定 */
     '.urm-chalk-path{fill:none;stroke-linecap:round}',
 
-    /* ── col-pair ───────────────────────────────────────────────── */
     '.urm-cp{' +
       'display:inline;position:relative;cursor:default;' +
       'transition:color .2s ease}',
@@ -188,24 +156,6 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
-  /* ════════════════════════════════════════════════════════════════
-   * text-morph
-   *
-   * 用法：
-   *   <text-morph theme="sky" label-from="← 還原" label-to="看升級版 →">
-   *     <morph-from>原版文字（可含任何 HTML）</morph-from>
-   *     <morph-to>升級版文字（可含任何 HTML）</morph-to>
-   *   </text-morph>
-   *
-   * 屬性：
-   *   theme        按鈕色票名稱或 hex（預設 morphTheme）
-   *   duration     過渡毫秒（預設 morphDuration）
-   *   label-from   顯示「還原」按鈕的文字
-   *   label-to     顯示「切換」按鈕的文字
-   *
-   * ★ morph 內容中的 chalk-mark / margin-pin / read-pulse
-   *   在每次切換後會自動重新初始化。col-pair 不支援巢狀於 morph 內。
-   * ════════════════════════════════════════════════════════════════ */
   function initMorph(el) {
     if (el.dataset.urm) return;
     el.dataset.urm = '1';
@@ -227,7 +177,6 @@
     var cSafe    = clr('safe');
     var shown    = false; /* false = from, true = to */
 
-    /* ── DOM ── */
     var wrap = document.createElement('div');
     wrap.className = 'urm-morph';
     wrap.style.setProperty('--urm-md', dur + 'ms');
@@ -286,19 +235,6 @@
     });
   }
 
-  /* ════════════════════════════════════════════════════════════════
-   * margin-pin
-   *
-   * 用法：
-   *   <margin-pin note="說明文字" theme="yellow">標記詞</margin-pin>
-   *
-   * 屬性：
-   *   note    浮動說明文字
-   *   theme   標記色票名稱或 hex（預設 pinTheme）
-   *
-   * ★ 共用一對全域 DOM（標注框 + 連接線），不依賴容器寬度。
-   *   建議在寬螢幕使用（視窗右側需有足夠空間顯示標注框）。
-   * ════════════════════════════════════════════════════════════════ */
   var _pa = null, _pl = null, _pt = null;
 
   function ensurePinDom() {
@@ -377,22 +313,6 @@
     });
   }
 
-  /* ════════════════════════════════════════════════════════════════
-   * read-pulse
-   *
-   * 用法：
-   *   <read-pulse color="teal" speed="2800" trigger="visible">
-   *     段落文字…
-   *   </read-pulse>
-   *
-   * 屬性：
-   *   color        掃描線色票名稱或 hex（預設 pulseColor）
-   *   speed        掃描毫秒（預設 pulseSpeed）
-   *   pulse-width  掃描線粗細（預設 pulseWidth）
-   *   gap          左側留白 px（預設 pulseGap）
-   *   trigger      visible（預設）| click | hover
-   *   repeat       有此屬性時可重複觸發（預設只播一次）
-   * ════════════════════════════════════════════════════════════════ */
   function initPulse(el) {
     if (el.dataset.urm) return;
     el.dataset.urm = '1';
@@ -458,24 +378,7 @@
       wrap.addEventListener('mouseenter', pulse);
     }
   }
-
-  /* ════════════════════════════════════════════════════════════════
-   * chalk-mark
-   *
-   * 用法：
-   *   <chalk-mark theme="focus">詞彙</chalk-mark>
-   *   <chalk-mark theme="sky" active>預設已啟動</chalk-mark>
-   *
-   * 屬性：
-   *   theme      弧線色票名稱或 hex（預設 chalkTheme）
-   *   thickness  弧線粗細 px（預設 chalkThickness）
-   *   duration   畫出 / 消除動畫毫秒（預設 chalkDuration）
-   *   active     有此屬性時頁面載入後自動畫出弧線
-   *
-   * ★ 弧線以 SVG quadratic bezier 實作，
-   *   用 stroke-dashoffset 動畫模擬手繪效果。
-   *   chalk-mark 限用於單行短詞，跨行不保證正確。
-   * ════════════════════════════════════════════════════════════════ */
+  
   function initChalk(el) {
     if (el.dataset.urm) return;
     el.dataset.urm = '1';
@@ -493,7 +396,6 @@
 
     var svgEl = null, chalkPath = null, isActive = false;
 
-    /* ── 建立弧線 SVG ── */
     function buildArc() {
       if (svgEl) { svgEl.remove(); svgEl = null; chalkPath = null; }
 
@@ -573,25 +475,6 @@
     if (preActive) setTimeout(activate, 80);
   }
 
-  /* ════════════════════════════════════════════════════════════════
-   * col-pair — 搭配詞同色小印記
-   *
-   * 用法：
-   *   I need to <col-pair group="g1">make</col-pair> a
-   *   <col-pair group="g1">decision</col-pair> soon.
-   *   This will <col-pair group="g2">have</col-pair> a significant
-   *   <col-pair group="g2">impact</col-pair>.
-   *
-   * 屬性：
-   *   group    同組識別碼（字串，必填）；同組自動共享顏色
-   *   theme    覆蓋該組自動分配的色票名稱或 hex
-   *            （同組第一個 theme 屬性生效，後續忽略）
-   *   label    hover 時 title 提示文字，同組共用
-   *
-   * ★ 所有 col-pair 需一起初始化，UiReading.init() 可安全重複呼叫。
-   * ════════════════════════════════════════════════════════════════ */
-
-  /* 自動色盤（排除太淺或對比不足的色票） */
   var _cpPalette = [
     BRAND.yellow, BRAND.sky, BRAND.lavender, BRAND.ocean,
     BRAND.salmon, BRAND.teal, BRAND.focus,   BRAND.info,
@@ -607,7 +490,6 @@
     );
     if (!els.length) return;
 
-    /* ── 第一遍：建群組，分配顏色 ── */
     els.forEach(function (el) {
       var gid   = el.getAttribute('group') || '_nogroup';
       var theme = el.getAttribute('theme');
@@ -618,15 +500,12 @@
           : _cpPalette[_cpPaletteIdx++ % _cpPalette.length];
         _cpGroups[gid] = { color: c, members: [], label: label, _hasTheme: !!theme };
       }
-      /* 同組第一個 theme 優先，後續忽略 */
       if (theme && !_cpGroups[gid]._hasTheme) {
         _cpGroups[gid].color = clr(theme);
         _cpGroups[gid]._hasTheme = true;
       }
       if (label && !_cpGroups[gid].label) _cpGroups[gid].label = label;
     });
-
-    /* ── 第二遍：替換 DOM ── */
     var registry = [];
     els.forEach(function (el) {
       el.dataset.urm = '1';
@@ -640,8 +519,6 @@
       wrap.style.setProperty('--urm-cp-c', c);
       if (grp.label) wrap.title = grp.label;
       wrap.innerHTML = el.innerHTML;
-
-      /* 小印記圓點，insertBefore 確保在文字節點最前 */
       var dot = document.createElement('span');
       dot.className = 'urm-cp-dot';
       wrap.insertBefore(dot, wrap.firstChild);
@@ -650,8 +527,6 @@
       grp.members.push(wrap);
       registry.push({ wrap: wrap, gid: gid });
     });
-
-    /* ── 第三遍：掛 hover 事件（此時 wrap 已全數入 DOM） ── */
     registry.forEach(function (item) {
       var grp = _cpGroups[item.gid];
       item.wrap.addEventListener('mouseenter', function () {
@@ -662,15 +537,92 @@
       });
     });
   }
+  /* ================================================================
+   * initProgress：容器閱讀進度條
+   *
+   * 用法：<read-progress target="#article" theme="sky">
+   *
+   * 屬性：
+   *   target    CSS selector，要追蹤的容器（省略時追蹤父元素）
+   *   theme     顏色名稱或 hex（預設 CFG.progressTheme）
+   *   color     同 theme，兩者擇一
+   *   height    進度條粗細，任意 CSS 長度（預設 CFG.progressHeight）
+   *   position  top | bottom，固定在視窗上方或下方（預設 CFG.progressPosition）
+   *
+   * 計算邏輯（第二種：容器無自訂捲軸）：
+   *   progress = (scrollY - containerTop) / (containerHeight - innerHeight)
+   *   - scrollY < containerTop         → 0%（尚未進入）
+   *   - containerBottom 進入視窗底部   → 100%（已讀完）
+   * ================================================================ */
+  function initProgress(el) {
+    if (el.dataset.urm) return;
+    el.dataset.urm = '1';
 
-  /* ════════════════════════════════════════════════════════════════
-   * boot
-   * ════════════════════════════════════════════════════════════════ */
+    /* ── 找目標容器 ── */
+    var targetSel = el.getAttribute('target');
+    var target    = targetSel
+      ? document.querySelector(targetSel)
+      : el.parentElement;
+    if (!target) {
+      console.warn('[ui-reading] <read-progress> 找不到 target：' + targetSel);
+      return;
+    }
+
+    var c   = clr(el.getAttribute('theme') || el.getAttribute('color') || CFG.progressTheme);
+    var h   = el.getAttribute('height')    || CFG.progressHeight;
+    var pos = (el.getAttribute('position') || CFG.progressPosition) === 'bottom'
+              ? 'bottom' : 'top';
+
+    /* ── 建立固定進度條 ── */
+    var bar = document.createElement('div');
+    bar.style.cssText =
+      'position:fixed;left:0;width:0%;' +
+      'height:' + h + ';' +
+      (pos === 'bottom' ? 'bottom:0;top:auto;' : 'top:0;bottom:auto;') +
+      'background:' + c + ';' +
+      'z-index:9200;pointer-events:none;' +
+      'border-radius:0 2px 2px 0;' +
+      'transition:width .12s linear';
+    document.body.appendChild(bar);
+
+    /* 隱藏原始標籤 */
+    el.style.display = 'none';
+
+    /* ── 量測（resize 時重算） ── */
+    var cTop = 0, cH = 0;
+
+    function measure() {
+      var r = target.getBoundingClientRect();
+      cTop  = r.top + window.pageYOffset;
+      cH    = target.offsetHeight;
+    }
+
+    /* ── 更新進度 ── */
+    function update() {
+      var scrolled = window.pageYOffset - cTop;
+      var total    = cH - window.innerHeight;
+      var pct;
+      if (total <= 0) {
+        /* 容器比視窗矮：進入可視範圍即 100% */
+        pct = window.pageYOffset + window.innerHeight >= cTop + cH ? 1 : 0;
+      } else {
+        pct = Math.min(1, Math.max(0, scrolled / total));
+      }
+      bar.style.width = (pct * 100).toFixed(2) + '%';
+    }
+
+    measure();
+    update();
+    window.addEventListener('scroll', update,  { passive: true });
+    window.addEventListener('resize', function () { measure(); update(); }, { passive: true });
+  }
+
   function boot() {
     document.querySelectorAll('text-morph:not([data-urm])').forEach(initMorph);
     document.querySelectorAll('margin-pin:not([data-urm])').forEach(initPin);
     document.querySelectorAll('read-pulse:not([data-urm])').forEach(initPulse);
     document.querySelectorAll('chalk-mark:not([data-urm])').forEach(initChalk);
+    document.querySelectorAll('read-progress:not([data-urm])').forEach(initProgress);
     initColPairs();
   }
 
