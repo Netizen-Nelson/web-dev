@@ -102,17 +102,17 @@
 .me-8, .mx-8        { margin-right: 8rem !important; }
 
 /* ── Padding utilities (level 6–8) ──────── */
-.p-6                { padding: 4rem !important; }
-.pt-6, .py-6        { padding-top: 4rem !important; }
-.pb-6, .py-6        { padding-bottom: 4rem !important; }
-.ps-6, .px-6        { padding-left: 4rem !important; }
-.pe-6, .px-6        { padding-right: 4rem !important; }
+.p-6                { padding: 4.5rem !important; }
+.pt-6, .py-6        { padding-top: 4.5rem !important; }
+.pb-6, .py-6        { padding-bottom: 4.5rem !important; }
+.ps-6, .px-6        { padding-left: 4.5rem !important; }
+.pe-6, .px-6        { padding-right: 4.5rem !important; }
 
-.p-7                { padding: 5.5rem !important; }
-.pt-7, .py-7        { padding-top: 5.5rem !important; }
-.pb-7, .py-7        { padding-bottom: 5.5rem !important; }
-.ps-7, .px-7        { padding-left: 5.5rem !important; }
-.pe-7, .px-7        { padding-right: 5.5rem !important; }
+.p-7                { padding: 5.75rem !important; }
+.pt-7, .py-7        { padding-top: 5.75rem !important; }
+.pb-7, .py-7        { padding-bottom: 5.75rem !important; }
+.ps-7, .px-7        { padding-left: 5.75rem !important; }
+.pe-7, .px-7        { padding-right: 5.75rem !important; }
 
 .p-8                { padding: 8rem !important; }
 .pt-8, .py-8        { padding-top: 8rem !important; }
@@ -126,6 +126,8 @@
 .bp-ind-4 { padding-left: 2.0em; }
 .bp-ind-5 { padding-left: 2.5em; }
 .bp-ind-6 { padding-left: 3.0em; }
+.bp-ind-7 { padding-left: 3.5em; }
+.bp-ind-8 { padding-left: 4.0em; }
 
 .bp-lnh-1 { line-height: 4em; }
 .bp-lnh-2 { line-height: 3.5em; }
@@ -133,9 +135,11 @@
 .bp-lnh-4 { line-height: 2.5em; }
 .bp-lnh-5 { line-height: 2em; }
 .bp-lnh-6 { line-height: 1.75em; }
-.bp-lnh-7 { line-height: 1.5em; }
-.bp-lnh-8 { line-height: 1em; }
-.bp-lnh-9 { line-height: 0.75em; }
+.bp-lnh-7 { line-height: 1.55em; }
+.bp-lnh-8 { line-height: 1.2em; }
+.bp-lnh-9 { line-height: 1em; }
+.bp-lnh-10 { line-height: 0.75em; }
+.bp-lnh-11 { line-height: 0.6em; }
 
 blockquote {
     margin: 16px 0;
