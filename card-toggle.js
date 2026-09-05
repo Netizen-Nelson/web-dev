@@ -56,6 +56,9 @@ class CardToggle extends HTMLElement {
                 --ct-color-indigo:    #9B72CF;
                 --ct-color-pink:      #FFB3D9;
                 --ct-color-orange:    #eda109;
+                /* 左側 bar 寬度 */
+                --ct-bar-width:       3px;
+                --ct-bar-width-hover: 5px;
                 /* 預設動態顏色變數 */
                 --ct-active-color: var(--ct-color-special);
             }
@@ -81,14 +84,14 @@ class CardToggle extends HTMLElement {
                 left: 0;
                 top: 20%;
                 bottom: 20%;
-                width: 3px;
+                width: var(--ct-bar-width, 3px);
                 border-radius: 0 2px 2px 0;
                 background-color: var(--ct-bg-primary);
                 transition: width 0.2s ease, background-color 0.2s ease;
             }
 
             card-toggle:hover::before {
-                width: 5px;
+                width: var(--ct-bar-width-hover, 5px);
             }
 
             card-toggle:hover {
@@ -106,7 +109,7 @@ class CardToggle extends HTMLElement {
             }
 
             card-toggle[replaced]:not([toggle])::before {
-                width: 3px;
+                width: var(--ct-bar-width, 3px);
             }
 
             card-toggle[dashed] {
@@ -644,6 +647,156 @@ class CardToggle extends HTMLElement {
                 background-color: rgba(198, 199, 189, 0.06);
                 cursor: pointer;
             }
+
+            /* ── quiz 正面模式：卡片本身不觸發點擊 ─────────────────────── */
+            card-toggle[question]:not([replaced]) {
+                cursor: default;
+            }
+            card-toggle[question]:not([replaced]):hover {
+                background-color: var(--ct-bg-secondary);
+                box-shadow: none;
+            }
+            card-toggle[question]:not([replaced])::before {
+                width: var(--ct-bar-width, 3px);
+            }
+            card-toggle[question][replaced] {
+                cursor: pointer;
+            }
+
+            /* ── skin：幾何結構 / 色塊疊加裝飾 ──────────────────────────── */
+
+            /* grid：正方格線 */
+            card-toggle[skin="grid"] {
+                --ct-skin-line: rgba(198,199,189,0.08);
+                background-image:
+                    linear-gradient(var(--ct-skin-line) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--ct-skin-line) 1px, transparent 1px);
+                background-size: 24px 24px;
+            }
+
+            /* ruled：橫線 */
+            card-toggle[skin="ruled"] {
+                --ct-skin-line: rgba(198,199,189,0.1);
+                background-image:
+                    linear-gradient(transparent calc(100% - 1px), var(--ct-skin-line) 1px);
+                background-size: 100% 28px;
+                background-position: 0 0;
+            }
+
+            /* blueprint：雙密度格線（天藍調） */
+            card-toggle[skin="blueprint"] {
+                background-image:
+                    linear-gradient(rgba(149,201,222,0.1)  1px, transparent 1px),
+                    linear-gradient(90deg, rgba(149,201,222,0.1)  1px, transparent 1px),
+                    linear-gradient(rgba(149,201,222,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(149,201,222,0.04) 1px, transparent 1px);
+                background-size: 60px 60px, 60px 60px, 12px 12px, 12px 12px;
+            }
+
+            /* split：上半稍亮 / 下半稍暗 */
+            card-toggle[skin="split"] {
+                background-image: linear-gradient(
+                    to bottom,
+                    rgba(255,255,255,0.04) 0%,
+                    rgba(255,255,255,0.04) 50%,
+                    rgba(0,0,0,0.1) 50%,
+                    rgba(0,0,0,0.1) 100%
+                );
+            }
+
+            /* band：頂部色帶 */
+            card-toggle[skin="band"] {
+                background-image: linear-gradient(
+                    to bottom,
+                    rgba(255,255,255,0.07) 0px,
+                    rgba(255,255,255,0.07) 36px,
+                    transparent 36px
+                );
+            }
+
+            /* skin × color：grid / ruled 線條跟隨色票 */
+            card-toggle[skin="grid"][color="sky"],
+            card-toggle[skin="ruled"][color="sky"]      { --ct-skin-line: rgba(149,201,222,0.1); }
+            card-toggle[skin="grid"][color="lavender"],
+            card-toggle[skin="ruled"][color="lavender"]  { --ct-skin-line: rgba(195,165,229,0.1); }
+            card-toggle[skin="grid"][color="safe"],
+            card-toggle[skin="ruled"][color="safe"]      { --ct-skin-line: rgba(32,194,29,0.1); }
+            card-toggle[skin="grid"][color="warning"],
+            card-toggle[skin="ruled"][color="warning"]   { --ct-skin-line: rgba(240,128,128,0.1); }
+            card-toggle[skin="grid"][color="info"],
+            card-toggle[skin="ruled"][color="info"]      { --ct-skin-line: rgba(120,140,222,0.1); }
+            card-toggle[skin="grid"][color="orange"],
+            card-toggle[skin="ruled"][color="orange"]    { --ct-skin-line: rgba(237,161,9,0.1); }
+            card-toggle[skin="grid"][color="focus"],
+            card-toggle[skin="ruled"][color="focus"]     { --ct-skin-line: rgba(224,190,121,0.1); }
+            card-toggle[skin="grid"][color="teal"],
+            card-toggle[skin="ruled"][color="teal"]      { --ct-skin-line: rgba(13,165,145,0.1); }
+            card-toggle[skin="grid"][color="ocean"],
+            card-toggle[skin="ruled"][color="ocean"]     { --ct-skin-line: rgba(10,189,198,0.1); }
+            card-toggle[skin="grid"][color="indigo"],
+            card-toggle[skin="ruled"][color="indigo"]    { --ct-skin-line: rgba(155,114,207,0.1); }
+            card-toggle[skin="grid"][color="pink"],
+            card-toggle[skin="ruled"][color="pink"]      { --ct-skin-line: rgba(255,179,217,0.1); }
+            card-toggle[skin="grid"][color="salmon"],
+            card-toggle[skin="ruled"][color="salmon"]    { --ct-skin-line: rgba(229,195,179,0.1); }
+            card-toggle[skin="grid"][color="special"],
+            card-toggle[skin="ruled"][color="special"]   { --ct-skin-line: rgba(200,221,90,0.1); }
+            card-toggle[skin="grid"][color="shell"],
+            card-toggle[skin="ruled"][color="shell"]     { --ct-skin-line: rgba(198,199,189,0.13); }
+
+            /* ── shape="envelope"：信封形狀 ──────────────────────────────── */
+            /*
+             * clip-path: polygon(0 36px, 50% 0, 100% 36px, 100% 100%, 0 100%)
+             * 固定 36px 折痕深度，不受卡片高度百分比影響。
+             * ::after 繪製兩條對角折痕線（X → V 形），顏色跟隨 color 屬性。
+             * ::before 左側 bar 從折痕線起始（top: 36px），視覺整齊。
+             */
+            card-toggle[shape="envelope"] {
+                --ct-envelope-fold: rgba(198,199,189,0.18);
+                clip-path: polygon(0 36px, 50% 0, 100% 36px, 100% 100%, 0 100%);
+                padding-top: 50px;
+                min-height: 90px;
+            }
+            card-toggle[shape="envelope"]::before {
+                top: 38px;
+            }
+            card-toggle[shape="envelope"]::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 36px;
+                pointer-events: none;
+                background:
+                    linear-gradient(
+                        to bottom right,
+                        transparent 49.8%, var(--ct-envelope-fold) 49.8%,
+                        var(--ct-envelope-fold) 50.2%, transparent 50.2%
+                    ),
+                    linear-gradient(
+                        to bottom left,
+                        transparent 49.8%, var(--ct-envelope-fold) 49.8%,
+                        var(--ct-envelope-fold) 50.2%, transparent 50.2%
+                    );
+            }
+
+            /* envelope × color：折痕線跟隨色票 */
+            card-toggle[shape="envelope"][color="sky"]      { --ct-envelope-fold: rgba(149,201,222,0.3); }
+            card-toggle[shape="envelope"][color="lavender"] { --ct-envelope-fold: rgba(195,165,229,0.3); }
+            card-toggle[shape="envelope"][color="safe"]     { --ct-envelope-fold: rgba(32,194,29,0.3); }
+            card-toggle[shape="envelope"][color="warning"]  { --ct-envelope-fold: rgba(240,128,128,0.3); }
+            card-toggle[shape="envelope"][color="info"]     { --ct-envelope-fold: rgba(120,140,222,0.3); }
+            card-toggle[shape="envelope"][color="orange"]   { --ct-envelope-fold: rgba(237,161,9,0.3); }
+            card-toggle[shape="envelope"][color="focus"]    { --ct-envelope-fold: rgba(224,190,121,0.3); }
+            card-toggle[shape="envelope"][color="teal"]     { --ct-envelope-fold: rgba(13,165,145,0.3); }
+            card-toggle[shape="envelope"][color="ocean"]    { --ct-envelope-fold: rgba(10,189,198,0.3); }
+            card-toggle[shape="envelope"][color="indigo"]   { --ct-envelope-fold: rgba(155,114,207,0.3); }
+            card-toggle[shape="envelope"][color="pink"]     { --ct-envelope-fold: rgba(255,179,217,0.3); }
+            card-toggle[shape="envelope"][color="salmon"]   { --ct-envelope-fold: rgba(229,195,179,0.3); }
+            card-toggle[shape="envelope"][color="special"]  { --ct-envelope-fold: rgba(200,221,90,0.3); }
+            card-toggle[shape="envelope"][color="shell"]    { --ct-envelope-fold: rgba(198,199,189,0.28); }
+            card-toggle[shape="envelope"][color="attention"]{ --ct-envelope-fold: rgba(222,202,75,0.3); }
         `;
         document.head.appendChild(style);
     }
@@ -658,6 +811,13 @@ class CardToggle extends HTMLElement {
         if (this.hasAttribute('number')) {
             this._addNumber();
         }
+
+        // Quiz 正面模式：卡片載入即直接呈現輸入表單
+        if (this.hasAttribute('question') && !this._snapshotTaken) {
+            this._renderQuizFront();
+        }
+
+        this._applyLineStyles();
     }
 
     _addNumber() {
@@ -675,13 +835,82 @@ class CardToggle extends HTMLElement {
         this.insertBefore(numberSpan, this.firstChild);
     }
 
+    /**
+     * Quiz 正面模式：直接在卡片正面渲染輸入表單，
+     * 不需要使用者點擊觸發。快照在此立即完成，
+     * 答對翻面後可點擊翻回重試。
+     */
+    _renderQuizFront() {
+        this.innerHTML     = this._generateQuizContent();
+        this._originalContent = this.innerHTML;   // 快照 = 表單本身
+        this._snapshotTaken   = true;
+        this.style.cursor     = 'default';
+    }
+
+    /**
+     * 套用線條與形狀樣式
+     *
+     * bar-width="N"            左側 bar 寬度（純數字視為 px，預設 3）
+     * bar-width-hover="N"      Hover 時寬度（未設定 = bar-width + 2）
+     * top-line="N"             上邊線條寬度（空值預設 2px）
+     * top-line-color="NAME"    上邊線條顏色（預設同 color 屬性）
+     * bottom-line="N"          下邊線條寬度（空值預設 2px）
+     * bottom-line-color="NAME" 下邊線條顏色（預設同 color 屬性）
+     */
+    _applyLineStyles() {
+        // ── 左側 bar 粗細 ────────────────────────────────────────────────
+        const barWidth      = this.getAttribute('bar-width');
+        const barWidthHover = this.getAttribute('bar-width-hover');
+
+        if (barWidth !== null && barWidth !== '') {
+            const w = /^\d+(\.\d+)?$/.test(barWidth) ? barWidth + 'px' : barWidth;
+            this.style.setProperty('--ct-bar-width', w);
+            if (barWidthHover !== null && barWidthHover !== '') {
+                const hw = /^\d+(\.\d+)?$/.test(barWidthHover) ? barWidthHover + 'px' : barWidthHover;
+                this.style.setProperty('--ct-bar-width-hover', hw);
+            } else {
+                this.style.setProperty('--ct-bar-width-hover', (parseFloat(barWidth) + 2) + 'px');
+            }
+        } else if (barWidthHover !== null && barWidthHover !== '') {
+            const hw = /^\d+(\.\d+)?$/.test(barWidthHover) ? barWidthHover + 'px' : barWidthHover;
+            this.style.setProperty('--ct-bar-width-hover', hw);
+        }
+
+        // ── 上 / 下邊線條 ───────────────────────────────────────────────
+        const colorName    = this.getAttribute('color') || 'shell';
+        const defaultColor = this._resolveColor(colorName);
+
+        const _parseLineW = (val) =>
+            (val === null)      ? null :
+            (val === '')        ? '2px' :
+            /^\d+(\.\d+)?$/.test(val.trim()) ? val.trim() + 'px' : val.trim();
+
+        const topW = _parseLineW(this.getAttribute('top-line'));
+        if (topW !== null) {
+            const c = this._resolveColor(this.getAttribute('top-line-color')) || defaultColor;
+            this.style.borderTopWidth = topW;
+            this.style.borderTopStyle = 'solid';
+            this.style.borderTopColor = c;
+        }
+
+        const botW = _parseLineW(this.getAttribute('bottom-line'));
+        if (botW !== null) {
+            const c = this._resolveColor(this.getAttribute('bottom-line-color')) || defaultColor;
+            this.style.borderBottomWidth = botW;
+            this.style.borderBottomStyle = 'solid';
+            this.style.borderBottomColor = c;
+        }
+    }
+
     _handleClick(event) {
         // 第一次點擊時才取快照，此時子節點一定已完整解析
         this._takeSnapshot();
 
-        const isToggleMode = this.hasAttribute('toggle');
+        // quiz 正面模式：卡片本身不可點擊（只有按鈕觸發），但背面仍可翻回
+        const isQuizMode   = this.hasAttribute('question');
+        const isToggleMode = this.hasAttribute('toggle') || isQuizMode;
 
-        // toggle 模式：已翻到背面時，點擊可翻回正面
+        // toggle / quiz 背面：點擊翻回正面
         if (this.hasAttribute('replaced') && isToggleMode) {
             const target = event.target;
             const interactiveElements = ['INPUT', 'BUTTON', 'TEXTAREA', 'SELECT', 'A'];
@@ -694,6 +923,9 @@ class CardToggle extends HTMLElement {
         if (this.hasAttribute('replaced')) {
             return;
         }
+
+        // quiz 正面不可點擊卡片觸發翻面
+        if (isQuizMode) return;
 
         const target = event.target;
         const interactiveElements = ['INPUT', 'BUTTON', 'TEXTAREA', 'SELECT', 'A'];
@@ -808,7 +1040,7 @@ class CardToggle extends HTMLElement {
     _replace(content, animation) {
         const colorAfter = this.getAttribute('color-after');
         const autoFlip  = this.getAttribute('auto-flip');   // ms，例如 "3000"
-        const isToggle  = this.hasAttribute('toggle');
+        const isToggle  = this.hasAttribute('toggle') || this.hasAttribute('question');
 
         const afterReplace = () => {
             this._isFlipped = true;
@@ -961,7 +1193,8 @@ class CardToggle extends HTMLElement {
         this.removeAttribute('replaced');
         this._isFlipped = false;
         this._attempts = 0;
-        this.style.cursor = '';
+        // quiz 模式翻回後維持 default；一般卡片清空讓 CSS 決定
+        this.style.cursor = this.hasAttribute('question') ? 'default' : '';
 
         // 恢復原始 color
         if (originalColor) {
@@ -1017,27 +1250,51 @@ class CardToggle extends HTMLElement {
         }
     }
 
-    _handleCorrectAnswer(successSource, successMessage, successColor, autoNext) {
-        let finalContent = '';
+    /**
+     * 解析正確答案後要顯示的背面內容。
+     * 優先順序：success-source → (quiz 模式) source / content → 預設訊息
+     */
+    _resolveCorrectContent(successSource, successMessage) {
+        const cloneEl = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const c = el.cloneNode(true);
+            c.style.display = 'block';
+            c.removeAttribute('id');
+            return c.outerHTML;
+        };
 
         if (successSource) {
-            const sourceElement = document.getElementById(successSource);
-            if (sourceElement) {
-                const clonedElement = sourceElement.cloneNode(true);
-                clonedElement.style.display = 'block';
-                clonedElement.removeAttribute('id');
-                finalContent = clonedElement.outerHTML;
-            } else {
-                finalContent = `<p class="ct-success"><i class="bi bi-check-circle-fill"></i> ${successMessage}</p>`;
-            }
-        } else {
-            finalContent = `<p class="ct-success"><i class="bi bi-check-circle-fill"></i> ${successMessage}</p>`;
+            const html = cloneEl(successSource);
+            if (html) return html;
         }
 
-        this.innerHTML = finalContent;
-        this.setAttribute('replaced', '');
-        this.setAttribute('color', successColor);
-        this.classList.add('ct-fade-in');
+        // quiz 模式：source / content 作為解說背面
+        if (this.hasAttribute('question')) {
+            const sourceId    = this.getAttribute('source');
+            const contentAttr = this.getAttribute('content');
+            if (sourceId) {
+                const html = cloneEl(sourceId);
+                if (html) return html;
+            }
+            if (contentAttr) return contentAttr;
+        }
+
+        return `<p class="ct-success"><i class="bi bi-check-circle-fill"></i> ${successMessage || '答對了！'}</p>`;
+    }
+
+    _handleCorrectAnswer(successSource, successMessage, successColor, autoNext) {
+        const animation      = this.getAttribute('animation') || 'fade';
+        const finalContent   = this._resolveCorrectContent(successSource, successMessage);
+        const animDelay      = (animation === 'fade' || animation === 'slide') ? 320 : 0;
+
+        // 使用 _replace() 執行翻面動畫（含 toggle hint 注入）
+        this._replace(finalContent, animation);
+
+        // 動畫結束後套用成功色
+        if (successColor) {
+            setTimeout(() => this.setAttribute('color', successColor), animDelay);
+        }
 
         // ★ 通知所屬 group 此題答對
         const group = this.closest('card-toggle-group');
@@ -1047,9 +1304,7 @@ class CardToggle extends HTMLElement {
 
         if (autoNext) {
             setTimeout(() => {
-                if (group && group._goNext) {
-                    group._goNext();
-                }
+                if (group && group._goNext) group._goNext();
             }, 1500);
         }
     }
