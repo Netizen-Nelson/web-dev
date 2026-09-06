@@ -88,6 +88,9 @@
     progressDoneText: '',
     progressIconClass:     '',   // e.g. "bi bi-arrow-right"（優先於 progressIcon）
     progressDoneIconClass: '',   // e.g. "bi bi-check-circle-fill"
+    //   progressHideLast : true = 最後一步不注入完成按鈕（當流程結尾不需按鈕觸發時使用）
+    //                      個別步驟可在 bp-step 加 data-no-btn 達到同樣效果
+    progressHideLast: false,
     progBtnSize:      '28px',
     uiTitleGap:       '8px',    // ui-title 與元件之間的間距（獨立於 data-gap）
     // ── compact-header 模式：badge + icon + title 排成一行 ────────────────────
@@ -773,6 +776,21 @@ bp-step[data-state="error"] .bps-step-header::after {
   );
   opacity: 0.50;
 }
+
+/* ── show-ending 結尾區塊 ────────────────────────────────────────────────────
+   初始化時由 initEl 加上 bps-ending-hidden 將目標 div 隱藏；
+   最後一步按鈕點擊後移除隱藏並加上 bps-ending-reveal 播放進場動畫。
+   resetStates() 呼叫後恢復隱藏狀態。                                        */
+.bps-ending-hidden {
+  display: none !important;
+}
+@keyframes bps-ending-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);    }
+}
+.bps-ending-reveal {
+  animation: bps-ending-in 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 `;
   }
 
@@ -906,9 +924,14 @@ bp-step[data-state="error"] .bps-step-header::after {
   //    data-progress-done-icon 最後一步圖示覆寫（預設空 = 沿用圖示）
   //    data-progress-done-text 最後一步文字覆寫（預設空 = 沿用文字）
   //    data-prog-btn-size      CSS 變數 --bps-prog-btn-sz（透過 DATA_MAP）
+  //    data-progress-hide-last 存在即隱藏最後一步的完成按鈕（值為 "false" 時視為未設定）
+  //                            適用於「最後一步已自帶操作」或「不需按鈕觸發完成」的情境
+  //    data-show-ending="id"   最後一步按鈕點擊後顯示指定 id 的 div（淡入動畫）
+  //                            initEl 初始化時會自動隱藏目標 div；resetStates 呼叫後恢復隱藏
   //
   //  bp-step 層級（逐步覆寫）：
   //    data-progress-icon, data-progress-text
+  //    data-no-btn             存在即跳過該步驟的按鈕注入（可用於任意步驟，不限最後一步）
   // ────────────────────────────────────────────────────────────────────────────
   function injectProgressBtns(el, cfg) {
     const isShow = getMode(el) === 'progress-show';
@@ -935,11 +958,24 @@ bp-step[data-state="error"] .bps-step-header::after {
       return icon;
     }
 
+    // ── 最後一步按鈕隱藏旗標 ─────────────────────────────────────────────────────
+    //   data-progress-hide-last（屬性存在且值不為 "false"）→ hideLast = true
+    //   未設定時回落至 cfg.progressHideLast（預設 false）
+    const hideLast = el.dataset.progressHideLast !== undefined
+      ? el.dataset.progressHideLast !== 'false'
+      : Boolean(cfg.progressHideLast);
+
     const steps = getSteps(el);
 
     steps.forEach((step, i) => {
       if (step.querySelector('.bps-prog-btn')) return;
       const isLast = i === steps.length - 1;
+
+      // ── 跳過條件 ────────────────────────────────────────────────────────────
+      //   hideLast       → 最後一步整體隱藏
+      //   data-no-btn    → 個別步驟隱藏（任意位置均可使用）
+      if (isLast && hideLast) return;
+      if (step.hasAttribute('data-no-btn')) return;
 
       const icon = step.dataset.progressIcon !== undefined
         ? step.dataset.progressIcon
@@ -983,6 +1019,16 @@ bp-step[data-state="error"] .bps-step-header::after {
           progressShowNext(el, i); // 先揭示再推進
         } else {
           setActive(el, i + 1);
+        }
+        // ── 最後一步：顯示結尾區塊 ────────────────────────────────────────────
+        //   data-show-ending="someId" → 找到 #someId 並播放淡入動畫
+        if (isLast && el.dataset.showEnding) {
+          const endingEl = document.getElementById(el.dataset.showEnding);
+          if (endingEl) {
+            endingEl.classList.remove('bps-ending-hidden');
+            void endingEl.offsetWidth;  // 強制 reflow，確保 animation 從頭播放
+            endingEl.classList.add('bps-ending-reveal');
+          }
         }
       });
 
@@ -1125,6 +1171,17 @@ bp-step[data-state="error"] .bps-step-header::after {
       el.setAttribute('data-has-title', '');
     }
 
+    // 1d. show-ending：初始化時自動隱藏目標 div，等待最後一步按鈕觸發顯示
+    //   用法：data-show-ending="(div id)"
+    //   配合 resetStates() 呼叫可重置為隱藏（見 resetStates）
+    if (el.dataset.showEnding) {
+      const endingEl = document.getElementById(el.dataset.showEnding);
+      if (endingEl) {
+        endingEl.classList.remove('bps-ending-reveal');
+        endingEl.classList.add('bps-ending-hidden');
+      }
+    }
+
     // 2. connector 樣式（solid 也顯式寫入，避免被後繼卡片的 stacking context 蓋掉連接線）
     if (!el.dataset.connector) {
       const cs = el.dataset.connectorStyle || cfg.connectorStyle;
@@ -1253,6 +1310,14 @@ bp-step[data-state="error"] .bps-step-header::after {
       }
     });
     syncWrapConnector(el);
+    // 重置時將結尾區塊恢復隱藏
+    if (el.dataset.showEnding) {
+      const endingEl = document.getElementById(el.dataset.showEnding);
+      if (endingEl) {
+        endingEl.classList.remove('bps-ending-reveal');
+        endingEl.classList.add('bps-ending-hidden');
+      }
+    }
   }
 
   customElements.define('bp-stepper', class extends HTMLElement {
