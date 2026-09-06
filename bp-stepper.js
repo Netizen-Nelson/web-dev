@@ -776,6 +776,13 @@ bp-step[data-state="error"] .bps-step-header::after {
 `;
   }
 
+  // ─── 十六進位色碼 → {r,g,b} 整數（用於自動推算卡片背景）────────────────────────
+  function hexToRgb(hex) {
+    if (!hex || typeof hex !== 'string') return null;
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim());
+    return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
+  }
+
   // ─── JS 屬性名稱 → CSS 變數名稱對照表 ──────────────────────────────────────────
   const DATA_MAP = {
     color:               '--bps-color',
@@ -1063,9 +1070,35 @@ bp-step[data-state="error"] .bps-step-header::after {
     if (theme && THEMES[theme]) Object.assign(cfg, THEMES[theme]);
 
     Object.entries(DATA_MAP).forEach(([key, cssVar]) => {
-      const val = el.dataset[key] !== undefined ? el.dataset[key] : cfg[key];
+      let val = el.dataset[key] !== undefined ? el.dataset[key] : cfg[key];
+      // ★ 解析 BRAND 色名別名（e.g. 'salmon' → '#E5C3B3'，'ocean' → '#0ABDC6'）
+      //   data-color-active / data-color-done 等直接填色名時，原本會以字串形式寫入
+      //   CSS 變數，導致：
+      //     • 碰巧是 CSS 原生色名（如 salmon）→ 顯示錯誤顏色
+      //     • 非 CSS 色名（如 ocean）         → 無效值，所有用該變數的規則全失效
+      //       （連接線 ::after、箭頭 ::before 一起消失）
+      if (typeof val === 'string' && BRAND[val]) val = BRAND[val];
       if (val) el.style.setProperty(cssVar, val);
     });
+
+    // 1a. 若使用者以 data-color-active / data-color-done / data-color-error 個別覆寫，
+    //     且未明確指定對應的 data-card-bg-* 時，自動從色值推算卡片背景色。
+    //     如此一來自訂色和卡片背景始終一致，不會停留在 defaults/theme 的預設色。
+    ;(function syncCardBgs() {
+      const pairs = [
+        ['colorActive', 'cardBgActive', '--bps-card-bg-act', 0.09],
+        ['colorDone',   'cardBgDone',   '--bps-card-bg-done', 0.08],
+        ['colorError',  'cardBgError',  '--bps-card-bg-err', 0.08],
+      ];
+      pairs.forEach(([colorKey, bgKey, cssVar, opacity]) => {
+        if (el.dataset[colorKey] === undefined) return;   // 未覆寫 → 沿用 theme/defaults
+        if (el.dataset[bgKey]    !== undefined) return;   // 使用者自訂背景 → 不覆寫
+        const raw = el.dataset[colorKey];
+        const hex = BRAND[raw] || raw;                    // 解析別名或直接使用十六進位
+        const rgb = hexToRgb(hex);
+        if (rgb) el.style.setProperty(cssVar, `rgba(${rgb.r},${rgb.g},${rgb.b},${opacity})`);
+      });
+    })();
 
     // 1b. 垂直模式寬度
     //  --bps-vert-width 只在使用者明確設定 data-card-width 時注入
