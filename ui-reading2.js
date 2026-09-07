@@ -1,5 +1,5 @@
 /**
- * ui-reading2.js  v1.0.0
+ * ui-reading2.js  v1.1.0
  * ─────────────────────────────────────────────────────────────────────
  * 三合一進階閱讀互動元件
  *
@@ -199,7 +199,46 @@
 
     /* 非啟動的 spotlight 降透明度（繼承 body 的 --urm-sp-dim） */
     'body.urm-sp-mode .urm-sp:not(.urm-sp-active){' +
-      'opacity:var(--urm-sp-dim,.15)}'
+      'opacity:var(--urm-sp-dim,.15)}',
+
+    /* ls-layer label="#id" → 來源 div 自動隱藏 */
+    '[data-urm-ls-src]{display:none!important}',
+
+    /* ls-layer rich-label 彈出框（fixed，全域唯一） */
+    '.urm-ls-annot{' +
+      'position:fixed;z-index:9200;max-width:380px;min-width:120px;' +
+      'padding:14px 18px;border-radius:11px;' +
+      'background:#141514;' +
+      'border:1px solid rgba(198,199,189,0.18);' +
+      'box-shadow:0 8px 32px rgba(0,0,0,0.88);' +
+      'font-size:.86rem;line-height:1.58;' +
+      'pointer-events:none;' +
+      'opacity:0;transform:translateY(6px);' +
+      'transition:opacity .2s ease,transform .2s ease}',
+    '.urm-ls-annot.urm-ls-av{opacity:1;transform:translateY(0)}',
+
+    /* 彈出框內 HTML 元素基本排版（與 chunk-spot 共用視覺語言） */
+    '.urm-ls-annot p{margin-bottom:8px}',
+    '.urm-ls-annot p:last-child{margin-bottom:0}',
+    '.urm-ls-annot ul,.urm-ls-annot ol{padding-left:18px;margin-bottom:8px}',
+    '.urm-ls-annot li{margin-bottom:3px}',
+    '.urm-ls-annot strong,.urm-ls-annot b{color:#DECA4B;font-weight:700}',
+    '.urm-ls-annot em,.urm-ls-annot i{color:#95c9de;font-style:italic}',
+    '.urm-ls-annot code{' +
+      'font-family:monospace;font-size:.88em;' +
+      'background:rgba(198,199,189,0.12);' +
+      'padding:1px 5px;border-radius:4px}',
+    '.urm-ls-annot pre{' +
+      'font-family:monospace;font-size:.82em;' +
+      'background:rgba(198,199,189,0.08);' +
+      'padding:10px 12px;border-radius:7px;' +
+      'overflow-x:auto;margin-bottom:8px;white-space:pre}',
+    '.urm-ls-annot table{border-collapse:collapse;width:100%;margin-bottom:8px}',
+    '.urm-ls-annot th,.urm-ls-annot td{' +
+      'padding:5px 10px;font-size:.83em;' +
+      'border:1px solid rgba(198,199,189,0.18)}',
+    '.urm-ls-annot th{color:#DECA4B;background:rgba(198,199,189,0.07);font-weight:700}',
+    '.urm-ls-annot hr{border:none;border-top:1px solid rgba(198,199,189,0.16);margin:8px 0}'
 
   ].join('\n');
 
@@ -393,6 +432,16 @@
     el.replaceWith(wrap);
   }
 
+  /* ls-layer rich-label 彈出框：全頁唯一，lazy 建立 */
+  var _lsAnnotEl = null, _lsAnnotTm = null;
+
+  function ensureLsAnnot() {
+    if (_lsAnnotEl) return;
+    _lsAnnotEl = document.createElement('div');
+    _lsAnnotEl.className = 'urm-ls-annot';
+    document.body.appendChild(_lsAnnotEl);
+  }
+
   /* ════════════════════════════════════════════════════════════════
    * layer-switch
    *
@@ -427,11 +476,14 @@
    *   size              覆蓋字級，任何 CSS font-size 值
    *
    * ls-layer 屬性：
-   *   name              層識別碼（必填）
-   *   label             toggle 按鈕文字
+   *   name              層識別碼（必填）；label="#id" 時同時作為按鈕備用文字
+   *   label             兩種格式：
+   *                     "純文字"   → toggle 按鈕文字（原有行為）
+   *                     "#some-id" → hover 按鈕時顯示 div#some-id 的 HTML 彈出框
+   *                                  按鈕文字自動退為 name；來源 div 自動隱藏
    *   theme             色票名稱或 hex
    *   icon              Bootstrap Icon class（選填）
-   *   info              按鈕旁的小說明（title 屬性）
+   *   info              按鈕旁的小說明（title 屬性；label="#id" 時仍有效）
    * ════════════════════════════════════════════════════════════════ */
   function initLayerSwitch(el) {
     if (el.dataset.urm) return;
@@ -457,13 +509,24 @@
     /* 建立層定義表 */
     var layers = {};
     layerEls.forEach(function (le) {
-      var name = le.getAttribute('name');
+      var name     = le.getAttribute('name');
       if (!name) return;
+
+      var rawLabel = le.getAttribute('label') || name;
+      var labelIsId = rawLabel.charAt(0) === '#';
+
+      /* label="#id" → 標記來源 div，CSS 自動隱藏它 */
+      if (labelIsId) {
+        var srcEl = document.getElementById(rawLabel.slice(1));
+        if (srcEl) srcEl.dataset.urmLsSrc = '1';
+      }
+
       layers[name] = {
-        label: le.getAttribute('label') || name,
-        color: clr(le.getAttribute('theme') || 'shell'),
-        icon:  le.getAttribute('icon')  || '',
-        info:  le.getAttribute('info')  || ''
+        label:   labelIsId ? name : rawLabel,   /* 按鈕顯示文字 */
+        labelId: labelIsId ? rawLabel.slice(1) : '', /* rich-label 目標 id */
+        color:   clr(le.getAttribute('theme') || 'shell'),
+        icon:    le.getAttribute('icon')  || '',
+        info:    le.getAttribute('info')  || ''
       };
     });
 
@@ -564,6 +627,8 @@
       btn.dataset.lsn = name;
       btn.style.color       = layer.color;
       btn.style.borderColor = layer.color;
+
+      /* info title：不論 label 格式都可並存 */
       if (layer.info) btn.title = layer.info;
 
       if (!isDot) {
@@ -574,6 +639,45 @@
           btn.appendChild(ic);
         }
         btn.appendChild(document.createTextNode(layer.label));
+      }
+
+      /* ── rich-label：label="#id" ─────────────────────────────── */
+      if (layer.labelId) {
+        (function (targetId) {
+          btn.addEventListener('mouseenter', function () {
+            var srcEl = document.getElementById(targetId);
+            if (!srcEl) return;
+            ensureLsAnnot();
+            clearTimeout(_lsAnnotTm);
+
+            /* 填入內容並定位 */
+            _lsAnnotEl.innerHTML = srcEl.innerHTML;
+            var r    = btn.getBoundingClientRect();
+            var left = Math.min(r.left, window.innerWidth - 396);
+            var top  = r.bottom + 9;
+
+            _lsAnnotEl.style.visibility = 'hidden';
+            _lsAnnotEl.style.top  = top + 'px';
+            _lsAnnotEl.style.left = Math.max(8, left) + 'px';
+            _lsAnnotEl.classList.add('urm-ls-av');
+
+            /* 超出底部時改顯示於按鈕上方 */
+            requestAnimationFrame(function () {
+              var ar = _lsAnnotEl.getBoundingClientRect();
+              if (ar.bottom > window.innerHeight - 8) {
+                _lsAnnotEl.style.top =
+                  Math.max(8, r.top - ar.height - 9) + 'px';
+              }
+              _lsAnnotEl.style.visibility = '';
+            });
+          });
+
+          btn.addEventListener('mouseleave', function () {
+            _lsAnnotTm = setTimeout(function () {
+              if (_lsAnnotEl) _lsAnnotEl.classList.remove('urm-ls-av');
+            }, 120);
+          });
+        })(layer.labelId);
       }
 
       function syncBtn(n, b) {
