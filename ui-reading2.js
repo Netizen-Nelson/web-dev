@@ -1,5 +1,5 @@
 /**
- * ui-reading2.js  v1.1.0
+ * ui-reading2.js  v1.2.0
  * ─────────────────────────────────────────────────────────────────────
  * 三合一進階閱讀互動元件
  *
@@ -201,44 +201,8 @@
     'body.urm-sp-mode .urm-sp:not(.urm-sp-active){' +
       'opacity:var(--urm-sp-dim,.15)}',
 
-    /* ls-layer label="#id" → 來源 div 自動隱藏 */
-    '[data-urm-ls-src]{display:none!important}',
-
-    /* ls-layer rich-label 彈出框（fixed，全域唯一） */
-    '.urm-ls-annot{' +
-      'position:fixed;z-index:9200;max-width:380px;min-width:120px;' +
-      'padding:14px 18px;border-radius:11px;' +
-      'background:#141514;' +
-      'border:1px solid rgba(198,199,189,0.18);' +
-      'box-shadow:0 8px 32px rgba(0,0,0,0.88);' +
-      'font-size:.86rem;line-height:1.58;' +
-      'pointer-events:none;' +
-      'opacity:0;transform:translateY(6px);' +
-      'transition:opacity .2s ease,transform .2s ease}',
-    '.urm-ls-annot.urm-ls-av{opacity:1;transform:translateY(0)}',
-
-    /* 彈出框內 HTML 元素基本排版（與 chunk-spot 共用視覺語言） */
-    '.urm-ls-annot p{margin-bottom:8px}',
-    '.urm-ls-annot p:last-child{margin-bottom:0}',
-    '.urm-ls-annot ul,.urm-ls-annot ol{padding-left:18px;margin-bottom:8px}',
-    '.urm-ls-annot li{margin-bottom:3px}',
-    '.urm-ls-annot strong,.urm-ls-annot b{color:#DECA4B;font-weight:700}',
-    '.urm-ls-annot em,.urm-ls-annot i{color:#95c9de;font-style:italic}',
-    '.urm-ls-annot code{' +
-      'font-family:monospace;font-size:.88em;' +
-      'background:rgba(198,199,189,0.12);' +
-      'padding:1px 5px;border-radius:4px}',
-    '.urm-ls-annot pre{' +
-      'font-family:monospace;font-size:.82em;' +
-      'background:rgba(198,199,189,0.08);' +
-      'padding:10px 12px;border-radius:7px;' +
-      'overflow-x:auto;margin-bottom:8px;white-space:pre}',
-    '.urm-ls-annot table{border-collapse:collapse;width:100%;margin-bottom:8px}',
-    '.urm-ls-annot th,.urm-ls-annot td{' +
-      'padding:5px 10px;font-size:.83em;' +
-      'border:1px solid rgba(198,199,189,0.18)}',
-    '.urm-ls-annot th{color:#DECA4B;background:rgba(198,199,189,0.07);font-weight:700}',
-    '.urm-ls-annot hr{border:none;border-top:1px solid rgba(198,199,189,0.16);margin:8px 0}'
+    /* source / note="#id" 來源 div 自動隱藏 */
+    '[data-urm-ls-src]{display:none!important}'
 
   ].join('\n');
 
@@ -432,34 +396,32 @@
     el.replaceWith(wrap);
   }
 
-  /* ls-layer rich-label 彈出框：全頁唯一，lazy 建立 */
-  var _lsAnnotEl = null, _lsAnnotTm = null;
-
-  function ensureLsAnnot() {
-    if (_lsAnnotEl) return;
-    _lsAnnotEl = document.createElement('div');
-    _lsAnnotEl.className = 'urm-ls-annot';
-    document.body.appendChild(_lsAnnotEl);
-  }
-
   /* ════════════════════════════════════════════════════════════════
    * layer-switch
    *
-   * <layer-switch default="coherence" multi="false"
+   * <layer-switch default="c1" multi="false" target="#info-panel"
    *               mark-style="highlight" toggle-style="pill">
    *   <ls-text>
-   *     I jog every day,
-   *     <ls-mark layer="coherence" note="說明文字">rain or shine</ls-mark>.
-   *     <ls-mark layer="collocation grammar">Keeping fit</ls-mark>
-   *     has become a natural part of my life.
+   *     <ls-mark layer="c1" note="#note-c1">Like their peers,</ls-mark>
+   *     <ls-mark layer="c2">adults</ls-mark>
+   *     <ls-mark layer="c3">caring for an aging spouse</ls-mark>
    *   </ls-text>
-   *   <ls-layer name="coherence"   label="連貫詞" theme="sky"></ls-layer>
-   *   <ls-layer name="collocation" label="搭配詞" theme="yellow"></ls-layer>
-   *   <ls-layer name="grammar"     label="語法"  theme="lavender"></ls-layer>
+   *   <ls-layer name="c1" label="介系詞片語" source="#tip-c1" theme="ocean"></ls-layer>
+   *   <ls-layer name="c2" label="主詞"       source="#tip-c2" theme="yellow"></ls-layer>
+   *   <ls-layer name="c3" label="分詞片語"   source="#tip-c3" theme="lavender"></ls-layer>
    * </layer-switch>
    *
+   * <!-- 說明來源 div（放頁面任何位置，JS 自動隱藏） -->
+   * <div id="tip-c1"><strong>介系詞片語</strong><p>當副詞修飾主句…</p></div>
+   * <div id="note-c1">這個介系詞片語的具體補充說明</div>
+   *
+   * <!-- 顯示目標 div（使用者自行設計樣式） -->
+   * <div id="info-panel"></div>
+   *
+   * ────────────────────────────────────────────────────────────────
    * layer-switch 屬性：
    *   default           預設啟動的層名稱（留空則不預設啟動）
+   *   target            全域說明面板 div id（可被 ls-layer 個別覆蓋）
    *   multi             允許多層同時啟動 true | false（預設 false）
    *   toggle-style      pill（預設）| dot
    *   toggle-position   top（預設）| bottom
@@ -469,21 +431,25 @@
    *   body-dim-val      body-dim 的透明度（預設 0.55）
    *   animate           過渡動畫 true（預設）| false
    *
-   * ls-mark 屬性：
-   *   layer             空格分隔的層名稱（必填；可同時屬於多層）
-   *   note              hover title 提示文字
-   *   weight            normal（預設）| bold
-   *   size              覆蓋字級，任何 CSS font-size 值
-   *
    * ls-layer 屬性：
-   *   name              層識別碼（必填）；label="#id" 時同時作為按鈕備用文字
-   *   label             兩種格式：
-   *                     "純文字"   → toggle 按鈕文字（原有行為）
-   *                     "#some-id" → hover 按鈕時顯示 div#some-id 的 HTML 彈出框
-   *                                  按鈕文字自動退為 name；來源 div 自動隱藏
+   *   name              層識別碼（必填）
+   *   label             toggle 按鈕文字
+   *   source            點擊按鈕時注入說明面板的 div id（支援 "#id" 或 "id"）
+   *                     來源 div 自動隱藏
+   *   target            覆蓋全域 target，指定此層要注入的 div id
    *   theme             色票名稱或 hex
    *   icon              Bootstrap Icon class（選填）
-   *   info              按鈕旁的小說明（title 屬性；label="#id" 時仍有效）
+   *   info              按鈕 title tooltip（選填）
+   *
+   * ls-mark 屬性：
+   *   layer             空格分隔的層名稱（必填；可同時屬於多層）
+   *   note              兩種格式：
+   *                     "純文字"   → hover 時顯示 title tooltip（原有行為）
+   *                     "#some-id" → hover 時將 div#some-id 的 innerHTML 注入
+   *                                  該 mark 所屬層的 target；離開時還原層說明
+   *                                  來源 div 自動隱藏
+   *   weight            normal（預設）| bold
+   *   size              覆蓋字級，任何 CSS font-size 值
    * ════════════════════════════════════════════════════════════════ */
   function initLayerSwitch(el) {
     if (el.dataset.urm) return;
@@ -496,68 +462,89 @@
       return;
     }
 
-    var defaultL  = el.getAttribute('default')           || '';
-    var multi     = el.getAttribute('multi')             === 'true';
-    var tStyle    = el.getAttribute('toggle-style')      || CFG.lsToggleStyle;
-    var tPos      = el.getAttribute('toggle-position')   || CFG.lsTogglePosition;
-    var markStyle = el.getAttribute('mark-style')        || CFG.lsMarkStyle;
-    var dimVal    = +(el.getAttribute('dim')             || CFG.lsDim);
-    var bodyDim   = el.getAttribute('body-dim')          === 'true' || CFG.lsBodyDim;
-    var bodyDimV  = +(el.getAttribute('body-dim-val')    || CFG.lsBodyDimVal);
-    var animate   = el.getAttribute('animate')           !== 'false';
+    var defaultL   = el.getAttribute('default')           || '';
+    var globalTgt  = (el.getAttribute('target') || '').replace(/^#/, '');
+    var multi      = el.getAttribute('multi')             === 'true';
+    var tStyle     = el.getAttribute('toggle-style')      || CFG.lsToggleStyle;
+    var tPos       = el.getAttribute('toggle-position')   || CFG.lsTogglePosition;
+    var markStyle  = el.getAttribute('mark-style')        || CFG.lsMarkStyle;
+    var dimVal     = +(el.getAttribute('dim')             || CFG.lsDim);
+    var bodyDim    = el.getAttribute('body-dim')          === 'true' || CFG.lsBodyDim;
+    var bodyDimV   = +(el.getAttribute('body-dim-val')    || CFG.lsBodyDimVal);
+    var animate    = el.getAttribute('animate')           !== 'false';
 
-    /* 建立層定義表 */
+    /* ── 建立層定義表 ── */
     var layers = {};
     layerEls.forEach(function (le) {
-      var name     = le.getAttribute('name');
+      var name = le.getAttribute('name');
       if (!name) return;
 
-      var rawLabel = le.getAttribute('label') || name;
-      var labelIsId = rawLabel.charAt(0) === '#';
+      var sourceId = (le.getAttribute('source') || '').replace(/^#/, '');
+      var targetId = (le.getAttribute('target') || '').replace(/^#/, '') || globalTgt;
 
-      /* label="#id" → 標記來源 div，CSS 自動隱藏它 */
-      if (labelIsId) {
-        var srcEl = document.getElementById(rawLabel.slice(1));
+      /* 標記來源 div → CSS 自動隱藏 */
+      if (sourceId) {
+        var srcEl = document.getElementById(sourceId);
         if (srcEl) srcEl.dataset.urmLsSrc = '1';
       }
 
       layers[name] = {
-        label:   labelIsId ? name : rawLabel,   /* 按鈕顯示文字 */
-        labelId: labelIsId ? rawLabel.slice(1) : '', /* rich-label 目標 id */
-        color:   clr(le.getAttribute('theme') || 'shell'),
-        icon:    le.getAttribute('icon')  || '',
-        info:    le.getAttribute('info')  || ''
+        label:    le.getAttribute('label') || name,
+        sourceId: sourceId,
+        targetId: targetId,
+        color:    clr(le.getAttribute('theme') || 'shell'),
+        icon:     le.getAttribute('icon')  || '',
+        info:     le.getAttribute('info')  || ''
       };
     });
 
-    /* 處理 ls-text 內的 ls-mark：換成 span */
+    /* ── 將所有 target div 的初始內容清空（避免殘留舊 HTML） ── */
+    var knownTargets = {};
+    Object.keys(layers).forEach(function (n) {
+      var tid = layers[n].targetId;
+      if (tid) knownTargets[tid] = true;
+    });
+    Object.keys(knownTargets).forEach(function (tid) {
+      var tgtEl = document.getElementById(tid);
+      if (tgtEl && !defaultL) tgtEl.innerHTML = '';
+    });
+
+    /* ── 將 ls-mark 換成 span ── */
     var tempDiv = document.createElement('div');
     tempDiv.innerHTML = textEl.innerHTML;
     tempDiv.querySelectorAll('ls-mark').forEach(function (markEl) {
       var layerAttr = markEl.getAttribute('layer') || '';
-      var note      = markEl.getAttribute('note')  || '';
+      var rawNote   = markEl.getAttribute('note')  || '';
       var weight    = markEl.getAttribute('weight')|| 'normal';
       var size      = markEl.getAttribute('size')  || '';
+      var noteIsId  = rawNote.charAt(0) === '#';
 
       var span = document.createElement('span');
-      span.className    = 'urm-ls-mark';
+      span.className      = 'urm-ls-mark';
       if (markStyle === 'underline') span.classList.add('urm-ls-mark-ul');
       if (markStyle === 'box')       span.classList.add('urm-ls-mark-box');
       span.dataset.layers = layerAttr.trim();
-      if (note)              span.title = note;
+
+      if (noteIsId) {
+        /* note="#id"：注入 target，存 id，自動隱藏來源 div */
+        span.dataset.urmLsNote = rawNote.slice(1);
+        var noteSrc = document.getElementById(rawNote.slice(1));
+        if (noteSrc) noteSrc.dataset.urmLsSrc = '1';
+      } else if (rawNote) {
+        /* note="純文字"：維持原有 title tooltip */
+        span.title = rawNote;
+      }
+
       if (weight === 'bold') span.style.fontWeight = '700';
       if (size)              span.style.fontSize   = size;
       span.innerHTML = markEl.innerHTML;
       markEl.replaceWith(span);
     });
 
-    /* 組裝 DOM */
+    /* ── 組裝 DOM ── */
     var wrap = document.createElement('div');
     wrap.className = 'urm-ls';
-    if (!animate) {
-      wrap.style.cssText +=
-        'transition:none';
-    }
+    if (!animate) wrap.style.cssText += 'transition:none';
 
     var ctrl = document.createElement('div');
     ctrl.className = 'urm-ls-ctrl';
@@ -568,11 +555,30 @@
 
     var markSpans = Array.from(body.querySelectorAll('.urm-ls-mark'));
 
-    /* 啟動層狀態 */
+    /* ── 啟動層狀態 ── */
     var active = new Set();
     if (defaultL && layers[defaultL]) active.add(defaultL);
 
-    /* 更新標記樣式 */
+    /* ── 將 active 層的 source 注入對應 target ── */
+    function injectTargets() {
+      /* 先記錄哪些 target 要被寫入什麼（後啟動的層覆蓋先啟動的） */
+      var toWrite = {};
+      active.forEach(function (n) {
+        var l = layers[n];
+        if (l.sourceId && l.targetId) {
+          var srcEl = document.getElementById(l.sourceId);
+          if (srcEl) toWrite[l.targetId] = srcEl.innerHTML;
+        }
+      });
+
+      /* 已知所有 target：有寫入就注入，沒有就清空 */
+      Object.keys(knownTargets).forEach(function (tid) {
+        var tgtEl = document.getElementById(tid);
+        if (tgtEl) tgtEl.innerHTML = (tid in toWrite) ? toWrite[tid] : '';
+      });
+    }
+
+    /* ── 更新標記高亮樣式 ── */
     function applyLayers() {
       var anyActive = active.size > 0;
       body.style.opacity = (bodyDim && anyActive) ? String(bodyDimV) : '';
@@ -582,10 +588,10 @@
         var matchedLayer = spanLayers.find(function (l) { return active.has(l); });
 
         if (!anyActive) {
-          span.style.opacity        = '';
-          span.style.background     = '';
-          span.style.color          = '';
-          span.style.outlineColor   = 'transparent';
+          span.style.opacity              = '';
+          span.style.background           = '';
+          span.style.color                = '';
+          span.style.outlineColor         = 'transparent';
           if (markStyle === 'underline')
             span.style.textDecorationColor = 'currentColor';
           return;
@@ -595,9 +601,9 @@
           var c = layers[matchedLayer].color;
           span.style.opacity = '1';
           if (markStyle === 'underline') {
-            span.style.background          = '';
-            span.style.color               = c;
-            span.style.textDecorationColor = c;
+            span.style.background           = '';
+            span.style.color                = c;
+            span.style.textDecorationColor  = c;
           } else if (markStyle === 'box') {
             span.style.background  = '';
             span.style.color       = c;
@@ -607,18 +613,60 @@
             span.style.color      = c;
           }
         } else {
-          span.style.opacity     = dimVal;
-          span.style.background  = '';
-          span.style.color       = '';
-          span.style.outlineColor = 'transparent';
+          span.style.opacity              = dimVal;
+          span.style.background           = '';
+          span.style.color                = '';
+          span.style.outlineColor         = 'transparent';
           if (markStyle === 'underline')
             span.style.textDecorationColor = 'transparent';
         }
       });
+
+      injectTargets();
     }
     applyLayers();
 
-    /* Toggle 按鈕 */
+    /* ── ls-mark note="#id"：hover 時暫時注入 note，離開時還原 ── */
+    markSpans.forEach(function (span) {
+      var noteId = span.dataset.urmLsNote;
+      if (!noteId) return;
+
+      /* 找出此 mark 所屬層的 target（取第一個有設定 target 的層） */
+      function getTargetId() {
+        var spanLayers = span.dataset.layers.split(/\s+/).filter(Boolean);
+        for (var i = 0; i < spanLayers.length; i++) {
+          var l = layers[spanLayers[i]];
+          if (l && l.targetId) return l.targetId;
+        }
+        return globalTgt;
+      }
+
+      span.addEventListener('mouseenter', function () {
+        var tid   = getTargetId();
+        var noteSrc = document.getElementById(noteId);
+        var tgtEl   = tid ? document.getElementById(tid) : null;
+        if (noteSrc && tgtEl) tgtEl.innerHTML = noteSrc.innerHTML;
+      });
+
+      span.addEventListener('mouseleave', function () {
+        /* 離開後還原此 target 目前 active 層的說明；若無 active 則清空 */
+        var tid   = getTargetId();
+        var tgtEl = tid ? document.getElementById(tid) : null;
+        if (!tgtEl) return;
+        var restored = false;
+        active.forEach(function (n) {
+          if (restored) return;
+          var l = layers[n];
+          if (l.targetId === tid && l.sourceId) {
+            var srcEl = document.getElementById(l.sourceId);
+            if (srcEl) { tgtEl.innerHTML = srcEl.innerHTML; restored = true; }
+          }
+        });
+        if (!restored) tgtEl.innerHTML = '';
+      });
+    });
+
+    /* ── Toggle 按鈕 ── */
     Object.keys(layers).forEach(function (name) {
       var layer = layers[name];
       var isDot = tStyle === 'dot';
@@ -627,8 +675,6 @@
       btn.dataset.lsn = name;
       btn.style.color       = layer.color;
       btn.style.borderColor = layer.color;
-
-      /* info title：不論 label 格式都可並存 */
       if (layer.info) btn.title = layer.info;
 
       if (!isDot) {
@@ -639,45 +685,6 @@
           btn.appendChild(ic);
         }
         btn.appendChild(document.createTextNode(layer.label));
-      }
-
-      /* ── rich-label：label="#id" ─────────────────────────────── */
-      if (layer.labelId) {
-        (function (targetId) {
-          btn.addEventListener('mouseenter', function () {
-            var srcEl = document.getElementById(targetId);
-            if (!srcEl) return;
-            ensureLsAnnot();
-            clearTimeout(_lsAnnotTm);
-
-            /* 填入內容並定位 */
-            _lsAnnotEl.innerHTML = srcEl.innerHTML;
-            var r    = btn.getBoundingClientRect();
-            var left = Math.min(r.left, window.innerWidth - 396);
-            var top  = r.bottom + 9;
-
-            _lsAnnotEl.style.visibility = 'hidden';
-            _lsAnnotEl.style.top  = top + 'px';
-            _lsAnnotEl.style.left = Math.max(8, left) + 'px';
-            _lsAnnotEl.classList.add('urm-ls-av');
-
-            /* 超出底部時改顯示於按鈕上方 */
-            requestAnimationFrame(function () {
-              var ar = _lsAnnotEl.getBoundingClientRect();
-              if (ar.bottom > window.innerHeight - 8) {
-                _lsAnnotEl.style.top =
-                  Math.max(8, r.top - ar.height - 9) + 'px';
-              }
-              _lsAnnotEl.style.visibility = '';
-            });
-          });
-
-          btn.addEventListener('mouseleave', function () {
-            _lsAnnotTm = setTimeout(function () {
-              if (_lsAnnotEl) _lsAnnotEl.classList.remove('urm-ls-av');
-            }, 120);
-          });
-        })(layer.labelId);
       }
 
       function syncBtn(n, b) {
