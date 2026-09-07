@@ -1,5 +1,5 @@
 /**
- * ui-reading2.js  v1.2.0
+ * ui-reading2.js  v1.3.0
  * ─────────────────────────────────────────────────────────────────────
  * 三合一進階閱讀互動元件
  *
@@ -72,6 +72,10 @@
     lsAnimate:        true,          /* 過渡動畫 */
     lsBodyDim:        false,         /* 啟動層時整體文字是否降透明 */
     lsBodyDimVal:     0.55,          /* body-dim 的透明度 */
+    lsPalette: [                     /* 按鈕自動配色盤（未設 theme 時依序取用） */
+      'ocean','yellow','lavender','salmon',
+      'teal','focus','info','indigo','pink','sky'
+    ],
 
     /* ── spotlight ── */
     spTheme:          'focus',       /* 聚光圈顏色色票 */
@@ -420,8 +424,11 @@
    *
    * ────────────────────────────────────────────────────────────────
    * layer-switch 屬性：
-   *   default           預設啟動的層名稱（留空則不預設啟動）
+   *   default           預設啟動的層名稱（高亮生效，但 target panel 不自動注入）
    *   target            全域說明面板 div id（可被 ls-layer 個別覆蓋）
+   *   palette           按鈕自動配色，逗號分隔色票名稱（如 "ocean,yellow,teal"）
+   *                     ls-layer 個別 theme 屬性可覆蓋對應位置的顏色
+   *                     未設定時使用 CFG.lsPalette 的預設色盤
    *   multi             允許多層同時啟動 true | false（預設 false）
    *   toggle-style      pill（預設）| dot
    *   toggle-position   top（預設）| bottom
@@ -473,6 +480,13 @@
     var bodyDimV   = +(el.getAttribute('body-dim-val')    || CFG.lsBodyDimVal);
     var animate    = el.getAttribute('animate')           !== 'false';
 
+    /* palette：element 屬性 > CFG.lsPalette */
+    var rawPalette = (el.getAttribute('palette') || '').split(',')
+                       .map(function (s) { return s.trim(); })
+                       .filter(Boolean);
+    var palette  = rawPalette.length ? rawPalette : CFG.lsPalette;
+    var palIdx   = 0;
+
     /* ── 建立層定義表 ── */
     var layers = {};
     layerEls.forEach(function (le) {
@@ -481,6 +495,12 @@
 
       var sourceId = (le.getAttribute('source') || '').replace(/^#/, '');
       var targetId = (le.getAttribute('target') || '').replace(/^#/, '') || globalTgt;
+
+      /* theme 未設定時從 palette 依序取色 */
+      var rawTheme = le.getAttribute('theme') || '';
+      var color    = rawTheme
+        ? clr(rawTheme)
+        : clr(palette[palIdx++ % palette.length]);
 
       /* 標記來源 div → CSS 自動隱藏 */
       if (sourceId) {
@@ -492,7 +512,7 @@
         label:    le.getAttribute('label') || name,
         sourceId: sourceId,
         targetId: targetId,
-        color:    clr(le.getAttribute('theme') || 'shell'),
+        color:    color,
         icon:     le.getAttribute('icon')  || '',
         info:     le.getAttribute('info')  || ''
       };
@@ -578,8 +598,8 @@
       });
     }
 
-    /* ── 更新標記高亮樣式 ── */
-    function applyLayers() {
+    /* ── 更新標記高亮樣式；doInject=true 時才同步 target panel ── */
+    function applyLayers(doInject) {
       var anyActive = active.size > 0;
       body.style.opacity = (bodyDim && anyActive) ? String(bodyDimV) : '';
 
@@ -622,9 +642,9 @@
         }
       });
 
-      injectTargets();
+      if (doInject) injectTargets();
     }
-    applyLayers();
+    applyLayers(false);  /* 初始：只套高亮樣式，不注入 target panel */
 
     /* ── ls-mark note="#id"：hover 時暫時注入 note，離開時還原 ── */
     markSpans.forEach(function (span) {
@@ -710,7 +730,7 @@
           var n = b.dataset.lsn;
           if (n && layers[n]) syncBtn(n, b);
         });
-        applyLayers();
+        applyLayers(true);  /* 使用者點擊後才注入 target panel */
       });
 
       ctrl.appendChild(btn);
