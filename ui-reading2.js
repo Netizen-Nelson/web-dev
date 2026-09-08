@@ -741,7 +741,16 @@
     cmGap:         '16px',
     cmHoverDim:    0.35,
     cmTrigger:     'hover',
-    cmAnimate:     true
+    cmAnimate:     true,
+
+    /* ── cm-group ── */
+    cmGroupLayout:  'row',        /* row | column */
+    cmGroupGapRow:  '48px',       /* layout="row" 時的間距 */
+    cmGroupGapCol:  '32px',       /* layout="column" 時的間距 */
+    cmGroupAlign:   'center',     /* align-items */
+    cmGroupWrap:    true,         /* layout="row" 是否允許換行 */
+    cmGroupJustify: 'flex-start'  /* justify-content */
+
   }, global.CollocationMapConfig || {});
 
   /* ── collocation-map CSS 注入 ── */
@@ -750,7 +759,7 @@
     var s = document.createElement('style');
     s.id  = 'urm-cm-css';
     s.textContent = [
-      'collocation-map,cm-point,cm-item{display:none}',
+      'collocation-map,cm-point,cm-item,cm-group{display:none}',
 
       '.urm-cm{display:inline-flex;align-items:center}',
 
@@ -787,6 +796,40 @@
     ].join('\n');
     (document.head || document.documentElement).appendChild(s);
   })();
+
+  /* ════════════════════════════════════════════════════════════════
+   * cm-group — collocation-map 的排版容器
+   *
+   * <cm-group layout="row" gap="64px" align="center" wrap="true">
+   *   <collocation-map ...></collocation-map>
+   *   <collocation-map ...></collocation-map>
+   * </cm-group>
+   *
+   * 屬性：
+   *   layout    row（預設）| column
+   *   gap       項目間距（row 預設 48px，column 預設 32px）
+   *   align     align-items（預設 center）
+   *   wrap      row 時是否允許換行，true（預設）| false
+   *   justify   justify-content（預設 flex-start）
+   * ════════════════════════════════════════════════════════════════ */
+  function initCmGroup(el) {
+    if (el.dataset.urm) return;
+    el.dataset.urm = '1';
+
+    var layout  = el.getAttribute('layout')  || CM_CFG.cmGroupLayout;
+    var isRow   = layout !== 'column';
+    var gap     = el.getAttribute('gap')     || (isRow ? CM_CFG.cmGroupGapRow : CM_CFG.cmGroupGapCol);
+    var align   = el.getAttribute('align')   || CM_CFG.cmGroupAlign;
+    var wrap    = el.getAttribute('wrap')    !== 'false' && CM_CFG.cmGroupWrap;
+    var justify = el.getAttribute('justify') || CM_CFG.cmGroupJustify;
+
+    el.style.display        = 'flex';
+    el.style.flexDirection  = isRow ? 'row' : 'column';
+    el.style.gap            = gap;
+    el.style.alignItems     = align;
+    el.style.flexWrap       = (isRow && wrap) ? 'wrap' : 'nowrap';
+    el.style.justifyContent = justify;
+  }
 
   /* ════════════════════════════════════════════════════════════════
    * collocation-map
@@ -1043,6 +1086,8 @@
   function boot() {
     document.querySelectorAll('layer-switch:not([data-urm])').forEach(initLayerSwitch);
     document.querySelectorAll('spotlight:not([data-urm])').forEach(initSpotlight);
+    /* cm-group 必須先初始化（設好 flex 容器），collocation-map 才能正確排版 */
+    document.querySelectorAll('cm-group:not([data-urm])').forEach(initCmGroup);
     document.querySelectorAll('collocation-map:not([data-urm])').forEach(initCollocationMap);
   }
 
