@@ -722,9 +722,328 @@
     if (preActive) setTimeout(function () { activateSp(wrap); }, 120);
   }
 
+  /* ════════════════════════════════════════════════════════════════
+   * CollocationMapConfig — 獨立全域配置（不合併進 UiReading2Config）
+   * ════════════════════════════════════════════════════════════════ */
+  var CM_CFG = global.CollocationMapConfig = Object.assign({
+    cmPalette:     ['ocean','yellow','lavender','salmon','teal','safe','indigo','pink','sky','focus'],
+    cmAnchorSide:  'left',
+    cmAnchorAlign: 'center',
+    cmDotSize:     '12px',
+    cmDotGap:      '8px',
+    cmLineColor:   'shell',
+    cmLineStyle:   'solid',
+    cmLineWidth:   '1.5px',
+    cmLineGap:     '18px',
+    cmOverhang:    '16px',
+    cmPointSize:   '1.4rem',
+    cmItemSize:    '1rem',
+    cmGap:         '16px',
+    cmHoverDim:    0.35,
+    cmTrigger:     'hover',
+    cmAnimate:     true
+  }, global.CollocationMapConfig || {});
+
+  /* ── collocation-map CSS 注入 ── */
+  (function () {
+    if (document.getElementById('urm-cm-css')) return;
+    var s = document.createElement('style');
+    s.id  = 'urm-cm-css';
+    s.textContent = [
+      'collocation-map,cm-point,cm-item{display:none}',
+
+      '.urm-cm{display:inline-flex;align-items:center}',
+
+      '.urm-cm-pt{' +
+        'display:flex;align-items:center;' +
+        'white-space:nowrap;padding:0 4px' +
+      '}',
+
+      '.urm-cm-div{' +
+        'position:relative;align-self:stretch;' +
+        'display:flex;align-items:center;flex-shrink:0' +
+      '}',
+
+      /* 分隔線用 ::before 偽元素，才能用 border-left 控制 line-style */
+      '.urm-cm-div::before{' +
+        'content:"";position:absolute;' +
+        'top:calc(-1 * var(--cm-ov,16px));' +
+        'bottom:calc(-1 * var(--cm-ov,16px));' +
+        'left:50%;transform:translateX(-50%);' +
+        'border-left:var(--cm-lw,1.5px) var(--cm-ls,solid) var(--cm-lc,#C6C7BD)' +
+      '}',
+
+      '.urm-cm-items{display:flex;flex-direction:column}',
+
+      '.urm-cm-item{' +
+        'display:flex;align-items:center;' +
+        'user-select:none;cursor:default' +
+      '}',
+
+      '.urm-cm-dot{border-radius:50%;display:inline-block;flex-shrink:0}',
+
+      '.urm-cm-lbl{white-space:nowrap}'
+
+    ].join('\n');
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
+  /* ════════════════════════════════════════════════════════════════
+   * collocation-map
+   *
+   * 基本用法（anchor-side="left"，錨點在左、搭配詞在右）：
+   *
+   *   <collocation-map anchor-side="left"
+   *                    palette="safe,orange,indigo,sky"
+   *                    target="ex-panel" trigger="hover">
+   *     <cm-point theme="lavender" weight="bold">undermine</cm-point>
+   *     <cm-item note="ex-confidence">confidence</cm-item>
+   *     <cm-item note="ex-trust">trust</cm-item>
+   *     <cm-item theme="indigo" note="ex-arg">the argument</cm-item>
+   *   </collocation-map>
+   *
+   *   <!-- 來源 div（放頁面任何位置，JS 自動隱藏）-->
+   *   <div id="ex-confidence">
+   *     The scandal <b>undermined public confidence</b> in the government.
+   *   </div>
+   *
+   *   <!-- 顯示目標 -->
+   *   <div id="ex-panel"></div>
+   *
+   * ────────────────────────────────────────────────────────────────
+   * collocation-map 屬性：
+   *   anchor-side    錨點所在側，left（預設）| right
+   *   anchor-align   錨點垂直對齊，center（預設）| start | end
+   *   palette        自動配色，逗號分隔；支援色票名稱或 #hex（如 #FFFFFF）
+   *   dot-size       圓點尺寸（預設 12px）
+   *   dot-gap        圓點與文字間距（預設 8px）
+   *   line-color     分隔線顏色，色票名稱或 hex（預設 shell）
+   *   line-style     solid（預設）| dashed | dotted
+   *   line-width     線條粗細（預設 1.5px）
+   *   line-gap       分隔線兩側水平留白（預設 18px）
+   *   line-overhang  線條超出首末搭配詞的距離（預設 16px）
+   *   point-size     錨點字體大小（預設 1.4rem）
+   *   item-size      搭配詞字體大小（預設 1rem）
+   *   gap            搭配詞之間垂直間距（預設 16px）
+   *   hover-dim      非 active 項的透明度 0–1（預設 0.35）
+   *   trigger        hover（預設）| click | both
+   *   animate        過渡動畫，true（預設）| false
+   *   target         全域說明面板 div id（#id 或 id 均可）
+   *
+   * cm-point 屬性：
+   *   theme          文字顏色，色票名稱或 hex（預設 shell）
+   *   weight         字重，bold（預設）| normal
+   *   size           字體大小，任何 CSS 值（覆蓋 point-size）
+   *
+   * cm-item 屬性：
+   *   theme          覆蓋此項顏色，色票名稱或 hex
+   *   note           說明來源 div id（#id 或 id 均可）
+   *   target         覆蓋全域 target，指定此項注入哪個 div id
+   * ════════════════════════════════════════════════════════════════ */
+  function initCollocationMap(el) {
+    if (el.dataset.urm) return;
+    el.dataset.urm = '1';
+
+    /* ── 讀取 collocation-map 屬性 ── */
+    var anchorSide  = el.getAttribute('anchor-side')   || CM_CFG.cmAnchorSide;
+    var anchorAlign = el.getAttribute('anchor-align')  || CM_CFG.cmAnchorAlign;
+    var rawPal = (el.getAttribute('palette') || '').split(',')
+                   .map(function(s) { return s.trim(); }).filter(Boolean);
+    var palette    = rawPal.length ? rawPal : CM_CFG.cmPalette;
+    var dotSize    = el.getAttribute('dot-size')       || CM_CFG.cmDotSize;
+    var dotGap     = el.getAttribute('dot-gap')        || CM_CFG.cmDotGap;
+    var lineColor  = clr(el.getAttribute('line-color') || CM_CFG.cmLineColor);
+    var lineStyle  = el.getAttribute('line-style')     || CM_CFG.cmLineStyle;
+    var lineWidth  = el.getAttribute('line-width')     || CM_CFG.cmLineWidth;
+    var lineGap    = el.getAttribute('line-gap')       || CM_CFG.cmLineGap;
+    var overhang   = el.getAttribute('line-overhang')  || CM_CFG.cmOverhang;
+    var pointSize  = el.getAttribute('point-size')     || CM_CFG.cmPointSize;
+    var itemSize   = el.getAttribute('item-size')      || CM_CFG.cmItemSize;
+    var gap        = el.getAttribute('gap')            || CM_CFG.cmGap;
+    var hoverDim   = +(el.getAttribute('hover-dim')    || CM_CFG.cmHoverDim);
+    var trigger    = el.getAttribute('trigger')        || CM_CFG.cmTrigger;
+    var animate    = el.getAttribute('animate') !== 'false' && CM_CFG.cmAnimate;
+    var globalTgt  = (el.getAttribute('target') || '').replace(/^#/, '');
+
+    /* ── 解析 cm-point ── */
+    var ptEl     = el.querySelector('cm-point');
+    var ptTheme  = ptEl ? (ptEl.getAttribute('theme')  || '') : '';
+    var ptWeight = ptEl ? (ptEl.getAttribute('weight') || 'bold') : 'bold';
+    var ptSzOvr  = ptEl ? (ptEl.getAttribute('size')   || '') : '';
+    var ptColor  = ptTheme ? clr(ptTheme) : BRAND.shell;
+    var ptHTML   = ptEl ? ptEl.innerHTML : '';
+
+    /* ── 解析 cm-item（支援色票名稱與 #hex palette） ── */
+    var palIdx = 0;
+    var items = Array.from(el.querySelectorAll('cm-item')).map(function(ie) {
+      var rawTheme = ie.getAttribute('theme') || '';
+      var color = rawTheme
+        ? clr(rawTheme)
+        : clr(palette[palIdx++ % palette.length]);
+      return {
+        html:  ie.innerHTML,
+        color: color,
+        note:  (ie.getAttribute('note')   || '').replace(/^#/, ''),
+        tgt:   (ie.getAttribute('target') || '').replace(/^#/, '') || globalTgt
+      };
+    });
+
+    /* ── 隱藏來源 div ── */
+    items.forEach(function(item) {
+      if (item.note) {
+        var s = document.getElementById(item.note);
+        if (s) s.style.display = 'none';
+      }
+    });
+
+    /* ══════════════════════════════
+     * 建立 DOM
+     * ══════════════════════════════ */
+
+    /* 外層容器 */
+    var wrap = document.createElement('div');
+    wrap.className = 'urm-cm';
+    var alignMap = { center: 'center', start: 'flex-start', end: 'flex-end' };
+    wrap.style.alignItems = alignMap[anchorAlign] || 'center';
+
+    /* 錨點 div */
+    var ptDiv = document.createElement('div');
+    ptDiv.className   = 'urm-cm-pt';
+    ptDiv.innerHTML   = ptHTML;
+    ptDiv.style.fontSize   = ptSzOvr || pointSize;
+    ptDiv.style.fontWeight = ptWeight;
+    ptDiv.style.color      = ptColor;
+
+    /* 分隔線容器（真正的線是 ::before 偽元素） */
+    var divEl = document.createElement('div');
+    divEl.className = 'urm-cm-div';
+    divEl.style.setProperty('--cm-ov', overhang);
+    divEl.style.setProperty('--cm-lc', lineColor);
+    divEl.style.setProperty('--cm-ls', lineStyle);
+    divEl.style.setProperty('--cm-lw', lineWidth);
+    divEl.style.padding = '0 ' + lineGap;
+
+    /* 搭配詞欄位 */
+    var itmWrap = document.createElement('div');
+    itmWrap.className  = 'urm-cm-items';
+    itmWrap.style.gap  = gap;
+
+    /* 搭配詞列 */
+    var itmEls = items.map(function(item) {
+      var row = document.createElement('div');
+      row.className  = 'urm-cm-item';
+      row.style.gap  = dotGap;
+      if (animate) row.style.transition = 'opacity 0.22s ease';
+
+      var dot = document.createElement('span');
+      dot.className        = 'urm-cm-dot';
+      dot.style.width      = dotSize;
+      dot.style.height     = dotSize;
+      dot.style.background = item.color;
+
+      var lbl = document.createElement('span');
+      lbl.className       = 'urm-cm-lbl';
+      lbl.innerHTML        = item.html;
+      lbl.style.fontSize   = itemSize;
+      lbl.style.color      = item.color;
+
+      if (anchorSide === 'left') {
+        /* 搭配詞在右，dot 在文字外側（右）→ [label][dot] */
+        row.appendChild(lbl);
+        row.appendChild(dot);
+      } else {
+        /* 搭配詞在左，dot 在文字外側（左）→ [dot][label] */
+        row.appendChild(dot);
+        row.appendChild(lbl);
+      }
+
+      itmWrap.appendChild(row);
+      return row;
+    });
+
+    /* 依 anchor-side 決定左右排列 */
+    if (anchorSide === 'left') {
+      ptDiv.style.textAlign = 'right';
+      wrap.appendChild(ptDiv);
+      wrap.appendChild(divEl);
+      wrap.appendChild(itmWrap);
+    } else {
+      ptDiv.style.textAlign = 'left';
+      wrap.appendChild(itmWrap);
+      wrap.appendChild(divEl);
+      wrap.appendChild(ptDiv);
+    }
+
+    /* ══════════════════════════════
+     * 互動邏輯
+     * ══════════════════════════════ */
+    var locked = -1;  /* 點擊鎖定的 index，-1 表示未鎖定 */
+
+    function dimOthers(idx) {
+      itmEls.forEach(function(row, i) {
+        row.style.opacity = (i === idx) ? '1' : String(hoverDim);
+      });
+    }
+
+    function resetAll() {
+      itmEls.forEach(function(row) { row.style.opacity = '1'; });
+    }
+
+    function showNote(idx) {
+      var item = items[idx];
+      if (!item.note || !item.tgt) return;
+      var srcEl = document.getElementById(item.note);
+      var tgtEl = document.getElementById(item.tgt);
+      if (srcEl && tgtEl) tgtEl.innerHTML = srcEl.innerHTML;
+    }
+
+    function clearNote(tgtId) {
+      if (!tgtId) return;
+      var tgtEl = document.getElementById(tgtId);
+      if (tgtEl) tgtEl.innerHTML = '';
+    }
+
+    itmEls.forEach(function(row, idx) {
+      var doHover = (trigger === 'hover' || trigger === 'both');
+      var doClick = (trigger === 'click' || trigger === 'both');
+      if (doClick) row.style.cursor = 'pointer';
+
+      if (doHover) {
+        row.addEventListener('mouseenter', function() {
+          if (locked >= 0) return;
+          dimOthers(idx);
+          showNote(idx);
+        });
+        row.addEventListener('mouseleave', function() {
+          if (locked >= 0) return;
+          resetAll();
+          clearNote(items[idx].tgt);
+        });
+      }
+
+      if (doClick) {
+        row.addEventListener('click', function() {
+          if (locked === idx) {
+            locked = -1;
+            resetAll();
+            clearNote(items[idx].tgt);
+          } else {
+            if (locked >= 0) clearNote(items[locked].tgt);
+            locked = idx;
+            dimOthers(idx);
+            showNote(idx);
+          }
+        });
+      }
+    });
+
+    el.replaceWith(wrap);
+  }
+
   function boot() {
     document.querySelectorAll('layer-switch:not([data-urm])').forEach(initLayerSwitch);
     document.querySelectorAll('spotlight:not([data-urm])').forEach(initSpotlight);
+    document.querySelectorAll('collocation-map:not([data-urm])').forEach(initCollocationMap);
   }
 
   if (document.readyState === 'loading') {
@@ -733,6 +1052,5 @@
     boot();
   }
 
-  global.UiReading2 = { init: boot, config: CFG, colors: BRAND };
-
+  global.UiReading2 = { init: boot, config: CFG, cmConfig: CM_CFG, colors: BRAND };
 })(window);
