@@ -53,41 +53,9 @@
 
   }, global.UiReading2Config || {});
 
-  /* ════════════════════════════════════════════════════════════════
-   * CSS
-   * ════════════════════════════════════════════════════════════════ */
   var CSS = [
     'layer-switch,ls-text,ls-layer,ls-mark{display:none}',
     'spotlight{display:none}',
-
-    /* ── text-diff ─────────────────────────────────────────────── */
-    '.urm-td{display:block;line-height:1.75}',
-
-    /* 刪除：刪除線版 */
-    '.urm-td-del{' +
-      'text-decoration:line-through;text-decoration-thickness:1.5px;' +
-      'opacity:.5;transition:opacity .2s}',
-
-    /* 刪除：淡出版 */
-    '.urm-td-del.urm-td-fade{opacity:.22}',
-
-    /* 插入 */
-    '.urm-td-ins{border-radius:3px;padding:0 2px;transition:all .2s}',
-
-    /* side 模式：雙欄 */
-    '.urm-td-side{display:grid;grid-template-columns:1fr 1fr;gap:20px}',
-
-    '.urm-td-panel{padding:16px 20px;border-radius:10px;line-height:1.75}',
-
-    '.urm-td-plabel{' +
-      'font-size:.7rem;font-weight:700;letter-spacing:.1em;' +
-      'text-transform:uppercase;margin-bottom:10px;' +
-      'display:flex;align-items:center;gap:6px}',
-
-    '.urm-td-plabel-dot{' +
-      'width:6px;height:6px;border-radius:50%;' +
-      'background:currentColor;flex-shrink:0}',
-
     /* ── layer-switch ───────────────────────────────────────────── */
     '.urm-ls{display:block}',
 
@@ -104,7 +72,6 @@
     '.urm-ls-btn:hover{filter:brightness(1.15)}',
     '.urm-ls-btn:active{transform:scale(.95)}',
 
-    /* dot 樣式的 toggle 按鈕 */
     '.urm-ls-dot{' +
       'padding:0;width:14px;height:14px;border-radius:50%;' +
       'flex-shrink:0;border-width:2px}',
@@ -126,23 +93,19 @@
       'text-decoration:underline;text-underline-offset:3px;' +
       'text-decoration-thickness:2px;padding:0}',
 
-    /* mark-style: box */
     '.urm-ls-mark-box{' +
       'outline:1.5px solid transparent;border-radius:3px;padding:1px 3px}',
 
-    /* ── spotlight ──────────────────────────────────────────────── */
     '.urm-sp{' +
       'display:block;position:relative;cursor:pointer;' +
       'transition:opacity var(--urm-spt,.3s) ease}',
 
-    /* 聚光圈邊框 */
     '.urm-sp-ring{' +
       'position:absolute;inset:-6px;border-radius:10px;' +
       'pointer-events:none;opacity:0;' +
       'transition:opacity .25s ease}',
     '.urm-sp.urm-sp-active>.urm-sp-ring{opacity:1}',
 
-    /* 提示圖示（右上角） */
     '.urm-sp-hint{' +
       'position:absolute;top:6px;right:6px;' +
       'width:18px;height:18px;border-radius:50%;' +
@@ -151,7 +114,6 @@
       'transition:opacity .2s ease}',
     '.urm-sp:hover>.urm-sp-hint{opacity:.75}',
 
-    /* 遮罩 overlay */
     '.urm-sp-overlay{' +
       'position:fixed;inset:0;z-index:8999;' +
       'background:rgba(0,0,0,0);pointer-events:none;' +
@@ -159,14 +121,11 @@
     '.urm-sp-overlay.urm-sp-ov{' +
       'background:rgba(0,0,0,.82);pointer-events:all}',
 
-    /* 所有 spotlight 在 mode 啟動時浮到 overlay 上方 */
     'body.urm-sp-mode .urm-sp{z-index:9000}',
 
-    /* 非啟動的 spotlight 降透明度（繼承 body 的 --urm-sp-dim） */
     'body.urm-sp-mode .urm-sp:not(.urm-sp-active){' +
       'opacity:var(--urm-sp-dim,.15)}',
 
-    /* source / note="#id" 來源 div 自動隱藏 */
     '[data-urm-ls-src]{display:none!important}'
 
   ].join('\n');
@@ -179,9 +138,6 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
-  /* ════════════════════════════════════════════════════════════════
-   * 工具
-   * ════════════════════════════════════════════════════════════════ */
   function escHtml(s) {
     return String(s)
       .replace(/&/g, '&amp;')
@@ -189,13 +145,11 @@
       .replace(/>/g, '&gt;');
   }
 
-  /* 斷詞：保留空白 token，讓 diff 重組後格式不變 */
   function tokenize(text, gran) {
     if (gran === 'char') return text.split('');
     return text.match(/\S+|\s+/g) || [];
   }
 
-  /* LCS 差分演算法（O(m*n)，適合句子級別的文字量） */
   function computeDiff(fromText, toText, gran) {
     var a = tokenize(fromText, gran);
     var b = tokenize(toText,   gran);
