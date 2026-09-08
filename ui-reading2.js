@@ -1,26 +1,6 @@
-/**
- * ui-reading2.js  v1.3.0
- * ─────────────────────────────────────────────────────────────────────
- * 三合一進階閱讀互動元件
- *
- *  <text-diff>      同時顯示兩版本差異（刪除線＋插入底色），word-level LCS diff
- *  <layer-switch>   多層次分析切換，不同維度的標記分層顯示
- *  <spotlight>      點擊段落聚焦，其他內容降低透明度退至背景
- *
- * 全域配置（在引入此檔前設定）：
- *   window.UiReading2Config = { diffThemeDel: 'warning', ... }
- *
- * API：
- *   UiReading2.init()   — 重新掃描並初始化新節點
- *   UiReading2.config   — 目前的全域配置物件
- *   UiReading2.colors   — 色票物件
- */
 (function (global) {
   'use strict';
 
-  /* ════════════════════════════════════════════════════════════════
-   * 色票
-   * ════════════════════════════════════════════════════════════════ */
   var BRAND = {
     shell:    '#C6C7BD', lavender: '#C3A5E5', sky:     '#62c8f0',
     warning:  '#F08080', salmon:   '#E5C3B3', ocean:   '#0ABDC6',
@@ -37,7 +17,6 @@
     return BRAND[v] || (/^#|^rgb/.test(v) ? v : BRAND.shell);
   }
 
-  /* hex → rgba（品牌色均為六碼 hex） */
   function rgba(hexOrName, a) {
     var h = clr(hexOrName);
     var r = parseInt(h.slice(1, 3), 16);
@@ -46,23 +25,7 @@
     return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
   }
 
-  /* ════════════════════════════════════════════════════════════════
-   * 全域配置
-   * ════════════════════════════════════════════════════════════════ */
   var CFG = global.UiReading2Config = Object.assign({
-
-    /* ── text-diff ── */
-    diffThemeDel:     'warning',     /* 刪除文字色票 */
-    diffThemeIns:     'safe',        /* 插入文字色票 */
-    diffMode:         'inline',      /* inline | side */
-    diffDelStyle:     'strikethrough', /* strikethrough | fade | hide */
-    diffGranularity:  'word',        /* word | char */
-    diffMarkDel:      true,          /* 是否標示刪除 */
-    diffHighlightIns: true,          /* 是否標示插入 */
-    diffInsBg:        0.22,          /* 插入底色透明度 0–1 */
-    diffShowLabel:    false,         /* 顯示 FROM/TO 標籤 */
-    diffLabelFrom:    'FROM',
-    diffLabelTo:      'TO',
 
     /* ── layer-switch ── */
     lsDim:            0.30,          /* 非匹配標記的透明度 */
@@ -94,8 +57,6 @@
    * CSS
    * ════════════════════════════════════════════════════════════════ */
   var CSS = [
-    /* 升級前隱藏 */
-    'text-diff,diff-from,diff-to{display:none}',
     'layer-switch,ls-text,ls-layer,ls-mark{display:none}',
     'spotlight{display:none}',
 
@@ -310,94 +271,6 @@
              'background:' + rgba(cIns, insBg) + ';color:' + cIns + '">' +
              escHtml(op.v) + '</span>';
     }).join('');
-  }
-
-  /* ════════════════════════════════════════════════════════════════
-   * text-diff
-   *
-   * <text-diff theme-del="warning" theme-ins="safe" mode="inline">
-   *   <diff-from>原版句子</diff-from>
-   *   <diff-to>升級版句子</diff-to>
-   * </text-diff>
-   *
-   * 屬性：
-   *   theme-del       刪除文字色票或 hex（預設 diffThemeDel）
-   *   theme-ins       插入文字色票或 hex（預設 diffThemeIns）
-   *   mode            inline（預設）| side
-   *   del-style       strikethrough（預設）| fade | hide
-   *   granularity     word（預設）| char
-   *   mark-del        是否標示刪除 true（預設）| false
-   *   highlight-ins   是否標示插入 true（預設）| false
-   *   ins-bg          插入底色透明度 0–1（預設 0.22）
-   *   show-label      顯示 FROM / TO 標籤 true | false（預設 false）
-   *   label-from      FROM 標籤文字（預設 FROM）
-   *   label-to        TO 標籤文字（預設 TO）
-   *
-   * ★ diff-from / diff-to 的內容以 textContent 進行差分，
-   *   建議放純文字；HTML 標籤會被視為純文字處理。
-   * ════════════════════════════════════════════════════════════════ */
-  function initDiff(el) {
-    if (el.dataset.urm) return;
-    el.dataset.urm = '1';
-
-    var fromEl = el.querySelector('diff-from');
-    var toEl   = el.querySelector('diff-to');
-    if (!fromEl || !toEl) {
-      console.warn('[ui-reading2] <text-diff> 缺少 <diff-from> 或 <diff-to>，已略過。');
-      return;
-    }
-
-    var fromText = fromEl.textContent.trim();
-    var toText   = toEl.textContent.trim();
-
-    var cDel      = clr(el.getAttribute('theme-del')       || CFG.diffThemeDel);
-    var cIns      = clr(el.getAttribute('theme-ins')       || CFG.diffThemeIns);
-    var mode      = el.getAttribute('mode')                 || CFG.diffMode;
-    var delStyle  = el.getAttribute('del-style')            || CFG.diffDelStyle;
-    var gran      = el.getAttribute('granularity')          || CFG.diffGranularity;
-    var markDel   = el.getAttribute('mark-del')             !== 'false';
-    var highIns   = el.getAttribute('highlight-ins')        !== 'false';
-    var insBg     = +(el.getAttribute('ins-bg')             || CFG.diffInsBg);
-    var showLabel = el.getAttribute('show-label')           === 'true' || CFG.diffShowLabel;
-    var lblFrom   = el.getAttribute('label-from')           || CFG.diffLabelFrom;
-    var lblTo     = el.getAttribute('label-to')             || CFG.diffLabelTo;
-
-    var ops  = computeDiff(fromText, toText, gran);
-    var wrap = document.createElement('div');
-    wrap.className = 'urm-td';
-
-    if (mode === 'side') {
-      wrap.classList.add('urm-td-side');
-
-      function makePanel(html, c, label) {
-        var panel = document.createElement('div');
-        panel.className = 'urm-td-panel';
-        panel.style.cssText =
-          'background:' + rgba(c, 0.07) + ';' +
-          'border:1px solid ' + rgba(c, 0.28);
-        if (showLabel) {
-          var lbl = document.createElement('div');
-          lbl.className = 'urm-td-plabel';
-          lbl.style.color = c;
-          lbl.innerHTML =
-            '<span class="urm-td-plabel-dot"></span>' + escHtml(label);
-          panel.appendChild(lbl);
-        }
-        var body = document.createElement('div');
-        body.innerHTML = html;
-        panel.appendChild(body);
-        return panel;
-      }
-
-      wrap.appendChild(makePanel(renderFrom(ops, cDel, delStyle), cDel, lblFrom));
-      wrap.appendChild(makePanel(renderTo(ops, cIns, insBg),      cIns, lblTo));
-
-    } else {
-      /* inline mode */
-      wrap.innerHTML = renderInline(ops, cDel, cIns, delStyle, markDel, highIns, insBg);
-    }
-
-    el.replaceWith(wrap);
   }
 
   /* ════════════════════════════════════════════════════════════════
@@ -895,11 +768,7 @@
     if (preActive) setTimeout(function () { activateSp(wrap); }, 120);
   }
 
-  /* ════════════════════════════════════════════════════════════════
-   * boot
-   * ════════════════════════════════════════════════════════════════ */
   function boot() {
-    document.querySelectorAll('text-diff:not([data-urm])').forEach(initDiff);
     document.querySelectorAll('layer-switch:not([data-urm])').forEach(initLayerSwitch);
     document.querySelectorAll('spotlight:not([data-urm])').forEach(initSpotlight);
   }
