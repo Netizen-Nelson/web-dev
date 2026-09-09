@@ -68,6 +68,23 @@
   };
 
   /* ═══════════════════════════════════════════════════════════════════════════
+     §2-B  RING 預設值
+  ══════════════════════════════════════════════════════════════════════════ */
+  const RCFG = {
+    defaultSize:         200,
+    defaultGap:          12,
+    defaultRingWidth:    8,
+    defaultLinecap:      'round',
+    defaultTrackColor:   '#2A2B2A',
+    defaultTrackWidth:   1.5,
+    defaultCenterColor:  '#C6C7BD',
+    defaultCenterSize:   '2rem',
+    defaultCenterWeight: '700',
+    defaultMargin:       '0',
+    defaultPadding:      '0',
+  };
+
+  /* ═══════════════════════════════════════════════════════════════════════════
      §3  符號資料（8 分類）
   ══════════════════════════════════════════════════════════════════════════ */
   const SYM = [
@@ -145,6 +162,39 @@
   }
   function autoTextColor(bgHex) {
     return relativeLuminance(bgHex) > 0.179 ? CFG.theme.darkText : CFG.theme.lightText;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     §4-B  弧段 SVG 建構器（供 ui-ring 使用）
+  ══════════════════════════════════════════════════════════════════════════ */
+  /**
+   * 順時針弧段。0° = 12 點鐘，角度範圍 0–360。
+   * from === to → 不畫弧；from → to 相差 360° → 整圓。
+   * 跨零點：from=350, to=20 → 順時針 30° 弧。
+   */
+  function buildArc(cx, cy, R, from, to, color, strokeW, linecap) {
+    if (from === to) return '';   // 零長度，跳過
+
+    // 順時針弧長（% 修正負值，|| 360 處理差值恰好是整數倍 360 的情況）
+    const span = (((to - from) % 360) + 360) % 360 || 360;
+    const sa   = `fill="none" stroke="${color}" stroke-width="${strokeW.toFixed(2)}" stroke-linecap="${linecap}"`;
+
+    if (span >= 359.9) {
+      // 整圓：SVG arc 無法繪製 360°，改用 circle
+      return `<circle cx="${cx.toFixed(3)}" cy="${cy.toFixed(3)}" r="${R.toFixed(3)}" ${sa}/>`;
+    }
+
+    const toRad = a => a * Math.PI / 180;
+    const sx  = cx + R * Math.sin(toRad(from));
+    const sy  = cy - R * Math.cos(toRad(from));
+    const ex  = cx + R * Math.sin(toRad(to));
+    const ey  = cy - R * Math.cos(toRad(to));
+    const lg  = span > 180 ? 1 : 0;   // large-arc-flag
+
+    return (
+      `<path d="M${sx.toFixed(3)},${sy.toFixed(3)} ` +
+      `A${R.toFixed(3)},${R.toFixed(3)} 0 ${lg},1 ${ex.toFixed(3)},${ey.toFixed(3)}" ${sa}/>`
+    );
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════
@@ -663,6 +713,132 @@ ui-symbol-picker { display: inline-block; }
   customElements.define('ui-symbol-picker', UISymbolPicker);
 
   /* ═══════════════════════════════════════════════════════════════════════════
+     §10  UIRing 元件
+     ── 屬性 ────────────────────────────────────────────────────────────────
+     size           SVG 總尺寸 px                   (預設 200)
+     center         中心單行文字
+     center-size    中心字體大小                     (預設 '2rem')
+     center-color   中心文字色                       (預設 '#C6C7BD')
+     center-weight  中心字重                         (預設 '700')
+     gap            環間等距 px                      (預設 12)
+     ring-width     所有環寬 px（全域統一）           (預設 8)
+     track-color    軌道圓圈顏色                     (預設 '#2A2B2A')
+     track-width    軌道圓圈線寬 px                  (預設 1.5)
+     linecap        弧端形狀 round|butt|square       (預設 'round')
+     margin         容器對外邊距（CSS 簡寫）          (預設 '0')
+     padding        容器對內邊距（CSS 簡寫）          (預設 '0')
+     source         點擊來源 CSS 選擇器（自動隱藏）
+     target         點擊目標 CSS 選擇器（寫入 innerHTML）
+     rings          JSON 陣列，第 0 項為最外環
+                    [{"from":0,"to":90,"color":"#299459"}, ...]
+                    from/to：0–360，0=12 點鐘，順時針
+  ══════════════════════════════════════════════════════════════════════════ */
+  class UIRing extends HTMLElement {
+    constructor() {
+      super();
+      this._delegated = false;
+    }
+
+    static get observedAttributes() {
+      return [
+        'size','center','center-size','center-color','center-weight',
+        'gap','ring-width','track-color','track-width','linecap',
+        'source','target','margin','padding','rings',
+      ];
+    }
+
+    connectedCallback() {
+      if (!this._delegated) {
+        this.addEventListener('click', e => {
+          if (e.target.closest('.uir-center')) this._copy();
+        });
+        this._delegated = true;
+      }
+      this._render();
+    }
+
+    attributeChangedCallback() { if (this.isConnected) this._render(); }
+
+    _attr(k, d) { return this.hasAttribute(k) ? this.getAttribute(k) : d; }
+
+    _render() {
+      const size       = parseFloat(this._attr('size',          RCFG.defaultSize));
+      const cx         = size / 2;
+      const center     = this._attr('center',        '');
+      const cColor     = this._attr('center-color',  RCFG.defaultCenterColor);
+      const cSize      = this._attr('center-size',   RCFG.defaultCenterSize);
+      const cWeight    = this._attr('center-weight', RCFG.defaultCenterWeight);
+      const gap        = parseFloat(this._attr('gap',           RCFG.defaultGap));
+      const ringW      = parseFloat(this._attr('ring-width',    RCFG.defaultRingWidth));
+      const trackColor = this._attr('track-color',   RCFG.defaultTrackColor);
+      const trackW     = parseFloat(this._attr('track-width',   RCFG.defaultTrackWidth));
+      const linecap    = this._attr('linecap',       RCFG.defaultLinecap);
+      const margin     = this._attr('margin',        RCFG.defaultMargin);
+      const padding    = this._attr('padding',       RCFG.defaultPadding);
+
+      let rings = [];
+      try { rings = JSON.parse(this._attr('rings', '[]')); } catch (_) {}
+
+      // 最外環半徑：留半環寬 + 2px 安全邊距避免 stroke 被截切
+      const Rmax = cx - ringW / 2 - 2;
+
+      const ringsSVG = rings.map((r, i) => {
+        const R = Rmax - i * (ringW + gap);
+        if (R <= ringW / 2) return '';   // 半徑過小，跳過
+        const track = (
+          `<circle cx="${cx}" cy="${cx}" r="${R.toFixed(3)}" ` +
+          `fill="none" stroke="${trackColor}" stroke-width="${trackW}"/>`
+        );
+        const arc = buildArc(
+          cx, cx, R,
+          r.from ?? 0, r.to ?? 0,
+          r.color ?? '#C3A5E5',
+          ringW, linecap
+        );
+        return track + arc;
+      }).join('');
+
+      // 中心文字：有 source + target 才顯示 pointer cursor
+      const clickable  = this.hasAttribute('source') && this.hasAttribute('target');
+      const safeCenter = String(center)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+      const centerSVG = center
+        ? (`<text class="uir-center" x="${cx}" y="${cx}" ` +
+           `text-anchor="middle" dominant-baseline="central" ` +
+           `fill="${cColor}" font-size="${cSize}" font-weight="${cWeight}" ` +
+           `style="font-family:inherit;user-select:none;${clickable ? 'cursor:pointer;' : ''}"` +
+           `>${safeCenter}</text>`)
+        : '';
+
+      this.innerHTML =
+        `<div style="display:inline-block;line-height:0;margin:${margin};padding:${padding};">` +
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" ` +
+        `width="${size}" height="${size}" style="display:block;">` +
+        ringsSVG + centerSVG +
+        `</svg></div>`;
+
+      this.style.display = 'inline-block';
+
+      // source 元素自動隱藏（掛載時）
+      if (this.hasAttribute('source')) {
+        const src = document.querySelector(this.getAttribute('source'));
+        if (src) src.style.display = 'none';
+      }
+    }
+
+    /** 將 source.innerHTML 複製到 target.innerHTML */
+    _copy() {
+      const src = this.hasAttribute('source')
+        ? document.querySelector(this.getAttribute('source')) : null;
+      const tgt = this.hasAttribute('target')
+        ? document.querySelector(this.getAttribute('target')) : null;
+      if (src && tgt) tgt.innerHTML = src.innerHTML;
+    }
+  }
+  customElements.define('ui-ring', UIRing);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
      §9  公開 API
   ══════════════════════════════════════════════════════════════════════════ */
   window.UIBadge = {
@@ -676,6 +852,13 @@ ui-symbol-picker { display: inline-block; }
         if (p.defaultCategory !== undefined) PCFG.defaultCategory = p.defaultCategory;
         // categories 白名單：覆寫全域預設（陣列順序 = Tab 顯示順序）
         if (Array.isArray(p.categories)) PCFG.categories = [...p.categories];
+      }
+      if (opts.ring) {
+        const r = opts.ring;
+        ['defaultSize','defaultGap','defaultRingWidth','defaultLinecap',
+         'defaultTrackColor','defaultTrackWidth','defaultCenterColor',
+         'defaultCenterSize','defaultCenterWeight','defaultMargin','defaultPadding']
+          .forEach(k => { if (r[k] !== undefined) RCFG[k] = r[k]; });
       }
     },
   };
