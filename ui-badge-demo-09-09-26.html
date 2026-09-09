@@ -298,6 +298,16 @@ input[type="color"] {
 /* Bootstrap alert 字色修正 */
 .alert { font-size: 1rem; }
 .alert-dismissible .btn-close { filter: invert(0.8); }
+
+/* 符號選擇器 demo */
+.pm-lbl {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--sky);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
 </style>
 </head>
 <body>
@@ -472,6 +482,55 @@ document.addEventListener(
         </span>
       </div>
       <div class="char-grid" id="charGrid"></div>
+    </div>
+
+    <!-- ── 符號選擇器 ────────────────────────────────────────────────────── -->
+    <div class="card-box">
+      <div class="card-ttl">
+        符號選擇器 Symbol Picker
+        <span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;font-size:1rem;">
+          （選擇任意符號直接更新字符輸入與所有預覽）
+        </span>
+      </div>
+
+      <!-- Inline 模式 -->
+      <div style="margin-bottom:22px;">
+        <div class="pm-lbl">Inline 模式</div>
+        <ui-symbol-picker mode="inline" target="#charIn" on-select="onPickerSelect"></ui-symbol-picker>
+      </div>
+
+      <!-- Compact + Popup 並排 -->
+      <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start;margin-bottom:22px;">
+
+        <div>
+          <div class="pm-lbl">Compact 模式</div>
+          <ui-symbol-picker mode="compact" target="#charIn" on-select="onPickerSelect"></ui-symbol-picker>
+        </div>
+
+        <div>
+          <div class="pm-lbl">Popup 模式（自動按鈕）</div>
+          <ui-symbol-picker mode="popup" target="#charIn" on-select="onPickerSelect"></ui-symbol-picker>
+          <p style="margin:8px 0 0;font-size:1rem;color:var(--text-dim);">點擊開啟 · Esc 或點外部收起</p>
+        </div>
+
+        <div>
+          <div class="pm-lbl">Popup 模式（外部 Trigger）</div>
+          <button id="extTrigBtn" class="act-btn" style="margin-bottom:8px;">★ 雜項符號</button>
+          <ui-symbol-picker mode="popup" trigger="#extTrigBtn"
+            target="#charIn" category="misc" on-select="onPickerSelect"></ui-symbol-picker>
+          <p style="margin:8px 0 0;font-size:1rem;color:var(--text-dim);">預設開啟「雜項」分類</p>
+        </div>
+
+      </div>
+
+      <!-- 事件紀錄 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span class="card-ttl" style="margin:0;">ui-symbol-picker:select 事件</span>
+        <button class="act-btn sm" onclick="clearPickerLog()">清除</button>
+      </div>
+      <div class="click-log" id="pickerLog">
+        <div class="log-empty">點擊任意符號觸發事件⋯</div>
+      </div>
     </div>
 
   </main>
@@ -670,6 +729,30 @@ function addLog(detail) {
 
 /* ── 預覽徽章 click handler（Layer 1 attribute） ─────────────────────────── */
 window.onPreviewClick = function(detail) { addLog(detail); };
+
+/* ── 符號選擇器 on-select handler ─────────────────────────────────────────── */
+window.onPickerSelect = function(detail) {
+  // 更新狀態（picker 已透過 target="#charIn" 觸發 input 事件）
+  // 這裡只記錄 log
+  addPickerLog(detail);
+};
+
+function addPickerLog(detail) {
+  const log = document.getElementById('pickerLog');
+  if (!log) return;
+  log.querySelector('.log-empty')?.remove();
+  log.querySelectorAll('.log-entry.fresh').forEach(e => e.classList.remove('fresh'));
+  const ts = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+  const d  = document.createElement('div');
+  d.className = 'log-entry fresh';
+  d.textContent = `[${ts}] char="${detail.char}"  ${detail.codepoint}  category="${detail.categoryLabel}"`;
+  log.insertBefore(d, log.firstChild);
+}
+
+function clearPickerLog() {
+  const log = document.getElementById('pickerLog');
+  if (log) log.innerHTML = '<div class="log-empty">點擊任意符號觸發事件⋯</div>';
+}
 
 /* ── 初始化 ──────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
