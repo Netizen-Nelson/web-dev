@@ -1,7 +1,5 @@
 /*!
- * ui-badge.js  v2.1.0
- * ─────────────────────────────────────────────────────────────────────────────
- * <ui-badge>          Badge 元件 — 任意字符、5 種形狀、solid / outline
+  * <ui-badge>          Badge 元件 — 任意字符、5 種形狀、solid / outline
  * <ui-symbol-picker>  符號選擇器 — 9 分類、3 種模式（inline / compact / popup）
  *
  * 一個 <script> 標籤同時啟用兩個元件。
@@ -75,7 +73,7 @@
     defaultGap:          12,
     defaultRingWidth:    8,
     defaultLinecap:      'round',
-    defaultTrackColor:   '#2A2B2A',
+    defaultTrackColor:   '#3A3B39',
     defaultTrackWidth:   1.5,
     defaultCenterColor:  '#C6C7BD',
     defaultCenterSize:   '2rem',
@@ -649,7 +647,6 @@ ui-symbol-picker { display: inline-block; }
       const panel = this.querySelector('.usp-popup-panel');
       if (!panel) return;
 
-      // 先隱形顯示以取得尺寸
       panel.style.visibility = 'hidden';
       panel.style.display    = 'block';
       this._positionPopup(trigEl, panel);
@@ -658,7 +655,6 @@ ui-symbol-picker { display: inline-block; }
       this._isOpen = true;
       trigEl.classList.add('usp-open');
 
-      // 點外部關閉（setTimeout 避免本次 click 立即觸發）
       setTimeout(() => {
         this._outsideHandler = e => {
           if (!this.contains(e.target) &&
@@ -695,10 +691,8 @@ ui-symbol-picker { display: inline-block; }
       let left = tr.left;
       let top  = (placement === 'top') ? tr.top - ph - 6 : tr.bottom + 6;
 
-      // 自動翻轉
       if (placement !== 'top' && top + ph > vh - 8) top = tr.top - ph - 6;
 
-      // 水平限制
       if (left + pw > vw - 8) left = vw - pw - 8;
       if (left < 8) left = 8;
       if (top  < 8) top  = 8;
@@ -714,7 +708,6 @@ ui-symbol-picker { display: inline-block; }
 
   /* ═══════════════════════════════════════════════════════════════════════════
      §10  UIRing 元件
-     ── 屬性 ────────────────────────────────────────────────────────────────
      size           SVG 總尺寸 px                   (預設 200)
      center         中心單行文字
      center-size    中心字體大小                     (預設 '2rem')
@@ -779,12 +772,11 @@ ui-symbol-picker { display: inline-block; }
       let rings = [];
       try { rings = JSON.parse(this._attr('rings', '[]')); } catch (_) {}
 
-      // 最外環半徑：留半環寬 + 2px 安全邊距避免 stroke 被截切
       const Rmax = cx - ringW / 2 - 2;
 
       const ringsSVG = rings.map((r, i) => {
         const R = Rmax - i * (ringW + gap);
-        if (R <= ringW / 2) return '';   // 半徑過小，跳過
+        if (R <= ringW / 2) return '';
         const track = (
           `<circle cx="${cx}" cy="${cx}" r="${R.toFixed(3)}" ` +
           `fill="none" stroke="${trackColor}" stroke-width="${trackW}"/>`
@@ -798,7 +790,6 @@ ui-symbol-picker { display: inline-block; }
         return track + arc;
       }).join('');
 
-      // 中心文字：有 source + target 才顯示 pointer cursor
       const clickable  = this.hasAttribute('source') && this.hasAttribute('target');
       const safeCenter = String(center)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -820,14 +811,12 @@ ui-symbol-picker { display: inline-block; }
 
       this.style.display = 'inline-block';
 
-      // source 元素自動隱藏（掛載時）
       if (this.hasAttribute('source')) {
         const src = document.querySelector(this.getAttribute('source'));
         if (src) src.style.display = 'none';
       }
     }
 
-    /** 將 source.innerHTML 複製到 target.innerHTML */
     _copy() {
       const src = this.hasAttribute('source')
         ? document.querySelector(this.getAttribute('source')) : null;
@@ -838,9 +827,106 @@ ui-symbol-picker { display: inline-block; }
   }
   customElements.define('ui-ring', UIRing);
 
-  /* ═══════════════════════════════════════════════════════════════════════════
-     §9  公開 API
-  ══════════════════════════════════════════════════════════════════════════ */
+  function injectBtnSwitchStyles() {
+    if (document.getElementById('_bsw_css')) return;
+    const el = document.createElement('style');
+    el.id = '_bsw_css';
+    el.textContent = '.bsw-trigger { cursor: pointer !important; }';
+    document.head.appendChild(el);
+  }
+
+  class BtnSwitch extends HTMLElement {
+    constructor() {
+      super();
+      this._idx        = 0;    // 目前顯示的 source 索引
+      this._sources    = [];   // 快取解析後的 source 元素陣列
+      this._linkEl     = null; // 連接的觸發容器元素
+      this._clickBound = null; // 已綁定的 click handler
+    }
+
+    static get observedAttributes() {
+      return ['link', 'source', 'target'];
+    }
+
+    connectedCallback() {
+      injectBtnSwitchStyles();
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        this._init();
+      } else {
+        document.addEventListener('DOMContentLoaded', () => this._init(), { once: true });
+      }
+    }
+
+    attributeChangedCallback() {
+      if (this.isConnected) setTimeout(() => this._init(), 0);
+    }
+
+    disconnectedCallback() { this._detach(); }
+
+    _init() {
+      this._detach();
+      const linkId = this.getAttribute('link');
+      if (!linkId) {
+        console.error('<btn-switch>: 必須提供 link 屬性（目標容器的 id）。');
+        return;
+      }
+      const linkEl = document.getElementById(linkId);
+      if (!linkEl) {
+        console.error(`<btn-switch>: 找不到 id="${linkId}" 的元素。`);
+        return;
+      }
+
+      const srcAttr = (this.getAttribute('source') || '').trim();
+      this._sources = srcAttr
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(sel => document.querySelector(sel))
+        .filter(Boolean);
+
+      if (srcAttr && this._sources.length === 0) {
+        console.warn(`<btn-switch>: 找不到任何 source 元素（${srcAttr}）。`);
+      }
+
+      this._sources.forEach(el => { el.style.display = 'none'; });
+
+      this._idx    = 0;
+      this._linkEl = linkEl;
+
+      linkEl.classList.add('bsw-trigger');
+
+      this._clickBound = () => this._trigger();
+      linkEl.addEventListener('click', this._clickBound);
+
+      this.style.display = 'none';
+    }
+
+    _trigger() {
+      if (this._sources.length === 0) return;
+
+      const tgtSel = this.getAttribute('target');
+      if (!tgtSel) return;
+      const tgt = document.querySelector(tgtSel);
+      if (!tgt) return;
+
+      tgt.innerHTML = this._sources[this._idx].innerHTML;
+
+      this._idx = (this._idx + 1) % this._sources.length;
+    }
+
+    _detach() {
+      if (this._linkEl) {
+        if (this._clickBound) {
+          this._linkEl.removeEventListener('click', this._clickBound);
+        }
+        this._linkEl.classList.remove('bsw-trigger');
+      }
+      this._linkEl     = null;
+      this._clickBound = null;
+      this._sources    = [];
+    }
+  }
+  customElements.define('btn-switch', BtnSwitch);
   window.UIBadge = {
     config(opts = {}) {
       ['defaultSize','defaultShape','defaultFill','defaultStroke','defaultFontWeight','defaultRadius']

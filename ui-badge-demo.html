@@ -582,7 +582,7 @@ document.addEventListener(
             <ui-ring
               size="180" center="點我" center-size="1.5rem"
               source="#ring-src" target="#ring-tgt"
-              gap="10" ring-width="8" track-color="#1C1D1C"
+              gap="10" ring-width="8" track-color="#3A3B39"
               rings='[
                 {"from":150,"to":190,"color":"#299459"},
                 {"from":280,"to":340,"color":"#1E65C7"}
@@ -602,7 +602,7 @@ document.addEventListener(
         <div>
           <div class="pm-lbl">三環</div>
           <ui-ring size="200" center="⬡" center-color="#C3A5E5" center-size="2.5rem"
-            gap="12" ring-width="9" track-color="#1A1B1A"
+            gap="12" ring-width="9" track-color="#3A3B39"
             rings='[
               {"from":0,"to":90,"color":"#C3A5E5"},
               {"from":45,"to":200,"color":"#0ABDC6"},
@@ -616,7 +616,7 @@ document.addEventListener(
           <div class="pm-lbl">margin / padding 容器</div>
           <div style="background:#131413;border:1px dashed #3D3E3C;display:inline-block;">
             <ui-ring size="150" center="M/P" center-size="1.2rem" center-color="#DECA4B"
-              margin="16px" padding="12px" gap="8" ring-width="6" track-color="#1A1B1A"
+              margin="16px" padding="12px" gap="8" ring-width="6" track-color="#3A3B39"
               rings='[
                 {"from":0,"to":270,"color":"#b3de73"},
                 {"from":180,"to":340,"color":"#FFB3D9"}
@@ -630,7 +630,7 @@ document.addEventListener(
         <div>
           <div class="pm-lbl">五環（含跨零點弧）</div>
           <ui-ring size="240" center="5" center-size="2.8rem"
-            gap="6" ring-width="7" track-color="#161716"
+            gap="6" ring-width="7" track-color="#3A3B39"
             rings='[
               {"from":0,"to":60,"color":"#C3A5E5"},
               {"from":90,"to":180,"color":"#0ABDC6"},
@@ -666,11 +666,125 @@ document.addEventListener(
 
     </div><!-- /ui-ring card -->
 
+    <!-- ── btn-switch 行為控制器 ─────────────────────────────────────────── -->
+    <div class="card-box">
+      <div class="card-ttl">行為控制器 btn-switch</div>
+      <p style="color:var(--text-dim);font-size:1rem;margin:0 0 20px;">
+        自身 <code style="color:var(--sky);">display:none</code>，把任意 id 容器變成觸發器。
+        所有 source 掛載時自動隱藏，點擊後寫入 target 的 innerHTML。
+      </p>
+
+      <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px;">
+
+        <!-- 單一來源 -->
+        <div>
+          <div class="pm-lbl">單一來源</div>
+          <div id="bsw-btn-1"
+            style="display:inline-block;background:var(--bg-btn);border:1px solid var(--border-acc);border-radius:8px;padding:8px 20px;color:var(--lavender);font-size:1rem;margin-bottom:12px;">
+            載入說明 ▶
+          </div>
+          <btn-switch link="bsw-btn-1" source="#bsw-src-1" target="#bsw-tgt-1"></btn-switch>
+          <div id="bsw-tgt-1"
+            style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:200px;min-height:64px;font-size:1rem;line-height:1.5;">
+            <span style="color:var(--text-vdim);">（點擊上方）</span>
+          </div>
+        </div>
+
+        <!-- 三來源輪換 -->
+        <div>
+          <div class="pm-lbl">三來源輪換（末尾自動回第一個）</div>
+          <div id="bsw-btn-2"
+            style="display:inline-block;background:var(--bg-btn);border:1px solid var(--border-acc);border-radius:8px;padding:8px 20px;color:var(--ocean);font-size:1rem;margin-bottom:12px;">
+            切換內容 ▶
+          </div>
+          <btn-switch link="bsw-btn-2"
+            source="#bsw-src-a,#bsw-src-b,#bsw-src-c"
+            target="#bsw-tgt-2">
+          </btn-switch>
+          <div id="bsw-tgt-2"
+            style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:220px;min-height:80px;font-size:1rem;line-height:1.5;">
+            <span style="color:var(--text-vdim);">（每點一次切換不同內容，第 3 次後回第 1 個）</span>
+          </div>
+        </div>
+
+        <!-- 任意元素：ui-badge 包在 div 中作觸發 -->
+        <div>
+          <div class="pm-lbl">任意元素作觸發（ui-badge）</div>
+          <div id="bsw-btn-3"
+            style="display:inline-flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <ui-badge char="▶" shape="circle" fill="solid" bg="#C3A5E5" size="48"></ui-badge>
+            <span style="color:var(--text-dim);font-size:1rem;">點擊 badge</span>
+          </div>
+          <btn-switch link="bsw-btn-3" source="#bsw-src-1" target="#bsw-tgt-3"></btn-switch>
+          <div id="bsw-tgt-3"
+            style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:200px;min-height:64px;font-size:1rem;line-height:1.5;">
+            <span style="color:var(--text-vdim);">（點擊左側 badge）</span>
+          </div>
+        </div>
+
+        <!-- 任意元素：ui-ring 作觸發（無內建 source/target）-->
+        <div>
+          <div class="pm-lbl">任意元素作觸發（ui-ring）</div>
+          <ui-ring id="bsw-ring-btn"
+            size="120" center="點我" center-size="1.1rem" center-color="#DECA4B"
+            gap="8" ring-width="6" track-color="#FFFFFF"
+            rings='[{"from":60,"to":280,"color":"#DECA4B"}]'>
+          </ui-ring>
+          <btn-switch link="bsw-ring-btn"
+            source="#bsw-src-a,#bsw-src-b,#bsw-src-c"
+            target="#bsw-tgt-3">
+          </btn-switch>
+          <p style="font-size:1rem;color:var(--text-dim);margin:6px 0 0;">輸出共用 bsw-tgt-3（與上方獨立 index）</p>
+        </div>
+
+      </div>
+
+      <div class="card-ttl" style="margin-top:4px;">使用方式</div>
+      <div class="code-blk" style="height:auto;line-height:1.5;">&lt;!-- link = id 純字串（不帶 #）。source/target 使用 CSS 選擇器 --&gt;
+
+&lt;!-- 單一來源 --&gt;
+&lt;div id="my-btn"&gt;點我&lt;/div&gt;
+&lt;btn-switch link="my-btn" source="#info" target="#output"&gt;&lt;/btn-switch&gt;
+
+&lt;!-- 多來源輪換（逗號分隔，末尾自動回第一個）--&gt;
+&lt;div id="cycle-btn"&gt;切換 ▶&lt;/div&gt;
+&lt;btn-switch link="cycle-btn" source="#s1,#s2,#s3" target="#output"&gt;&lt;/btn-switch&gt;
+
+&lt;!-- 任意元素：id 容器、ui-badge、ui-ring、自訂元件皆可 --&gt;
+&lt;ui-ring id="ring-btn" center="點我" ...&gt;&lt;/ui-ring&gt;
+&lt;btn-switch link="ring-btn" source="#info" target="#output"&gt;&lt;/btn-switch&gt;
+
+&lt;!-- source 不需手動 display:none，元件自動處理 --&gt;
+&lt;div id="info"&gt;任意 HTML 內容&lt;/div&gt;
+
+&lt;!-- link 缺少 → console.error；找不到 id → console.error --&gt;</div>
+
+    </div><!-- /btn-switch card -->
+
+    <!-- ── 隱藏來源（由各元件自動 display:none）─────────────────────────── -->
     <!-- #ring-src 由 ui-ring 自動隱藏，HTML 中無需寫 display:none -->
     <div id="ring-src">
       <p style="margin:0 0 6px;color:#C3A5E5;font-weight:600;">來自 #ring-src 的 HTML</p>
       <p style="margin:0;color:#C6C7BD;">這是隱藏來源的 <code style="color:#95c9de;">innerHTML</code>，可包含任意 HTML 標籤。</p>
       <p style="margin:6px 0 0;color:#0ABDC6;">點擊左側環形圖中心文字後，此內容複製到右側 #ring-tgt。</p>
+    </div>
+
+    <!-- btn-switch 來源（由 btn-switch 自動隱藏）-->
+    <div id="bsw-src-1">
+      <p style="margin:0 0 4px;color:#C3A5E5;font-weight:600;">來自 #bsw-src-1</p>
+      <p style="margin:0;color:#C6C7BD;">這是單一來源的 HTML 內容，可包含任意標籤。</p>
+    </div>
+    <div id="bsw-src-a">
+      <p style="margin:0;font-weight:600;color:#299459;">第 1 頁：safe（綠）</p>
+      <p style="margin:4px 0 0;color:#C6C7BD;">#bsw-src-a 的 innerHTML。</p>
+    </div>
+    <div id="bsw-src-b">
+      <p style="margin:0;font-weight:600;color:#0ABDC6;">第 2 頁：ocean（藍）</p>
+      <p style="margin:4px 0 0;color:#C6C7BD;">#bsw-src-b 的 innerHTML。</p>
+    </div>
+    <div id="bsw-src-c">
+      <p style="margin:0;font-weight:600;color:#EDA109;">第 3 頁：orange（橙）</p>
+      <p style="margin:4px 0 0;color:#C6C7BD;">#bsw-src-c 的 innerHTML，再點後回第 1 頁。</p>
     </div>
 
   </main>
