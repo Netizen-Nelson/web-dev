@@ -53,7 +53,6 @@ body {
   min-height: 100vh;
 }
 
-/* ── 版面 ─────────────────────────────────────────────────────────────── */
 .app-hdr {
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border);
@@ -108,7 +107,6 @@ body {
 
 hr.div { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
 
-/* Pill 按鈕 */
 .pills { display: flex; gap: 6px; flex-wrap: wrap; }
 .pill {
   background: var(--bg-btn);
@@ -129,12 +127,10 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
   font-weight: 600;
 }
 
-/* Slider */
 .slider-row { display: flex; align-items: center; gap: 12px; }
 .slider-row input[type="range"] { flex: 1; accent-color: var(--lavender); cursor: pointer; }
 .slider-val { min-width: 52px; text-align: right; color: var(--lavender); font-weight: 600; font-size: 1rem; }
 
-/* 文字輸入 */
 .txt-in {
   background: var(--bg-input);
   border: 1px solid var(--border);
@@ -147,7 +143,6 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
 }
 .txt-in:focus { outline: none; border-color: var(--lavender); }
 
-/* 色票 */
 .sw-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
 .swatch {
   width: 30px;
@@ -159,10 +154,8 @@ hr.div { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
   flex-shrink: 0;
 }
 .swatch:hover { transform: scale(1.18); }
-/* rgba(255,255,255,0.8) → alpha = 0.8 ≥ 0.76 ✓ */
 .swatch.on { border-color: #FFFFFF; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); }
 
-/* 色碼 row */
 .color-row { display: flex; align-items: center; gap: 8px; }
 .c-prev {
   width: 32px; height: 32px;
@@ -191,7 +184,6 @@ input[type="color"] {
   cursor: pointer;
 }
 
-/* 自動反色 toggle */
 .auto-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .auto-row label {
   display: flex; align-items: center; gap: 7px;
@@ -199,7 +191,6 @@ input[type="color"] {
 }
 .auto-row input { accent-color: var(--teal); }
 
-/* ── 右側預覽區 ─────────────────────────────────────────────────────── */
 .preview-area {
   padding: 20px 24px;
   display: flex;
@@ -208,7 +199,6 @@ input[type="color"] {
   overflow-y: auto;
 }
 
-/* 卡片 */
 .card-box {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -224,7 +214,6 @@ input[type="color"] {
   margin-bottom: 14px;
 }
 
-/* 預覽徽章置中區 */
 .badge-center {
   display: flex;
   align-items: center;
@@ -233,7 +222,6 @@ input[type="color"] {
   margin-bottom: 14px;
 }
 
-/* 代碼區塊 */
 .code-blk {
   background: var(--bg-code);
   border: 1px solid var(--border);
@@ -248,7 +236,6 @@ input[type="color"] {
   margin-bottom: 12px;
 }
 
-/* 按鈕 */
 .act-btn {
   background: var(--bg-btn);
   border: 1px solid var(--border-acc);
@@ -263,7 +250,6 @@ input[type="color"] {
 .act-btn:hover { background: var(--bg-btn-h); }
 .act-btn.sm { padding: 3px 12px; }
 
-/* Click 紀錄 */
 .click-log {
   background: var(--bg-code);
   border: 1px solid var(--border);
@@ -280,7 +266,6 @@ input[type="color"] {
 .log-entry.fresh { color: var(--special); }
 .log-empty { color: var(--text-vdim); }
 
-/* 形狀展示 */
 .shape-row { display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-end; }
 .shape-item { text-align: center; }
 .shape-lbl  { display: block; font-size: 1rem; color: var(--text-dim); margin-top: 6px; }
@@ -295,11 +280,9 @@ input[type="color"] {
   gap: 18px;
 }
 
-/* Bootstrap alert 字色修正 */
 .alert { font-size: 1rem; }
 .alert-dismissible .btn-close { filter: invert(0.8); }
 
-/* 符號選擇器 demo */
 .pm-lbl {
   font-size: 1rem;
   font-weight: 600;
@@ -320,7 +303,6 @@ input[type="color"] {
 
 <div class="main-wrap">
 
-  <!-- ── 控制面板 ────────────────────────────────────────────────────────── -->
   <aside class="ctrl-panel">
 
     <div class="ctrl-group">
