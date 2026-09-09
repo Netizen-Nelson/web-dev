@@ -9,13 +9,13 @@
     --bg:       #0c0d0c;
     --shell:    #c6c7bd;
     --lavender: #C3A5E5;
-    --special:  #C8DD5A;
+    --special:  #b3de73;
     --warning:  #F08080;
     --salmon:   #E5C3B3;
-    --sky:      #08a9d1;
-    --safe:     #40c99a;
+    --sky:      #95c9de;
+    --safe:     #299459;
     --yellow:   #DECA4B;
-    --info:     #5fafed;
+    --info:     #1E65C7;
     --stone:    #7090A8;
     --pink:     #FFB3D9;
     --orange:   #eda109;
@@ -34,7 +34,7 @@
 
   /* ── 頂部標題列 ── */
   .page-header {
-    background: linear-gradient(135deg, rgba(195,165,229,0.08) 0%, rgba(8,169,209,0.06) 100%);
+    background: linear-gradient(135deg, rgba(195,165,229,0.08) 0%, rgba(149,201,222,0.06) 100%);
     border-bottom: 1px solid rgba(195,165,229,0.2);
     padding: 48px 40px 36px;
   }
@@ -165,8 +165,8 @@
     border-radius: 6px;
     font-size: 0.82rem;
     font-weight: 500;
-    background: rgba(64,201,154,0.12);
-    border: 1px solid rgba(64,201,154,0.3);
+    background: rgba(41,148,89,0.12);
+    border: 1px solid rgba(41,148,89,0.3);
     color: var(--safe);
     animation: fadeIn .25s ease;
   }
@@ -250,9 +250,9 @@
     <p>橫向／縱向步驟流程元件　·　九種主題　·　多狀態系統　·　彈性全域設定</p>
     <div class="color-swatches" style="margin-top:16px;">
       <div class="swatch"><div class="swatch-dot" style="background:#C3A5E5"></div>lavender</div>
-      <div class="swatch"><div class="swatch-dot" style="background:#C8DD5A"></div>special</div>
-      <div class="swatch"><div class="swatch-dot" style="background:#08a9d1"></div>sky</div>
-      <div class="swatch"><div class="swatch-dot" style="background:#40c99a"></div>safe</div>
+      <div class="swatch"><div class="swatch-dot" style="background:#b3de73"></div>special</div>
+      <div class="swatch"><div class="swatch-dot" style="background:#95c9de"></div>sky</div>
+      <div class="swatch"><div class="swatch-dot" style="background:#299459"></div>safe</div>
       <div class="swatch"><div class="swatch-dot" style="background:#F08080"></div>warning</div>
       <div class="swatch"><div class="swatch-dot" style="background:#E5C3B3"></div>salmon</div>
       <div class="swatch"><div class="swatch-dot" style="background:#7090A8"></div>stone</div>
@@ -569,7 +569,7 @@
       <bp-stepper
            data-color="#DECA4B"
            data-color-active="#eda109"
-           data-color-done="#40c99a"
+           data-color-done="#299459"
            data-stroke="3px"
            data-card-width="200px"
            data-radius="6px"
@@ -659,8 +659,8 @@
           <tr><td><code>data-layout</code></td><td>—</td><td class="val">—</td><td class="desc">版型：vertical（縱向）</td></tr>
           <tr><td><code>data-auto-number</code></td><td>—</td><td class="val">true</td><td class="desc">自動注入步驟號徽章，設 false 關閉</td></tr>
           <tr><td><code>data-color</code></td><td><code>--bps-color</code></td><td class="val">#C3A5E5</td><td class="desc">主強調色（邊框、連接線、徽章輪廓）</td></tr>
-          <tr><td><code>data-color-active</code></td><td><code>--bps-color-active</code></td><td class="val">#C8DD5A</td><td class="desc">進行中步驟色</td></tr>
-          <tr><td><code>data-color-done</code></td><td><code>--bps-color-done</code></td><td class="val">#40c99a</td><td class="desc">已完成步驟色</td></tr>
+          <tr><td><code>data-color-active</code></td><td><code>--bps-color-active</code></td><td class="val">#b3de73</td><td class="desc">進行中步驟色</td></tr>
+          <tr><td><code>data-color-done</code></td><td><code>--bps-color-done</code></td><td class="val">#299459</td><td class="desc">已完成步驟色</td></tr>
           <tr><td><code>data-color-error</code></td><td><code>--bps-color-error</code></td><td class="val">#F08080</td><td class="desc">錯誤步驟色</td></tr>
           <tr><td><code>data-text-color</code></td><td><code>--bps-text</code></td><td class="val">#c6c7bd</td><td class="desc">卡片說明文字顏色</td></tr>
           <tr><td><code>data-title-color</code></td><td><code>--bps-title</code></td><td class="val">#C3A5E5</td><td class="desc">卡片標題顏色</td></tr>

@@ -3,16 +3,16 @@
 .bp-text-fill-hover { color: #3a3a3a; }
 .bp-text-shell    { color: #C6C7BD; }
 .bp-text-lavender { color: #C3A5E5; }
-.bp-text-special  { color: #C8DD5A; }
+.bp-text-special  { color: #b3de73; }
 .bp-text-warning  { color: #F08080; }
 .bp-text-salmon   { color: #E5C3B3; }
 .bp-text-sky      { color: #95c9de; }
-.bp-text-safe     { color: #20C21D; }
+.bp-text-safe     { color: #299459; }
 .bp-text-vanilla  { color: #DBEDD8; }
 .bp-text-yellow   { color: #DECA4B; }
 .bp-text-focus    { color: #E0BE79; }
-.bp-text-info     { color: #788CDE; }
-.bp-text-stone    { color: #95BDD7; }
+.bp-text-info     { color: #1E65C7; }
+.bp-text-stone    { color: #95c9de; }
 .bp-text-indigo   { color: #9B72CF; }
 .bp-text-pink     { color: #FFB3D9; }
 .bp-text-orange   { color: #EDA109; }
@@ -25,16 +25,16 @@
 .bp-bg-fill-hover { background-color: #3a3a3a; }
 .bp-bg-shell      { background-color: #C6C7BD; }
 .bp-bg-lavender   { background-color: #C3A5E5; }
-.bp-bg-special    { background-color: #C8DD5A; }
+.bp-bg-special    { background-color: #b3de73; }
 .bp-bg-warning    { background-color: #F08080; }
 .bp-bg-salmon     { background-color: #E5C3B3; }
 .bp-bg-sky        { background-color: #95c9de; }
-.bp-bg-safe       { background-color: #20C21D; }
+.bp-bg-safe       { background-color: #299459; }
 .bp-bg-vanilla    { background-color: #DBEDD8; }
 .bp-bg-yellow     { background-color: #DECA4B; }
 .bp-bg-focus      { background-color: #E0BE79; }
-.bp-bg-info       { background-color: #788CDE; }
-.bp-bg-stone      { background-color: #95BDD7; }
+.bp-bg-info       { background-color: #1E65C7; }
+.bp-bg-stone      { background-color: #95c9de; }
 .bp-bg-indigo     { background-color: #9B72CF; }
 .bp-bg-pink       { background-color: #FFB3D9; }
 .bp-bg-orange     { background-color: #EDA109; }
@@ -46,16 +46,16 @@
 .bp-border-fill-hover { border: 1px solid #3a3a3a; }
 .bp-border-shell      { border: 1px solid #C6C7BD; }
 .bp-border-lavender   { border: 1px solid #C3A5E5; }
-.bp-border-special    { border: 1px solid #C8DD5A; }
+.bp-border-special    { border: 1px solid #b3de73; }
 .bp-border-warning    { border: 1px solid #F08080; }
 .bp-border-salmon     { border: 1px solid #E5C3B3; }
 .bp-border-sky        { border: 1px solid #95c9de; }
-.bp-border-safe       { border: 1px solid #20C21D; }
+.bp-border-safe       { border: 1px solid #299459; }
 .bp-border-vanilla    { border: 1px solid #DBEDD8; }
 .bp-border-yellow     { border: 1px solid #DECA4B; }
 .bp-border-focus      { border: 1px solid #E0BE79; }
-.bp-border-info       { border: 1px solid #788CDE; }
-.bp-border-stone      { border: 1px solid #95BDD7; }
+.bp-border-info       { border: 1px solid #1E65C7; }
+.bp-border-stone      { border: 1px solid #95c9de; }
 .bp-border-indigo     { border: 1px solid #9B72CF; }
 .bp-border-pink       { border: 1px solid #FFB3D9; }
 .bp-border-orange     { border: 1px solid #EDA109; }
@@ -170,7 +170,7 @@ blockquote::before {
 .bp-annotation {
     position: relative;
     display: inline-block;
-    border-bottom: 1px dashed var(--note-color, #5BC0DE);
+    border-bottom: 1px dashed var(--note-color, #95c9de);
     padding-bottom: 1px;
     margin-bottom: 24px;
 }
@@ -183,7 +183,7 @@ blockquote::before {
     transform: translateX(-50%);
     font-size: 0.7rem;
     white-space: nowrap;
-    color: var(--note-color, #8E8E93);
+    color: var(--note-color, #C6C7BD);
 }
 
 /* ── bp-hatch：45° 斜線框（不支援 border-radius） ────────── */
@@ -212,17 +212,17 @@ blockquote::before {
 /* 色票（全部品牌色） */
 .bp-hatch-shell    { --hatch-color: #C6C7BD; }
 .bp-hatch-lavender { --hatch-color: #C3A5E5; }
-.bp-hatch-sky      { --hatch-color: #62c8f0; }
+.bp-hatch-sky      { --hatch-color: #95c9de; }
 .bp-hatch-warning  { --hatch-color: #F08080; }
 .bp-hatch-salmon   { --hatch-color: #E5C3B3; }
 .bp-hatch-ocean    { --hatch-color: #0ABDC6; }
-.bp-hatch-safe     { --hatch-color: #20c21d; }
+.bp-hatch-safe     { --hatch-color: #299459; }
 .bp-hatch-teal     { --hatch-color: #0DA591; }
 .bp-hatch-vanilla  { --hatch-color: #DBEDD8; }
 .bp-hatch-yellow   { --hatch-color: #DECA4B; }
 .bp-hatch-focus    { --hatch-color: #e0be79; }
-.bp-hatch-info     { --hatch-color: #788CDE; }
+.bp-hatch-info     { --hatch-color: #1E65C7; }
 .bp-hatch-indigo   { --hatch-color: #9B72CF; }
 .bp-hatch-pink     { --hatch-color: #FFB3D9; }
 .bp-hatch-orange   { --hatch-color: #EDA109; }
-.bp-hatch-special  { --hatch-color: #C8DD5A; }
+.bp-hatch-special  { --hatch-color: #b3de73; }

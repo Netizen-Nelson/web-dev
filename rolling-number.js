@@ -25,7 +25,7 @@
     // 顏色
     color:        '',            // 空字串 → 使用 colorScheme
     colorScheme:  'rainbow',     // 'rainbow' | 'mono'
-    monoColor:    '#C8DD5A',     // colorScheme='mono' 時的單色
+    monoColor:    '#b3de73',     // colorScheme='mono' 時的單色
     separatorColor: '#c6c7bd',   // 千位分隔符 / 小數點顏色
 
     // 動畫
@@ -57,9 +57,9 @@
 
   /* ── 彩虹色序列（依設計師色票） ── */
   const RAINBOW = [
-    '#C8DD5A', '#08A9D1', '#40c99a', '#C3A5E5',
+    '#b3de73', '#95c9de', '#299459', '#C3A5E5',
     '#eda109', '#E5C3B3', '#DECA4B', '#FFB3D9',
-    '#7B6CF0', '#95BDD7',
+    '#9B72CF', '#95c9de',
   ];
 
   /* ══════════════════════════════════════════════════════

@@ -337,7 +337,7 @@ html, body {
   transition: background .15s, color .15s, border-color .15s;
 }
 .copy-btn:hover { background: rgba(195,165,229,.25); }
-.copy-btn.ok { color: #40C99A; border-color: rgba(64,201,154,.4); background: rgba(64,201,154,.08); }
+.copy-btn.ok { color: #299459; border-color: rgba(41,148,89,.4); background: rgba(41,148,89,.08); }
 
 pre.code-out {
   background: var(--bg0);
@@ -382,7 +382,7 @@ pre.code-out::-webkit-scrollbar-thumb { background: var(--ac30); border-radius: 
     <div class="field">
       <div class="field-label">內容（支援 HTML）</div>
       <textarea class="x-ta" id="c-content" rows="5">這是一段<b>說明文字</b>，支援
-<span style="color:#08A9D1">HTML 標籤</span>與自訂樣式。</textarea>
+<span style="color:#95c9de">HTML 標籤</span>與自訂樣式。</textarea>
     </div>
 
     <!-- 標題 -->
@@ -523,23 +523,23 @@ pre.code-out::-webkit-scrollbar-thumb { background: var(--ac30); border-radius: 
 // ── Theme catalogue (mirrors THEMES in bp-popnote.js) ────────────────────────
 const THEMES = [
   { id:'dark',     label:'Dark',    color:'#C3A5E5', bg:'#130e1e' },
-  { id:'sky',      label:'Sky',     color:'#08a9d1', bg:'#091522' },
-  { id:'safe',     label:'Safe',    color:'#40c99a', bg:'#0a160f' },
-  { id:'special',  label:'Lime',    color:'#C8DD5A', bg:'#111605' },
+  { id:'sky',      label:'Sky',     color:'#95c9de', bg:'#091522' },
+  { id:'safe',     label:'Safe',    color:'#299459', bg:'#0a160f' },
+  { id:'special',  label:'Lime',    color:'#b3de73', bg:'#111605' },
   { id:'warning',  label:'Warn',    color:'#F08080', bg:'#190d0d' },
   { id:'yellow',   label:'Note',    color:'#DECA4B', bg:'#161205' },
   { id:'salmon',   label:'Salmon',  color:'#E5C3B3', bg:'#180e0a' },
   { id:'pink',     label:'Pink',    color:'#FFB3D9', bg:'#180a12' },
-  { id:'stone',    label:'Stone',   color:'#95BDD7', bg:'#0d1620' },
+  { id:'stone',    label:'Stone',   color:'#95c9de', bg:'#0d1620' },
   { id:'orange',   label:'Orange',  color:'#eda109', bg:'#181005' },
-  { id:'info',     label:'Info',    color:'#5fafed', bg:'#0a1522' },
-  { id:'vanilla',  label:'Vanilla', color:'#FDF6ED', bg:'#181614' },
+  { id:'info',     label:'Info',    color:'#1E65C7', bg:'#0a1522' },
+  { id:'vanilla',  label:'Vanilla', color:'#DBEDD8', bg:'#181614' },
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────────
 const S = {
   text:      '點我查看說明',
-  content:   '這是一段<b>說明文字</b>，支援\n<span style="color:#08A9D1">HTML 標籤</span>與自訂樣式。',
+  content:   '這是一段<b>說明文字</b>，支援\n<span style="color:#95c9de">HTML 標籤</span>與自訂樣式。',
   title:     '',
   theme:     'dark',
   mode:      'float',

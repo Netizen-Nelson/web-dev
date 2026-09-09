@@ -17,16 +17,16 @@
   --bd2:     rgba(198,199,189,.22);
   --shell:   #C6C7BD;
   --lavender:#C3A5E5;
-  --special: #C8DD5A;
+  --special: #b3de73;
   --warning: #F08080;
   --salmon:  #E5C3B3;
-  --sky:     #08A9D1;
-  --safe:    #40C99A;
-  --vanilla: #D4C5A9;
+  --sky:     #95c9de;
+  --safe:    #299459;
+  --vanilla: #DBEDD8;
   --yellow:  #DECA4B;
-  --info:    #4285EB;
-  --stone:   #95BDD7;
-  --indigo:  #7B6CF0;
+  --info:    #1E65C7;
+  --stone:   #95c9de;
+  --indigo:  #9B72CF;
   --pink:    #FFB3D9;
   --orange:  #EDA109;
   --mono: 'Cascadia Code','JetBrains Mono','Consolas',monospace;
@@ -69,7 +69,7 @@ header p{color:var(--stone);font-size:.85rem;margin-left:auto}
 .badge-row.baseline{align-items:baseline}
 
 /* ── Info/Warn boxes ─────────────────────────────────── */
-.info-box{background:rgba(66,133,235,.07);border:1px solid rgba(66,133,235,.2);border-left:3px solid var(--info);border-radius:0 8px 8px 0;padding:11px 16px;font-size:.85rem;color:var(--vanilla);margin:10px 0;line-height:1.6}
+.info-box{background:rgba(30,101,199,.07);border:1px solid rgba(30,101,199,.2);border-left:3px solid var(--info);border-radius:0 8px 8px 0;padding:11px 16px;font-size:.85rem;color:var(--vanilla);margin:10px 0;line-height:1.6}
 .warn-box{background:rgba(240,128,128,.07);border:1px solid rgba(240,128,128,.2);border-left:3px solid var(--warning);border-radius:0 8px 8px 0;padding:11px 16px;font-size:.85rem;color:var(--vanilla);margin:10px 0;line-height:1.6}
 
 /* ── Theme swatch grid (guide tab) ──────────────────── */
@@ -145,7 +145,7 @@ input[type=number].ctrl-input{flex:none;width:72px}
 /* Copy button */
 .copy-btn{background:rgba(195,165,229,.1);border:1px solid rgba(195,165,229,.25);border-radius:5px;color:var(--lavender);cursor:pointer;font-size:.72rem;padding:3px 10px;transition:all .15s;display:flex;align-items:center;gap:4px;font-family:inherit}
 .copy-btn:hover{background:rgba(195,165,229,.2)}
-.copy-btn.ok{color:var(--safe);border-color:rgba(64,201,154,.3);background:rgba(64,201,154,.08)}
+.copy-btn.ok{color:var(--safe);border-color:rgba(41,148,89,.3);background:rgba(41,148,89,.08)}
 
 /* Mode-specific ctrl sections */
 .mode-type,.mode-count{display:none}
@@ -187,8 +187,8 @@ table.at tr.hide{display:none}
 .filter-items{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;width:100%}
 .filter-item{background:var(--fill);border:1px solid var(--bd);border-radius:6px;padding:5px 10px;font-size:.75rem;color:var(--stone)}
 [data-filter-group="design"]{border-color:rgba(195,165,229,.35);color:var(--lavender)}
-[data-filter-group="dev"]{border-color:rgba(8,169,209,.35);color:var(--sky)}
-[data-filter-group="data"]{border-color:rgba(200,221,90,.35);color:var(--special)}
+[data-filter-group="dev"]{border-color:rgba(149,201,222,.35);color:var(--sky)}
+[data-filter-group="data"]{border-color:rgba(179,222,115,.35);color:var(--special)}
 
 /* Count demo */
 .count-controls{display:flex;align-items:center;gap:10px;margin-top:6px}
@@ -278,16 +278,16 @@ table.at tr.hide{display:none}
     <div class="swatch-grid">
       <div class="swatch" style="background:#C6C7BD;color:#0C0D0C"><span class="sw-name">shell</span><span class="sw-hex">#C6C7BD</span></div>
       <div class="swatch" style="background:#C3A5E5;color:#0C0D0C"><span class="sw-name">lavender</span><span class="sw-hex">#C3A5E5</span></div>
-      <div class="swatch" style="background:#C8DD5A;color:#0C0D0C"><span class="sw-name">special</span><span class="sw-hex">#C8DD5A</span></div>
+      <div class="swatch" style="background:#b3de73;color:#0C0D0C"><span class="sw-name">special</span><span class="sw-hex">#b3de73</span></div>
       <div class="swatch" style="background:#F08080;color:#0C0D0C"><span class="sw-name">warning</span><span class="sw-hex">#F08080</span></div>
       <div class="swatch" style="background:#E5C3B3;color:#0C0D0C"><span class="sw-name">salmon</span><span class="sw-hex">#E5C3B3</span></div>
-      <div class="swatch" style="background:#08A9D1;color:#0C0D0C"><span class="sw-name">sky</span><span class="sw-hex">#08A9D1</span></div>
-      <div class="swatch" style="background:#40C99A;color:#0C0D0C"><span class="sw-name">safe</span><span class="sw-hex">#40C99A</span></div>
-      <div class="swatch" style="background:#D4C5A9;color:#0C0D0C"><span class="sw-name">vanilla</span><span class="sw-hex">#D4C5A9</span></div>
+      <div class="swatch" style="background:#95c9de;color:#0C0D0C"><span class="sw-name">sky</span><span class="sw-hex">#95c9de</span></div>
+      <div class="swatch" style="background:#299459;color:#0C0D0C"><span class="sw-name">safe</span><span class="sw-hex">#299459</span></div>
+      <div class="swatch" style="background:#DBEDD8;color:#0C0D0C"><span class="sw-name">vanilla</span><span class="sw-hex">#DBEDD8</span></div>
       <div class="swatch" style="background:#DECA4B;color:#0C0D0C"><span class="sw-name">yellow</span><span class="sw-hex">#DECA4B</span></div>
-      <div class="swatch" style="background:#4285EB;color:#fff"><span class="sw-name">info</span><span class="sw-hex">#4285EB</span></div>
-      <div class="swatch" style="background:#95BDD7;color:#0C0D0C"><span class="sw-name">stone</span><span class="sw-hex">#95BDD7</span></div>
-      <div class="swatch new" style="background:#7B6CF0;color:#fff"><span class="sw-name">indigo</span><span class="sw-hex">#7B6CF0</span></div>
+      <div class="swatch" style="background:#1E65C7;color:#fff"><span class="sw-name">info</span><span class="sw-hex">#1E65C7</span></div>
+      <div class="swatch" style="background:#95c9de;color:#0C0D0C"><span class="sw-name">stone</span><span class="sw-hex">#95c9de</span></div>
+      <div class="swatch new" style="background:#9B72CF;color:#fff"><span class="sw-name">indigo</span><span class="sw-hex">#9B72CF</span></div>
       <div class="swatch" style="background:#FFB3D9;color:#0C0D0C"><span class="sw-name">pink</span><span class="sw-hex">#FFB3D9</span></div>
       <div class="swatch" style="background:#EDA109;color:#0C0D0C"><span class="sw-name">orange</span><span class="sw-hex">#EDA109</span></div>
     </div>
@@ -872,16 +872,16 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 const COLORS = [
   {name:'shell',   hex:'#C6C7BD'},
   {name:'lavender',hex:'#C3A5E5'},
-  {name:'special', hex:'#C8DD5A'},
+  {name:'special', hex:'#b3de73'},
   {name:'warning', hex:'#F08080'},
   {name:'salmon',  hex:'#E5C3B3'},
-  {name:'sky',     hex:'#08A9D1'},
-  {name:'safe',    hex:'#40C99A'},
-  {name:'vanilla', hex:'#D4C5A9'},
+  {name:'sky',     hex:'#95c9de'},
+  {name:'safe',    hex:'#299459'},
+  {name:'vanilla', hex:'#DBEDD8'},
   {name:'yellow',  hex:'#DECA4B'},
-  {name:'info',    hex:'#4285EB'},
-  {name:'stone',   hex:'#95BDD7'},
-  {name:'indigo',  hex:'#7B6CF0'},
+  {name:'info',    hex:'#1E65C7'},
+  {name:'stone',   hex:'#95c9de'},
+  {name:'indigo',  hex:'#9B72CF'},
   {name:'pink',    hex:'#FFB3D9'},
   {name:'orange',  hex:'#EDA109'},
 ];

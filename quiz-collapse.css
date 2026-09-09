@@ -19,7 +19,7 @@
  *   vanilla yellow focus info indigo pink orange shell
  *
  * 進階覆蓋：直接在元素上設 CSS var
- *   style="--qpc-accent:#40C99A"
+ *   style="--qpc-accent:#299459"
  */
 
 /* ═══════════════════════════════════════
@@ -40,18 +40,18 @@
 }
 
 /* ─ 主題色（data-theme）─ */
-.qp-collapse                   { --qpc-accent: #95BDD7; }   /* stone 預設 */
+.qp-collapse                   { --qpc-accent: #95c9de; }   /* stone 預設 */
 .qp-collapse[data-theme="lavender"] { --qpc-accent: #C3A5E5; }
-.qp-collapse[data-theme="special"]  { --qpc-accent: #C8DD5A; }
+.qp-collapse[data-theme="special"]  { --qpc-accent: #b3de73; }
 .qp-collapse[data-theme="warning"]  { --qpc-accent: #F08080; }
 .qp-collapse[data-theme="salmon"]   { --qpc-accent: #E5C3B3; }
-.qp-collapse[data-theme="sky"]      { --qpc-accent: #08A9D1; }
-.qp-collapse[data-theme="safe"]     { --qpc-accent: #40C99A; }
+.qp-collapse[data-theme="sky"]      { --qpc-accent: #95c9de; }
+.qp-collapse[data-theme="safe"]     { --qpc-accent: #299459; }
 .qp-collapse[data-theme="vanilla"]  { --qpc-accent: #DBEDD8; }
 .qp-collapse[data-theme="yellow"]   { --qpc-accent: #DECA4B; }
-.qp-collapse[data-theme="focus"]    { --qpc-accent: #A0CF72; }
-.qp-collapse[data-theme="info"]     { --qpc-accent: #4285EB; }
-.qp-collapse[data-theme="indigo"]   { --qpc-accent: #7B6CF0; }
+.qp-collapse[data-theme="focus"]    { --qpc-accent: #E0BE79; }
+.qp-collapse[data-theme="info"]     { --qpc-accent: #1E65C7; }
+.qp-collapse[data-theme="indigo"]   { --qpc-accent: #9B72CF; }
 .qp-collapse[data-theme="pink"]     { --qpc-accent: #FFB3D9; }
 .qp-collapse[data-theme="orange"]   { --qpc-accent: #EDA109; }
 .qp-collapse[data-theme="shell"]    { --qpc-accent: #C6C7BD; }

@@ -103,16 +103,16 @@
   ══════════════════════════════════════════ */
   const C = {
     bg:'#0C0D0C', bg1:'#141514', bg2:'#1C1D1C', bg3:'#252625',
-    shell:'#C6C7BD', lavender:'#C3A5E5', special:'#C8DD5A',
-    warning:'#F08080', safe:'#40C99A', vanilla:'#DBEDD8',
-    focus:'#A0CF72', stone:'#95BDD7', indigo:'#7B6CF0',
+    shell:'#C6C7BD', lavender:'#C3A5E5', special:'#b3de73',
+    warning:'#F08080', safe:'#299459', vanilla:'#DBEDD8',
+    focus:'#E0BE79', stone:'#95c9de', indigo:'#9B72CF',
   };
 
   const BRAND = {
-    lavender:'#C3A5E5', special:'#C8DD5A', warning:'#F08080',
-    salmon  :'#E5C3B3', sky    :'#08A9D1', safe   :'#40C99A',
-    vanilla :'#DBEDD8', yellow :'#DECA4B', focus  :'#A0CF72',
-    info    :'#4285EB', stone  :'#95BDD7', indigo :'#7B6CF0',
+    lavender:'#C3A5E5', special:'#b3de73', warning:'#F08080',
+    salmon  :'#E5C3B3', sky    :'#95c9de', safe   :'#299459',
+    vanilla :'#DBEDD8', yellow :'#DECA4B', focus  :'#E0BE79',
+    info    :'#1E65C7', stone  :'#95c9de', indigo :'#9B72CF',
     pink    :'#FFB3D9', orange :'#EDA109', shell  :'#C6C7BD',
   };
 
@@ -346,7 +346,7 @@
         background   : var(--qp-bg2);
         padding      : 1px 5px;
         border-radius: 3px;
-        color        : var(--qp-special, #C8DD5A);
+        color        : var(--qp-special, #b3de73);
         font-size    : 0.9em;
       }
 
@@ -534,7 +534,7 @@
         '--qp-shell' : C.shell,'--qp-accent': o.accent,'--qp-divider': o.divider,
         '--qp-q-color': o.qColor,'--qp-expl-color': o.eColor,
         '--qp-safe'  : C.safe, '--qp-warning': C.warning,
-        '--qp-special': '#C8DD5A','--qp-stone': C.stone,
+        '--qp-special': '#b3de73','--qp-stone': C.stone,
         '--qp-focus' : C.focus,'--qp-vanilla': C.vanilla,
         '--qp-min-h' : o.minHeight,
         '--qp-anim'  : `${o.animDur}ms`, '--qp-btn-size': o.btnSize,

@@ -24,17 +24,17 @@
       font-size: 1rem; line-height: 1.65; min-height: 100vh;
     }
     .pg-title {
-      font-size: 1.4rem; font-weight: 700; color: #C8DD5A;
+      font-size: 1.4rem; font-weight: 700; color: #b3de73;
       margin: 0 0 4px; letter-spacing: -0.01em;
     }
-    .pg-title .sub { color: #7B6CF0; font-weight: 400; }
-    .pg-desc { font-size: .88rem; color: #95BDD7; margin: 0 0 52px; }
+    .pg-title .sub { color: #9B72CF; font-weight: 400; }
+    .pg-desc { font-size: .88rem; color: #95c9de; margin: 0 0 52px; }
 
     .section  { margin-bottom: 52px; }
     .sec-tag  {
       font-size: .67rem; font-weight: 700;
       letter-spacing: .13em; text-transform: uppercase;
-      color: #7B6CF0; margin-bottom: 12px;
+      color: #9B72CF; margin-bottom: 12px;
     }
     .examples { display: flex; flex-direction: column; gap: 20px; }
 
@@ -76,8 +76,8 @@
       overflow-x: auto; white-space: pre;
     }
     .ck { color: #C3A5E5; }
-    .cv { color: #40C99A; }
-    .ct { color: #C8DD5A; }
+    .cv { color: #299459; }
+    .ct { color: #b3de73; }
     .cc { color: #3a3e3a; font-style: italic; }
   </style>
 </head>
@@ -199,7 +199,7 @@
     <div class="code-title">
       <span class="dot" style="background:#F08080"></span>
       <span class="dot" style="background:#DECA4B"></span>
-      <span class="dot" style="background:#40C99A"></span>
+      <span class="dot" style="background:#299459"></span>
       子元素語法（推薦）
     </div>
     <pre><span class="cc">&lt;!-- sentence 中 {n} 對應 cd-chunk 的 id 或出現順序 --&gt;</span>
@@ -229,7 +229,7 @@
     <div class="code-title">
       <span class="dot" style="background:#F08080"></span>
       <span class="dot" style="background:#DECA4B"></span>
-      <span class="dot" style="background:#40C99A"></span>
+      <span class="dot" style="background:#299459"></span>
       Preview 顏色自訂（data-config 或全域 ChunkDemoConfig）
     </div>
     <pre><span class="cc">&lt;!-- per-element：透過 data-config 覆蓋 --&gt;</span>
@@ -249,7 +249,7 @@ window.<span class="ck">ChunkDemoConfig</span> = {
     <div class="code-title">
       <span class="dot" style="background:#F08080"></span>
       <span class="dot" style="background:#DECA4B"></span>
-      <span class="dot" style="background:#40C99A"></span>
+      <span class="dot" style="background:#299459"></span>
       cd-level 內含 HTML 標籤
     </div>
     <pre><span class="cc">&lt;!-- cd-level 的文字內容以 innerHTML 解析，可使用任意 HTML --&gt;</span>
@@ -268,7 +268,7 @@ window.<span class="ck">ChunkDemoConfig</span> = {
     <div class="code-title">
       <span class="dot" style="background:#F08080"></span>
       <span class="dot" style="background:#DECA4B"></span>
-      <span class="dot" style="background:#40C99A"></span>
+      <span class="dot" style="background:#299459"></span>
       JSON Attribute 語法（向下相容）
     </div>
     <pre>&lt;<span class="ck">chunk-demo</span> <span class="ck">theme</span>=<span class="cv">"sky"</span> <span class="ck">sentence</span>=<span class="cv">"She {0} every morning."</span>
@@ -287,16 +287,16 @@ window.<span class="ck">ChunkDemoConfig</span> = {
   const THEMES = [
     { name: 'shell',    hex: '#C6C7BD' },
     { name: 'lavender', hex: '#C3A5E5' },
-    { name: 'special',  hex: '#C8DD5A' },
+    { name: 'special',  hex: '#b3de73' },
     { name: 'warning',  hex: '#F08080' },
     { name: 'salmon',   hex: '#E5C3B3' },
-    { name: 'sky',      hex: '#08A9D1' },
-    { name: 'safe',     hex: '#40C99A' },
-    { name: 'vanilla',  hex: '#D4C5A9' },
+    { name: 'sky',      hex: '#95c9de' },
+    { name: 'safe',     hex: '#299459' },
+    { name: 'vanilla',  hex: '#DBEDD8' },
     { name: 'yellow',   hex: '#DECA4B' },
-    { name: 'info',     hex: '#4285EB' },
-    { name: 'stone',    hex: '#95BDD7' },
-    { name: 'indigo',   hex: '#7B6CF0' },
+    { name: 'info',     hex: '#1E65C7' },
+    { name: 'stone',    hex: '#95c9de' },
+    { name: 'indigo',   hex: '#9B72CF' },
     { name: 'pink',     hex: '#FFB3D9' },
     { name: 'orange',   hex: '#EDA109' },
   ];

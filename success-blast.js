@@ -9,8 +9,8 @@
 
   /* ── 品牌色系 ── */
   var COLORS = [
-    '#C8DD5A', '#C3A5E5', '#0DA591', '#0ABDC6',
-    '#EDA109', '#E5C3B3', '#FFB3D9', '#62C8F0', '#C6C7BD'
+    '#b3de73', '#C3A5E5', '#0DA591', '#0ABDC6',
+    '#EDA109', '#E5C3B3', '#FFB3D9', '#95c9de', '#C6C7BD'
   ];
 
   function rand(a, b)    { return a + Math.random() * (b - a); }
@@ -45,7 +45,7 @@
       '  pointer-events:none;',
       '  animation:sb-cin .4s cubic-bezier(.34,1.56,.64,1) both; }',
 
-      '.sb-svg { filter:drop-shadow(0 0 18px rgba(200,221,90,.55)); }',
+      '.sb-svg { filter:drop-shadow(0 0 18px rgba(179,222,115,.55)); }',
 
       '.sb-check {',
       '  stroke-dasharray:84; stroke-dashoffset:84;',
@@ -54,8 +54,8 @@
       '.sb-text {',
       '  font-size:clamp(1.9rem,5vw,2.7rem); font-weight:900;',
       '  letter-spacing:.1em; font-family:system-ui,sans-serif;',
-      '  color:#C8DD5A; white-space:nowrap;',
-      '  text-shadow:0 0 28px rgba(200,221,90,.45), 0 2px 8px rgba(0,0,0,.6);',
+      '  color:#b3de73; white-space:nowrap;',
+      '  text-shadow:0 0 28px rgba(179,222,115,.45), 0 2px 8px rgba(0,0,0,.6);',
       '  animation:sb-pop .48s cubic-bezier(.34,1.56,.64,1) .32s both; }',
 
       '.sb-sub {',
@@ -177,15 +177,15 @@
       center.innerHTML = [
         '<svg class="sb-svg" viewBox="0 0 100 100" width="100" height="100">',
         /* 兩圈脈衝環 */
-        '<circle cx="50" cy="50" r="47" fill="none" stroke="#C8DD5A" stroke-width="2"',
+        '<circle cx="50" cy="50" r="47" fill="none" stroke="#b3de73" stroke-width="2"',
         '  style="animation:sb-ring 1.1s ease-out .04s forwards"/>',
-        '<circle cx="50" cy="50" r="38" fill="none" stroke="#C8DD5A" stroke-width="1.5"',
+        '<circle cx="50" cy="50" r="38" fill="none" stroke="#b3de73" stroke-width="1.5"',
         '  style="animation:sb-ring 1.4s ease-out .22s forwards"/>',
         /* 背景圓 */
-        '<circle cx="50" cy="50" r="42" fill="rgba(200,221,90,.07)"/>',
+        '<circle cx="50" cy="50" r="42" fill="rgba(179,222,115,.07)"/>',
         /* Checkmark */
         '<polyline class="sb-check" points="26,52 41,68 74,34"',
-        '  fill="none" stroke="#C8DD5A" stroke-width="5.5"',
+        '  fill="none" stroke="#b3de73" stroke-width="5.5"',
         '  stroke-linecap="round" stroke-linejoin="round"/>',
         '</svg>',
         '<div class="sb-text">' + text + '</div>',
@@ -235,7 +235,7 @@
 
       /* 三道擴散環（spd 同樣依 scale 縮放，duration 長則慢慢展開） */
       var rings = [
-        { r:0, spd:5.5*scale, max:cx*.7,  color:'#C8DD5A', lw:2,   life:1, delay:0  },
+        { r:0, spd:5.5*scale, max:cx*.7,  color:'#b3de73', lw:2,   life:1, delay:0  },
         { r:0, spd:4.5*scale, max:cx*.95, color:'#C3A5E5', lw:1.5, life:1, delay:7  },
         { r:0, spd:3.5*scale, max:cx*1.2, color:'#0DA591', lw:1,   life:1, delay:16 },
       ];
@@ -299,7 +299,7 @@
             if (sp.delay > 0) { sp.delay--; return; }
             var pulse = (Math.sin(frame * sp.speed + sp.phase) + 1) * 0.5;
             ctx.globalAlpha = pulse * 0.75;
-            ctx.fillStyle   = '#C8DD5A';
+            ctx.fillStyle   = '#b3de73';
             ctx.save();
             ctx.translate(sp.x, sp.y);
             drawStar(ctx, 4, sp.size, sp.size * .38);

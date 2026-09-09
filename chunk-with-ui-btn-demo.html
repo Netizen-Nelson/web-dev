@@ -12,18 +12,18 @@
   --bg:       #0C0D0C;
   --shell:    #C6C7BD;
   --lavender: #C3A5E5;
-  --special:  #C8DD5A;
+  --special:  #b3de73;
   --sky:      #0ABDC6;
-  --safe:     #40C99A;
+  --safe:     #299459;
   --warning:  #F08080;
   --salmon:   #E5C3B3;
   --orange:   #EDA109;
   --pink:     #FFB3D9;
-  --stone:    #95BDD7;
+  --stone:    #95c9de;
   --yellow:   #DECA4B;
   --indigo:   #9B72CF;
-  --focus:    #A0CF72;
-  --info:     #4285EB;
+  --focus:    #E0BE79;
+  --info:     #1E65C7;
 }
 
 body {
@@ -69,7 +69,7 @@ body {
   font-weight: 600;
   letter-spacing: .04em;
 }
-.hbadge--new  { background: rgba(200,221,90,.12); color: var(--special); border: 1px solid rgba(200,221,90,.3); }
+.hbadge--new  { background: rgba(179,222,115,.12); color: var(--special); border: 1px solid rgba(179,222,115,.3); }
 .hbadge--fix  { background: rgba(10,189,198,.1);  color: var(--sky);     border: 1px solid rgba(10,189,198,.25); }
 
 /* ── 版面 ─────────────────────────────── */
@@ -113,9 +113,9 @@ body {
 }
 .new-tag {
   display: inline-block;
-  background: rgba(200,221,90,.1);
+  background: rgba(179,222,115,.1);
   color: var(--special);
-  border: 1px solid rgba(200,221,90,.28);
+  border: 1px solid rgba(179,222,115,.28);
   border-radius: 4px;
   padding: 0px 6px;
   font-size: 0.68rem;
@@ -142,7 +142,7 @@ body {
 .section-desc code {
   font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
   font-size: 0.82rem;
-  background: rgba(200,221,90,.08);
+  background: rgba(179,222,115,.08);
   color: var(--special);
   border-radius: 3px;
   padding: 1px 5px;
@@ -373,14 +373,14 @@ body {
     </div>
 
     <div class="dot-legend">
-      <div class="dot-badge"><span class="dot-swatch" style="background:#40C99A"></span><b>L1</b> safe</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#299459"></span><b>L1</b> safe</div>
       <div class="dot-badge"><span class="dot-swatch" style="background:#DECA4B"></span><b>L2</b> yellow</div>
       <div class="dot-badge"><span class="dot-swatch" style="background:#C3A5E5"></span><b>L3</b> lavender</div>
       <div class="dot-badge"><span class="dot-swatch" style="background:#0ABDC6"></span><b>L4</b> sky</div>
       <div class="dot-badge"><span class="dot-swatch" style="background:#F08080"></span><b>L5</b> warning</div>
       <div class="dot-badge"><span class="dot-swatch" style="background:#EDA109"></span><b>L6</b> orange</div>
       <div class="dot-badge"><span class="dot-swatch" style="background:#FFB3D9"></span><b>L7</b> pink</div>
-      <div class="dot-badge"><span class="dot-swatch" style="background:#95BDD7"></span><b>L8</b> stone</div>
+      <div class="dot-badge"><span class="dot-swatch" style="background:#95c9de"></span><b>L8</b> stone</div>
     </div>
 
     <chunk-demo
@@ -572,12 +572,12 @@ body {
      Scroll Gate 示範區
      從這裡開始，每一節都需要解鎖才能繼續往下捲動
 ═════════════════════════════════════════════════════════ -->
-<div style="background:rgba(200,221,90,.04);border-top:1px solid rgba(200,221,90,.15);
-            border-bottom:1px solid rgba(200,221,90,.15);
+<div style="background:rgba(179,222,115,.04);border-top:1px solid rgba(179,222,115,.15);
+            border-bottom:1px solid rgba(179,222,115,.15);
             padding:28px 64px;margin-top:80px;">
   <div style="max-width:920px;margin:0 auto;">
     <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
-                text-transform:uppercase;color:#C8DD5A;margin-bottom:6px;">
+                text-transform:uppercase;color:#b3de73;margin-bottom:6px;">
       ✦ Scroll Gate 示範開始
     </div>
     <div style="font-size:0.88rem;color:rgba(198,199,189,.55);line-height:1.6;">
@@ -592,7 +592,7 @@ body {
 
   <div style="padding:64px 0 0;">
     <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
-                text-transform:uppercase;color:#95BDD7;margin-bottom:16px;">
+                text-transform:uppercase;color:#95c9de;margin-bottom:16px;">
       Gate 1 of 3
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;
@@ -614,10 +614,10 @@ body {
   </div>
 
   <div id="gate-block-1" style="margin-top:24px;padding:40px;
-       border-radius:16px;border:1px solid rgba(64,201,154,.2);
-       background:rgba(64,201,154,.04);">
+       border-radius:16px;border:1px solid rgba(41,148,89,.2);
+       background:rgba(41,148,89,.04);">
     <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
-                text-transform:uppercase;color:#40C99A;margin-bottom:14px;">
+                text-transform:uppercase;color:#299459;margin-bottom:14px;">
       Section A — 解鎖後可見完整內容
     </div>
     <p style="color:rgba(198,199,189,.8);line-height:1.7;margin-bottom:16px;">
@@ -643,7 +643,7 @@ body {
   <!-- ── Gate 2 ── -->
   <div style="padding:80px 0 0;">
     <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
-                text-transform:uppercase;color:#95BDD7;margin-bottom:16px;">
+                text-transform:uppercase;color:#95c9de;margin-bottom:16px;">
       Gate 2 of 3
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;
@@ -717,7 +717,7 @@ body {
   <!-- ── Gate 3 ── -->
   <div style="padding:80px 0 0;">
     <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
-                text-transform:uppercase;color:#95BDD7;margin-bottom:16px;">
+                text-transform:uppercase;color:#95c9de;margin-bottom:16px;">
       Gate 3 of 3
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;
@@ -738,14 +738,14 @@ body {
   </div>
 
   <div id="gate-block-3" style="margin-top:24px;padding:40px;
-       border-radius:16px;border:1px solid rgba(200,221,90,.2);
-       background:rgba(200,221,90,.04);">
+       border-radius:16px;border:1px solid rgba(179,222,115,.2);
+       background:rgba(179,222,115,.04);">
     <div style="font-size:0.7rem;font-weight:700;letter-spacing:.14em;
-                text-transform:uppercase;color:#C8DD5A;margin-bottom:14px;">
+                text-transform:uppercase;color:#b3de73;margin-bottom:14px;">
       Section C — 全部解鎖
     </div>
     <p style="color:rgba(198,199,189,.8);line-height:1.7;">
-      所有三個閘門都已解鎖。每個 <code style="color:#C8DD5A;background:rgba(200,221,90,.08);
+      所有三個閘門都已解鎖。每個 <code style="color:#b3de73;background:rgba(179,222,115,.08);
       padding:0 4px;border-radius:3px;">ui-btn</code> 關閉後會回鎖該段落，
       並禁止再次捲動經過。可試著關閉上方的按鈕觀察效果。
     </p>

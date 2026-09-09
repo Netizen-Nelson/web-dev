@@ -5,7 +5,7 @@
   const BUILT_IN_THEMES = {
     'before-after': [
       { accent: '#F08080', color: '#0C0D0C' },
-      { accent: '#20c21d', color: '#0C0D0C' },
+      { accent: '#299459', color: '#0C0D0C' },
     ],
     'compare': [
       { accent: '#95c9de', color: '#0C0D0C' },

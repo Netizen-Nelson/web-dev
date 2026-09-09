@@ -11,15 +11,15 @@
       --bg:      #0c0d0c;
       --shell:   #c6c7bd;
       --lavender:#C3A5E5;
-      --special: #C8DD5A;
+      --special: #b3de73;
       --warning: #F08080;
       --salmon:  #E5C3B3;
-      --sky:     #08a9d1;
-      --safe:    #40c99a;
-      --vanilla: #FDF6ED;
+      --sky:     #95c9de;
+      --safe:    #299459;
+      --vanilla: #DBEDD8;
       --yellow:  #DECA4B;
-      --info:    #5fafed;
-      --stone:   #95BDD7;
+      --info:    #1E65C7;
+      --stone:   #95c9de;
       --pink:    #FFB3D9;
       --orange:  #eda109;
     }
@@ -37,7 +37,7 @@
 
     h1 { font-size: 1.6rem; color: var(--lavender); margin-bottom: 6px; letter-spacing: 0.03em; }
     h2 { font-size: 1.1rem; color: var(--sky); margin: 40px 0 14px; letter-spacing: 0.02em;
-         border-bottom: 1px solid rgba(8,169,209,0.25); padding-bottom: 6px; }
+         border-bottom: 1px solid rgba(149,201,222,0.25); padding-bottom: 6px; }
     p  { margin-bottom: 14px; }
 
     .subtitle { color: var(--stone); font-size: 0.92rem; margin-bottom: 36px; }
@@ -135,7 +135,7 @@
     pre code { background: none; padding: 0; color: inherit; }
 
     .note-box {
-      background: rgba(95,175,237,0.08);
+      background: rgba(149,201,222,0.08);
       border-left: 3px solid var(--info);
       border-radius: 0 6px 6px 0;
       padding: 10px 16px;
@@ -203,7 +203,7 @@
     dark（預設）
   </span>
 
-  <span data-popover-title="Sky · 天藍" data-popover-content="資訊類提示，強調說明性內容。色票：<code>#08a9d1</code>" data-popover-theme="sky" style="color:#08a9d1;cursor:pointer;border-bottom:1px dashed #08a9d1">
+  <span data-popover-title="Sky · 天藍" data-popover-content="資訊類提示，強調說明性內容。色票：<code>#95c9de</code>" data-popover-theme="sky" style="color:#95c9de;cursor:pointer;border-bottom:1px dashed #95c9de">
     sky / info
   </span>
 
@@ -211,11 +211,11 @@
     warning
   </span>
 
-  <span data-popover-title="Safe · 翠綠" data-popover-content="操作成功、正常狀態。色票：<code>#40c99a</code>" data-popover-theme="safe" style="color:#40c99a;cursor:pointer;border-bottom:1px dashed #40c99a">
+  <span data-popover-title="Safe · 翠綠" data-popover-content="操作成功、正常狀態。色票：<code>#299459</code>" data-popover-theme="safe" style="color:#299459;cursor:pointer;border-bottom:1px dashed #299459">
     safe / success
   </span>
 
-  <span data-popover-title="Special · 萊姆" data-popover-content="特別強調、精選內容。色票：<code>#C8DD5A</code>" data-popover-theme="special" style="color:#C8DD5A;cursor:pointer;border-bottom:1px dashed #C8DD5A">
+  <span data-popover-title="Special · 萊姆" data-popover-content="特別強調、精選內容。色票：<code>#b3de73</code>" data-popover-theme="special" style="color:#b3de73;cursor:pointer;border-bottom:1px dashed #b3de73">
     special / highlight
   </span>
 
@@ -231,7 +231,7 @@
     salmon
   </span>
 
-  <span data-popover-title="Stone · 石藍" data-popover-content="沉穩的技術說明類。色票：<code>#95BDD7</code>（新增）" data-popover-theme="stone" style="color:#95BDD7;cursor:pointer;border-bottom:1px dashed #95BDD7">
+  <span data-popover-title="Stone · 石藍" data-popover-content="沉穩的技術說明類。色票：<code>#95c9de</code>（新增）" data-popover-theme="stone" style="color:#95c9de;cursor:pointer;border-bottom:1px dashed #95c9de">
     stone ✦
   </span>
 
@@ -239,11 +239,11 @@
     orange ✦
   </span>
 
-  <span data-popover-title="Vanilla · 香草白" data-popover-content="需要與深色背景高對比的內容。色票：<code>#FDF6ED</code>（新增）" data-popover-theme="vanilla" style="color:#FDF6ED;cursor:pointer;border-bottom:1px dashed #FDF6ED">
+  <span data-popover-title="Vanilla · 香草白" data-popover-content="需要與深色背景高對比的內容。色票：<code>#DBEDD8</code>（新增）" data-popover-theme="vanilla" style="color:#DBEDD8;cursor:pointer;border-bottom:1px dashed #DBEDD8">
     vanilla ✦
   </span>
 
-  <span data-popover-title="Info · 鋼藍" data-popover-content="次要資訊、中性補充說明。色票：<code>#5fafed</code>（新增）" data-popover-theme="info" style="color:#5fafed;cursor:pointer;border-bottom:1px dashed #5fafed">
+  <span data-popover-title="Info · 鋼藍" data-popover-content="次要資訊、中性補充說明。色票：<code>#1E65C7</code>（新增）" data-popover-theme="info" style="color:#1E65C7;cursor:pointer;border-bottom:1px dashed #1E65C7">
     info ✦
   </span>
 </div>
@@ -437,24 +437,24 @@ PopoverConfig.set({
 // 自訂主題
 PopoverConfig.addTheme('brand', {
   bg:          '#0d0d18',
-  titleColor:  '#a0c4ff',
-  borderColor: '#a0c4ff'
+  titleColor:  '#95c9de',
+  borderColor: '#95c9de'
 });</code></pre>
 
 <h3 style="color:var(--lavender);font-size:0.95rem;margin:24px 0 10px">可用主題</h3>
 <div class="theme-grid">
   <div class="theme-chip" style="color:#C3A5E5" data-popover-content="<code>#C3A5E5</code> — 紫藤，預設主題" data-popover-theme="dark">dark / lavender</div>
-  <div class="theme-chip" style="color:#08a9d1" data-popover-content="<code>#08a9d1</code> — 天藍" data-popover-theme="sky">sky / info</div>
+  <div class="theme-chip" style="color:#95c9de" data-popover-content="<code>#95c9de</code> — 天藍" data-popover-theme="sky">sky / info</div>
   <div class="theme-chip" style="color:#F08080" data-popover-content="<code>#F08080</code> — 珊瑚警告" data-popover-theme="warning">warning</div>
-  <div class="theme-chip" style="color:#40c99a" data-popover-content="<code>#40c99a</code> — 翠綠成功" data-popover-theme="safe">safe / success</div>
-  <div class="theme-chip" style="color:#C8DD5A" data-popover-content="<code>#C8DD5A</code> — 萊姆特殊" data-popover-theme="special">special / highlight</div>
+  <div class="theme-chip" style="color:#299459" data-popover-content="<code>#299459</code> — 翠綠成功" data-popover-theme="safe">safe / success</div>
+  <div class="theme-chip" style="color:#b3de73" data-popover-content="<code>#b3de73</code> — 萊姆特殊" data-popover-theme="special">special / highlight</div>
   <div class="theme-chip" style="color:#DECA4B" data-popover-content="<code>#DECA4B</code> — 琥珀筆記" data-popover-theme="note">note / yellow</div>
   <div class="theme-chip" style="color:#E5C3B3" data-popover-content="<code>#E5C3B3</code> — 暖膚鮭魚" data-popover-theme="salmon">salmon</div>
   <div class="theme-chip" style="color:#FFB3D9" data-popover-content="<code>#FFB3D9</code> — 粉紅" data-popover-theme="pink">pink</div>
-  <div class="theme-chip" style="color:#95BDD7" data-popover-content="<code>#95BDD7</code> — 石藍（新增）" data-popover-theme="stone">stone ✦</div>
+  <div class="theme-chip" style="color:#95c9de" data-popover-content="<code>#95c9de</code> — 石藍（新增）" data-popover-theme="stone">stone ✦</div>
   <div class="theme-chip" style="color:#eda109" data-popover-content="<code>#eda109</code> — 橙（新增）" data-popover-theme="orange">orange ✦</div>
-  <div class="theme-chip" style="color:#FDF6ED" data-popover-content="<code>#FDF6ED</code> — 香草白（新增）" data-popover-theme="vanilla">vanilla ✦</div>
-  <div class="theme-chip" style="color:#5fafed" data-popover-content="<code>#5fafed</code> — 鋼藍資訊（新增）" data-popover-theme="info">info ✦</div>
+  <div class="theme-chip" style="color:#DBEDD8" data-popover-content="<code>#DBEDD8</code> — 香草白（新增）" data-popover-theme="vanilla">vanilla ✦</div>
+  <div class="theme-chip" style="color:#1E65C7" data-popover-content="<code>#1E65C7</code> — 鋼藍資訊（新增）" data-popover-theme="info">info ✦</div>
 </div>
 
 <script src="bp-popnote.js"></script>

@@ -8,8 +8,8 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #0C0D0C; --surface: #141514; --border: #242524;
-    --shell: #C6C7BD; --stone: #95BDD7; --special: #C8DD5A;
-    --lavender: #C3A5E5; --sky: #08A9D1; --safe: #40C99A;
+    --shell: #C6C7BD; --stone: #95c9de; --special: #b3de73;
+    --lavender: #C3A5E5; --sky: #95c9de; --safe: #299459;
   }
   body {
     background: var(--bg); color: var(--shell);
@@ -188,11 +188,11 @@
 
     <div class="demo-wrap">
       <p style="font-size:.8rem;color:var(--stone);margin-bottom:12px">
-        level-colors="#F08080, #C8DD5A, #08A9D1"（紅 / 黃綠 / 天藍）
+        level-colors="#F08080, #b3de73, #95c9de"（紅 / 黃綠 / 天藍）
       </p>
       <chunk-demo
         sentence="I {0} my homework {1} every day."
-        level-colors="#F08080, #C8DD5A, #08A9D1"
+        level-colors="#F08080, #b3de73, #95c9de"
         theme="lavender"
         show-preview="true"
       >
@@ -211,13 +211,13 @@
 
     <pre>&lt;<span class="k">chunk-demo</span>
   <span class="a">sentence</span>=<span class="s">"I {0} my homework {1} every day."</span>
-  <span class="a">level-colors</span>=<span class="v">"#F08080, #C8DD5A, #08A9D1"</span>
+  <span class="a">level-colors</span>=<span class="v">"#F08080, #b3de73, #95c9de"</span>
   <span class="a">theme</span>=<span class="s">"lavender"</span>
   <span class="a">show-preview</span>=<span class="v">"true"</span>
 &gt;...&lt;/<span class="k">chunk-demo</span>&gt;
 
 <span class="c">// 等效的 data-config 寫法（可混用，屬性優先）：</span>
-<span class="a">data-config</span>=<span class="s">'{"levelDotColors":{"1":"#F08080","2":"#C8DD5A","3":"#08A9D1"}}'</span></pre>
+<span class="a">data-config</span>=<span class="s">'{"levelDotColors":{"1":"#F08080","2":"#b3de73","3":"#95c9de"}}'</span></pre>
   </section>
 
   <hr class="div">
@@ -297,7 +297,7 @@
         sentence="Students should {0} their essays {1} submitting them."
         mask-mode="true"
         show-dots="false"
-        level-colors="#EDA109, #40C99A, #C3A5E5"
+        level-colors="#EDA109, #299459, #C3A5E5"
         button-width="180px"
         dropdown-width="280px"
         width="100%"
@@ -322,7 +322,7 @@
   <span class="a">sentence</span>=<span class="s">"Students should {0} their essays {1} submitting them."</span>
   <span class="a">mask-mode</span>=<span class="v">"true"</span>
   <span class="a">show-dots</span>=<span class="v">"false"</span>
-  <span class="a">level-colors</span>=<span class="v">"#EDA109, #40C99A, #C3A5E5"</span>
+  <span class="a">level-colors</span>=<span class="v">"#EDA109, #299459, #C3A5E5"</span>
   <span class="a">button-width</span>=<span class="v">"180px"</span>
   <span class="a">dropdown-width</span>=<span class="v">"280px"</span>
   <span class="a">width</span>=<span class="v">"100%"</span>

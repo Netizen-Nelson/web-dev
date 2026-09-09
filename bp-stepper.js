@@ -4,39 +4,39 @@
     bg:       '#0C0D0C',
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    sky:      '#62C8F0',
+    sky:      '#95c9de',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
     ocean:    '#0ABDC6',
-    safe:     '#20C21D',
+    safe:     '#299459',
     teal:     '#0DA591',
     vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
     focus:    '#E0BE79',
-    info:     '#79B6FA',
+    info:     '#1E65C7',
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
     orange:   '#EDA109',
-    special:  '#C8DD5A',
-    stone:    '#95BDD7',
+    special:  '#b3de73',
+    stone:    '#95c9de',
   };
 
   const THEMES = {
     // 冷色系 → done 用 safe（清晰綠，與藍/紫拉開距離）
     lavender: { color: BRAND.lavender, colorActive: BRAND.special,  colorDone: BRAND.safe,   titleColor: BRAND.lavender, badgeBg: 'rgba(195,165,229,0.15)' },
-    sky:      { color: BRAND.sky,      colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.sky,      badgeBg: 'rgba(98,200,240,0.12)'  },
-    stone:    { color: BRAND.stone,    colorActive: BRAND.sky,      colorDone: BRAND.safe,   titleColor: BRAND.stone,    badgeBg: 'rgba(149,189,215,0.14)' },
-    info:     { color: BRAND.info,     colorActive: BRAND.indigo,   colorDone: BRAND.safe,   titleColor: BRAND.info,     badgeBg: 'rgba(121,182,250,0.12)' },
+    sky:      { color: BRAND.sky,      colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.sky,      badgeBg: 'rgba(149,201,222,0.12)'  },
+    stone:    { color: BRAND.stone,    colorActive: BRAND.sky,      colorDone: BRAND.safe,   titleColor: BRAND.stone,    badgeBg: 'rgba(149,201,222,0.14)' },
+    info:     { color: BRAND.info,     colorActive: BRAND.indigo,   colorDone: BRAND.safe,   titleColor: BRAND.info,     badgeBg: 'rgba(30,101,199,0.12)' },
     indigo:   { color: BRAND.indigo,   colorActive: BRAND.lavender, colorDone: BRAND.teal,   titleColor: BRAND.indigo,   badgeBg: 'rgba(155,114,207,0.12)' },
     // 青/綠系 → done 互補（safe↔teal 交叉，兩者都是綠系但色調不同）
     ocean:    { color: BRAND.ocean,    colorActive: BRAND.info,     colorDone: BRAND.safe,   titleColor: BRAND.ocean,    badgeBg: 'rgba(10,189,198,0.12)'  },
     teal:     { color: BRAND.teal,     colorActive: BRAND.ocean,    colorDone: BRAND.safe,   titleColor: BRAND.teal,     badgeBg: 'rgba(13,165,145,0.12)'  },
-    safe:     { color: BRAND.safe,     colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.safe,     badgeBg: 'rgba(32,194,29,0.12)'   },
+    safe:     { color: BRAND.safe,     colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.safe,     badgeBg: 'rgba(41,148,89,0.12)'   },
     // 暖色系 → done 用 teal（藍綠，跳脫暖色氛圍，明確標示完成）
     yellow:   { color: BRAND.yellow,   colorActive: BRAND.orange,   colorDone: BRAND.teal,   titleColor: BRAND.yellow,   badgeBg: 'rgba(222,202,75,0.12)'  },
     orange:   { color: BRAND.orange,   colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.orange,   badgeBg: 'rgba(237,161,9,0.12)'   },
     focus:    { color: BRAND.focus,    colorActive: BRAND.special,  colorDone: BRAND.teal,   titleColor: BRAND.focus,    badgeBg: 'rgba(224,190,121,0.12)' },
-    special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.special,  badgeBg: 'rgba(200,221,90,0.12)'  },
+    special:  { color: BRAND.special,  colorActive: BRAND.yellow,   colorDone: BRAND.teal,   titleColor: BRAND.special,  badgeBg: 'rgba(179,222,115,0.12)'  },
     // 粉/暖中性 → done 用 teal
     pink:     { color: BRAND.pink,     colorActive: BRAND.lavender, colorDone: BRAND.teal,   titleColor: BRAND.pink,     badgeBg: 'rgba(255,179,217,0.12)' },
     salmon:   { color: BRAND.salmon,   colorActive: BRAND.pink,     colorDone: BRAND.teal,   titleColor: BRAND.salmon,   badgeBg: 'rgba(229,195,179,0.12)' },
@@ -55,8 +55,8 @@
     titleColor:          BRAND.lavender,
     badgeBg:             'rgba(195,165,229,0.15)',
     cardBg:              'rgba(12,13,12,0.55)',
-    cardBgActive:        'rgba(200,221,90,0.07)',
-    cardBgDone:          'rgba(32,194,29,0.07)',
+    cardBgActive:        'rgba(179,222,115,0.07)',
+    cardBgDone:          'rgba(41,148,89,0.07)',
     cardBgError:         'rgba(240,128,128,0.07)',
     stroke:              '2px',
     radius:              '12px',
@@ -167,8 +167,8 @@ bp-stepper {
   --bps-title:                 ${BRAND.lavender};
   --bps-badge-bg:              rgba(195,165,229,0.15);
   --bps-card-bg:               rgba(12,13,12,0.55);
-  --bps-card-bg-act:           rgba(200,221,90,0.07);
-  --bps-card-bg-done:          rgba(32,194,29,0.07);
+  --bps-card-bg-act:           rgba(179,222,115,0.07);
+  --bps-card-bg-done:          rgba(41,148,89,0.07);
   --bps-card-bg-err:           rgba(240,128,128,0.07);
   --bps-stroke:                2px;
   --bps-radius:                8px;

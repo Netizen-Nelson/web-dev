@@ -25,12 +25,12 @@
    * 色票
    * ════════════════════════════════════════════════════════════════ */
   var BRAND = {
-    shell:    '#C6C7BD', lavender: '#C3A5E5', sky:     '#62c8f0',
+    shell:    '#C6C7BD', lavender: '#C3A5E5', sky:     '#95c9de',
     warning:  '#F08080', salmon:   '#E5C3B3', ocean:   '#0ABDC6',
-    safe:     '#20c21d', teal:     '#0DA591', vanilla: '#DBEDD8',
-    yellow:   '#DECA4B', focus:    '#e0be79', info:    '#79B6FA',
+    safe:     '#299459', teal:     '#0DA591', vanilla: '#DBEDD8',
+    yellow:   '#DECA4B', focus:    '#e0be79', info:    '#1E65C7',
     indigo:   '#9B72CF', pink:     '#FFB3D9', orange:  '#EDA109',
-    special:  '#C8DD5A'
+    special:  '#b3de73'
   };
   var BG = '#0C0D0C';
 

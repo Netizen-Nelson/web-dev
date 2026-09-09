@@ -40,16 +40,16 @@ class CardToggle extends HTMLElement {
                 --ct-bg-secondary:    #140d14;
                 --ct-color-shell:     #c6c7bd;
                 --ct-color-lavender:  #C3A5E5;
-                --ct-color-special:   #C8DD5A;
+                --ct-color-special:   #b3de73;
                 --ct-color-warning:   #F08080;
                 --ct-color-salmon:    #E5C3B3;
                 --ct-color-attention: #DECA4B;
                 --ct-color-sky:       #95c9de;
-                --ct-color-safe:      #20c21d;
+                --ct-color-safe:      #299459;
                 --ct-color-vanilla:   #DBEDD8;
                 --ct-color-yellow:    #DECA4B;
-                --ct-color-info:      #788cde;
-                --ct-color-stone:     #95BDD7;
+                --ct-color-info:      #1E65C7;
+                --ct-color-stone:     #95c9de;
                 --ct-color-ocean:     #0ABDC6;
                 --ct-color-teal:      #0DA591;
                 --ct-color-focus:     #e0be79;
@@ -118,17 +118,17 @@ class CardToggle extends HTMLElement {
                 border-width: 1px;
             }
 
-            card-toggle[dashed][color="safe"]      { border-color: rgba(32,194,29,0.55); }
+            card-toggle[dashed][color="safe"]      { border-color: rgba(41,148,89,0.55); }
             card-toggle[dashed][color="warning"]   { border-color: rgba(240,128,128,0.55); }
-            card-toggle[dashed][color="info"]      { border-color: rgba(120,140,222,0.55); }
-            card-toggle[dashed][color="special"]   { border-color: rgba(200,221,90,0.55); }
+            card-toggle[dashed][color="info"]      { border-color: rgba(30,101,199,0.55); }
+            card-toggle[dashed][color="special"]   { border-color: rgba(179,222,115,0.55); }
             card-toggle[dashed][color="sky"]       { border-color: rgba(149,201,222,0.55); }
             card-toggle[dashed][color="lavender"]  { border-color: rgba(195,165,229,0.55); }
             card-toggle[dashed][color="attention"] { border-color: rgba(222,202,75,0.55); }
             card-toggle[dashed][color="salmon"]    { border-color: rgba(229,195,179,0.55); }
             card-toggle[dashed][color="pink"]      { border-color: rgba(255,179,217,0.55); }
             card-toggle[dashed][color="orange"]    { border-color: rgba(237,161,9,0.55); }
-            card-toggle[dashed][color="stone"]     { border-color: rgba(149,189,215,0.55); }
+            card-toggle[dashed][color="stone"]     { border-color: rgba(149,201,222,0.55); }
             card-toggle[dashed][color="ocean"]    { border-color: rgba(10,189,198,0.55); }
             card-toggle[dashed][color="teal"]     { border-color: rgba(13,165,145,0.55); }
             card-toggle[dashed][color="focus"]    { border-color: rgba(224,190,121,0.55); }
@@ -156,8 +156,8 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="safe"]::before { background-color: var(--ct-color-safe); }
             card-toggle[color="safe"]:hover {
-                background-color: rgba(32, 194, 29, 0.05);
-                box-shadow: 0 0 0 1px rgba(32, 194, 29, 0.2);
+                background-color: rgba(41,148,89, 0.05);
+                box-shadow: 0 0 0 1px rgba(41,148,89, 0.2);
             }
 
             card-toggle[color="warning"]::before { background-color: var(--ct-color-warning); }
@@ -168,14 +168,14 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="info"]::before { background-color: var(--ct-color-info); }
             card-toggle[color="info"]:hover {
-                background-color: rgba(120, 140, 222, 0.05);
-                box-shadow: 0 0 0 1px rgba(120, 140, 222, 0.2);
+                background-color: rgba(30,101,199, 0.05);
+                box-shadow: 0 0 0 1px rgba(30,101,199, 0.2);
             }
 
             card-toggle[color="special"]::before { background-color: var(--ct-color-special); }
             card-toggle[color="special"]:hover {
-                background-color: rgba(200, 221, 90, 0.05);
-                box-shadow: 0 0 0 1px rgba(200, 221, 90, 0.2);
+                background-color: rgba(179,222,115, 0.05);
+                box-shadow: 0 0 0 1px rgba(179,222,115, 0.2);
             }
 
             card-toggle[color="sky"]::before { background-color: var(--ct-color-sky); }
@@ -222,8 +222,8 @@ class CardToggle extends HTMLElement {
 
             card-toggle[color="stone"]::before { background-color: var(--ct-color-stone); }
             card-toggle[color="stone"]:hover {
-                background-color: rgba(149, 189, 215, 0.05);
-                box-shadow: 0 0 0 1px rgba(149, 189, 215, 0.2);
+                background-color: rgba(149,201,222, 0.05);
+                box-shadow: 0 0 0 1px rgba(149,201,222, 0.2);
             }
             card-toggle[color="ocean"]::before { background-color: var(--ct-color-ocean); }
             card-toggle[color="ocean"]:hover {
@@ -512,9 +512,9 @@ class CardToggle extends HTMLElement {
 
             /* ── 答題狀態頁碼 ── */
             .ct-page-btn.answered-correct {
-                border-color: rgba(32, 194, 29, 0.6);
+                border-color: rgba(41,148,89, 0.6);
                 color: var(--ct-color-safe);
-                background-color: rgba(32, 194, 29, 0.08);
+                background-color: rgba(41,148,89, 0.08);
             }
             .ct-page-btn.answered-correct.active {
                 background-color: var(--ct-color-safe);
@@ -720,11 +720,11 @@ class CardToggle extends HTMLElement {
             card-toggle[skin="grid"][color="lavender"],
             card-toggle[skin="ruled"][color="lavender"]  { --ct-skin-line: rgba(195,165,229,0.1); }
             card-toggle[skin="grid"][color="safe"],
-            card-toggle[skin="ruled"][color="safe"]      { --ct-skin-line: rgba(32,194,29,0.1); }
+            card-toggle[skin="ruled"][color="safe"]      { --ct-skin-line: rgba(41,148,89,0.1); }
             card-toggle[skin="grid"][color="warning"],
             card-toggle[skin="ruled"][color="warning"]   { --ct-skin-line: rgba(240,128,128,0.1); }
             card-toggle[skin="grid"][color="info"],
-            card-toggle[skin="ruled"][color="info"]      { --ct-skin-line: rgba(120,140,222,0.1); }
+            card-toggle[skin="ruled"][color="info"]      { --ct-skin-line: rgba(30,101,199,0.1); }
             card-toggle[skin="grid"][color="orange"],
             card-toggle[skin="ruled"][color="orange"]    { --ct-skin-line: rgba(237,161,9,0.1); }
             card-toggle[skin="grid"][color="focus"],
@@ -740,7 +740,7 @@ class CardToggle extends HTMLElement {
             card-toggle[skin="grid"][color="salmon"],
             card-toggle[skin="ruled"][color="salmon"]    { --ct-skin-line: rgba(229,195,179,0.1); }
             card-toggle[skin="grid"][color="special"],
-            card-toggle[skin="ruled"][color="special"]   { --ct-skin-line: rgba(200,221,90,0.1); }
+            card-toggle[skin="ruled"][color="special"]   { --ct-skin-line: rgba(179,222,115,0.1); }
             card-toggle[skin="grid"][color="shell"],
             card-toggle[skin="ruled"][color="shell"]     { --ct-skin-line: rgba(198,199,189,0.13); }
 
@@ -784,9 +784,9 @@ class CardToggle extends HTMLElement {
             /* envelope × color：折痕線跟隨色票 */
             card-toggle[shape="envelope"][color="sky"]      { --ct-envelope-fold: rgba(149,201,222,0.3); }
             card-toggle[shape="envelope"][color="lavender"] { --ct-envelope-fold: rgba(195,165,229,0.3); }
-            card-toggle[shape="envelope"][color="safe"]     { --ct-envelope-fold: rgba(32,194,29,0.3); }
+            card-toggle[shape="envelope"][color="safe"]     { --ct-envelope-fold: rgba(41,148,89,0.3); }
             card-toggle[shape="envelope"][color="warning"]  { --ct-envelope-fold: rgba(240,128,128,0.3); }
-            card-toggle[shape="envelope"][color="info"]     { --ct-envelope-fold: rgba(120,140,222,0.3); }
+            card-toggle[shape="envelope"][color="info"]     { --ct-envelope-fold: rgba(30,101,199,0.3); }
             card-toggle[shape="envelope"][color="orange"]   { --ct-envelope-fold: rgba(237,161,9,0.3); }
             card-toggle[shape="envelope"][color="focus"]    { --ct-envelope-fold: rgba(224,190,121,0.3); }
             card-toggle[shape="envelope"][color="teal"]     { --ct-envelope-fold: rgba(13,165,145,0.3); }
@@ -794,7 +794,7 @@ class CardToggle extends HTMLElement {
             card-toggle[shape="envelope"][color="indigo"]   { --ct-envelope-fold: rgba(155,114,207,0.3); }
             card-toggle[shape="envelope"][color="pink"]     { --ct-envelope-fold: rgba(255,179,217,0.3); }
             card-toggle[shape="envelope"][color="salmon"]   { --ct-envelope-fold: rgba(229,195,179,0.3); }
-            card-toggle[shape="envelope"][color="special"]  { --ct-envelope-fold: rgba(200,221,90,0.3); }
+            card-toggle[shape="envelope"][color="special"]  { --ct-envelope-fold: rgba(179,222,115,0.3); }
             card-toggle[shape="envelope"][color="shell"]    { --ct-envelope-fold: rgba(198,199,189,0.28); }
             card-toggle[shape="envelope"][color="attention"]{ --ct-envelope-fold: rgba(222,202,75,0.3); }
         `;

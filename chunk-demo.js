@@ -103,7 +103,7 @@ chunk-demo { display: block; }
 .cd-h-lbl {
   font-size: .67rem; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
-  color: #79B6FA;
+  color: #1E65C7;
 }
 
 /* Level 列 */
@@ -133,7 +133,7 @@ chunk-demo { display: block; }
 /* ── 整句預覽 ───────────────────────────── */
 .cd-preview {
   margin-top: 1px; padding: 3px 6px;
-  border-left: 3px solid var(--pvb, #C8DD5A);
+  border-left: 3px solid var(--pvb, #b3de73);
   border-radius: 0 6px 6px 0;
   background: var(--pvbg, rgba(255,255,255,.035));
 }
@@ -188,17 +188,17 @@ chunk-demo { display: block; }
     themes: {
       shell:    { border: '#C6C7BD', text: '#C6C7BD', bg: 'rgba(198,199,189,.09)' },
       lavender: { border: '#C3A5E5', text: '#C3A5E5', bg: 'rgba(195,165,229,.09)' },
-      special:  { border: '#C8DD5A', text: '#C8DD5A', bg: 'rgba(200,221,90,.09)'  },
+      special:  { border: '#b3de73', text: '#b3de73', bg: 'rgba(179,222,115,.09)'  },
       warning:  { border: '#F08080', text: '#F08080', bg: 'rgba(240,128,128,.09)' },
       salmon:   { border: '#E5C3B3', text: '#E5C3B3', bg: 'rgba(229,195,179,.09)' },
-      sky:      { border: '#62C8F0', text: '#62C8F0', bg: 'rgba(98,200,240,.09)'  },
+      sky:      { border: '#95c9de', text: '#95c9de', bg: 'rgba(149,201,222,.09)'  },
       ocean:    { border: '#0ABDC6', text: '#0ABDC6', bg: 'rgba(10,189,198,.09)' },
-      safe:     { border: '#20C21D', text: '#20C21D', bg: 'rgba(32,194,29,.09)'  },
+      safe:     { border: '#299459', text: '#299459', bg: 'rgba(41,148,89,.09)'  },
       vanilla:  { border: '#DBEDD8', text: '#DBEDD8', bg: 'rgba(219,237,216,.09)' },
       focus:    { border: '#E0BE79', text: '#E0BE79', bg: 'rgba(224,190,121,.09)' },
       yellow:   { border: '#DECA4B', text: '#DECA4B', bg: 'rgba(222,202,75,.09)'  },
-      info:     { border: '#79B6FA', text: '#79B6FA', bg: 'rgba(121,182,250,.09)' },
-      stone:    { border: '#95BDD7', text: '#95BDD7', bg: 'rgba(149,189,215,.09)' },
+      info:     { border: '#1E65C7', text: '#1E65C7', bg: 'rgba(30,101,199,.09)' },
+      stone:    { border: '#95c9de', text: '#95c9de', bg: 'rgba(149,201,222,.09)' },
       teal:     { border: '#0DA591', text: '#0DA591', bg: 'rgba(13,165,145,.09)'  },
       indigo:   { border: '#9B72CF', text: '#9B72CF', bg: 'rgba(155,114,207,.09)' },
       pink:     { border: '#FFB3D9', text: '#FFB3D9', bg: 'rgba(255,179,217,.09)' },
@@ -210,14 +210,14 @@ chunk-demo { display: block; }
 
     /* 圓點色彩：由 3 種擴充至 8 種 */
     levelDotColors: {
-      1: '#20C21D',   /* safe    — 綠  */
+      1: '#299459',   /* safe    — 綠  */
       2: '#DECA4B',   /* yellow  — 黃  */
       3: '#C3A5E5',   /* lavender— 紫  */
-      4: '#62C8F0',   /* sky     — 青  */
+      4: '#95c9de',   /* sky     — 青  */
       5: '#F08080',   /* warning — 紅  */
       6: '#EDA109',   /* orange  — 橘  */
       7: '#FFB3D9',   /* pink    — 粉  */
-      8: '#95BDD7',   /* stone   — 藍灰 */
+      8: '#95c9de',   /* stone   — 藍灰 */
     },
 
     fixedTextColor:     '#C6C7BD',

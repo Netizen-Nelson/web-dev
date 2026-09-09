@@ -20,7 +20,7 @@
  *  DualLine.configure({ lineStyle:'dashed', dash:'6px', gap:'4px' });  // 同時設定兩者
  *
  * ── 自訂色票 ──────────────────────────────────────────────────
- *  DualLine.addColor('brand', '#3d9970');
+ *  DualLine.addColor('brand', '#299459');
  *  // 之後即可使用 color-left="brand"
  *
  * ── <dual-hr> 屬性 ────────────────────────────────────────────
@@ -57,17 +57,17 @@
   const PALETTE = {
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    special:  '#C8DD5A',
+    special:  '#b3de73',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#62C8F0',
+    sky:      '#95c9de',
     ocean:    '#0ABDC6',
-    safe:     '#20C21D',
+    safe:     '#299459',
     teal:     '#0DA591',
     vanilla:  '#DBEDD8',
     focus:    '#E0BE79',
     yellow:   '#DECA4B',
-    info:     '#79B6FA',
+    info:     '#1E65C7',
     indigo:   '#9B72CF',
     stone:    '#7090A8',
     pink:     '#FFB3D9',
@@ -333,7 +333,7 @@
   /**
    * DualLine — 統一操作入口
    *
-   * DualLine.addColor('brand', '#3d9970')
+   * DualLine.addColor('brand', '#299459')
    *   → 新增自訂色票名稱
    *
    * DualLine.configureHR({ colorLeft:'salmon', thickness:'2px' })

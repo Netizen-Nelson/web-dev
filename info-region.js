@@ -19,17 +19,17 @@
     warning:  '#F08080',
     salmon:   '#E5C3B3',
     ocean:    '#0ABDC6',
-    safe:     '#20c21d',
+    safe:     '#299459',
     teal:     '#0DA591',
     vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
     focus:    '#e0be79',
-    info:     '#788cde',
+    info:     '#1E65C7',
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
     orange:   '#EDA109',
-    special:  '#C8DD5A',
-    stone:    '#95BDD7',
+    special:  '#b3de73',
+    stone:    '#95c9de',
   };
 
   /* ── 全域預設值 ─────────────────────────────────────────────────── */
@@ -103,17 +103,17 @@
       info-region[active="true"][color="warning"]  { border-left-color: #F08080; }
       info-region[active="true"][color="salmon"]   { border-left-color: #E5C3B3; }
       info-region[active="true"][color="ocean"]    { border-left-color: #0ABDC6; }
-      info-region[active="true"][color="safe"]     { border-left-color: #20c21d; }
+      info-region[active="true"][color="safe"]     { border-left-color: #299459; }
       info-region[active="true"][color="teal"]     { border-left-color: #0DA591; }
       info-region[active="true"][color="vanilla"]  { border-left-color: #DBEDD8; }
       info-region[active="true"][color="yellow"]   { border-left-color: #DECA4B; }
       info-region[active="true"][color="focus"]    { border-left-color: #e0be79; }
-      info-region[active="true"][color="info"]     { border-left-color: #788cde; }
+      info-region[active="true"][color="info"]     { border-left-color: #1E65C7; }
       info-region[active="true"][color="indigo"]   { border-left-color: #9B72CF; }
       info-region[active="true"][color="pink"]     { border-left-color: #FFB3D9; }
       info-region[active="true"][color="orange"]   { border-left-color: #EDA109; }
-      info-region[active="true"][color="special"]  { border-left-color: #C8DD5A; }
-      info-region[active="true"][color="stone"]    { border-left-color: #95BDD7; }`;
+      info-region[active="true"][color="special"]  { border-left-color: #b3de73; }
+      info-region[active="true"][color="stone"]    { border-left-color: #95c9de; }`;
 
     const BTN_VARIANTS = `
       .ir-btn--shell    { border-color: #C6C7BD; color: #C6C7BD; }
@@ -128,8 +128,8 @@
       .ir-btn--salmon:hover   { background: #E5C3B322; }
       .ir-btn--ocean    { border-color: #0ABDC6; color: #0ABDC6; }
       .ir-btn--ocean:hover    { background: #0ABDC622; }
-      .ir-btn--safe     { border-color: #20c21d; color: #20c21d; }
-      .ir-btn--safe:hover     { background: #20c21d22; }
+      .ir-btn--safe     { border-color: #299459; color: #299459; }
+      .ir-btn--safe:hover     { background: #29945922; }
       .ir-btn--teal     { border-color: #0DA591; color: #0DA591; }
       .ir-btn--teal:hover     { background: #0DA59122; }
       .ir-btn--vanilla  { border-color: #DBEDD8; color: #DBEDD8; }
@@ -138,18 +138,18 @@
       .ir-btn--yellow:hover   { background: #DECA4B22; }
       .ir-btn--focus    { border-color: #e0be79; color: #e0be79; }
       .ir-btn--focus:hover    { background: #e0be7922; }
-      .ir-btn--info     { border-color: #788cde; color: #788cde; }
-      .ir-btn--info:hover     { background: #788cde22; }
+      .ir-btn--info     { border-color: #1E65C7; color: #1E65C7; }
+      .ir-btn--info:hover     { background: #1E65C722; }
       .ir-btn--indigo   { border-color: #9B72CF; color: #9B72CF; }
       .ir-btn--indigo:hover   { background: #9B72CF22; }
       .ir-btn--pink     { border-color: #FFB3D9; color: #FFB3D9; }
       .ir-btn--pink:hover     { background: #FFB3D922; }
       .ir-btn--orange   { border-color: #EDA109; color: #EDA109; }
       .ir-btn--orange:hover   { background: #EDA10922; }
-      .ir-btn--special  { border-color: #C8DD5A; color: #C8DD5A; }
-      .ir-btn--special:hover  { background: #C8DD5A22; }
-      .ir-btn--stone    { border-color: #95BDD7; color: #95BDD7; }
-      .ir-btn--stone:hover    { background: #95BDD722; }`;
+      .ir-btn--special  { border-color: #b3de73; color: #b3de73; }
+      .ir-btn--special:hover  { background: #b3de7322; }
+      .ir-btn--stone    { border-color: #95c9de; color: #95c9de; }
+      .ir-btn--stone:hover    { background: #95c9de22; }`;
 
     const css = `
       info-region {

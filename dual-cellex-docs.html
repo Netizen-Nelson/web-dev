@@ -12,16 +12,16 @@
   --bg:       #0C0D0C;
   --shell:    #C6C7BD;
   --lavender: #C3A5E5;
-  --special:  #C8DD5A;
+  --special:  #b3de73;
   --warning:  #F08080;
   --salmon:   #E5C3B3;
   --sky:      #0ABDC6;
-  --safe:     #40C99A;
+  --safe:     #299459;
   --vanilla:  #DBEDD8;
   --yellow:   #DECA4B;
-  --focus:    #A0CF72;
-  --info:     #4285EB;
-  --stone:    #95BDD7;
+  --focus:    #E0BE79;
+  --info:     #1E65C7;
+  --stone:    #95c9de;
   --indigo:   #9B72CF;
   --pink:     #FFB3D9;
   --orange:   #EDA109;
@@ -107,7 +107,7 @@ h2.section-h{
   color:var(--shell);
   margin:64px 0 6px;
   padding-bottom:10px;
-  border-bottom:1px solid rgba(149,189,215,0.18);
+  border-bottom:1px solid rgba(149,201,222,0.18);
   scroll-margin-top:20px;
 }
 h3.sub-h{
@@ -127,7 +127,7 @@ p.desc{
 /* ── 範例區塊 ── */
 .example{
   margin-bottom:32px;
-  border:1px solid rgba(149,189,215,0.14);
+  border:1px solid rgba(149,201,222,0.14);
   border-radius:var(--radius);
   overflow:hidden;
 }
@@ -136,8 +136,8 @@ p.desc{
   align-items:center;
   justify-content:space-between;
   padding:10px 14px;
-  background:rgba(149,189,215,0.06);
-  border-bottom:1px solid rgba(149,189,215,0.1);
+  background:rgba(149,201,222,0.06);
+  border-bottom:1px solid rgba(149,201,222,0.1);
 }
 .example-header .ex-title{
   font-size:0.82rem;
@@ -146,9 +146,9 @@ p.desc{
   letter-spacing:0.04em;
 }
 .btn-preview{
-  background:rgba(200,221,90,0.12);
+  background:rgba(179,222,115,0.12);
   color:var(--special);
-  border:1px solid rgba(200,221,90,0.3);
+  border:1px solid rgba(179,222,115,0.3);
   border-radius:5px;
   padding:5px 14px;
   font-size:0.82rem;
@@ -157,15 +157,15 @@ p.desc{
   letter-spacing:0.04em;
   transition:background .15s,border-color .15s;
 }
-.btn-preview:hover{background:rgba(200,221,90,0.22);border-color:rgba(200,221,90,0.55)}
-.btn-preview.active{background:rgba(64,201,154,0.12);color:var(--safe);border-color:rgba(64,201,154,0.35)}
+.btn-preview:hover{background:rgba(179,222,115,0.22);border-color:rgba(179,222,115,0.55)}
+.btn-preview.active{background:rgba(41,148,89,0.12);color:var(--safe);border-color:rgba(41,148,89,0.35)}
 
 /* ── 程式碼 / 預覽 雙欄 ── */
 .split{display:flex;gap:0;min-height:0}
 .split .code-side{
   flex:1;
   min-width:0;
-  border-right:1px solid rgba(149,189,215,0.12);
+  border-right:1px solid rgba(149,201,222,0.12);
 }
 .split .preview-side{
   flex:1;
@@ -187,14 +187,14 @@ pre.code-block{
   overflow-x:auto;
   margin:0;
   font-family:'Cascadia Code','Fira Code',monospace;
-  color:#c8ccc0;
+  color:#C6C7BD;
   white-space:pre;
 }
 /* Syntax tokens */
 .tk-tag{color:var(--lavender)}
 .tk-attr{color:var(--sky)}
 .tk-val{color:var(--special)}
-.tk-cmt{color:rgba(149,189,215,0.48);font-style:italic}
+.tk-cmt{color:rgba(149,201,222,0.48);font-style:italic}
 .tk-kw{color:var(--indigo)}
 .tk-str{color:var(--salmon)}
 .tk-num{color:var(--yellow)}
@@ -214,7 +214,7 @@ code{
 /* ── 表格 ── */
 .ref-table{width:100%;border-collapse:collapse;font-size:0.875rem;margin-top:8px}
 .ref-table th{
-  background:rgba(149,189,215,0.08);
+  background:rgba(149,201,222,0.08);
   color:var(--stone);
   font-size:0.75rem;
   font-weight:700;
@@ -225,12 +225,12 @@ code{
 }
 .ref-table td{
   padding:9px 12px;
-  border-bottom:1px solid rgba(149,189,215,0.07);
+  border-bottom:1px solid rgba(149,201,222,0.07);
   color:var(--shell);
   vertical-align:top;
 }
 .ref-table tr:last-child td{border-bottom:none}
-.ref-table tr:hover td{background:rgba(149,189,215,0.03)}
+.ref-table tr:hover td{background:rgba(149,201,222,0.03)}
 .ref-table td:first-child code{color:var(--sky)}
 .ref-table td:nth-child(2){color:var(--stone);font-size:0.82rem}
 .ref-table td:nth-child(3){color:var(--yellow);font-family:monospace;font-size:0.82rem}
@@ -247,7 +247,7 @@ code{
   vertical-align:middle;
   margin-left:4px;
 }
-.badge-new{background:rgba(200,221,90,0.15);color:var(--special)}
+.badge-new{background:rgba(179,222,115,0.15);color:var(--special)}
 .badge-fix{background:rgba(10,189,198,0.13);color:var(--sky)}
 .badge-opt{background:rgba(155,114,207,0.15);color:var(--indigo)}
 
@@ -262,7 +262,7 @@ code{
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:8px}
 .theme-card{
   background:rgba(255,255,255,0.025);
-  border:1px solid rgba(149,189,215,0.1);
+  border:1px solid rgba(149,201,222,0.1);
   border-radius:8px;
   padding:12px 14px 14px;
 }
@@ -270,8 +270,8 @@ code{
 
 /* ── Alert / Info box ── */
 .info-box{
-  background:rgba(66,133,235,0.08);
-  border:1px solid rgba(66,133,235,0.22);
+  background:rgba(30,101,199,0.08);
+  border:1px solid rgba(30,101,199,0.22);
   border-radius:6px;
   padding:10px 14px;
   font-size:0.88rem;
@@ -282,7 +282,7 @@ code{
 .info-box b{color:var(--info)}
 
 /* ── 分隔線 ── */
-hr.doc-hr{border:none;border-top:1px solid rgba(149,189,215,0.1);margin:0}
+hr.doc-hr{border:none;border-top:1px solid rgba(149,201,222,0.1);margin:0}
 </style>
 </head>
 <body>
@@ -799,20 +799,20 @@ hr.doc-hr{border:none;border-top:1px solid rgba(149,189,215,0.1);margin:0}
 
 <div class="palette">
   <div class="swatch"><div class="swatch-dot" style="background:#C3A5E5"></div><div class="swatch-name">lavender</div><div class="swatch-hex">#C3A5E5</div></div>
-  <div class="swatch"><div class="swatch-dot" style="background:#C8DD5A"></div><div class="swatch-name">special</div><div class="swatch-hex">#C8DD5A</div></div>
-  <div class="swatch"><div class="swatch-dot" style="background:#40C99A"></div><div class="swatch-name">safe</div><div class="swatch-hex">#40C99A</div></div>
+  <div class="swatch"><div class="swatch-dot" style="background:#b3de73"></div><div class="swatch-name">special</div><div class="swatch-hex">#b3de73</div></div>
+  <div class="swatch"><div class="swatch-dot" style="background:#299459"></div><div class="swatch-name">safe</div><div class="swatch-hex">#299459</div></div>
   <div class="swatch"><div class="swatch-dot" style="background:#0ABDC6"></div><div class="swatch-name">sky <span style="color:var(--sky);font-size:0.6rem">★</span></div><div class="swatch-hex">#0ABDC6</div></div>
-  <div class="swatch"><div class="swatch-dot" style="background:#4285EB"></div><div class="swatch-name">info</div><div class="swatch-hex">#4285EB</div></div>
-  <div class="swatch"><div class="swatch-dot" style="background:#95BDD7"></div><div class="swatch-name">stone</div><div class="swatch-hex">#95BDD7</div></div>
+  <div class="swatch"><div class="swatch-dot" style="background:#1E65C7"></div><div class="swatch-name">info</div><div class="swatch-hex">#1E65C7</div></div>
+  <div class="swatch"><div class="swatch-dot" style="background:#95c9de"></div><div class="swatch-name">stone</div><div class="swatch-hex">#95c9de</div></div>
   <div class="swatch"><div class="swatch-dot" style="background:#DECA4B"></div><div class="swatch-name">yellow</div><div class="swatch-hex">#DECA4B</div></div>
   <div class="swatch"><div class="swatch-dot" style="background:#F08080"></div><div class="swatch-name">warning</div><div class="swatch-hex">#F08080</div></div>
   <div class="swatch"><div class="swatch-dot" style="background:#E5C3B3"></div><div class="swatch-name">salmon</div><div class="swatch-hex">#E5C3B3</div></div>
   <div class="swatch"><div class="swatch-dot" style="background:#FFB3D9"></div><div class="swatch-name">pink</div><div class="swatch-hex">#FFB3D9</div></div>
   <div class="swatch"><div class="swatch-dot" style="background:#EDA109"></div><div class="swatch-name">orange</div><div class="swatch-hex">#EDA109</div></div>
   <div class="swatch"><div class="swatch-dot" style="background:#C6C7BD"></div><div class="swatch-name">shell</div><div class="swatch-hex">#C6C7BD</div></div>
-  <div class="swatch"><div class="swatch-dot" style="background:#DBEDD8;border-color:rgba(200,221,90,0.4)"></div><div class="swatch-name">vanilla <span style="color:var(--special);font-size:0.6rem">★</span></div><div class="swatch-hex">#DBEDD8</div></div>
-  <div class="swatch"><div class="swatch-dot" style="background:#A0CF72;border-color:rgba(200,221,90,0.4)"></div><div class="swatch-name">focus <span style="color:var(--special);font-size:0.6rem">✦</span></div><div class="swatch-hex">#A0CF72</div></div>
-  <div class="swatch"><div class="swatch-dot" style="background:#9B72CF;border-color:rgba(200,221,90,0.4)"></div><div class="swatch-name">indigo <span style="color:var(--special);font-size:0.6rem">★</span></div><div class="swatch-hex">#9B72CF</div></div>
+  <div class="swatch"><div class="swatch-dot" style="background:#DBEDD8;border-color:rgba(179,222,115,0.4)"></div><div class="swatch-name">vanilla <span style="color:var(--special);font-size:0.6rem">★</span></div><div class="swatch-hex">#DBEDD8</div></div>
+  <div class="swatch"><div class="swatch-dot" style="background:#E0BE79;border-color:rgba(179,222,115,0.4)"></div><div class="swatch-name">focus <span style="color:var(--special);font-size:0.6rem">✦</span></div><div class="swatch-hex">#E0BE79</div></div>
+  <div class="swatch"><div class="swatch-dot" style="background:#9B72CF;border-color:rgba(179,222,115,0.4)"></div><div class="swatch-name">indigo <span style="color:var(--special);font-size:0.6rem">★</span></div><div class="swatch-hex">#9B72CF</div></div>
 </div>
 <p class="desc" style="margin-top:8px"><code>★</code> 本次更新色值；<code>✦</code> 本次新增色票。</p>
 
@@ -861,7 +861,7 @@ hr.doc-hr{border:none;border-top:1px solid rgba(149,189,215,0.1);margin:0}
 <tbody>
 <tr><td><code>showMenuButton</code></td><td><code>show-menu-button</code></td><td><code>true</code></td><td>是否全域顯示選單按鈕</td></tr>
 <tr><td><code>menuButtonPosition</code></td><td><code>menu-button-position</code></td><td><code>right</code></td><td><code>left</code> 或 <code>right</code></td></tr>
-<tr><td><code>menuButtonColor</code></td><td><code>menu-button-color</code></td><td><code>#C8DD5A</code></td><td>按鈕圖示色</td></tr>
+<tr><td><code>menuButtonColor</code></td><td><code>menu-button-color</code></td><td><code>#b3de73</code></td><td>按鈕圖示色</td></tr>
 <tr><td><code>menuButtonSize</code></td><td><code>menu-button-size</code></td><td><code>1.25rem</code></td><td>按鈕圖示大小</td></tr>
 <tr><td><code>menuButtonIconPush</code></td><td><code>menu-button-icon-push</code></td><td>—</td><td>push 動作圖示（Bootstrap Icons class）</td></tr>
 <tr><td><code>menuButtonIconPull</code></td><td><code>menu-button-icon-pull</code></td><td>—</td><td>pull 動作圖示</td></tr>
@@ -892,7 +892,7 @@ hr.doc-hr{border:none;border-top:1px solid rgba(149,189,215,0.1);margin:0}
 <tbody>
 <tr><td><code>groupTitleFontSize</code></td><td><code>group-title-font-size</code></td><td>群組標題字體大小，預設 <code>1.125rem</code></td></tr>
 <tr><td><code>groupTitleColor</code></td><td><code>group-title-color</code></td><td>群組標題文字色，預設 <code>#1C1C1E</code></td></tr>
-<tr><td><code>groupTitleBgColor</code></td><td><code>group-title-bg-color</code></td><td>群組標題背景色，預設 <code>#C8DD5A</code></td></tr>
+<tr><td><code>groupTitleBgColor</code></td><td><code>group-title-bg-color</code></td><td>群組標題背景色，預設 <code>#b3de73</code></td></tr>
 <tr><td><code>groupTitlePadding</code></td><td><code>group-title-padding</code></td><td>群組標題內距，預設 <code>10px 12px</code></td></tr>
 <tr><td><code>groupCollapsedIcon</code></td><td><code>group-collapsed-icon</code></td><td>收合狀態圖示（Bootstrap Icons class）</td></tr>
 <tr><td><code>groupExpandedIcon</code></td><td><code>group-expanded-icon</code></td><td>展開狀態圖示</td></tr>
@@ -905,7 +905,7 @@ hr.doc-hr{border:none;border-top:1px solid rgba(149,189,215,0.1);margin:0}
 <tbody>
 <tr><td><code>carouselInterval</code></td><td><code>carousel-interval</code></td><td><code>4000</code></td><td>輪播間隔（毫秒），per-col 屬性可覆寫</td></tr>
 <tr><td><code>carouselIndicator</code></td><td><code>carousel-indicator</code></td><td><code>true</code></td><td>是否顯示讀秒進度條</td></tr>
-<tr><td><code>carouselIndicatorColor</code></td><td><code>carousel-indicator-color</code></td><td><code>#C8DD5A</code></td><td>進度條顏色（支援色名）</td></tr>
+<tr><td><code>carouselIndicatorColor</code></td><td><code>carousel-indicator-color</code></td><td><code>#b3de73</code></td><td>進度條顏色（支援色名）</td></tr>
 <tr><td><code>carouselIndicatorHeight</code></td><td><code>carousel-indicator-height</code></td><td><code>3px</code></td><td>進度條粗細</td></tr>
 </tbody>
 </table>
@@ -1001,7 +1001,7 @@ const PREVIEWS = {
     names.forEach(name => {
       const id = uid();
       html += `<div>
-        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;color:#95BDD7;text-transform:uppercase;margin-bottom:6px">${name}</div>
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;color:#95c9de;text-transform:uppercase;margin-bottom:6px">${name}</div>
         <div id="${id}">
           <dual-col>範例</dual-col>
           <dual-col>值</dual-col>

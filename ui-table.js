@@ -4,16 +4,16 @@
   var BRAND = {
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    special:  '#C8DD5A',
+    special:  '#b3de73',
     warning:  '#F08080',
     salmon:   '#E5C3B3',
-    sky:      '#62C8F0',
+    sky:      '#95c9de',
     ocean:    '#0ABDC6',
-    safe:     '#319960',
+    safe:     '#299459',
     vanilla:  '#DBEDD8',
     yellow:   '#DECA4B',
-    info:     '#79B6FA',
-    stone:    '#95BDD7',
+    info:     '#1E65C7',
+    stone:    '#95c9de',
     indigo:   '#9B72CF',
     pink:     '#FFB3D9',
     focus:    '#ff2a92',
@@ -81,7 +81,7 @@
     '3': 'linear-gradient(135deg,#1c0900 0%,#6b3000 50%,#EDA109 100%)',
     '4': 'linear-gradient(135deg,#1a0610 0%,#7a2040 50%,#FFB3D9 100%)',
     '5': 'linear-gradient(135deg,#041208 0%,#083820 50%,#0DA591 100%)',
-    '6': 'linear-gradient(135deg,#060c1e 0%,#1a3580 50%,#79B6FA 80%,#9B72CF 100%)'
+    '6': 'linear-gradient(135deg,#060c1e 0%,#1a3580 50%,#1E65C7 80%,#9B72CF 100%)'
   };
 
   var MASK_GRAD_TEXT = '#DBEDD8';

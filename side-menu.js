@@ -252,45 +252,45 @@ side-menu[theme="dark"] {
   --sm-divider         : #1d1e1d;
   --sm-text            : #C6C7BD;
   --sm-text-muted      : rgba(198,199,189,0.91);  /* ↑ 亮度提升 */
-  --sm-sub-c           : rgba(149,189,215,0.78);  /* ↑ 亮度提升 */
-  --sm-sub-hover-c     : rgba(149,189,215,0.88);
+  --sm-sub-c           : rgba(149,201,222,0.78);  /* ↑ 亮度提升 */
+  --sm-sub-hover-c     : rgba(149,201,222,0.88);
   --sm-hover-bg        : rgba(198,199,189,0.05);
-  --sm-active-bg       : rgba(200,221,90,0.16);   /* ↑ 對比加強 */
-  --sm-label           : rgba(149,189,215,0.35);
-  --sm-label-active    : rgba(149,189,215,0.6);
-  --sm-label-line      : rgba(149,189,215,0.12);
+  --sm-active-bg       : rgba(179,222,115,0.16);   /* ↑ 對比加強 */
+  --sm-label           : rgba(149,201,222,0.35);
+  --sm-label-active    : rgba(149,201,222,0.6);
+  --sm-label-line      : rgba(149,201,222,0.12);
 
   /* col=1 accent（黃綠）*/
-  --sm-accent          : #C8DD5A;
-  --sm-accent-sub-c    : rgba(200,221,90,0.6);
+  --sm-accent          : #b3de73;
+  --sm-accent-sub-c    : rgba(179,222,115,0.6);
 
   /* col=2 accent（天藍）*/
-  --sm-accent-2        : #62C8F0;
-  --sm-accent-2-dim    : rgba(98,200,240,0.22);
-  --sm-accent-2-sub    : rgba(98,200,240,0.76);
+  --sm-accent-2        : #95c9de;
+  --sm-accent-2-dim    : rgba(149,201,222,0.22);
+  --sm-accent-2-sub    : rgba(149,201,222,0.76);
 
   /* 指示條 */
-  --sm-bar-hover-c     : rgba(200,221,90,0.32);
-  --sm-bar-active-c    : #C8DD5A;
+  --sm-bar-hover-c     : rgba(179,222,115,0.32);
+  --sm-bar-active-c    : #b3de73;
 
   /* icon（共用）—— 預設狀態明顯一些 */
   --sm-icon-bg         : rgba(198,199,189,0.07);  /* ↑ */
   --sm-icon-bdr        : rgba(198,199,189,0.13);  /* ↑ */
   --sm-icon-c          : rgba(198,199,189,0.58);  /* ↑ 亮度提升 */
   --sm-icon-hover-bg   : rgba(198,199,189,0.11);
-  --sm-icon-hover-bdr  : rgba(200,221,90,0.25);
+  --sm-icon-hover-bdr  : rgba(179,222,115,0.25);
   --sm-icon-hover-c    : rgba(198,199,189,0.82);
-  --sm-icon-active-bg  : rgba(200,221,90,0.16);   /* ↑ */
-  --sm-icon-active-bdr : rgba(200,221,90,0.5);    /* ↑ */
+  --sm-icon-active-bg  : rgba(179,222,115,0.16);   /* ↑ */
+  --sm-icon-active-bdr : rgba(179,222,115,0.5);    /* ↑ */
 
   /* 雙欄卡片 */
   --sm-dbl-bg           : rgba(198,199,189,0.04);
   --sm-dbl-bdr          : rgba(198,199,189,0.11);
   --sm-dbl-hover-bg     : rgba(198,199,189,0.07);
-  --sm-dbl-hover-bdr    : rgba(98,200,240,0.28);
-  --sm-dbl-active-bg    : rgba(98,200,240,0.10);
-  --sm-dbl-icon-active-bg : rgba(98,200,240,0.16);
-  --sm-dbl-icon-active-bdr: rgba(98,200,240,0.40);
+  --sm-dbl-hover-bdr    : rgba(149,201,222,0.28);
+  --sm-dbl-active-bg    : rgba(149,201,222,0.10);
+  --sm-dbl-icon-active-bg : rgba(149,201,222,0.16);
+  --sm-dbl-icon-active-bdr: rgba(149,201,222,0.40);
 }
 
 /* ═══════════════════════════════════════════

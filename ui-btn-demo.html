@@ -14,16 +14,16 @@
     line-height: 1.5; padding: 36px 48px; min-height: 100vh;
   }
   .page-title { font-size: 1.6rem; font-weight: 700; color: #C3A5E5; margin-bottom: 6px; }
-  .page-sub   { color: #95BDD7; font-size: 0.88rem; margin-bottom: 40px; }
+  .page-sub   { color: #95c9de; font-size: 0.88rem; margin-bottom: 40px; }
   .section    { margin-bottom: 48px; }
   .section-title {
-    font-size: 1rem; font-weight: 700; color: #C8DD5A;
+    font-size: 1rem; font-weight: 700; color: #b3de73;
     margin-bottom: 4px; letter-spacing: .04em; text-transform: uppercase;
   }
-  .section-desc { font-size: 0.85rem; color: #95BDD7; margin-bottom: 18px; line-height: 1.5; }
+  .section-desc { font-size: 0.85rem; color: #95c9de; margin-bottom: 18px; line-height: 1.5; }
   code {
     font-family: Consolas, monospace; font-size: 0.82rem;
-    background: #1A1C1A; color: #C8DD5A; padding: 1px 5px; border-radius: 3px;
+    background: #1A1C1A; color: #b3de73; padding: 1px 5px; border-radius: 3px;
   }
   .row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
   .info-card {
@@ -31,22 +31,22 @@
     padding: 14px 18px; margin-top: 8px; color: #C6C7BD;
     font-size: 0.95rem; line-height: 1.5;
   }
-  .info-card b { color: #C8DD5A; }
+  .info-card b { color: #b3de73; }
   .info-card p + p { margin-top: 8px; }
   .sep { border: none; border-top: 1px solid #1E201E; margin: 40px 0; }
   .ilabel {
-    display: inline-block; font-size: 0.76rem; color: #95BDD7;
+    display: inline-block; font-size: 0.76rem; color: #95c9de;
     background: #141614; border: 1px solid #2A2C2A;
     border-radius: 3px; padding: 2px 6px; margin-right: 4px;
     vertical-align: middle; white-space: nowrap;
   }
   .fix-badge {
     display: inline-block; font-size: 0.74rem; font-weight: 700;
-    background: #1a2a1a; color: #40C99A; border: 1px solid #40C99A;
+    background: #0C0D0C; color: #299459; border: 1px solid #299459;
     border-radius: 3px; padding: 1px 7px; margin-left: 8px; vertical-align: middle;
   }
   .demo-trigger {
-    background: #1A1C1A; color: #C8DD5A;
+    background: #1A1C1A; color: #b3de73;
     border: 1px solid #2A2C2A; border-radius: 6px;
     padding: 6px 14px; cursor: pointer; font-size: 0.85rem;
     font-family: inherit; transition: background .15s;
@@ -56,7 +56,7 @@
 </head>
 <body>
 
-<p class="page-title">ui-btn <span style="font-size:1rem;color:#95BDD7;font-weight:400">v1.1.0</span></p>
+<p class="page-title">ui-btn <span style="font-size:1rem;color:#95c9de;font-weight:400">v1.1.0</span></p>
 <p class="page-sub">
   v1.1.0 修正：① Chevron/open 切換失效（並排按鈕 next-sibling 偵測問題）
   ② animOpen 殘留 opacity inline style ③ 快速連點動畫衝突。新增：UiBtn.alert() 通知 API。
@@ -203,7 +203,7 @@
     自動滑入頁面頂部或底部，點擊整條或 × 可提早關閉。<code>duration:0</code> 不自動消失。<code>UiBtn.alert.clear()</code> 清除全部。
   </p>
 
-  <p style="color:#95BDD7;font-size:0.85rem;margin-bottom:8px">▸ 頂部通知（預設 position:"top"）</p>
+  <p style="color:#95c9de;font-size:0.85rem;margin-bottom:8px">▸ 頂部通知（預設 position:"top"）</p>
   <div class="row">
     <button class="demo-trigger"
       onclick="UiBtn.alert('操作成功！', { theme:'safe', icon:'bi-check-circle-fill' })">
@@ -227,7 +227,7 @@
     </button>
   </div>
 
-  <p style="color:#95BDD7;font-size:0.85rem;margin:16px 0 8px">▸ 底部通知（position:"bottom"）</p>
+  <p style="color:#95c9de;font-size:0.85rem;margin:16px 0 8px">▸ 底部通知（position:"bottom"）</p>
   <div class="row">
     <button class="demo-trigger"
       onclick="UiBtn.alert('檔案已儲存', { theme:'teal', icon:'bi-floppy-fill', position:'bottom' })">
@@ -247,7 +247,7 @@
     </button>
   </div>
 
-  <p style="color:#95BDD7;font-size:0.85rem;margin:16px 0 8px">▸ 連續堆疊 ＆ 清除</p>
+  <p style="color:#95c9de;font-size:0.85rem;margin:16px 0 8px">▸ 連續堆疊 ＆ 清除</p>
   <div class="row">
     <button class="demo-trigger" onclick="
       UiBtn.alert('第一則通知', { theme:'shell', icon:'bi-1-circle-fill' });

@@ -13,7 +13,7 @@
   --shell:   #C6C7BD;
   --sky:     #95c9de;
   --pink:    #FFB3D9;
-  --special: #C8DD5A;
+  --special: #b3de73;
   --bg2:     #111211;
   --bg3:     #161716;
 }
@@ -79,7 +79,7 @@ body {
 }
 .sidebar a i { font-size: 0.85rem; width: 15px; flex-shrink: 0; opacity: 0.8; }
 .sidebar a:hover, .sidebar a.is-active {
-  background: rgba(200,221,90,0.10);
+  background: rgba(179,222,115,0.10);
   color: var(--special);
 }
 .sidebar a.is-active i { opacity: 1; }
@@ -118,7 +118,7 @@ body {
 .hb-shell  { color: var(--shell);   border-color: var(--shell);   background: rgba(198,199,189,0.07); }
 .hb-sky    { color: var(--sky);     border-color: var(--sky);     background: rgba(149,201,222,0.07); }
 .hb-pink   { color: var(--pink);    border-color: var(--pink);    background: rgba(255,179,217,0.07); }
-.hb-special{ color: var(--special); border-color: var(--special); background: rgba(200,221,90,0.07); }
+.hb-special{ color: var(--special); border-color: var(--special); background: rgba(179,222,115,0.07); }
 
 /* ── Sections ── */
 .doc-section { margin-bottom: 64px; scroll-margin-top: 24px; }
@@ -184,8 +184,8 @@ body {
 .pill-opt  { color: var(--shell);   background: rgba(198,199,189,0.12); }
 .pill-req  { color: var(--pink);    background: rgba(255,179,217,0.13); }
 .pill-bool { color: var(--sky);     background: rgba(149,201,222,0.12); }
-.pill-grp  { color: var(--special); background: rgba(200,221,90,0.11); }
-.pill-new  { color: #C8DD5A;        background: rgba(200,221,90,0.18); border: 1px solid rgba(200,221,90,0.35); }
+.pill-grp  { color: var(--special); background: rgba(179,222,115,0.11); }
+.pill-new  { color: #b3de73;        background: rgba(179,222,115,0.18); border: 1px solid rgba(179,222,115,0.35); }
 
 /* ── Code Block ── */
 .cb-wrap { border-radius: 8px; overflow: hidden; border: 1px solid rgba(198,199,189,0.10); margin-bottom: 10px; }
@@ -212,7 +212,7 @@ body {
   transition: all 0.18s;
 }
 .copy-btn:hover { border-color: var(--special); color: var(--special); }
-.copy-btn.done  { border-color: #20c21d; color: #20c21d; }
+.copy-btn.done  { border-color: #299459; color: #299459; }
 .cb-wrap pre {
   margin: 0;
   padding: 18px 20px;
@@ -274,7 +274,7 @@ body {
 /* ── Inline code ── */
 p code, li code, td code {
   color: var(--special);
-  background: rgba(200,221,90,0.10);
+  background: rgba(179,222,115,0.10);
   padding: 1px 6px;
   border-radius: 4px;
   font-size: 0.85em;
@@ -310,9 +310,9 @@ p code, li code, td code {
   font-weight: 800;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(200,221,90,0.18);
+  background: rgba(179,222,115,0.18);
   color: var(--special);
-  border: 1px solid rgba(200,221,90,0.35);
+  border: 1px solid rgba(179,222,115,0.35);
   vertical-align: middle;
   margin-left: 6px;
   letter-spacing: 0.04em;
@@ -1300,7 +1300,7 @@ function copyCode(btn) {
 
 function showToast(msg, type) {
   const area  = document.getElementById('toast-area');
-  const color = type === 'warn' ? '#FFB3D9' : '#C8DD5A';
+  const color = type === 'warn' ? '#FFB3D9' : '#b3de73';
   const div   = document.createElement('div');
   div.style.cssText = 'background:#161716; border:1px solid ' + color + '; color:' + color + '; padding:10px 14px; border-radius:6px; font-size:0.875rem; margin-bottom:8px; animation:slideIn 0.2s ease; line-height:1.4; box-shadow:0 4px 16px rgba(0,0,0,0.5);';
   div.textContent = msg;
