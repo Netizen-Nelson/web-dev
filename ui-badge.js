@@ -1,8 +1,8 @@
 /*!
- * ui-badge.js  v2.0.0
+ * ui-badge.js  v2.1.0
  * ─────────────────────────────────────────────────────────────────────────────
  * <ui-badge>          Badge 元件 — 任意字符、5 種形狀、solid / outline
- * <ui-symbol-picker>  符號選擇器 — 8 分類、3 種模式（inline / compact / popup）
+ * <ui-symbol-picker>  符號選擇器 — 9 分類、3 種模式（inline / compact / popup）
  *
  * 一個 <script> 標籤同時啟用兩個元件。
  *
@@ -11,13 +11,16 @@
  *   Click: on-click attr · el.onClick · 'ui-badge:click' CustomEvent
  *
  * [ui-symbol-picker] 屬性
- *   mode       inline | compact | popup
- *   target     CSS 選擇器 → ui-badge 更新 char；input/textarea 更新 value
- *   trigger    Popup 模式的外部觸發元素選擇器
- *   placement  bottom（預設）| top
- *   category   預設開啟的分類 id
- *   on-select  全域函式名稱
- *   label      Popup 自動生成按鈕的文字（預設 "⬡ 符號"）
+ *   mode        inline | compact | popup
+ *   target      CSS 選擇器 → ui-badge 更新 char；input/textarea 更新 value
+ *   trigger     Popup 模式的外部觸發元素選擇器
+ *   placement   bottom（預設）| top
+ *   category    預設開啟的分類 id
+ *   categories  分類白名單，逗號分隔，同時決定顯示順序
+ *               省略 → 繼承全域設定（預設不含 emoji）
+ *               例：categories="geometric,arrow,emoji"
+ *   on-select   全域函式名稱
+ *   label       Popup 自動生成按鈕的文字（預設 "⬡ 符號"）
  *   Select: on-select attr · el.onSelect · 'ui-symbol-picker:select' CustomEvent
  *   detail: { char, category, categoryLabel, codepoint }
  *
@@ -25,7 +28,10 @@
  *   UIBadge.config({
  *     defaultSize, defaultShape, defaultFill, defaultStroke,
  *     defaultFontWeight, defaultRadius, theme:{bg,color,darkText,lightText},
- *     picker: { defaultMode, defaultCategory }
+ *     picker: {
+ *       defaultMode, defaultCategory,
+ *       categories: ['geometric','misc','arrow']  // 白名單決定所有 picker 預設分類
+ *     }
  *   })
  * ─────────────────────────────────────────────────────────────────────────────
  */
@@ -56,6 +62,9 @@
   const PCFG = {
     defaultMode:     'inline',
     defaultCategory: 'geometric',
+    // 全域預設白名單：不含 emoji（預設隱藏）
+    // 白名單同時決定 Tab 顯示順序
+    categories: ['geometric','drawing','misc','game','music','number','arrow','math'],
   };
 
   /* ═══════════════════════════════════════════════════════════════════════════
@@ -101,6 +110,21 @@
         '∈','∉','∩','∪','⊂','⊃','⊆','⊇',
         '∧','∨','¬','∀','∃','≈','≡','≅','∝','⊕','⊗',
         'π','φ','θ','λ','μ','σ','α','β','γ','δ',
+      ],
+    },
+    // ── 表情符號（預設不在 PCFG.categories 白名單內，需明確開啟） ────────────
+    // 使用陣列形式避免 [...string] 對代理對的切割問題
+    {
+      id: 'emoji', label: '表情', compact: '表',
+      items: [
+        '😀','😃','😄','😁','😆','😅','😂','🤣',
+        '😊','😍','🥰','😘','😋','😎','🤩','🥳',
+        '😢','😭','😤','😡','😰','🤔','😴','🤒',
+        '👍','👎','👋','🤚','🙌','👏','💪','🤞',
+        '❤','🧡','💛','💚','💙','💜','🖤','💔',
+        '⭐','🌟','✨','💫','🔥','💧','🌈','🌙',
+        '🎉','🎊','🎈','🎁','🏆','🎯','🔑','💡',
+        '🍀','🌸','🌺','🍁','🐶','🐱','🦊','🐼',
       ],
     },
   ];
@@ -381,7 +405,7 @@ ui-symbol-picker { display: inline-block; }
     }
 
     static get observedAttributes() {
-      return ['mode','target','trigger','placement','category','on-select','label'];
+      return ['mode','target','trigger','placement','category','categories','on-select','label'];
     }
 
     connectedCallback() {
@@ -396,9 +420,11 @@ ui-symbol-picker { display: inline-block; }
     }
 
     attributeChangedCallback(name) {
+      // 'category' 直接更新目前分類（_panelInner 會做 fallback 驗證）
       if (name === 'category' && this.hasAttribute('category')) {
         this._cat = this.getAttribute('category');
       }
+      // 'categories' 白名單變更：_cat 可能不再有效，讓 _panelInner 自動降級
       if (this.isConnected) this._render();
     }
 
@@ -408,6 +434,22 @@ ui-symbol-picker { display: inline-block; }
     }
 
     _attr(k, d) { return this.hasAttribute(k) ? this.getAttribute(k) : d; }
+
+    /* ── 分類白名單（屬性 > 全域設定，順序即 Tab 順序） ─────────────────── */
+    _effectiveCategories() {
+      const ids = this.hasAttribute('categories')
+        ? this.getAttribute('categories').split(',').map(s => s.trim())
+        : PCFG.categories;
+      return ids.filter(id => SYM.some(c => c.id === id));
+    }
+
+    /* ── 確保 _cat 在白名單內，否則自動降級 ─────────────────────────────── */
+    _effectiveCat(cats) {
+      if (cats.includes(this._cat)) return this._cat;
+      const pref = this._attr('category', PCFG.defaultCategory);
+      if (cats.includes(pref)) return pref;
+      return cats[0] ?? null;
+    }
 
     /* ── 渲染 ─────────────────────────────────────────────────────────────── */
     _render() {
@@ -431,24 +473,36 @@ ui-symbol-picker { display: inline-block; }
     /* ── 面板內容 HTML ─────────────────────────────────────────────────────── */
     _panelInner(mode) {
       const compact = mode === 'compact';
-      const cat = SYM.find(c => c.id === this._cat) || SYM[0];
 
-      const tabs = SYM.map(c =>
-        `<button class="usp-tab${c.id === this._cat ? ' usp-on' : ''}" ` +
-        `data-cat="${c.id}" title="${c.label}">` +
-        (compact ? c.compact : c.label) +
-        `</button>`
-      ).join('');
+      // 套用白名單（決定可見分類與 Tab 順序）
+      const cats    = this._effectiveCategories();
+      const active  = this._effectiveCat(cats);
+      this._cat     = active;  // 同步，確保 _switchCat 時參照正確
 
-      const cells = cat.items.map(ch => this._cellHTML(ch)).join('');
+      const catData = SYM.find(c => c.id === active);
+
+      const tabs = cats.map(id => {
+        const c = SYM.find(s => s.id === id);
+        if (!c) return '';
+        return (
+          `<button class="usp-tab${id === active ? ' usp-on' : ''}" ` +
+          `data-cat="${id}" title="${c.label}">` +
+          (compact ? c.compact : c.label) +
+          `</button>`
+        );
+      }).join('');
+
+      const cells = catData ? catData.items.map(ch => this._cellHTML(ch)).join('') : '';
 
       return `<div class="usp-tabs">${tabs}</div>` +
              `<div class="usp-grid${compact ? ' usp-scr' : ''}">${cells}</div>`;
     }
 
     _cellHTML(ch) {
-      const cp = 'U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
-      // 對 data-char 中的雙引號轉義
+      // 支援多碼點字符（emoji 等），逐一列出各 codepoint
+      const cp = [...ch]
+        .map(c => 'U+' + c.codePointAt(0).toString(16).toUpperCase().padStart(4, '0'))
+        .join(' ');
       const safe = ch.replace(/"/g, '&quot;');
       return `<button class="usp-cell" data-char="${safe}" title="${ch}  ${cp}">${ch}</button>`;
     }
@@ -466,6 +520,8 @@ ui-symbol-picker { display: inline-block; }
 
     /* ── 切換分類（只更新格子，不重繪整個元件） ────────────────────────── */
     _switchCat(catId) {
+      // 驗證：目標分類必須在白名單內
+      if (!this._effectiveCategories().includes(catId)) return;
       const cat = SYM.find(c => c.id === catId);
       if (!cat) return;
       this._cat = catId;
@@ -618,6 +674,8 @@ ui-symbol-picker { display: inline-block; }
         const p = opts.picker;
         if (p.defaultMode     !== undefined) PCFG.defaultMode     = p.defaultMode;
         if (p.defaultCategory !== undefined) PCFG.defaultCategory = p.defaultCategory;
+        // categories 白名單：覆寫全域預設（陣列順序 = Tab 顯示順序）
+        if (Array.isArray(p.categories)) PCFG.categories = [...p.categories];
       }
     },
   };

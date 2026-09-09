@@ -523,6 +523,42 @@ document.addEventListener(
 
       </div>
 
+      <!-- 分類白名單篩選示範 -->
+      <div style="margin-bottom:22px;">
+        <div class="pm-lbl">categories 白名單示範（compact 模式）</div>
+        <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;">
+
+          <div>
+            <p style="margin:0 0 8px;font-size:1rem;color:var(--text-dim);">
+              categories="geometric,arrow,number"
+            </p>
+            <ui-symbol-picker mode="compact"
+              categories="geometric,arrow,number"
+              target="#charIn"></ui-symbol-picker>
+          </div>
+
+          <div>
+            <p style="margin:0 0 8px;font-size:1rem;color:var(--text-dim);">
+              categories="drawing,math"
+            </p>
+            <ui-symbol-picker mode="compact"
+              categories="drawing,math"
+              category="math"
+              target="#charIn"></ui-symbol-picker>
+          </div>
+
+          <div>
+            <p style="margin:0 0 8px;font-size:1rem;color:var(--text-dim);">
+              categories="emoji,misc,game" &nbsp;<span style="color:var(--focus);">← 開啟表情符號</span>
+            </p>
+            <ui-symbol-picker mode="compact"
+              categories="emoji,misc,game"
+              target="#charIn"></ui-symbol-picker>
+          </div>
+
+        </div>
+      </div>
+
       <!-- 事件紀錄 -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <span class="card-ttl" style="margin:0;">ui-symbol-picker:select 事件</span>
