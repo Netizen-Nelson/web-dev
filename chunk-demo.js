@@ -1,6 +1,6 @@
 (function (win, doc) {
   'use strict';
-  const CSS_ID = '__chunk-demo-v3__';
+  const CSS_ID = '__chunk-demo-v6__';
   if (!doc.getElementById(CSS_ID)) {
     const s = doc.createElement('style');
     s.id = CSS_ID;
@@ -18,29 +18,18 @@ chunk-demo { display: block; }
   font-size: 1.1rem; line-height: 2.2;
 }
 
-/* ── 語塊錨點（下拉定位容器）────────────── */
+/* ── 語塊錨點（定位容器）────────────── */
 .cd-anchor { position: relative; display: inline-flex; align-items: center; }
-
-/*
-  長語塊獨佔整行：
-  cd-anchor-grp  = 錨點 + 緊接標點的包裝層（同為直接 flex 子項）
-  cd-anchor--full 套用於 .cd-anchor 或 .cd-anchor-grp，讓其獨佔整行
-*/
-.cd-anchor-grp {
-  display: inline-flex;
-  align-items: center;
-}
-.cd-anchor--full {
-  flex-basis: 100%;
-}
+.cd-anchor-grp { display: inline-flex; align-items: center; }
+.cd-anchor--full { flex-basis: 100%; }
 
 /* ── 語塊按鈕 ───────────────────────────── */
 .cd-btn {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 4px 10px 4px 9px;
-  border-radius: 7px;
-  border: 1.5px solid transparent;
-  font-family: inherit; font-size: 0.95rem; line-height: 1.4;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  font-family: inherit; font-size: 0.95rem; line-height: 1.35;
   cursor: pointer;
   transition: filter .16s ease, box-shadow .16s ease;
   white-space: nowrap;
@@ -49,28 +38,33 @@ chunk-demo { display: block; }
 .cd-btn:hover         { filter: brightness(1.2); }
 .cd-btn.is-open       { box-shadow: 0 0 0 3px rgba(255,255,255,.12); filter: brightness(1.18); }
 
-.cd-b-icon { font-size: .88em; }
-.cd-b-text { font-weight: 500; }
-.cd-b-arr  { font-size: .68em; opacity: .55; transition: transform .18s ease; margin-left: 1px; }
+.cd-b-icon { font-size: .9em; }
+.cd-b-text { font-weight: 500; display: inline-block; }
+.cd-b-arr  { font-size: .68em; opacity: .66; transition: transform .18s ease; margin-left: 1px; }
 .cd-btn.is-open .cd-b-arr { transform: rotate(180deg); }
+
+/* dot / dots-ext mode：隱藏箭頭 */
+.cd-btn.cd-btn--dot .cd-b-arr,
+.cd-btn.cd-btn--ext .cd-b-arr { display: none; }
+
+/* dots-ext：點按時短暫縮放回饋 */
+.cd-btn.cd-btn--ext { cursor: pointer; }
+.cd-btn.cd-btn--ext:active { transform: scale(.96); transition: transform .08s ease; }
 
 /* ── 遮罩模式（mask-mode）────────────────── */
 .cd-btn.is-masked .cd-b-text {
   background   : var(--cd-mask-bg, #252625);
   color        : transparent;
-  border-radius: 4px;
+  border-radius: 3px;
   padding      : 0 10px;
   min-width    : 48px;
-  display      : inline-block;
   user-select  : none;
   transition   : none;
 }
 .cd-btn.is-masked:hover .cd-b-text {
   background: color-mix(in srgb, var(--cd-mask-bg, #252625) 80%, white);
 }
-.cd-btn.is-masked.is-open {
-  box-shadow: 0 0 0 3px rgba(255,255,255,.12);
-}
+.cd-btn.is-masked.is-open { box-shadow: 0 0 0 3px rgba(255,255,255,.12); }
 
 /* ── 下拉選單 ───────────────────────────── */
 .cd-dd {
@@ -80,33 +74,27 @@ chunk-demo { display: block; }
   border: 1px solid; border-radius: 10px; overflow: hidden;
   box-shadow: 0 16px 44px rgba(0,0,0,.72);
   min-width: 240px; max-width: 420px;
-  /* 預設往下展開：起始稍高並縮小 */
   opacity: 0; transform: translateY(-5px) scale(.985);
   pointer-events: none;
   transition: opacity .17s ease, transform .17s ease;
 }
-/* 往上翻轉：起始稍低並縮小，動畫方向對調 */
 .cd-dd.cd-dd--up {
-  top: auto;
+  top: auto; bottom: calc(100% + 6px);
   transform: translateY(5px) scale(.985);
 }
-.cd-dd.is-open {
-  opacity: 1; transform: none; pointer-events: auto;
-}
+.cd-dd.is-open { opacity: 1; transform: none; pointer-events: auto; }
 
-/* 下拉標題（僅在 chunk.label 非空時渲染）*/
 .cd-dd-head {
   display: flex; align-items: center; gap: 7px;
   padding: 8px 13px 7px;
   border-bottom: 1px solid rgba(255,255,255,.07);
 }
 .cd-h-lbl {
-  font-size: .67rem; font-weight: 700;
+  font-size: .7rem; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
-  color: #1E65C7;
+  color: #95BDD7;
 }
 
-/* Level 列 */
 .cd-lv {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 10px 14px;
@@ -118,34 +106,31 @@ chunk-demo { display: block; }
 .cd-lv.is-sel     { background: rgba(255,255,255,.07); }
 .cd-lv.is-sel::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-  width: 3px; background: var(--sel-bar, var(--lc, #C6C7BD)); border-radius: 0 2px 2px 0;
+  width: 3px; background: var(--sel-bar, var(--lc, #C6C7BD));
+  border-radius: 0 2px 2px 0;
 }
-
-/* 圓點（show-dots=false 時不渲染此元素）*/
 .cd-lv-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--lc, #C6C7BD); flex-shrink: 0; margin-top: 5px;
 }
-
 .cd-lv-text { font-size: .91rem; line-height: 1.5; color: #9da09a; white-space: normal; }
 .cd-lv.is-sel .cd-lv-text { color: #dde0d8; }
 
 /* ── 整句預覽 ───────────────────────────── */
 .cd-preview {
-  margin-top: 1px; padding: 3px 6px;
-  border-left: 3px solid var(--pvb, #b3de73);
+  margin-top: 1px; padding: 3px;
+  border-left: 3px solid var(--pvb, #C8DD5A);
   border-radius: 0 6px 6px 0;
   background: var(--pvbg, rgba(255,255,255,.035));
 }
 .cd-pv-text { font-size: .9rem; font-style: italic; color: var(--pvt, #7a8078); }
 
 .cd-translation {
-  margin-top: 1px; padding: 3px 6px;
+  margin-top: 1px; padding: 3px;
   margin-left: var(--trl-indent, 0px);
   border-left: 3px solid var(--trlb, #C6C7BD);
   border-radius: 0 6px 6px 0;
   background: rgba(255,255,255,.025);
-  transition: opacity .2s ease;
 }
 .cd-tr-text {
   font-size: .9rem; color: var(--trlc, #8C9088);
@@ -153,54 +138,140 @@ chunk-demo { display: block; }
 }
 
 .cd-note {
-  margin-top: 1px; padding: 3px 6px;
+  margin-top: 1px; padding: 3px;
   margin-left: var(--note-indent, 0px);
   border-left: 3px solid var(--noteb, #C6C7BD);
   border-radius: 0 6px 6px 0;
   background: rgba(255,255,255,.018);
-  transition: opacity .2s ease;
 }
 .cd-note-text {
-  font-size: .85rem; color: var(--notec, #6e7270);
+  font-size: .9rem; color: var(--notec, #6e7270);
   letter-spacing: .02em; line-height: 1.3; font-style: italic;
 }
 
-/* ── 鎖定語塊（等待外部 ui-btn 解鎖）── */
-.cd-btn.is-locked {
-  opacity: 0.36;
-  cursor: not-allowed;
-}
+/* ── 鎖定語塊 ── */
+.cd-btn.is-locked { opacity: 0.48; cursor: not-allowed; }
 .cd-btn.is-locked:hover { filter: none !important; }
 .cd-btn.is-locked:active { transform: none !important; }
-/* 鎖定時箭頭變鎖頭圖示（CSS 替換內容）*/
-.cd-btn.is-locked .cd-b-arr {
-  opacity: 1;
-  font-style: normal;
+.cd-btn.is-locked .cd-b-arr { opacity: 1; font-style: normal; }
+
+/* ══ 圓點浮層（mode="dots"）══════════════════════ */
+.cd-dots-pill {
+  position: absolute;
+  top: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  translate: 0 -5px;
+  scale: 0.90;
+  z-index: 9999;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  border-radius: 99px;
+  border: 1px solid;
+  box-shadow: 0 10px 32px rgba(0,0,0,.72);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .17s ease, translate .17s ease, scale .17s ease;
+  white-space: nowrap;
 }
+.cd-dots-pill--up {
+  top: auto; bottom: calc(100% + 6px);
+  translate: 0 5px;
+}
+.cd-dots-pill.is-open {
+  opacity: 1; translate: 0 0; scale: 1; pointer-events: auto;
+}
+
+/* ══ 圓點面板（mode="dots-ext"）══════════════════ */
+.cd-dots-panel {
+  border-radius: 10px;
+  border: 1px solid;
+  padding: 9px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.cd-dots-panel--top  { margin-bottom: 9px; }
+.cd-dots-panel--bottom { margin-top: 9px; }
+
+/* 每一個 chunk 的橫列 */
+.cd-dp-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 3px;
+  border-radius: 8px;
+  transition: background .18s ease;
+}
+
+/* pulse 高亮動畫（句子框內按鈕點擊時觸發）*/
+@keyframes cd-row-pulse {
+  0%   { background: transparent; }
+  25%  { background: rgba(255,255,255,.09); }
+  100% { background: transparent; }
+}
+.cd-dp-row.is-pulsed { animation: cd-row-pulse .45s ease forwards; }
+
+/* {N} 標籤（有 label 屬性時改用內文字型，由 JS 處理）*/
+.cd-dp-label {
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: .9rem;
+  letter-spacing: .03em;
+  min-width: 36px;
+  flex-shrink: 0;
+  user-select: none;
+  opacity: .8;
+  white-space: nowrap;
+}
+
+/* 圓點容器（dots mode 和 dots-ext panel 共用 .cd-dp-dot）*/
+.cd-dp-dots {
+  display: flex; align-items: center; gap: 16px;
+}
+
+/* ── 共用圓點樣式 ── */
+.cd-dp-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  cursor: pointer; flex-shrink: 0;
+  opacity: .7;
+  transition: opacity .14s ease, transform .14s ease, box-shadow .14s ease;
+}
+.cd-dp-dot:hover    { opacity: .75; transform: scale(1.5); }
+.cd-dp-dot.is-active {
+  opacity: 1;
+  transform: scale(1.5);
+  box-shadow: 0 0 0 2.5px rgba(255,255,255,.22);
+}
+
+/* 文字切換動畫 (slide + fade) */
+@keyframes cd-txt-out {
+  0%   { opacity: 1; transform: translateY(0);     }
+  100% { opacity: 0; transform: translateY(-11px); }
+}
+@keyframes cd-txt-in {
+  0%   { opacity: 0; transform: translateY(11px); }
+  100% { opacity: 1; transform: translateY(0);    }
+}
+.cd-b-text.cd-anim-out { animation: cd-txt-out .14s ease forwards; }
+.cd-b-text.cd-anim-in  { animation: cd-txt-in  .14s ease forwards; }
     `.trim();
     (doc.head || doc.documentElement).appendChild(s);
   }
 
-  /* ─────────────────────────────────────────────────────
-     預設設定
-  ───────────────────────────────────────────────────── */
   const DEFAULTS = {
     themes: {
       shell:    { border: '#C6C7BD', text: '#C6C7BD', bg: 'rgba(198,199,189,.09)' },
       lavender: { border: '#C3A5E5', text: '#C3A5E5', bg: 'rgba(195,165,229,.09)' },
-      special:  { border: '#b3de73', text: '#b3de73', bg: 'rgba(179,222,115,.09)'  },
+      special:  { border: '#C8DD5A', text: '#C8DD5A', bg: 'rgba(200,221,90,.09)'  },
       warning:  { border: '#F08080', text: '#F08080', bg: 'rgba(240,128,128,.09)' },
       salmon:   { border: '#E5C3B3', text: '#E5C3B3', bg: 'rgba(229,195,179,.09)' },
-      sky:      { border: '#95c9de', text: '#95c9de', bg: 'rgba(149,201,222,.09)'  },
-      ocean:    { border: '#0ABDC6', text: '#0ABDC6', bg: 'rgba(10,189,198,.09)' },
-      safe:     { border: '#299459', text: '#299459', bg: 'rgba(41,148,89,.09)'  },
+      sky:      { border: '#08A9D1', text: '#08A9D1', bg: 'rgba(8,169,209,.09)'   },
+      safe:     { border: '#40C99A', text: '#40C99A', bg: 'rgba(64,201,154,.09)'  },
       vanilla:  { border: '#DBEDD8', text: '#DBEDD8', bg: 'rgba(219,237,216,.09)' },
-      focus:    { border: '#E0BE79', text: '#E0BE79', bg: 'rgba(224,190,121,.09)' },
+      focus:    { border: '#A0CF72', text: '#A0CF72', bg: 'rgba(160,207,114,.09)' },
       yellow:   { border: '#DECA4B', text: '#DECA4B', bg: 'rgba(222,202,75,.09)'  },
-      info:     { border: '#1E65C7', text: '#1E65C7', bg: 'rgba(30,101,199,.09)' },
-      stone:    { border: '#95c9de', text: '#95c9de', bg: 'rgba(149,201,222,.09)' },
-      teal:     { border: '#0DA591', text: '#0DA591', bg: 'rgba(13,165,145,.09)'  },
-      indigo:   { border: '#9B72CF', text: '#9B72CF', bg: 'rgba(155,114,207,.09)' },
+      info:     { border: '#4285EB', text: '#4285EB', bg: 'rgba(66,133,235,.09)'  },
+      stone:    { border: '#95BDD7', text: '#95BDD7', bg: 'rgba(149,189,215,.09)' },
+      indigo:   { border: '#7B6CF0', text: '#7B6CF0', bg: 'rgba(123,108,240,.09)' },
       pink:     { border: '#FFB3D9', text: '#FFB3D9', bg: 'rgba(255,179,217,.09)' },
       orange:   { border: '#EDA109', text: '#EDA109', bg: 'rgba(237,161,9,.09)'   },
     },
@@ -208,16 +279,15 @@ chunk-demo { display: block; }
     chunkBorderWidth: '1.5px',
     chunkBorderStyle: 'solid',
 
-    /* 圓點色彩：由 3 種擴充至 8 種 */
     levelDotColors: {
-      1: '#299459',   /* safe    — 綠  */
-      2: '#DECA4B',   /* yellow  — 黃  */
-      3: '#C3A5E5',   /* lavender— 紫  */
-      4: '#95c9de',   /* sky     — 青  */
-      5: '#F08080',   /* warning — 紅  */
-      6: '#EDA109',   /* orange  — 橘  */
-      7: '#FFB3D9',   /* pink    — 粉  */
-      8: '#95c9de',   /* stone   — 藍灰 */
+      1: '#40C99A',
+      2: '#DECA4B',
+      3: '#C3A5E5',
+      4: '#0ABDC6',
+      5: '#F08080',
+      6: '#EDA109',
+      7: '#FFB3D9',
+      8: '#95BDD7',
     },
 
     fixedTextColor:     '#C6C7BD',
@@ -235,13 +305,6 @@ chunk-demo { display: block; }
     width:              null,
     dropdownWidth:      null,
     buttonWidth:        null,
-
-    /*
-      longChunkThreshold：
-      按鈕原生寬（scrollWidth）佔句子框可用寬的比例超過此值時，
-      自動對錨點加 .cd-anchor--full 使其獨佔整行。
-      可透過 long-chunk-threshold="0.4" 屬性覆寫。
-    */
     longChunkThreshold: 0.52,
 
     showTranslation:        false,
@@ -253,11 +316,11 @@ chunk-demo { display: block; }
     noteColor:       '#6e7270',
     noteBorderColor: null,
     noteIndent:      0,
+
+    mode:    'dropdown',   /* 'dropdown' | 'dots' | 'dots-ext' */
+    dotsPos: 'bottom',     /* 'bottom' | 'top'  — dots-ext 面板位置 */
   };
 
-  /* ─────────────────────────────────────────────────────
-     Custom Element
-  ───────────────────────────────────────────────────── */
   class ChunkDemo extends HTMLElement {
 
     static get observedAttributes() {
@@ -270,6 +333,8 @@ chunk-demo { display: block; }
         'note', 'show-note', 'note-indent',
         'long-chunk-threshold',
         'lock-chunks',
+        'mode',       /* 'dropdown' | 'dots' | 'dots-ext' */
+        'dots-pos',   /* 'bottom' | 'top'  */
       ];
     }
 
@@ -281,10 +346,12 @@ chunk-demo { display: block; }
       this._openId   = null;
       this._btns     = {};
       this._dds      = {};
+      this._pills    = {};
+      this._panel    = null;   /* dots-ext 面板參考 */
       this._ready    = false;
       this._revealed = new Set();
       this._ro       = null;
-      this._locked   = new Set();   /* chunk id 集合，鎖定中的語塊無法開啟下拉 */
+      this._locked   = new Set();
       this._docClick = () => this._close();
       this._docKey   = e => { if (e.key === 'Escape') this._close(); };
     }
@@ -293,7 +360,6 @@ chunk-demo { display: block; }
       doc.addEventListener('click',   this._docClick);
       doc.addEventListener('keydown', this._docKey);
 
-      /* ResizeObserver：元件寬度改變時重新判斷長語塊 */
       if (typeof ResizeObserver !== 'undefined') {
         this._ro = new ResizeObserver(() => {
           const bar = this.querySelector('.cd-bar');
@@ -316,7 +382,6 @@ chunk-demo { display: block; }
       if (this.isConnected && this._ready) this._init();
     }
 
-    /* ── 合併設定 ─────────────────────────── */
     _cfg() {
       const G = win.ChunkDemoConfig || {};
       let E = {};
@@ -370,7 +435,12 @@ chunk-demo { display: block; }
         if (!isNaN(v)) cfg.longChunkThreshold = v;
       }
 
-      /* 衍生值 */
+      const modeAttr = this.getAttribute('mode');
+      if (['dropdown','dots','dots-ext'].includes(modeAttr)) cfg.mode = modeAttr;
+
+      const dpAttr = this.getAttribute('dots-pos');
+      if (dpAttr === 'top' || dpAttr === 'bottom') cfg.dotsPos = dpAttr;
+
       cfg._pvColor   = cfg.previewBorderColor || cfg._theme.border;
       cfg._maskColor = cfg.maskColor || DEFAULTS.maskColor;
       cfg._trColor   = cfg.translationBorderColor || cfg._theme.border;
@@ -411,7 +481,6 @@ chunk-demo { display: block; }
       this._trans  = this.getAttribute('translation') || '';
       this._chunks = chunks;
 
-      /* 重新解析鎖定清單（只在 _init 時重置，_draw 不重置）*/
       const lcAttrRaw = this.getAttribute('lock-chunks') || '';
       this._locked = new Set(
         lcAttrRaw.split(',')
@@ -433,8 +502,10 @@ chunk-demo { display: block; }
     _draw() {
       const srcNodes = Array.from(this.querySelectorAll(':scope > cd-chunk'));
       this.innerHTML = '';
-      this._btns     = {};
-      this._dds      = {};
+      this._btns  = {};
+      this._dds   = {};
+      this._pills = {};
+      this._panel = null;
       srcNodes.forEach(n => this.appendChild(n));
 
       const cfg = this._cfg();
@@ -451,12 +522,21 @@ chunk-demo { display: block; }
         this.style.removeProperty('--cd-mask-bg');
       }
 
-      /* 句子框（含長語塊解析）*/
       const bar = this._buildBar(cfg);
       this.appendChild(bar);
-
-      /* 長語塊判斷（需等 DOM 插入後才能取得正確寬度）*/
       requestAnimationFrame(() => this._checkLongBtns(bar, cfg));
+
+      if (cfg.mode === 'dots-ext') {
+        const panel = this._mkDotsPanel(cfg);
+        if (cfg.dotsPos === 'top') {
+          this.insertBefore(panel, bar);   /* 插在 bar 之前 */
+          panel.classList.add('cd-dots-panel--top');
+        } else {
+          this.appendChild(panel);
+          panel.classList.add('cd-dots-panel--bottom');
+        }
+        this._panel = panel;
+      }
 
       /* 整句預覽 */
       const showPrev =
@@ -520,8 +600,7 @@ chunk-demo { display: block; }
       bar.style.borderColor = cfg.sentenceBorder;
 
       const PUNCT_RE = /^([.,!?;:…\u3002\uff0c\uff01\uff1f\uff1b\uff1a]+)([\s\S]*)$/;
-
-      const parts = this._sent.split(/(\{\d+\})/);
+      const parts    = this._sent.split(/(\{\d+\})/);
 
       for (let i = 0; i < parts.length; i++) {
         const part = parts[i];
@@ -562,7 +641,7 @@ chunk-demo { display: block; }
 
     _checkLongBtns(bar, cfg) {
       if (!cfg) cfg = this._cfg();
-      const padH      = 44;   /* padding-left 22 + padding-right 22 */
+      const padH      = 44;
       const barW      = bar.clientWidth - padH;
       if (barW <= 0) return;
 
@@ -575,24 +654,27 @@ chunk-demo { display: block; }
       });
     }
 
+    /* ── 建立錨點（三種模式分支）────────────── */
     _mkAnchor(chunk, cfg) {
-      const st    = this._state.find(s => s.id === chunk.id) || { level: 1 };
-      const lvNum = st.level;
-      const lvD   = chunk.levels.find(l => l.level === lvNum) || chunk.levels[0];
-      const th    = cfg._theme;
-      const bw    = cfg.chunkBorderWidth || '1.5px';
-      const bs    = cfg.chunkBorderStyle || 'solid';
-
-      const isMasked  = cfg.maskMode && !this._revealed.has(chunk.id);
-      const isLocked  = this._locked.has(chunk.id);
+      const st       = this._state.find(s => s.id === chunk.id) || { level: 1 };
+      const lvNum    = st.level;
+      const lvD      = chunk.levels.find(l => l.level === lvNum) || chunk.levels[0];
+      const th       = cfg._theme;
+      const bw       = cfg.chunkBorderWidth || '1.5px';
+      const bs       = cfg.chunkBorderStyle || 'solid';
+      const isMasked = cfg.maskMode && !this._revealed.has(chunk.id);
+      const isLocked = this._locked.has(chunk.id);
+      const mode     = cfg.mode;
 
       const anchor     = doc.createElement('div');
       anchor.className = 'cd-anchor';
 
       const btn     = doc.createElement('button');
       btn.className = 'cd-btn' +
-        (isMasked ? ' is-masked' : '') +
-        (isLocked  ? ' is-locked'  : '');
+        (isMasked          ? ' is-masked'   : '') +
+        (isLocked          ? ' is-locked'   : '') +
+        (mode === 'dots'   ? ' cd-btn--dot' : '') +
+        (mode === 'dots-ext' ? ' cd-btn--ext' : '');
       btn.style.cssText =
         `border-color:${th.border};border-width:${bw};border-style:${bs};` +
         `color:${th.text};background:${th.bg};`;
@@ -611,19 +693,34 @@ chunk-demo { display: block; }
       tx.innerHTML = lvD?.text ?? '—';
       btn.appendChild(tx);
 
-      const arr       = doc.createElement('span');
-      arr.className   = 'cd-b-arr';
-      arr.textContent = isLocked ? '🔒' : '▾';
-      arr.setAttribute('aria-hidden', 'true');
-      btn.appendChild(arr);
+      if (mode === 'dropdown') {
+        const arr       = doc.createElement('span');
+        arr.className   = 'cd-b-arr';
+        arr.textContent = isLocked ? '🔒' : '▾';
+        arr.setAttribute('aria-hidden', 'true');
+        btn.appendChild(arr);
+      }
 
-      btn.addEventListener('click', e => { e.stopPropagation(); this._toggle(chunk.id); });
+      if (mode === 'dots') {
+        btn.addEventListener('click', e => { e.stopPropagation(); this._toggleDot(chunk.id); });
+      } else if (mode === 'dots-ext') {
+        btn.addEventListener('click', e => { e.stopPropagation(); this._pingPanelRow(chunk.id); });
+      } else {
+        btn.addEventListener('click', e => { e.stopPropagation(); this._toggle(chunk.id); });
+      }
+
       this._btns[chunk.id] = btn;
       anchor.appendChild(btn);
 
-      const dd = this._mkDD(chunk, cfg, lvNum);
-      this._dds[chunk.id] = dd;
-      anchor.appendChild(dd);
+      if (mode === 'dots') {
+        const pill = this._mkDotPill(chunk, cfg, lvNum);
+        this._pills[chunk.id] = pill;
+        anchor.appendChild(pill);
+      } else if (mode === 'dropdown') {
+        const dd = this._mkDD(chunk, cfg, lvNum);
+        this._dds[chunk.id] = dd;
+        anchor.appendChild(dd);
+      }
 
       return anchor;
     }
@@ -682,6 +779,238 @@ chunk-demo { display: block; }
       return dd;
     }
 
+    _mkDotPill(chunk, cfg, currentLevel) {
+      const pill = doc.createElement('div');
+      pill.className = 'cd-dots-pill';
+      pill.style.background  = cfg.dropdownBg;
+      pill.style.borderColor = cfg.dropdownBorder;
+
+      chunk.levels.forEach(lv => {
+        const dotC    = cfg.levelDotColors[lv.level] || '#C6C7BD';
+        const isActive = lv.level === currentLevel;
+
+        const dot     = doc.createElement('span');
+        dot.className = 'cd-dp-dot' + (isActive ? ' is-active' : '');
+        dot.style.background = dotC;
+        dot.dataset.level    = String(lv.level);
+        dot.title = lv.text.replace(/<[^>]+>/g, '').trim();
+
+        dot.addEventListener('click', e => {
+          e.stopPropagation();
+          this._pickDot(chunk.id, lv.level);
+        });
+        pill.appendChild(dot);
+      });
+
+      return pill;
+    }
+
+    _mkDotsPanel(cfg) {
+      const panel = doc.createElement('div');
+      panel.className = 'cd-dots-panel';
+      panel.style.background  = cfg.dropdownBg;
+      panel.style.borderColor = cfg.dropdownBorder;
+
+      this._chunks.forEach(chunk => {
+        const st      = this._state.find(s => s.id === chunk.id) || { level: 1 };
+        const currLvl = st.level;
+        const isLocked = this._locked.has(chunk.id);
+
+        const row = doc.createElement('div');
+        row.className = 'cd-dp-row';
+        row.dataset.chunkId = String(chunk.id);
+
+        const lbl = doc.createElement('span');
+        lbl.className = 'cd-dp-label';
+        const hasLabel = typeof chunk.label === 'string' && chunk.label.trim() !== '';
+        lbl.textContent = hasLabel ? chunk.label.trim() : `{${chunk.id}}`;
+        lbl.style.color = cfg._theme.text;
+        if (hasLabel) lbl.style.fontFamily = 'inherit';
+        row.appendChild(lbl);
+
+        const dotsWrap = doc.createElement('span');
+        dotsWrap.className = 'cd-dp-dots';
+
+        chunk.levels.forEach(lv => {
+          const dotC    = cfg.levelDotColors[lv.level] || '#C6C7BD';
+          const isActive = lv.level === currLvl;
+
+          const dot = doc.createElement('span');
+          dot.className = 'cd-dp-dot' + (isActive ? ' is-active' : '');
+          dot.style.background = dotC;
+          dot.dataset.level    = String(lv.level);
+          dot.title = lv.text.replace(/<[^>]+>/g, '').trim();
+
+          if (!isLocked) {
+            dot.addEventListener('click', e => {
+              e.stopPropagation();
+              this._pickExt(chunk.id, lv.level);
+            });
+          } else {
+            dot.style.cursor = 'not-allowed';
+            dot.style.opacity = '0.2';
+          }
+
+          dotsWrap.appendChild(dot);
+        });
+
+        row.appendChild(dotsWrap);
+        panel.appendChild(row);
+      });
+
+      return panel;
+    }
+
+    _pickExt(id, level) {
+      const st = this._state.find(s => s.id === id);
+      if (!st) return;
+      if (st.level === level) return;
+
+      this._revealed.add(id);
+
+      const chunk = this._chunks.find(c => c.id === id);
+      const lvD   = chunk?.levels.find(l => l.level === level) || chunk?.levels[0];
+      if (!lvD) return;
+
+      const btn    = this._btns[id];
+      const txSpan = btn?.querySelector('.cd-b-text');
+
+      if (!txSpan) {
+        st.level = level;
+        this._draw();
+        return;
+      }
+
+      const ANIM_DUR = 140;
+
+      txSpan.classList.add('cd-anim-out');
+
+      setTimeout(() => {
+        st.level         = level;
+        txSpan.innerHTML = lvD.text;
+        txSpan.classList.remove('cd-anim-out');
+
+        if (btn.classList.contains('is-masked')) btn.classList.remove('is-masked');
+
+        txSpan.classList.add('cd-anim-in');
+        setTimeout(() => txSpan.classList.remove('cd-anim-in'), ANIM_DUR);
+
+        if (this._panel) {
+          const row = this._panel.querySelector(`.cd-dp-row[data-chunk-id="${id}"]`);
+          if (row) {
+            row.querySelectorAll('.cd-dp-dot').forEach(dot => {
+              dot.classList.toggle('is-active', parseInt(dot.dataset.level) === level);
+            });
+          }
+        }
+
+        this._updateSubs();
+      }, ANIM_DUR);
+    }
+
+    _pingPanelRow(id) {
+      if (!this._panel) return;
+      const row = this._panel.querySelector(`.cd-dp-row[data-chunk-id="${id}"]`);
+      if (!row) return;
+      row.classList.remove('is-pulsed');
+      void row.offsetWidth;                           /* 強制 reflow，重啟動畫 */
+      row.classList.add('is-pulsed');
+      row.addEventListener('animationend', () => row.classList.remove('is-pulsed'), { once: true });
+    }
+
+    _toggleDot(id) {
+      if (this._locked.has(id)) return;
+      if (this._openId === id) { this._close(); return; }
+      this._close();
+      this._openId = id;
+      this._btns[id]?.classList.add('is-open');
+
+      const pill = this._pills[id];
+      if (!pill) return;
+
+      const btn        = this._btns[id];
+      const btnRect    = btn.getBoundingClientRect();
+      const pillH      = pill.scrollHeight || 36;
+      const spaceBelow = win.innerHeight - btnRect.bottom;
+      const spaceAbove = btnRect.top;
+
+      if (spaceBelow < pillH + 16 && spaceAbove > pillH + 16) {
+        pill.classList.add('cd-dots-pill--up');
+      } else {
+        pill.classList.remove('cd-dots-pill--up');
+      }
+
+      pill.classList.add('is-open');
+
+      requestAnimationFrame(() => {
+        if (!this._pills[id]) return;
+        const r = pill.getBoundingClientRect();
+        if (r.right > win.innerWidth - 8) {
+          pill.style.left      = 'auto';
+          pill.style.right     = '0';
+          pill.style.transform = 'none';
+        } else if (r.left < 8) {
+          pill.style.left      = '0';
+          pill.style.right     = 'auto';
+          pill.style.transform = 'none';
+        }
+      });
+    }
+
+    _pickDot(id, level) {
+      const st = this._state.find(s => s.id === id);
+      if (!st) return;
+      if (st.level === level) { this._close(); return; }
+
+      this._revealed.add(id);
+      this._close();
+
+      const chunk = this._chunks.find(c => c.id === id);
+      const lvD   = chunk?.levels.find(l => l.level === level) || chunk?.levels[0];
+      if (!lvD) return;
+
+      const btn    = this._btns[id];
+      const txSpan = btn?.querySelector('.cd-b-text');
+
+      if (!txSpan) {
+        st.level = level;
+        this._draw();
+        return;
+      }
+
+      const ANIM_DUR = 140;
+
+      txSpan.classList.add('cd-anim-out');
+
+      setTimeout(() => {
+        st.level         = level;
+        txSpan.innerHTML = lvD.text;
+        txSpan.classList.remove('cd-anim-out');
+
+        if (btn.classList.contains('is-masked')) btn.classList.remove('is-masked');
+
+        txSpan.classList.add('cd-anim-in');
+        setTimeout(() => txSpan.classList.remove('cd-anim-in'), ANIM_DUR);
+
+        const pill = this._pills[id];
+        if (pill) {
+          pill.querySelectorAll('.cd-dp-dot').forEach(dot => {
+            dot.classList.toggle('is-active', parseInt(dot.dataset.level) === level);
+          });
+        }
+
+        this._updateSubs();
+      }, ANIM_DUR);
+    }
+
+    _updateSubs() {
+      const pvText = this.querySelector('.cd-pv-text');
+      if (pvText) pvText.innerHTML = this._full();
+
+      const trText = this.querySelector('.cd-tr-text');
+      if (trText) trText.innerHTML = this._fullTrans();
+    }
+
     _toggle(id) {
       if (this._locked.has(id)) return;
       if (this._openId === id) { this._close(); return; }
@@ -720,6 +1049,7 @@ chunk-demo { display: block; }
     _close() {
       if (this._openId === null) return;
       this._btns[this._openId]?.classList.remove('is-open');
+
       const dd = this._dds[this._openId];
       if (dd) {
         dd.classList.remove('is-open', 'cd-dd--up');
@@ -728,6 +1058,15 @@ chunk-demo { display: block; }
         dd.style.left   = '';
         dd.style.right  = '';
       }
+
+      const pill = this._pills[this._openId];
+      if (pill) {
+        pill.classList.remove('is-open', 'cd-dots-pill--up');
+        pill.style.left      = '';
+        pill.style.right     = '';
+        pill.style.transform = '';
+      }
+
       this._openId = null;
     }
 
@@ -771,7 +1110,6 @@ chunk-demo { display: block; }
     lockChunk(id) {
       const n = parseInt(id, 10);
       if (!isNaN(n) && !this._locked.has(n)) {
-        /* 若該 chunk 的下拉正開著，先關閉 */
         if (this._openId === n) this._close();
         this._locked.add(n);
         this._draw();
