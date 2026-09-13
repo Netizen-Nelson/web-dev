@@ -3,21 +3,21 @@
 .bp-text-fill-hover { color: #3a3a3a; }
 .bp-text-shell    { color: #C6C7BD; }
 .bp-text-lavender { color: #C3A5E5; }
-.bp-text-special  { color: #b3de73; }
-.bp-text-warning  { color: #F08080; }
+.bp-text-special  { color: #B3DE73; }
+.bp-text-warning  { color: #E6374B; }
 .bp-text-salmon   { color: #E5C3B3; }
-.bp-text-sky      { color: #95c9de; }
+.bp-text-sky      { color: #95C9DE; }
 .bp-text-safe     { color: #299459; }
 .bp-text-vanilla  { color: #DBEDD8; }
-.bp-text-yellow   { color: #DECA4B; }
-.bp-text-focus    { color: #E0BE79; }
-.bp-text-info     { color: #1E65C7; }
-.bp-text-stone    { color: #95c9de; }
-.bp-text-indigo   { color: #9B72CF; }
-.bp-text-pink     { color: #FFB3D9; }
+.bp-text-yellow   { color: #E3D322; }
+.bp-text-focus    { color: #3C7BCF; }
+.bp-text-info     { color: #2351DB; }
+.bp-text-stone    { color: #95C9DE; }
+.bp-text-indigo   { color: #7849C9; }
+.bp-text-pink     { color: #FF91D7; }
 .bp-text-orange   { color: #EDA109; }
 .bp-text-teal     { color: #0DA591; }
-.bp-text-ocean    { color: #0ABDC6; }
+.bp-text-ocean    { color: #1CCAE8; }
 
 .bp-bg-background { background-color: #0C0D0C; }
 .bp-bg-base       { background-color: #0C0D0C; }
@@ -25,42 +25,42 @@
 .bp-bg-fill-hover { background-color: #3a3a3a; }
 .bp-bg-shell      { background-color: #C6C7BD; }
 .bp-bg-lavender   { background-color: #C3A5E5; }
-.bp-bg-special    { background-color: #b3de73; }
-.bp-bg-warning    { background-color: #F08080; }
+.bp-bg-special    { background-color: #B3DE73; }
+.bp-bg-warning    { background-color: #E6374B; }
 .bp-bg-salmon     { background-color: #E5C3B3; }
-.bp-bg-sky        { background-color: #95c9de; }
+.bp-bg-sky        { background-color: #95C9DE; }
 .bp-bg-safe       { background-color: #299459; }
 .bp-bg-vanilla    { background-color: #DBEDD8; }
-.bp-bg-yellow     { background-color: #DECA4B; }
-.bp-bg-focus      { background-color: #E0BE79; }
-.bp-bg-info       { background-color: #1E65C7; }
-.bp-bg-stone      { background-color: #95c9de; }
-.bp-bg-indigo     { background-color: #9B72CF; }
-.bp-bg-pink       { background-color: #FFB3D9; }
+.bp-bg-yellow     { background-color: #E3D322; }
+.bp-bg-focus      { background-color: #3C7BCF; }
+.bp-bg-info       { background-color: #2351DB; }
+.bp-bg-stone      { background-color: #95C9DE; }
+.bp-bg-indigo     { background-color: #7849C9; }
+.bp-bg-pink       { background-color: #FF91D7; }
 .bp-bg-orange     { background-color: #EDA109; }
 .bp-bg-teal       { background-color: #0DA591; }
-.bp-bg-ocean      { background-color: #0ABDC6; }
+.bp-bg-ocean      { background-color: #1CCAE8; }
 
 .bp-border-base       { border: 1px solid #0C0D0C; }
 .bp-border-fill       { border: 1px solid #333333; }
 .bp-border-fill-hover { border: 1px solid #3a3a3a; }
 .bp-border-shell      { border: 1px solid #C6C7BD; }
 .bp-border-lavender   { border: 1px solid #C3A5E5; }
-.bp-border-special    { border: 1px solid #b3de73; }
-.bp-border-warning    { border: 1px solid #F08080; }
+.bp-border-special    { border: 1px solid #B3DE73; }
+.bp-border-warning    { border: 1px solid #E6374B; }
 .bp-border-salmon     { border: 1px solid #E5C3B3; }
-.bp-border-sky        { border: 1px solid #95c9de; }
+.bp-border-sky        { border: 1px solid #95C9DE; }
 .bp-border-safe       { border: 1px solid #299459; }
 .bp-border-vanilla    { border: 1px solid #DBEDD8; }
-.bp-border-yellow     { border: 1px solid #DECA4B; }
-.bp-border-focus      { border: 1px solid #E0BE79; }
-.bp-border-info       { border: 1px solid #1E65C7; }
-.bp-border-stone      { border: 1px solid #95c9de; }
-.bp-border-indigo     { border: 1px solid #9B72CF; }
-.bp-border-pink       { border: 1px solid #FFB3D9; }
+.bp-border-yellow     { border: 1px solid #E3D322; }
+.bp-border-focus      { border: 1px solid #3C7BCF; }
+.bp-border-info       { border: 1px solid #2351DB; }
+.bp-border-stone      { border: 1px solid #95C9DE; }
+.bp-border-indigo     { border: 1px solid #7849C9; }
+.bp-border-pink       { border: 1px solid #FF91D7; }
 .bp-border-orange     { border: 1px solid #EDA109; }
 .bp-border-teal       { border: 1px solid #0DA591; }
-.bp-border-ocean      { border: 1px solid #0ABDC6; }
+.bp-border-ocean      { border: 1px solid #1CCAE8; }
 /* ── Font sizes ──────────────────────────── */
 .fs-superlarge        { font-size: 3.75rem; }
 .fs-extralarge        { font-size: 3rem; }
@@ -170,7 +170,7 @@ blockquote::before {
 .bp-annotation {
     position: relative;
     display: inline-block;
-    border-bottom: 1px dashed var(--note-color, #95c9de);
+    border-bottom: 1px dashed var(--note-color, #95C9DE);
     padding-bottom: 1px;
     margin-bottom: 24px;
 }
@@ -188,7 +188,7 @@ blockquote::before {
 
 /* ── bp-hatch：45° 斜線框（不支援 border-radius） ────────── */
 .bp-hatch {
-  --hatch-color: #DECA4B;
+  --hatch-color: #E3D322;
   --hatch-line:  3px;
   --hatch-gap:   7px;
   border: 14px solid transparent;
@@ -212,17 +212,17 @@ blockquote::before {
 /* 色票（全部品牌色） */
 .bp-hatch-shell    { --hatch-color: #C6C7BD; }
 .bp-hatch-lavender { --hatch-color: #C3A5E5; }
-.bp-hatch-sky      { --hatch-color: #95c9de; }
-.bp-hatch-warning  { --hatch-color: #F08080; }
+.bp-hatch-sky      { --hatch-color: #95C9DE; }
+.bp-hatch-warning  { --hatch-color: #E6374B; }
 .bp-hatch-salmon   { --hatch-color: #E5C3B3; }
-.bp-hatch-ocean    { --hatch-color: #0ABDC6; }
+.bp-hatch-ocean    { --hatch-color: #1CCAE8; }
 .bp-hatch-safe     { --hatch-color: #299459; }
 .bp-hatch-teal     { --hatch-color: #0DA591; }
 .bp-hatch-vanilla  { --hatch-color: #DBEDD8; }
-.bp-hatch-yellow   { --hatch-color: #DECA4B; }
-.bp-hatch-focus    { --hatch-color: #e0be79; }
-.bp-hatch-info     { --hatch-color: #1E65C7; }
-.bp-hatch-indigo   { --hatch-color: #9B72CF; }
-.bp-hatch-pink     { --hatch-color: #FFB3D9; }
+.bp-hatch-yellow   { --hatch-color: #E3D322; }
+.bp-hatch-focus    { --hatch-color: #3C7BCF; }
+.bp-hatch-info     { --hatch-color: #2351DB; }
+.bp-hatch-indigo   { --hatch-color: #7849C9; }
+.bp-hatch-pink     { --hatch-color: #FF91D7; }
 .bp-hatch-orange   { --hatch-color: #EDA109; }
-.bp-hatch-special  { --hatch-color: #b3de73; }
+.bp-hatch-special  { --hatch-color: #B3DE73; }
