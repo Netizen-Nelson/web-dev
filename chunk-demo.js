@@ -92,7 +92,7 @@ chunk-demo { display: block; }
 .cd-h-lbl {
   font-size: .7rem; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
-  color: #95BDD7;
+  color: #95C9DE;
 }
 
 .cd-lv {
@@ -119,7 +119,7 @@ chunk-demo { display: block; }
 /* ── 整句預覽 ───────────────────────────── */
 .cd-preview {
   margin-top: 1px; padding: 3px;
-  border-left: 3px solid var(--pvb, #C8DD5A);
+  border-left: 3px solid var(--pvb, #B3DE73);
   border-radius: 0 6px 6px 0;
   background: var(--pvbg, rgba(255,255,255,.035));
 }
@@ -261,18 +261,17 @@ chunk-demo { display: block; }
     themes: {
       shell:    { border: '#C6C7BD', text: '#C6C7BD', bg: 'rgba(198,199,189,.09)' },
       lavender: { border: '#C3A5E5', text: '#C3A5E5', bg: 'rgba(195,165,229,.09)' },
-      special:  { border: '#C8DD5A', text: '#C8DD5A', bg: 'rgba(200,221,90,.09)'  },
-      warning:  { border: '#F08080', text: '#F08080', bg: 'rgba(240,128,128,.09)' },
+      special:  { border: '#B3DE73', text: '#B3DE73', bg: 'rgba(179,222,115,.09)' },
+      warning:  { border: '#E6374B', text: '#E6374B', bg: 'rgba(230,55,75,.09)'   },
       salmon:   { border: '#E5C3B3', text: '#E5C3B3', bg: 'rgba(229,195,179,.09)' },
-      sky:      { border: '#08A9D1', text: '#08A9D1', bg: 'rgba(8,169,209,.09)'   },
-      safe:     { border: '#40C99A', text: '#40C99A', bg: 'rgba(64,201,154,.09)'  },
+      sky:      { border: '#95C9DE', text: '#95C9DE', bg: 'rgba(149,201,222,.09)' },
+      safe:     { border: '#299459', text: '#299459', bg: 'rgba(41,148,89,.09)'   },
       vanilla:  { border: '#DBEDD8', text: '#DBEDD8', bg: 'rgba(219,237,216,.09)' },
-      focus:    { border: '#A0CF72', text: '#A0CF72', bg: 'rgba(160,207,114,.09)' },
-      yellow:   { border: '#DECA4B', text: '#DECA4B', bg: 'rgba(222,202,75,.09)'  },
-      info:     { border: '#4285EB', text: '#4285EB', bg: 'rgba(66,133,235,.09)'  },
-      stone:    { border: '#95BDD7', text: '#95BDD7', bg: 'rgba(149,189,215,.09)' },
-      indigo:   { border: '#7B6CF0', text: '#7B6CF0', bg: 'rgba(123,108,240,.09)' },
-      pink:     { border: '#FFB3D9', text: '#FFB3D9', bg: 'rgba(255,179,217,.09)' },
+      focus:    { border: '#3C7BCF', text: '#3C7BCF', bg: 'rgba(60,123,207,.09)'  },
+      yellow:   { border: '#E3D322', text: '#E3D322', bg: 'rgba(227,211,34,.09)'  },
+      info:     { border: '#2351DB', text: '#2351DB', bg: 'rgba(35,81,219,.09)'   },
+      indigo:   { border: '#7849C9', text: '#7849C9', bg: 'rgba(120,73,201,.09)'  },
+      pink:     { border: '#FF91D7', text: '#FF91D7', bg: 'rgba(255,145,215,.09)' },
       orange:   { border: '#EDA109', text: '#EDA109', bg: 'rgba(237,161,9,.09)'   },
     },
     defaultTheme:     'special',
@@ -280,14 +279,14 @@ chunk-demo { display: block; }
     chunkBorderStyle: 'solid',
 
     levelDotColors: {
-      1: '#40C99A',
-      2: '#DECA4B',
+      1: '#299459',
+      2: '#E3D322',
       3: '#C3A5E5',
-      4: '#0ABDC6',
-      5: '#F08080',
+      4: '#1CCAE8',
+      5: '#E6374B',
       6: '#EDA109',
-      7: '#FFB3D9',
-      8: '#95BDD7',
+      7: '#FF91D7',
+      8: '#95C9DE',
     },
 
     fixedTextColor:     '#C6C7BD',

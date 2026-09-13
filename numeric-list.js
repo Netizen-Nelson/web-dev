@@ -24,9 +24,9 @@
    * ═══════════════════════════════════════════════════════════════════ */
   var Config = {
     borderColor:        '#31332f',
-    borderHoverColor:   '#95c9de',   /* hover 邊框（global） */
+    borderHoverColor:   '#95C9DE',   /* hover 邊框（global） */
     borderActiveColor:  '#C3A5E5',
-    numberColor:        '#95c9de',   /* CSS 用，JS 端以 themeColor 優先 */
+    numberColor:        '#95C9DE',   /* CSS 用，JS 端以 themeColor 優先 */
     themeColor:         null,        /* 非 null 時，所有數字統一此色；null 則循環 accentColors */
     numberBg:           '#0d1b24',
     numberDivider:      '#1c2d38',
@@ -35,16 +35,16 @@
     activeBackground:   '#10192a',
 
     accentColors: [
-      '#95c9de',   /* sky     */
+      '#95C9DE',   /* sky     */
       '#C3A5E5',   /* lavender*/
-      '#0ABDC6',   /* ocean   */
-      '#b3de73',   /* special */
-      '#DECA4B',   /* yellow  */
+      '#1CCAE8',   /* ocean   */
+      '#B3DE73',   /* special */
+      '#E3D322',   /* yellow  */
       '#E5C3B3',   /* salmon  */
       '#0DA591',   /* teal    */
-      '#FFB3D9',   /* pink    */
+      '#FF91D7',   /* pink    */
       '#EDA109',   /* orange  */
-      '#9B72CF',   /* indigo  */
+      '#7849C9',   /* indigo  */
     ],
 
     fontSize:       '1.125rem',

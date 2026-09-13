@@ -278,24 +278,23 @@
   const THEMES = {
     dark:      { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' },
     lavender:  { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' }, // alias
-    sky:       { bg: '#071318', titleColor: '#95c9de', borderColor: '#95c9de' },
-    ocean:     { bg: '#071518', titleColor: '#0ABDC6', borderColor: '#0ABDC6' },
-    warning:   { bg: '#190d0d', titleColor: '#F08080', borderColor: '#F08080' },
+    sky:       { bg: '#071318', titleColor: '#95C9DE', borderColor: '#95C9DE' },
+    ocean:     { bg: '#041418', titleColor: '#1CCAE8', borderColor: '#1CCAE8' },
+    warning:   { bg: '#190d0d', titleColor: '#E6374B', borderColor: '#E6374B' },
     success:   { bg: '#091508', titleColor: '#299459', borderColor: '#299459' },
     safe:      { bg: '#091508', titleColor: '#299459', borderColor: '#299459' }, // alias
-    special:   { bg: '#111605', titleColor: '#b3de73', borderColor: '#b3de73' },
-    highlight: { bg: '#111605', titleColor: '#b3de73', borderColor: '#b3de73' }, // alias
-    note:      { bg: '#161205', titleColor: '#DECA4B', borderColor: '#DECA4B' },
-    yellow:    { bg: '#161205', titleColor: '#DECA4B', borderColor: '#DECA4B' }, // alias
+    special:   { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' },
+    highlight: { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' }, // alias
+    note:      { bg: '#141200', titleColor: '#E3D322', borderColor: '#E3D322' },
+    yellow:    { bg: '#141200', titleColor: '#E3D322', borderColor: '#E3D322' }, // alias
     salmon:    { bg: '#180e0a', titleColor: '#E5C3B3', borderColor: '#E5C3B3' },
-    pink:      { bg: '#180a12', titleColor: '#FFB3D9', borderColor: '#FFB3D9' },
-    stone:     { bg: '#0d1620', titleColor: '#95c9de', borderColor: '#95c9de' },
+    pink:      { bg: '#180a12', titleColor: '#FF91D7', borderColor: '#FF91D7' },
     orange:    { bg: '#181005', titleColor: '#EDA109', borderColor: '#EDA109' },
     vanilla:   { bg: '#171815', titleColor: '#DBEDD8', borderColor: '#DBEDD8' },
     teal:      { bg: '#061412', titleColor: '#0DA591', borderColor: '#0DA591' },
-    focus:     { bg: '#181408', titleColor: '#E0BE79', borderColor: '#E0BE79' },
-    indigo:    { bg: '#0e0a18', titleColor: '#9B72CF', borderColor: '#9B72CF' },
-    info:      { bg: '#08101a', titleColor: '#1E65C7', borderColor: '#1E65C7' },
+    focus:     { bg: '#070d16', titleColor: '#3C7BCF', borderColor: '#3C7BCF' },
+    indigo:    { bg: '#0e0a18', titleColor: '#7849C9', borderColor: '#7849C9' },
+    info:      { bg: '#060c1c', titleColor: '#2351DB', borderColor: '#2351DB' },
   };
 
   let config = {
