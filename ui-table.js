@@ -4,19 +4,18 @@
   var BRAND = {
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    special:  '#b3de73',
-    warning:  '#F08080',
+    special:  '#B3DE73',
+    warning:  '#E6374B',
     salmon:   '#E5C3B3',
-    sky:      '#95c9de',
-    ocean:    '#0ABDC6',
+    sky:      '#95C9DE',
+    ocean:    '#1CCAE8',
     safe:     '#299459',
     vanilla:  '#DBEDD8',
-    yellow:   '#DECA4B',
-    info:     '#1E65C7',
-    stone:    '#95c9de',
-    indigo:   '#9B72CF',
-    pink:     '#FFB3D9',
-    focus:    '#ff2a92',
+    yellow:   '#E3D322',
+    info:     '#2351DB',
+    indigo:   '#7849C9',
+    pink:     '#FF91D7',
+    focus:    '#3C7BCF',
     orange:   '#EDA109',
     teal:     '#0DA591'
   };
@@ -76,12 +75,12 @@
   }
 
   var MASK_GRADIENTS = {
-    '1': 'linear-gradient(135deg,#100820 0%,#2d1a4a 45%,#9B72CF 100%)',
-    '2': 'linear-gradient(135deg,#04121c 0%,#0a2e38 45%,#0ABDC6 100%)',
+    '1': 'linear-gradient(135deg,#0d0814 0%,#1e1040 45%,#7849C9 100%)',
+    '2': 'linear-gradient(135deg,#041418 0%,#073540 45%,#1CCAE8 100%)',
     '3': 'linear-gradient(135deg,#1c0900 0%,#6b3000 50%,#EDA109 100%)',
-    '4': 'linear-gradient(135deg,#1a0610 0%,#7a2040 50%,#FFB3D9 100%)',
+    '4': 'linear-gradient(135deg,#1a060e 0%,#5e1535 50%,#FF91D7 100%)',
     '5': 'linear-gradient(135deg,#041208 0%,#083820 50%,#0DA591 100%)',
-    '6': 'linear-gradient(135deg,#060c1e 0%,#1a3580 50%,#1E65C7 80%,#9B72CF 100%)'
+    '6': 'linear-gradient(135deg,#060c1e 0%,#162060 50%,#2351DB 80%,#7849C9 100%)'
   };
 
   var MASK_GRAD_TEXT = '#DBEDD8';

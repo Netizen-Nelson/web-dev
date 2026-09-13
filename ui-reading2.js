@@ -2,12 +2,12 @@
   'use strict';
 
   var BRAND = {
-    shell:    '#C6C7BD', lavender: '#C3A5E5', sky:     '#95c9de',
-    warning:  '#F08080', salmon:   '#E5C3B3', ocean:   '#0ABDC6',
+    shell:    '#C6C7BD', lavender: '#C3A5E5', sky:     '#95C9DE',
+    warning:  '#E6374B', salmon:   '#E5C3B3', ocean:   '#1CCAE8',
     safe:     '#299459', teal:     '#0DA591', vanilla: '#DBEDD8',
-    yellow:   '#DECA4B', focus:    '#e0be79', info:    '#1E65C7',
-    indigo:   '#9B72CF', pink:     '#FFB3D9', orange:  '#EDA109',
-    special:  '#b3de73'
+    yellow:   '#E3D322', focus:    '#3C7BCF', info:    '#2351DB',
+    indigo:   '#7849C9', pink:     '#FF91D7', orange:  '#EDA109',
+    special:  '#B3DE73'
   };
   var BG = '#0C0D0C';
 
