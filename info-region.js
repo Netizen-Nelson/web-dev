@@ -1,38 +1,38 @@
 (function () {
   'use strict';
 
-  /* ── 工具函式 ────────────────────────────────────────────────────── */
+  /* ── 工具函式 ── */
   const cap     = s => s.charAt(0).toUpperCase() + s.slice(1);
-  const addUnit = (val, unit) => {
-    if (!val) return null;
-    if (/[a-z%]$/i.test(String(val))) return String(val);
-    return val + unit;
+  const addUnit = (v, u) => {
+    if (!v) return null;
+    return /[a-z%]$/i.test(String(v)) ? String(v) : v + u;
   };
 
-  /* ── 品牌色 ─────────────────────────────────────────────────────── */
+  /* ── 品牌色票（與 ui-plus.js 同步）── */
   const BrandColors = {
     bg:       '#0C0D0C',
     region:   '#333333',
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    sky:      '#95c9de',
-    warning:  '#F08080',
+    sky:      '#82C8E5',
+    warning:  '#E6374B',
     salmon:   '#E5C3B3',
-    ocean:    '#0ABDC6',
-    safe:     '#299459',
+    ocean:    '#1CCAE8',
+    safe:     '#184B48',
     teal:     '#0DA591',
     vanilla:  '#DBEDD8',
-    yellow:   '#DECA4B',
-    focus:    '#e0be79',
-    info:     '#1E65C7',
-    indigo:   '#9B72CF',
-    pink:     '#FFB3D9',
+    yellow:   '#E3D322',
+    focus:    '#D4FFFC',
+    info:     '#2351DB',
+    indigo:   '#7849C9',
+    pink:     '#FF91D7',
     orange:   '#EDA109',
-    special:  '#b3de73',
-    stone:    '#95c9de',
+    special:  '#B3DE73',
+    stone:    '#82C8E5',
+    gold:     '#C9973F',
   };
 
-  /* ── 全域預設值 ─────────────────────────────────────────────────── */
+  /* ── 全域預設值 ── */
   const defaults = {
     defaultColor:       'sky',
     animDuration:       500,
@@ -80,76 +80,34 @@
 
   window.InfoRegionConfig = Object.assign({}, defaults, window.InfoRegionConfig || {});
 
-  /* ================================================================
-   * 靜態 CSS（不在執行期動態生成色彩 variant 迴圈）
-   * 動畫時長讀自 cfg，注入一次後不再重算
-   * ================================================================ */
+  /* ── CSS 注入（每頁只執行一次）── */
   let _stylesInjected = false;
 
   function injectStyles() {
     if (_stylesInjected) return;
     _stylesInjected = true;
 
-    const cfg  = window.InfoRegionConfig;
-    const vDur = cfg.animDuration + 'ms';
-    const hDur = cfg.horizontalAnimDur + 'ms';
+    const cfg    = window.InfoRegionConfig;
+    const vDur   = cfg.animDuration + 'ms';
+    const hDur   = cfg.horizontalAnimDur + 'ms';
     const defClr = BrandColors[cfg.defaultColor] || BrandColors.sky;
 
-    /* ── 靜態色彩 variant（硬編碼，不走迴圈） ── */
-    const COLOR_VARIANTS = `
-      info-region[active="true"][color="shell"]    { border-left-color: #C6C7BD; }
-      info-region[active="true"][color="lavender"] { border-left-color: #C3A5E5; }
-      info-region[active="true"][color="sky"]      { border-left-color: #95c9de; }
-      info-region[active="true"][color="warning"]  { border-left-color: #F08080; }
-      info-region[active="true"][color="salmon"]   { border-left-color: #E5C3B3; }
-      info-region[active="true"][color="ocean"]    { border-left-color: #0ABDC6; }
-      info-region[active="true"][color="safe"]     { border-left-color: #299459; }
-      info-region[active="true"][color="teal"]     { border-left-color: #0DA591; }
-      info-region[active="true"][color="vanilla"]  { border-left-color: #DBEDD8; }
-      info-region[active="true"][color="yellow"]   { border-left-color: #DECA4B; }
-      info-region[active="true"][color="focus"]    { border-left-color: #e0be79; }
-      info-region[active="true"][color="info"]     { border-left-color: #1E65C7; }
-      info-region[active="true"][color="indigo"]   { border-left-color: #9B72CF; }
-      info-region[active="true"][color="pink"]     { border-left-color: #FFB3D9; }
-      info-region[active="true"][color="orange"]   { border-left-color: #EDA109; }
-      info-region[active="true"][color="special"]  { border-left-color: #b3de73; }
-      info-region[active="true"][color="stone"]    { border-left-color: #95c9de; }`;
+    /* 色彩 variant — 自動從 BrandColors 生成，新增色票只需修改上方物件 */
+    const skip = new Set(['bg', 'region']);
 
-    const BTN_VARIANTS = `
-      .ir-btn--shell    { border-color: #C6C7BD; color: #C6C7BD; }
-      .ir-btn--shell:hover    { background: #C6C7BD22; }
-      .ir-btn--lavender { border-color: #C3A5E5; color: #C3A5E5; }
-      .ir-btn--lavender:hover { background: #C3A5E522; }
-      .ir-btn--sky      { border-color: #95c9de; color: #95c9de; }
-      .ir-btn--sky:hover      { background: #95c9de22; }
-      .ir-btn--warning  { border-color: #F08080; color: #F08080; }
-      .ir-btn--warning:hover  { background: #F0808022; }
-      .ir-btn--salmon   { border-color: #E5C3B3; color: #E5C3B3; }
-      .ir-btn--salmon:hover   { background: #E5C3B322; }
-      .ir-btn--ocean    { border-color: #0ABDC6; color: #0ABDC6; }
-      .ir-btn--ocean:hover    { background: #0ABDC622; }
-      .ir-btn--safe     { border-color: #299459; color: #299459; }
-      .ir-btn--safe:hover     { background: #29945922; }
-      .ir-btn--teal     { border-color: #0DA591; color: #0DA591; }
-      .ir-btn--teal:hover     { background: #0DA59122; }
-      .ir-btn--vanilla  { border-color: #DBEDD8; color: #DBEDD8; }
-      .ir-btn--vanilla:hover  { background: #DBEDD822; }
-      .ir-btn--yellow   { border-color: #DECA4B; color: #DECA4B; }
-      .ir-btn--yellow:hover   { background: #DECA4B22; }
-      .ir-btn--focus    { border-color: #e0be79; color: #e0be79; }
-      .ir-btn--focus:hover    { background: #e0be7922; }
-      .ir-btn--info     { border-color: #1E65C7; color: #1E65C7; }
-      .ir-btn--info:hover     { background: #1E65C722; }
-      .ir-btn--indigo   { border-color: #9B72CF; color: #9B72CF; }
-      .ir-btn--indigo:hover   { background: #9B72CF22; }
-      .ir-btn--pink     { border-color: #FFB3D9; color: #FFB3D9; }
-      .ir-btn--pink:hover     { background: #FFB3D922; }
-      .ir-btn--orange   { border-color: #EDA109; color: #EDA109; }
-      .ir-btn--orange:hover   { background: #EDA10922; }
-      .ir-btn--special  { border-color: #b3de73; color: #b3de73; }
-      .ir-btn--special:hover  { background: #b3de7322; }
-      .ir-btn--stone    { border-color: #95c9de; color: #95c9de; }
-      .ir-btn--stone:hover    { background: #95c9de22; }`;
+    const COLOR_VARIANTS = Object.entries(BrandColors)
+      .filter(([k]) => !skip.has(k))
+      .map(([k, v]) =>
+        `info-region[active="true"][color="${k}"]{border-left-color:${v}}`
+      ).join('\n      ');
+
+    const BTN_VARIANTS = Object.entries(BrandColors)
+      .filter(([k]) => !skip.has(k))
+      .map(([k, v]) => {
+        const [r, g, b] = [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16));
+        return `.ir-btn--${k}{border-color:${v};color:${v}}` +
+               `.ir-btn--${k}:hover{background:rgba(${r},${g},${b},0.18)}`;
+      }).join('\n      ');
 
     const css = `
       info-region {
@@ -182,7 +140,6 @@
       }
       ${COLOR_VARIANTS}
 
-      /* ── 水平佈局：改用 CSS Flexbox，不搬移 DOM ── */
       info-region-group[layout="horizontal"] {
         display: flex;
         flex-wrap: wrap;
@@ -196,9 +153,7 @@
         transform: translateX(-8px);
         padding: ${cfg.padding};
         margin-bottom: 0;
-        transition:
-          opacity   ${hDur} ease,
-          transform ${hDur} ease;
+        transition: opacity ${hDur} ease, transform ${hDur} ease;
       }
       info-region-group[layout="horizontal"] info-region[active="true"] {
         max-height: none;
@@ -238,12 +193,7 @@
 
       info-region-group { display: block; }
 
-      .ir-controls {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-      }
+      .ir-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 
       .ir-btn {
         display: inline-flex;
@@ -299,6 +249,48 @@
       info-region p:last-child { margin-bottom: 0; }
       info-region ul, info-region ol { padding-left: 18px; }
       info-region li { margin-bottom: 3px; }
+
+      /* ══ 金箔特別版 — class="ir-gold" ══
+         用於步驟序列的第一步（開場）或最後一步（結尾），
+         視覺獨特，與中間普通步驟明顯區隔。            */
+      info-region.ir-gold[active="true"] {
+        background: linear-gradient(
+          150deg,
+          #1A1200 0%,
+          #2E2000 40%,
+          #1F1700 70%,
+          #1A1200 100%
+        ) !important;
+        border-left: 4px solid #C9973F !important;
+        border-top: 1px solid rgba(185,140,55,0.82) !important;
+        border-right: 1px solid rgba(185,140,55,0.82) !important;
+        border-bottom: 1px solid rgba(185,140,55,0.82) !important;
+        border-radius: 6px !important;
+        color: #EFD9A2 !important;
+      }
+      /* 掃光動畫 — 裝飾性，低不透明度屬意為之 */
+      info-region.ir-gold::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          102deg,
+          transparent 25%,
+          rgba(255, 210, 80, 0.13) 50%,
+          transparent 75%
+        );
+        background-size: 200% 100%;
+        animation: ir-gold-shimmer 4s ease-in-out infinite;
+      }
+      @keyframes ir-gold-shimmer {
+        0%   { background-position: -60% center; }
+        100% { background-position: 160% center; }
+      }
+      info-region.ir-gold > *:not(.ir-countdown-bar) {
+        position: relative;
+        z-index: 1;
+      }
     `;
 
     const styleEl = document.createElement('style');
@@ -308,7 +300,7 @@
   }
 
   /* ════════════════════════════════════════════════════════════════════
-   *  InfoRegion
+   *  InfoRegion — 單一資訊區塊
    * ════════════════════════════════════════════════════════════════════ */
   class InfoRegion extends HTMLElement {
     static get observedAttributes() {
@@ -324,8 +316,6 @@
     }
 
     connectedCallback() {
-      /* ★ 守衛：CSS 只注入一次；active 狀態由 attributeChangedCallback 處理，
-           避免 DOM 搬移時重複觸發 _onActivated */
       injectStyles();
       if (!this._irConnected) {
         this._irConnected = true;
@@ -337,15 +327,12 @@
 
     attributeChangedCallback(name, oldVal, newVal) {
       if (name === 'active') {
-        if (newVal === 'true' && oldVal !== 'true') {
-          this._onActivated();
-        }
+        if (newVal === 'true' && oldVal !== 'true') this._onActivated();
       } else if (this.getAttribute('active') === 'true') {
         this._applyBorderStyles();
       }
     }
 
-    /* ── 啟動流程 ─────────────────────────────────────────────────── */
     _onActivated() {
       this._applyBorderStyles();
 
@@ -354,80 +341,55 @@
         return;
       }
 
-      const parentGroup    = this.closest('info-region-group');
-      const groupHasGlobal = parentGroup && parentGroup.hasAttribute('global-progress');
-      const groupCascade   = parentGroup &&
-        parseInt(parentGroup.getAttribute('cascade-interval'), 10) > 0;
+      const grp = this.closest('info-region-group');
+      if (grp && (
+        grp.hasAttribute('global-progress') ||
+        parseInt(grp.getAttribute('cascade-interval'), 10) > 0
+      )) return;
 
-      if (groupCascade) return;
-
-      if (this.hasAttribute('countdown') && !groupHasGlobal) {
+      if (this.hasAttribute('countdown') && !(grp && grp.hasAttribute('global-progress'))) {
         this._startCountdown();
       } else {
         this._triggerNext(this._getInterval());
       }
     }
 
-    /* ── 框線樣式套用 ─────────────────────────────────────────────── */
     _applyBorderStyles() {
-      const cfg       = window.InfoRegionConfig;
-      const colorName = this.getAttribute('color') || cfg.defaultColor;
-      const colorHex  = BrandColors[colorName] || BrandColors.sky;
-
-      const attrAllW = this.getAttribute('border-width');
-      const attrAllS = this.getAttribute('border-style');
+      const cfg  = window.InfoRegionConfig;
+      const hex  = BrandColors[this.getAttribute('color') || cfg.defaultColor] || BrandColors.sky;
+      const allW = this.getAttribute('border-width');
+      const allS = this.getAttribute('border-style');
 
       ['top', 'right', 'bottom', 'left'].forEach(side => {
-        const C    = cap(side);
-        const prop = 'border' + C;
+        const C = cap(side), p = 'border' + C;
 
-        const attrW = this.getAttribute(`border-${side}-width`) != null
-                    ? this.getAttribute(`border-${side}-width`)
-                    : attrAllW;
+        const aw  = this.getAttribute(`border-${side}-width`) ?? allW;
+        const cfW = cfg[`border${C}Width`] ?? cfg.borderAllWidth ?? (side === 'left' ? cfg.borderWidth : 0);
+        const w   = parseInt(aw ?? cfW, 10) || 0;
 
-        let cfgW = cfg[`border${C}Width`] != null
-                 ? cfg[`border${C}Width`]
-                 : cfg.borderAllWidth != null
-                   ? cfg.borderAllWidth
-                   : (side === 'left' ? cfg.borderWidth : 0);
+        const as = this.getAttribute(`border-${side}-style`) ?? allS;
+        const s  = as || cfg[`border${C}Style`] || cfg.borderStyle || 'solid';
 
-        const w = attrW != null ? (parseInt(attrW, 10) || 0) : (parseInt(cfgW, 10) || 0);
-
-        const attrS = this.getAttribute(`border-${side}-style`) != null
-                    ? this.getAttribute(`border-${side}-style`)
-                    : attrAllS;
-
-        const s = attrS
-               || cfg[`border${C}Style`]
-               || cfg.borderStyle
-               || 'solid';
-
-        this.style[`${prop}Width`] = w + 'px';
-        this.style[`${prop}Style`] = w > 0 ? s : 'none';
-        this.style[`${prop}Color`] = w > 0 ? colorHex : 'transparent';
+        this.style[`${p}Width`] = w + 'px';
+        this.style[`${p}Style`] = w > 0 ? s : 'none';
+        this.style[`${p}Color`] = w > 0 ? hex : 'transparent';
       });
     }
 
-    /* ── 框線樣式清除 ─────────────────────────────────────────────── */
     _clearBorderStyles() {
       ['top', 'right', 'bottom', 'left'].forEach(side => {
-        const prop = 'border' + cap(side);
-        this.style[`${prop}Width`] = '';
-        this.style[`${prop}Style`] = '';
-        this.style[`${prop}Color`] = '';
+        const p = 'border' + cap(side);
+        this.style[`${p}Width`] = this.style[`${p}Style`] = this.style[`${p}Color`] = '';
       });
     }
 
-    /* ── 手動按鈕 ─────────────────────────────────────────────────── */
     _insertManualButton() {
       if (this.querySelector('.ir-manual-wrap')) return;
 
-      const cfg       = window.InfoRegionConfig;
-      const label     = this.getAttribute('manual-label') || cfg.manualLabel;
-      const colorName = this.getAttribute('manual-color')
-                     || this.getAttribute('color')
-                     || cfg.defaultColor;
-      const align     = this.getAttribute('manual-align') || cfg.manualAlign;
+      const cfg   = window.InfoRegionConfig;
+      const label = this.getAttribute('manual-label') || cfg.manualLabel;
+      const color = this.getAttribute('manual-color') || this.getAttribute('color') || cfg.defaultColor;
+      const align = this.getAttribute('manual-align') || cfg.manualAlign;
       const justifyMap = { left: 'flex-start', center: 'center', right: 'flex-end' };
 
       const wrap = document.createElement('div');
@@ -435,7 +397,7 @@
       wrap.style.justifyContent = justifyMap[align] || 'flex-end';
 
       const btn = document.createElement('button');
-      btn.className = `ir-btn ir-manual-btn ir-btn--${colorName}`;
+      btn.className = `ir-btn ir-manual-btn ir-btn--${color}`;
       btn.textContent = label;
 
       btn.addEventListener('click', () => {
@@ -450,16 +412,13 @@
       this.appendChild(wrap);
     }
 
-    /* ── 倒數進度條 ───────────────────────────────────────────────── */
     _startCountdown() {
-      const cfg       = window.InfoRegionConfig;
-      const duration  = parseInt(this.getAttribute('countdown'), 10) || 2000;
-      const position  = this.getAttribute('countdown-position') || cfg.countdownPosition;
-      const height    = parseInt(this.getAttribute('countdown-height'), 10) || cfg.countdownHeight;
-      const colorName = this.getAttribute('countdown-color')
-                     || this.getAttribute('color')
-                     || cfg.defaultColor;
-      const colorHex  = BrandColors[colorName] || BrandColors.sky;
+      const cfg      = window.InfoRegionConfig;
+      const duration = parseInt(this.getAttribute('countdown'), 10) || 2000;
+      const position = this.getAttribute('countdown-position') || cfg.countdownPosition;
+      const height   = parseInt(this.getAttribute('countdown-height'), 10) || cfg.countdownHeight;
+      const color    = this.getAttribute('countdown-color') || this.getAttribute('color') || cfg.defaultColor;
+      const colorHex = BrandColors[color] || BrandColors.sky;
 
       const old = this.querySelector('.ir-countdown-bar');
       if (old) old.remove();
@@ -481,7 +440,6 @@
       setTimeout(() => this._triggerNext(0), duration);
     }
 
-    /* ── 鏈結下一個元素 ───────────────────────────────────────────── */
     _triggerNext(delay) {
       const nextId = this.getAttribute('next');
       if (!nextId) return;
@@ -493,25 +451,23 @@
     }
 
     _getInterval() {
-      return parseInt(this.getAttribute('next-interval'), 10)
-          || window.InfoRegionConfig.defaultInterval;
+      return parseInt(this.getAttribute('next-interval'), 10) ||
+             window.InfoRegionConfig.defaultInterval;
     }
 
     activate() { this.setAttribute('active', 'true'); }
 
     reset() {
-      this._irConnected = false; // 允許下次 connectedCallback 重新初始化
+      this._irConnected = false;
       this.removeAttribute('active');
       this._clearBorderStyles();
-      const bar  = this.querySelector('.ir-countdown-bar');
-      const wrap = this.querySelector('.ir-manual-wrap');
-      if (bar)  bar.remove();
-      if (wrap) wrap.remove();
+      this.querySelector('.ir-countdown-bar')?.remove();
+      this.querySelector('.ir-manual-wrap')?.remove();
     }
   }
 
   /* ════════════════════════════════════════════════════════════════════
-   *  InfoRegionGroup
+   *  InfoRegionGroup — 步驟群組容器
    * ════════════════════════════════════════════════════════════════════ */
   class InfoRegionGroup extends HTMLElement {
     constructor() {
@@ -523,14 +479,13 @@
 
     connectedCallback() {
       injectStyles();
-      /* ★ 守衛：_build 只跑一次，避免 DOM 操作觸發重複初始化 */
       if (this._irGroupBuilt) return;
       this._irGroupBuilt = true;
       Promise.resolve().then(() => this._build());
     }
 
     disconnectedCallback() {
-      if (this._observer) this._observer.disconnect();
+      this._observer?.disconnect();
     }
 
     _getChildren() {
@@ -549,51 +504,46 @@
       }
     }
 
-    /* ── 水平佈局（純 CSS，不搬移 DOM）────────────────────────────── */
-    /*
-     * 改用 CSS 變數控制欄寬，完全不移動子元素。
-     * cols-per-row 轉換為 flex-basis 百分比，讓瀏覽器處理折行。
-     * row-gap / gutter 屬性仍有效，對應 CSS gap。
-     */
     _setupLayout() {
       if (this.getAttribute('layout') !== 'horizontal') return;
 
       const cfg    = window.InfoRegionConfig;
-      const perRow = parseInt(this.getAttribute('cols-per-row'), 10)
-                  || cfg.colsPerRow || 4;
+      const perRow = parseInt(this.getAttribute('cols-per-row'), 10) || cfg.colsPerRow || 4;
       const gap    = this.getAttribute('gutter-size') || '16px';
       const rowGap = this.getAttribute('row-gap')     || gap;
-
-      /* 計算每欄最小寬度（百分比留些許空間讓 gap 呼吸） */
-      const pct = Math.floor(100 / perRow) - 1;
+      const pct    = Math.floor(100 / perRow) - 1;
 
       this.style.setProperty('--ir-col-min', pct + '%');
       this.style.setProperty('--ir-row-gap', rowGap);
       this.style.gap = rowGap;
     }
 
-    /* ── 控制按鈕（不變） ─────────────────────────────────────────── */
     _setupControls() {
       if (this.getAttribute('show-controls') === 'false') return;
-
-      const startLabel = this.getAttribute('start-label') || '▶ 開始';
-      const resetLabel = this.getAttribute('reset-label') || '↺ 重設';
-      const startColor = this.getAttribute('start-color') || 'sky';
-      const resetColor = this.getAttribute('reset-color') || 'warning';
 
       const div = document.createElement('div');
       div.className = 'ir-controls';
 
-      const startBtn = document.createElement('button');
-      startBtn.className = `ir-btn ir-btn--${startColor}`;
-      startBtn.textContent = startLabel;
-      startBtn.addEventListener('click', () => this._start());
-      this._applyBtnStyles(startBtn, 'start');
+      const mkBtn = (label, color) => {
+        const b = document.createElement('button');
+        b.className = `ir-btn ir-btn--${color}`;
+        b.textContent = label;
+        return b;
+      };
 
-      const resetBtn = document.createElement('button');
-      resetBtn.className = `ir-btn ir-btn--${resetColor}`;
-      resetBtn.textContent = resetLabel;
+      const startBtn = mkBtn(
+        this.getAttribute('start-label') || '▶ 開始',
+        this.getAttribute('start-color') || 'sky'
+      );
+      const resetBtn = mkBtn(
+        this.getAttribute('reset-label') || '↺ 重設',
+        this.getAttribute('reset-color') || 'warning'
+      );
+
+      startBtn.addEventListener('click', () => this._start());
       resetBtn.addEventListener('click', () => this._reset());
+
+      this._applyBtnStyles(startBtn, 'start');
       this._applyBtnStyles(resetBtn, 'reset');
 
       div.append(startBtn, resetBtn);
@@ -602,41 +552,36 @@
 
     _applyBtnStyles(btn, prefix) {
       const cfg = window.InfoRegionConfig;
-      const cfgPrefix = prefix + 'Btn';
+      const pre = prefix + 'Btn';
 
-      const resolve = (attr, cfgKey, fbAttr, fbCfgKey) => {
-        const v = this.getAttribute(attr);
-        if (v != null) return v;
-        if (cfg[cfgKey] != null) return String(cfg[cfgKey]);
-        if (fbAttr) {
-          const fv = this.getAttribute(fbAttr);
-          if (fv != null) return fv;
-        }
-        if (fbCfgKey && cfg[fbCfgKey] != null) return String(cfg[fbCfgKey]);
+      const resolve = (a, ck, fa, fck) => {
+        const av = this.getAttribute(a);      if (av != null) return av;
+        if (cfg[ck]  != null) return String(cfg[ck]);
+        const fv = fa && this.getAttribute(fa); if (fv != null) return fv;
+        if (fck && cfg[fck] != null) return String(cfg[fck]);
         return null;
       };
 
-      const width    = resolve(`${prefix}-width`,     `${cfgPrefix}Width`,    'btn-width',     'btnWidth');
-      const height   = resolve(`${prefix}-height`,    `${cfgPrefix}Height`,   'btn-height',    'btnHeight');
-      const fontSize = resolve(`${prefix}-font-size`, `${cfgPrefix}FontSize`, 'btn-font-size', 'btnFontSize');
-      const padding  = resolve(`${prefix}-padding`,   `${cfgPrefix}Padding`,  'btn-padding',   'btnPadding');
+      const w  = resolve(`${prefix}-width`,     `${pre}Width`,    'btn-width',     'btnWidth');
+      const h  = resolve(`${prefix}-height`,    `${pre}Height`,   'btn-height',    'btnHeight');
+      const fs = resolve(`${prefix}-font-size`, `${pre}FontSize`, 'btn-font-size', 'btnFontSize');
+      const pa = resolve(`${prefix}-padding`,   `${pre}Padding`,  'btn-padding',   'btnPadding');
 
-      if (width)    btn.style.width    = addUnit(width, 'px');
-      if (height)   btn.style.height   = addUnit(height, 'px');
-      if (fontSize) btn.style.fontSize = addUnit(fontSize, 'rem');
-      if (padding)  btn.style.padding  = padding;
+      if (w)  btn.style.width    = addUnit(w, 'px');
+      if (h)  btn.style.height   = addUnit(h, 'px');
+      if (fs) btn.style.fontSize = addUnit(fs, 'rem');
+      if (pa) btn.style.padding  = pa;
     }
 
-    /* ── 全體進度條（不變） ───────────────────────────────────────── */
     _setupGlobalProgress() {
-      const cfg       = window.InfoRegionConfig;
-      const position  = this.getAttribute('progress-position') || cfg.progressPosition;
-      const height    = parseInt(this.getAttribute('progress-height'), 10) || cfg.progressHeight;
-      const colorName = this.getAttribute('progress-color') || cfg.defaultColor;
-      const colorHex  = BrandColors[colorName] || BrandColors.sky;
-      const showPct   = this.hasAttribute('show-percent');
+      const cfg      = window.InfoRegionConfig;
+      const position = this.getAttribute('progress-position') || cfg.progressPosition;
+      const height   = parseInt(this.getAttribute('progress-height'), 10) || cfg.progressHeight;
+      const color    = this.getAttribute('progress-color') || cfg.defaultColor;
+      const colorHex = BrandColors[color] || BrandColors.sky;
+      const showPct  = this.hasAttribute('show-percent');
 
-      const wrap = document.createElement('div');
+      const wrap  = document.createElement('div');
       wrap.className = 'ir-global-progress-wrap';
       wrap.style[position === 'top' ? 'marginBottom' : 'marginTop'] = '12px';
 
@@ -662,14 +607,14 @@
 
       if (position === 'top') {
         const controls = this.querySelector('.ir-controls');
-        if (controls) controls.insertAdjacentElement('afterend', wrap);
-        else          this.insertBefore(wrap, this.firstChild);
+        (controls ? controls : this).insertAdjacentElement(
+          controls ? 'afterend' : 'afterbegin', wrap
+        );
       } else {
         this.appendChild(wrap);
       }
     }
 
-    /* ── MutationObserver（不變） ─────────────────────────────────── */
     _setupObserver() {
       this._observer = new MutationObserver(() => this._updateProgress());
       this._getChildren().forEach(child => {
@@ -680,9 +625,9 @@
     _updateProgress() {
       if (!this._progressBar) return;
       const children  = this._getChildren();
-      const total     = children.length;
-      const activated = children.filter(el => el.getAttribute('active') === 'true').length;
-      const ratio     = total > 0 ? activated / total : 0;
+      const ratio     = children.length > 0
+        ? children.filter(el => el.getAttribute('active') === 'true').length / children.length
+        : 0;
 
       this._progressBar.style.transform = `scaleX(${ratio})`;
 
@@ -692,33 +637,27 @@
       }
     }
 
-    /* ── 開始 / 重設（不變） ──────────────────────────────────────── */
     _start() {
       this._reset(false);
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (this._progressBar) {
-            const cfg = window.InfoRegionConfig;
-            this._progressBar.style.transition =
-              `transform ${cfg.progressTransition}ms ease`;
-          }
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (this._progressBar) {
+          this._progressBar.style.transition =
+            `transform ${window.InfoRegionConfig.progressTransition}ms ease`;
+        }
 
-          const children = this._getChildren();
-          if (children.length === 0) return;
+        const children  = this._getChildren();
+        if (!children.length) return;
 
-          const cascadeMs = parseInt(this.getAttribute('cascade-interval'), 10)
-                         || window.InfoRegionConfig.cascadeInterval;
+        const cascadeMs = parseInt(this.getAttribute('cascade-interval'), 10) ||
+                          window.InfoRegionConfig.cascadeInterval;
 
-          if (cascadeMs > 0) {
-            children.forEach((child, i) => {
-              setTimeout(() => child.activate(), i * cascadeMs);
-            });
-          } else {
-            children[0].activate();
-          }
-        });
-      });
+        if (cascadeMs > 0) {
+          children.forEach((c, i) => setTimeout(() => c.activate(), i * cascadeMs));
+        } else {
+          children[0].activate();
+        }
+      }));
     }
 
     _reset(reenableTransition = true) {
@@ -730,9 +669,8 @@
         if (reenableTransition) {
           requestAnimationFrame(() => {
             if (this._progressBar) {
-              const cfg = window.InfoRegionConfig;
               this._progressBar.style.transition =
-                `transform ${cfg.progressTransition}ms ease`;
+                `transform ${window.InfoRegionConfig.progressTransition}ms ease`;
             }
           });
         }
@@ -748,15 +686,15 @@
     reset() { this._reset(); }
   }
 
-  /* ── 元素註冊 ────────────────────────────────────────────────────── */
+  /* ── 元素註冊 ── */
   customElements.define('info-region',       InfoRegion);
   customElements.define('info-region-group', InfoRegionGroup);
 
-  /* ── 公開 API ────────────────────────────────────────────────────── */
+  /* ── 公開 API ── */
   window.InfoRegion = {
     activate(id) {
       const el = document.getElementById(id);
-      if (el && el.tagName === 'INFO-REGION') el.activate();
+      if (el?.tagName === 'INFO-REGION') el.activate();
       else console.warn(`[InfoRegion.activate] 找不到 info-region#${id}`);
     },
     resetAll(scopeSelector = 'info-region') {
