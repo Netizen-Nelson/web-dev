@@ -32,7 +32,8 @@
 //   cta-href      {string} 行動呼叫按鈕連結
 //   cta-target    {string} _blank 等（預設 _self）
 //   auto-dismiss  {number} 幾秒後自動關閉（0 = 不自動關閉）
-//   color         {string} 覆蓋顏色：accent | correct | wrong | warning | special
+//   color         {string} 覆蓋顏色：accent | correct | wrong | warning | special | gold
+//                          gold = 金箔樣式（深金底 + 掃光動畫），適合置頂公告或促銷 bar
 //                          或直接輸入 CSS 色碼
 //   no-anim                 停用動畫
 //
@@ -178,12 +179,35 @@
             'bp-notice[type="sticky"] .bpn-box[data-color="wrong"]{border-top-color:' + t.wrong + ';}',
             'bp-notice[type="sticky"] .bpn-box[data-color="warning"]{border-top-color:' + t.warning + ';}',
             'bp-notice[type="sticky"] .bpn-box[data-color="special"]{border-top-color:' + t.special + ';}',
+
+            /* ── 金箔 gold ── */
+            '.bpn-box[data-color="gold"]{',
+            'background:linear-gradient(150deg,#1A1200 0%,#2A1E00 40%,#1F1600 100%);',
+            'border-color:rgba(185,140,55,0.82);border-left-color:#C9973F;',
+            'color:#EFD9A2;overflow:hidden;}',
+            '.bpn-box[data-color="gold"]::before{',
+            'content:"";position:absolute;inset:0;pointer-events:none;',
+            'background:linear-gradient(102deg,transparent 25%,rgba(255,210,80,.13) 50%,transparent 75%);',
+            'background-size:200% 100%;',
+            'animation:bpn-gold-shimmer 4s ease-in-out infinite;}',
+            '@keyframes bpn-gold-shimmer{',
+            '0%{background-position:-60% center}',
+            '100%{background-position:160% center}}',
+            '.bpn-box[data-color="gold"]>.bpn-icon{color:#C9973F;position:relative;z-index:1;}',
+            '.bpn-box[data-color="gold"]>.bpn-content{position:relative;z-index:1;}',
+            '.bpn-box[data-color="gold"]>.bpn-cta{',
+            'background:#C9973F;color:#0C0D0C;position:relative;z-index:1;}',
+            '.bpn-box[data-color="gold"]>.bpn-close{',
+            'color:rgba(239,217,162,.82);position:relative;z-index:1;}',
+            '.bpn-box[data-color="gold"]>.bpn-close:hover{color:#EFD9A2;}',
+            'bp-notice[type="sticky"] .bpn-box[data-color="gold"]{',
+            'border-top-color:#C9973F;}',
         ].join('');
     }
 
     // ── 色彩解析（color 屬性）───────────────────────────────────
     // 預設 token 用 data-color，直接色碼用 inline style
-    var COLOR_TOKENS = ['accent','correct','wrong','warning','special'];
+    var COLOR_TOKENS = ['accent','correct','wrong','warning','special','gold'];
 
     function applyColor(box, colorAttr) {
         if (!colorAttr) return;
