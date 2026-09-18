@@ -282,7 +282,7 @@
     ocean:     { bg: '#041418', titleColor: '#1CCAE8', borderColor: '#1CCAE8' },
     warning:   { bg: '#190d0d', titleColor: '#E6374B', borderColor: '#E6374B' },
     success:   { bg: '#091508', titleColor: '#299459', borderColor: '#299459' },
-    safe:      { bg: '#091508', titleColor: '#299459', borderColor: '#299459' }, // alias
+    safe:      { bg: '#091508', titleColor: '#27AE60', borderColor: '#27AE60' }, // alias
     special:   { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' },
     highlight: { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' }, // alias
     note:      { bg: '#141200', titleColor: '#E3D322', borderColor: '#E3D322' },
@@ -307,9 +307,6 @@
     carousel:    { animation: 'slide', interval: 3000 },
     panelTarget: null,
     _customThemes: {},
-    // ── Modal / Offcanvas ─────────────────────────────────────
-    // modal: false | 'dialog' | 'start' | 'end' | 'top' | 'bottom'
-    // true is treated as 'dialog' for convenience
     modal:       false,
     modalSize:   '',      // CSS value: '480px', '80vw' … or Bootstrap keyword 'sm'|'lg'|'xl'
     modalStatic: false,   // true → clicking backdrop does NOT close
@@ -485,22 +482,6 @@
     return { stop: () => clearTimeout(timer) };
   }
 
-  // ─── Modal mode helpers ───────────────────────────────────────────────────────
-  //
-  // data-popover-modal values:
-  //   'true' | 'dialog'            → Bootstrap Modal (centred dialog)
-  //   'start' | 'end' | 'top' | 'bottom'  → Bootstrap Offcanvas (side panel)
-  //   'false'                      → opt-out even when config.modal is set
-  //   (attribute present, no value / empty string) → treated as 'dialog'
-  //
-  // Global:
-  //   PopoverConfig.set({ modal: 'dialog' })   or   modal: 'end'
-  //   modal: true  is treated as  modal: 'dialog'
-  //
-  // Per-trigger overrides (data attribute wins over config):
-  //   data-popover-modal-size="600px"      – CSS value or 'sm'|'lg'|'xl' (dialog only)
-  //   data-popover-modal-static="true"     – clicking backdrop does NOT close
-
   const OC_PLACEMENTS = ['start', 'end', 'top', 'bottom'];
 
   function getModalMode(trigger) {
@@ -508,7 +489,6 @@
     let val;
 
     if (attr !== undefined) {
-      // Per-trigger attribute exists — it wins over global config
       val = (attr === '') ? 'dialog' : attr;
     } else if (config.modal) {
       val = config.modal;
@@ -519,10 +499,9 @@
     if (val === 'false' || val === false)          return null;
     if (val === true || val === 'true' || val === 'dialog') return 'dialog';
     if (OC_PLACEMENTS.includes(val))               return val;
-    return 'dialog'; // unknown value → safe default
+    return 'dialog';
   }
 
-  // Lazy-init the shared Bootstrap Modal DOM element
   function ensureModal() {
     let el = document.getElementById('xpop-bs-modal');
     if (el) return el;
@@ -547,7 +526,6 @@
     return el;
   }
 
-  // Lazy-init the shared Bootstrap Offcanvas DOM element
   function ensureOffcanvas() {
     let el = document.getElementById('xpop-bs-offcanvas');
     if (el) return el;
@@ -657,7 +635,6 @@
       }
     }
 
-    // Populate content
     const header  = ocEl.querySelector('.offcanvas-header');
     const titleEl = ocEl.querySelector('.offcanvas-title');
     const body    = ocEl.querySelector('.offcanvas-body');
@@ -834,8 +811,6 @@
     setTimeout(() => pop.parentNode && pop.parentNode.removeChild(pop), 230);
     currentPop = currentTrigger = null;
   }
-
-  // ─── Unified click handler ────────────────────────────────────────────────────
 
   document.addEventListener('click', function (e) {
     const trigger = e.target.closest(
