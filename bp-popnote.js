@@ -232,6 +232,12 @@
       color: var(--xpop-hint-color, #C3A5E5);
     }
 
+
+    /* ── 事後標注 mark 元素：重設瀏覽器預設黃色底 ── */
+    mark.bpn-annotated {
+      background: none;
+      color: inherit;
+    }
     /* ── Bootstrap Modal theming ─────────────────────────────── */
     #xpop-bs-modal .modal-content {
       border-width: 1px;
@@ -278,10 +284,10 @@
   const THEMES = {
     dark:      { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' },
     lavender:  { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' }, // alias
-    sky:       { bg: '#071318', titleColor: '#95C9DE', borderColor: '#95C9DE' },
+    sky:       { bg: '#071318', titleColor: '#82C8E5', borderColor: '#82C8E5' },
     ocean:     { bg: '#041418', titleColor: '#1CCAE8', borderColor: '#1CCAE8' },
     warning:   { bg: '#190d0d', titleColor: '#E6374B', borderColor: '#E6374B' },
-    success:   { bg: '#091508', titleColor: '#299459', borderColor: '#299459' },
+    success:   { bg: '#091508', titleColor: '#27AE60', borderColor: '#27AE60' },
     safe:      { bg: '#091508', titleColor: '#27AE60', borderColor: '#27AE60' }, // alias
     special:   { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' },
     highlight: { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' }, // alias
@@ -292,7 +298,7 @@
     orange:    { bg: '#181005', titleColor: '#EDA109', borderColor: '#EDA109' },
     vanilla:   { bg: '#171815', titleColor: '#DBEDD8', borderColor: '#DBEDD8' },
     teal:      { bg: '#061412', titleColor: '#0DA591', borderColor: '#0DA591' },
-    focus:     { bg: '#070d16', titleColor: '#3C7BCF', borderColor: '#3C7BCF' },
+    focus:     { bg: '#070d16', titleColor: '#D4FFFC', borderColor: '#D4FFFC' },
     indigo:    { bg: '#0e0a18', titleColor: '#7849C9', borderColor: '#7849C9' },
     info:      { bg: '#060c1c', titleColor: '#2351DB', borderColor: '#2351DB' },
   };
@@ -312,6 +318,26 @@
     modalStatic: false,   // true → clicking backdrop does NOT close
   };
 
+  window.BpPopnote = {
+    /**
+     * 對已存在的文字進行事後標注。
+     * @param {Object|Object[]} rules
+     *   每條規則包含：
+     *   必填 — text: string               要標注的文字
+     *   定位 — within: string             CSS selector（限定搜尋範圍，強烈建議填寫）
+     *          context: { before, after }  前後文字確認（配合 within 使用）
+     *          occurrence: number          第幾個符合（預設 1）
+     *   popover — title / content / theme / placement / panel /
+     *             modal / label / hint / maxwidth / fontsize /
+     *             arrow / interval / carouselAnim / offset / target
+     */
+    annotate(rules) {
+      (Array.isArray(rules) ? rules : [rules]).forEach(_annotateRule);
+    },
+    /** 移除所有（或指定 CSS selector 範圍內）的事後標注 mark */
+    clearAnnotations: _clearAnnotations,
+  };
+
   window.PopoverConfig = {
     set(opts) {
       if (opts.carousel) { Object.assign(config.carousel, opts.carousel); delete opts.carousel; }
@@ -326,6 +352,117 @@
 
   function getTheme(n)  { return config._customThemes[n] || THEMES[n] || THEMES.dark; }
   function ra(el, k, fb){ return el.dataset[k] !== undefined ? el.dataset[k] : fb; }
+
+
+  // ─── 事後標注 API ─────────────────────────────────────────────────────────────
+
+  // 取得文字節點附近的區塊祖先，用於 context 檢查
+  function _contextMatches(textNode, targetText, ctx) {
+    const block = textNode.parentNode.closest(
+      'p,li,td,th,div,section,article,blockquote,h1,h2,h3,h4,h5,h6'
+    ) || textNode.parentNode;
+    const text = block.textContent;
+    const pos  = text.indexOf(targetText);
+    if (pos === -1) return false;
+    if (ctx.before && !text.slice(0, pos).includes(ctx.before))                  return false;
+    if (ctx.after  && !text.slice(pos + targetText.length).includes(ctx.after))  return false;
+    return true;
+  }
+
+  // 將文字節點在指定位置切割並包入 <mark>
+  function _wrapNode(textNode, start, length, rule) {
+    const mid = textNode.splitText(start);
+    mid.splitText(length);
+
+    const mark = document.createElement('mark');
+    mark.className = 'bpn-annotated';
+
+    if (rule.title)              mark.dataset.popoverTitle        = rule.title;
+    if (rule.content)            mark.dataset.popoverContent      = rule.content;
+    if (rule.target)             mark.dataset.popoverTarget       = rule.target;
+    if (rule.theme)              mark.dataset.popoverTheme        = rule.theme;
+    if (rule.placement)         mark.dataset.popoverPlacement    = rule.placement;
+    if (rule.panel)              mark.dataset.popoverPanel        = rule.panel;
+    if (rule.label)              mark.dataset.popoverLabel        = rule.label;
+    if (rule.maxwidth)           mark.dataset.popoverMaxwidth     = rule.maxwidth;
+    if (rule.fontsize)           mark.dataset.popoverFontsize     = rule.fontsize;
+    if (rule.carouselAnim)       mark.dataset.popoverCarouselAnim = rule.carouselAnim;
+    if (rule.modal  !== undefined) mark.dataset.popoverModal      = String(rule.modal);
+    if (rule.arrow  !== undefined) mark.dataset.popoverArrow      = String(rule.arrow);
+    if (rule.hint   === false)     mark.dataset.popoverHint       = 'false';
+    if (rule.interval !== undefined) mark.dataset.popoverInterval = String(rule.interval);
+    if (rule.offset !== undefined) mark.dataset.popoverOffset     = String(rule.offset);
+
+    mid.parentNode.insertBefore(mark, mid);
+    mark.appendChild(mid);
+    return mark;
+  }
+
+  // 執行單條標注規則
+  function _annotateRule(rule) {
+    if (!rule || !rule.text) {
+      console.warn('[BpPopnote.annotate] text 為必填'); return;
+    }
+
+    const scopeEl = rule.within
+      ? (typeof rule.within === 'string' ? document.querySelector(rule.within) : rule.within)
+      : document.body;
+
+    if (!scopeEl) {
+      console.warn('[BpPopnote.annotate] within selector "' + rule.within + '" 找不到'); return;
+    }
+
+    const target  = rule.text;
+    const wantNth = rule.occurrence || 1;
+    let nthCount  = 0;
+    let found     = false;
+
+    const walker  = document.createTreeWalker(scopeEl, NodeFilter.SHOW_TEXT);
+    let node;
+
+    outer:
+    while ((node = walker.nextNode())) {
+      const pTag = node.parentNode.tagName;
+      if (pTag === 'SCRIPT' || pTag === 'STYLE' || pTag === 'NOSCRIPT') continue;
+      if (node.parentNode.classList.contains('bpn-annotated')) continue;
+
+      const val = node.nodeValue;
+      let searchFrom = 0, idx;
+
+      while ((idx = val.indexOf(target, searchFrom)) !== -1) {
+        if (rule.context && !_contextMatches(node, target, rule.context)) {
+          searchFrom = idx + 1;
+          continue;
+        }
+        nthCount++;
+        if (nthCount === wantNth) {
+          _wrapNode(node, idx, target.length, rule);
+          found = true;
+          break outer;
+        }
+        searchFrom = idx + target.length;
+      }
+    }
+
+    if (!found) {
+      console.warn(
+        '[BpPopnote.annotate] "' + target + '" 第 ' + wantNth + ' 個未找到' +
+        (rule.within ? '（within: "' + rule.within + '"）' : '')
+      );
+    }
+  }
+
+  // 移除所有 / 指定範圍的事後標注
+  function _clearAnnotations(scopeSelector) {
+    const scope = scopeSelector ? document.querySelector(scopeSelector) : document;
+    if (!scope) return;
+    scope.querySelectorAll('mark.bpn-annotated').forEach(function (mark) {
+      const parent = mark.parentNode;
+      while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+      parent.removeChild(mark);
+      parent.normalize();
+    });
+  }
 
   function injectCSS() {
     if (document.getElementById('bp-popnote-style')) return;
