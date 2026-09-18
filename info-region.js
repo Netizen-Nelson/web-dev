@@ -1,14 +1,12 @@
 (function () {
   'use strict';
 
-  /* ── 工具函式 ── */
   const cap     = s => s.charAt(0).toUpperCase() + s.slice(1);
   const addUnit = (v, u) => {
     if (!v) return null;
     return /[a-z%]$/i.test(String(v)) ? String(v) : v + u;
   };
 
-  /* ── 品牌色票（與 ui-plus.js 同步）── */
   const BrandColors = {
     bg:       '#0C0D0C',
     region:   '#333333',
@@ -18,7 +16,7 @@
     warning:  '#E6374B',
     salmon:   '#E5C3B3',
     ocean:    '#1CCAE8',
-    safe:     '#184B48',
+    safe:     '#27AE60',
     teal:     '#0DA591',
     vanilla:  '#DBEDD8',
     yellow:   '#E3D322',
@@ -299,9 +297,6 @@
     document.head.appendChild(styleEl);
   }
 
-  /* ════════════════════════════════════════════════════════════════════
-   *  InfoRegion — 單一資訊區塊
-   * ════════════════════════════════════════════════════════════════════ */
   class InfoRegion extends HTMLElement {
     static get observedAttributes() {
       return [
@@ -466,9 +461,6 @@
     }
   }
 
-  /* ════════════════════════════════════════════════════════════════════
-   *  InfoRegionGroup — 步驟群組容器
-   * ════════════════════════════════════════════════════════════════════ */
   class InfoRegionGroup extends HTMLElement {
     constructor() {
       super();
@@ -686,11 +678,9 @@
     reset() { this._reset(); }
   }
 
-  /* ── 元素註冊 ── */
   customElements.define('info-region',       InfoRegion);
   customElements.define('info-region-group', InfoRegionGroup);
 
-  /* ── 公開 API ── */
   window.InfoRegion = {
     activate(id) {
       const el = document.getElementById(id);
