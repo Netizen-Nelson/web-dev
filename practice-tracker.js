@@ -3,26 +3,28 @@
 
   const CSS_ID = '__practice-tracker-v1__';
 
+  /* ── 品牌色票 ─────────────────────────────────────────── */
   const BRAND = {
     bg:       '#0C0D0C',
     shell:    '#C6C7BD',
     lavender: '#C3A5E5',
-    sky:      '#62C8F0',
-    warning:  '#F08080',
+    sky:      '#82C8E5',
+    warning:  '#E6374B',
     salmon:   '#E5C3B3',
-    ocean:    '#0ABDC6',
-    safe:     '#20C21D',
+    ocean:    '#1CCAE8',
+    safe:     '#27AE60',
     teal:     '#0DA591',
     vanilla:  '#DBEDD8',
-    yellow:   '#DECA4B',
-    special:  '#C8DD5A',
-    info:     '#79B6FA',
-    indigo:   '#9B72CF',
-    pink:     '#FFB3D9',
+    yellow:   '#E3D322',
+    focus:    '#D4FFFC',
+    special:  '#B3DE73',
+    info:     '#2351DB',
+    indigo:   '#7849C9',
+    pink:     '#FF91D7',
     orange:   '#EDA109',
   };
 
-  /* ── 預設設定 ─────────────────────────────────────────── */
+  /* ── 預設配置 ─────────────────────────────────────────── */
   const DEFAULTS = {
     prefix:          'ex-',          // section id 前綴
     position:        'bottom-right', // bottom-right / bottom-left / top-right / top-left
@@ -30,7 +32,7 @@
     offsetY:         '24px',
     panelWidth:      '220px',
     zIndex:          '999',
-    collapsed:       false,          // 預設是否收合
+    collapsed:       false,
     cellSize:        '16px',
     cellGap:         '6px',
     cellRadius:      '4px',
@@ -40,24 +42,67 @@
     colorPanel:      '#1a1b1a',
     colorText:       BRAND.shell,
     colorComplete:   BRAND.special,
-    title:           '練習進度',
+    title:           '進度',
     labelDone:       '完成',
     completeText:    '全部完成',
     completeSubText: '',
     animateCell:     true,
     animateDuration: '0.3s',
-    eventName:       'pt:stage-complete', // 手動觸發的自定義事件名
-    watchStepper:    true,                // 是否監聽 bps:complete
+    eventName:       'pt:stage-complete',
+    watchStepper:    true,
   };
 
-  const CFG = Object.assign({}, DEFAULTS, win.PracticeTrackerConfig || {});
+  /* ── 元素屬性對應表 ───────────────────────────────────── */
+  /*
+   * 支援在 <practice-tracker> 元素上用 data-* 屬性覆蓋配置。
+   * 優先序：DEFAULTS → window.PracticeTrackerConfig → data-* 屬性（最高）
+   */
+  const ATTR_MAP = {
+    'data-prefix':           { key: 'prefix',          type: 'string' },
+    'data-position':         { key: 'position',         type: 'string' },
+    'data-offset-x':         { key: 'offsetX',          type: 'string' },
+    'data-offset-y':         { key: 'offsetY',          type: 'string' },
+    'data-panel-width':      { key: 'panelWidth',       type: 'string' },
+    'data-z-index':          { key: 'zIndex',           type: 'string' },
+    'data-collapsed':        { key: 'collapsed',        type: 'bool'   },
+    'data-cell-size':        { key: 'cellSize',         type: 'string' },
+    'data-cell-gap':         { key: 'cellGap',          type: 'string' },
+    'data-cell-radius':      { key: 'cellRadius',       type: 'string' },
+    'data-cells-per-row':    { key: 'cellsPerRow',      type: 'int'    },
+    'data-color-done':       { key: 'colorDone',        type: 'string' },
+    'data-color-pending':    { key: 'colorPending',     type: 'string' },
+    'data-color-panel':      { key: 'colorPanel',       type: 'string' },
+    'data-color-text':       { key: 'colorText',        type: 'string' },
+    'data-color-complete':   { key: 'colorComplete',    type: 'string' },
+    'data-title':            { key: 'title',            type: 'string' },
+    'data-label-done':       { key: 'labelDone',        type: 'string' },
+    'data-complete-text':    { key: 'completeText',     type: 'string' },
+    'data-complete-sub':     { key: 'completeSubText',  type: 'string' },
+    'data-animate-cell':     { key: 'animateCell',      type: 'bool'   },
+    'data-animate-duration': { key: 'animateDuration',  type: 'string' },
+    'data-event-name':       { key: 'eventName',        type: 'string' },
+    'data-watch-stepper':    { key: 'watchStepper',     type: 'bool'   },
+  };
 
-  /* ── CSS 注入（只注一次）──────────────────────────────── */
+  /* ── 讀取元素屬性、就地覆蓋 cfg ─────────────────────── */
+  function readElementAttrs(el, cfg) {
+    for (const [attr, meta] of Object.entries(ATTR_MAP)) {
+      if (!el.hasAttribute(attr)) continue;
+      const raw = el.getAttribute(attr);
+      switch (meta.type) {
+        case 'bool': cfg[meta.key] = (raw !== 'false'); break;
+        case 'int':  cfg[meta.key] = parseInt(raw, 10); break;
+        default:     cfg[meta.key] = raw;
+      }
+    }
+  }
+
+  /* ── 注入全域樣式（僅一次）──────────────────────────── */
   if (!doc.getElementById(CSS_ID)) {
     const s = doc.createElement('style');
     s.id = CSS_ID;
     s.textContent = `
-/* 語意標籤：預設區塊排版 */
+/* 語意標籤：預設 block */
 practice-tracker,
 pt-header, pt-title, pt-toggle,
 pt-body, pt-grid, pt-cell,
@@ -66,7 +111,7 @@ pt-count, pt-complete, pt-complete-sub {
   box-sizing: border-box;
 }
 
-/* ── 面板外框 ────────────────────────────────────────────── */
+/* ── 面板外框（position:fixed 浮動，預設）────────────────── */
 practice-tracker {
   position: fixed;
   width: var(--pt-width, 220px);
@@ -82,7 +127,22 @@ practice-tracker {
   transition: border-color 0.4s ease;
 }
 practice-tracker.pt-complete-state {
-  border-color: rgba(200,221,90,0.45);
+  border-color: rgba(179,222,115,0.45);
+}
+
+/* ── 行內嵌入模式（data-inline）────────────────────────── */
+/*
+ * 寫法：<practice-tracker data-inline ...>
+ * 元素保留在文件流中，不蓋住內容。
+ * 移除 data-inline 即恢復浮動模式。
+ */
+practice-tracker[data-inline] {
+  position: relative;
+  top:    auto !important;
+  bottom: auto !important;
+  left:   auto !important;
+  right:  auto !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 1px 6px rgba(0,0,0,0.30);
 }
 
 /* ── 標題列 ──────────────────────────────────────────────── */
@@ -91,7 +151,7 @@ pt-header {
   align-items: center;
   justify-content: space-between;
   padding: 9px 12px 8px;
-  border-bottom: 1px solid rgba(198,199,189,0.1);
+  border-bottom: 1px solid rgba(198,199,189,0.10);
   cursor: pointer;
   user-select: none;
 }
@@ -138,7 +198,7 @@ pt-grid {
   margin-bottom: 8px;
 }
 pt-cell {
-  width: var(--pt-cell, 16px);
+  width:  var(--pt-cell, 16px);
   height: var(--pt-cell, 16px);
   border-radius: var(--pt-radius, 4px);
   background: var(--pt-pending, #2a2b2a);
@@ -147,7 +207,7 @@ pt-cell {
     transform  var(--pt-anim, 0.3s) cubic-bezier(.34,1.56,.64,1);
 }
 pt-cell.is-done {
-  background: var(--pt-done, #20C21D);
+  background: var(--pt-done, #27AE60);
 }
 pt-cell.pt-pop {
   transform: scale(1.4);
@@ -170,7 +230,7 @@ pt-complete {
   padding: 0 12px 10px;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--pt-complete-color, #C8DD5A);
+  color: var(--pt-complete-color, #B3DE73);
   letter-spacing: 0.02em;
   line-height: 1.5;
 }
@@ -187,62 +247,82 @@ pt-complete-sub {
     doc.head.appendChild(s);
   }
 
-  /* ── 工具：CSS 變數套用 ───────────────────────────────── */
-  function applyCSSVars(el) {
-    el.style.setProperty('--pt-width',          CFG.panelWidth);
-    el.style.setProperty('--pt-panel-bg',        CFG.colorPanel);
-    el.style.setProperty('--pt-text',            CFG.colorText);
-    el.style.setProperty('--pt-z',               String(CFG.zIndex));
-    el.style.setProperty('--pt-cell',            CFG.cellSize);
-    el.style.setProperty('--pt-gap',             CFG.cellGap);
-    el.style.setProperty('--pt-radius',          CFG.cellRadius);
-    el.style.setProperty('--pt-cols',            String(CFG.cellsPerRow));
-    el.style.setProperty('--pt-done',            CFG.colorDone);
-    el.style.setProperty('--pt-pending',         CFG.colorPending);
-    el.style.setProperty('--pt-complete-color',  CFG.colorComplete);
-    el.style.setProperty('--pt-anim',            CFG.animateCell ? CFG.animateDuration : '0s');
+  /* ── CSS 變數注入 ────────────────────────────────────── */
+  function applyCSSVars(el, cfg) {
+    el.style.setProperty('--pt-width',          cfg.panelWidth);
+    el.style.setProperty('--pt-panel-bg',        cfg.colorPanel);
+    el.style.setProperty('--pt-text',            cfg.colorText);
+    el.style.setProperty('--pt-z',               String(cfg.zIndex));
+    el.style.setProperty('--pt-cell',            cfg.cellSize);
+    el.style.setProperty('--pt-gap',             cfg.cellGap);
+    el.style.setProperty('--pt-radius',          cfg.cellRadius);
+    el.style.setProperty('--pt-cols',            String(cfg.cellsPerRow));
+    el.style.setProperty('--pt-done',            cfg.colorDone);
+    el.style.setProperty('--pt-pending',         cfg.colorPending);
+    el.style.setProperty('--pt-complete-color',  cfg.colorComplete);
+    el.style.setProperty('--pt-anim',            cfg.animateCell ? cfg.animateDuration : '0s');
   }
 
-  /* ── 工具：定位 ──────────────────────────────────────── */
-  function applyPosition(el) {
-    const pos = CFG.position || 'bottom-right';
-    el.style.top    = pos.includes('top')    ? CFG.offsetY : 'auto';
-    el.style.bottom = pos.includes('bottom') ? CFG.offsetY : 'auto';
-    el.style.left   = pos.includes('left')   ? CFG.offsetX : 'auto';
-    el.style.right  = pos.includes('right')  ? CFG.offsetX : 'auto';
+  /* ── 浮動位置 ────────────────────────────────────────── */
+  function applyPosition(el, cfg) {
+    const pos = cfg.position || 'bottom-right';
+    el.style.top    = pos.includes('top')    ? cfg.offsetY : 'auto';
+    el.style.bottom = pos.includes('bottom') ? cfg.offsetY : 'auto';
+    el.style.left   = pos.includes('left')   ? cfg.offsetX : 'auto';
+    el.style.right  = pos.includes('right')  ? cfg.offsetX : 'auto';
   }
 
   /* ── 主流程 ──────────────────────────────────────────── */
   function init() {
+
+    /* ① 偵測 HTML 中是否已存在 <practice-tracker> 元素 */
+    const hostEl = doc.querySelector('practice-tracker');
+
+    /* ② 建立此次實例的配置（三層優先序）
+     *   DEFAULTS  →  window.PracticeTrackerConfig  →  data-* 屬性（最高）
+     */
+    const cfg = Object.assign({}, DEFAULTS, win.PracticeTrackerConfig || {});
+    if (hostEl) readElementAttrs(hostEl, cfg);
+
+    /* ③ 收集目標 section */
     const sections = Array.from(
-      doc.querySelectorAll(`section[id^="${CFG.prefix}"]`)
+      doc.querySelectorAll(`section[id^="${cfg.prefix}"]`)
     );
     if (!sections.length) return;
 
-    const total  = sections.length;
+    const total   = sections.length;
     const doneSet = new Set();
     const cells   = {};
 
-    /* 建立 DOM 結構 */
-    const tracker = doc.createElement('practice-tracker');
-    applyCSSVars(tracker);
-    applyPosition(tracker);
-    if (CFG.collapsed) tracker.classList.add('is-collapsed');
+    /* ④ 取用（或新建）tracker 元素；清空原有子內容 */
+    const tracker = hostEl || doc.createElement('practice-tracker');
+    if (hostEl) hostEl.innerHTML = '';
 
-    /* 標題列 */
+    applyCSSVars(tracker, cfg);
+
+    /* ⑤ 位置處理
+     *   data-inline 存在  → 保留文件流，不套 fixed 座標
+     *   data-inline 不存在 → 套 position:fixed + offsetX/Y
+     */
+    const isInline = hostEl && hostEl.hasAttribute('data-inline');
+    if (!isInline) applyPosition(tracker, cfg);
+
+    if (cfg.collapsed) tracker.classList.add('is-collapsed');
+
+    /* ⑥ 標題列 */
     const header   = doc.createElement('pt-header');
     const titleEl  = doc.createElement('pt-title');
     const toggleEl = doc.createElement('pt-toggle');
-    titleEl.textContent  = CFG.title;
-    toggleEl.textContent = CFG.collapsed ? '+' : '−';
+    titleEl.textContent  = cfg.title;
+    toggleEl.textContent = cfg.collapsed ? '+' : '−';
     header.appendChild(titleEl);
     header.appendChild(toggleEl);
 
-    /* 主體 */
+    /* ⑦ 主體 */
     const body = doc.createElement('pt-body');
     body.style.maxHeight = '300px';
 
-    /* 格子陣列 */
+    /* ⑧ 格子陣列 */
     const grid = doc.createElement('pt-grid');
     sections.forEach(sec => {
       const cell = doc.createElement('pt-cell');
@@ -252,28 +332,31 @@ pt-complete-sub {
       cells[sec.id] = cell;
     });
 
-    /* 進度計數 */
+    /* ⑨ 進度計數 */
     const countEl = doc.createElement('pt-count');
-    countEl.textContent = `0 / ${total} ${CFG.labelDone}`;
+    countEl.textContent = `0 / ${total} ${cfg.labelDone}`;
 
     body.appendChild(grid);
     body.appendChild(countEl);
 
-    /* 完成訊息 */
+    /* ⑩ 完成訊息 */
     const completeEl = doc.createElement('pt-complete');
-    completeEl.textContent = CFG.completeText;
-    if (CFG.completeSubText) {
+    completeEl.textContent = cfg.completeText;
+    if (cfg.completeSubText) {
       const sub = doc.createElement('pt-complete-sub');
-      sub.textContent = CFG.completeSubText;
+      sub.textContent = cfg.completeSubText;
       completeEl.appendChild(sub);
     }
 
+    /* ⑪ 組裝 */
     tracker.appendChild(header);
     tracker.appendChild(body);
     tracker.appendChild(completeEl);
-    doc.body.appendChild(tracker);
 
-    /* 收合切換 */
+    /* ⑫ 只在「純 JS 建立」模式下才 append 至 body */
+    if (!hostEl) doc.body.appendChild(tracker);
+
+    /* ⑬ 收合切換 */
     header.addEventListener('click', () => {
       const nowCollapsed = tracker.classList.toggle('is-collapsed');
       toggleEl.textContent = nowCollapsed ? '+' : '−';
@@ -290,41 +373,36 @@ pt-complete-sub {
       const cell = cells[sectionId];
       cell.classList.add('is-done');
 
-      /* 彈跳動畫 */
-      if (CFG.animateCell) {
+      if (cfg.animateCell) {
         cell.classList.add('pt-pop');
-        setTimeout(() => cell.classList.remove('pt-pop'),
-          parseFloat(CFG.animateDuration) * 1000 + 50);
+        setTimeout(
+          () => cell.classList.remove('pt-pop'),
+          parseFloat(cfg.animateDuration) * 1000 + 50
+        );
       }
 
-      /* 更新計數 */
-      countEl.textContent = `${doneSet.size} / ${total} ${CFG.labelDone}`;
-
-      /* 全部完成 */
-      if (doneSet.size === total) {
-        tracker.classList.add('pt-complete-state');
-      }
+      countEl.textContent = `${doneSet.size} / ${total} ${cfg.labelDone}`;
+      if (doneSet.size === total) tracker.classList.add('pt-complete-state');
     }
 
-    /* ── 監聽 bps:complete（bp-stepper）──────────────── */
-    if (CFG.watchStepper) {
-      doc.addEventListener('bps:complete', (e) => {
-        const sec = e.target.closest(`section[id^="${CFG.prefix}"]`);
+    /* ⑭ 事件監聽 */
+    if (cfg.watchStepper) {
+      doc.addEventListener('bps:complete', e => {
+        const sec = e.target.closest(`section[id^="${cfg.prefix}"]`);
         if (sec) markDone(sec.id);
       });
     }
 
-    /* ── 監聽自定義事件 pt:stage-complete ────────────── */
-    doc.addEventListener(CFG.eventName, (e) => {
+    doc.addEventListener(cfg.eventName, e => {
       const id = e.detail && e.detail.sectionId;
       if (id) markDone(id);
     });
 
-    /* 公開 API */
-    win.PracticeTracker = { markDone, total, doneSet };
+    /* ⑮ 公開 API */
+    win.PracticeTracker = { markDone, total, doneSet, cfg };
   }
 
-  /* ── DOM 就緒後啟動 ──────────────────────────────────── */
+  /* ── 時機：DOMContentLoaded 或立即執行 ──────────────── */
   if (doc.readyState === 'loading') {
     doc.addEventListener('DOMContentLoaded', init);
   } else {
