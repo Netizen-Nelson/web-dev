@@ -1,8 +1,5 @@
 /*!
  * WeekCal v2.0.0
- * Week-strip calendar · click-to-inject content from source divs into a target div
- * No dependencies · CSS embedded · No shadow DOM · Global config system
- *
  * ── v2.0 新增：自訂元素 <week-cal> ─────────────────────────────────────────
  *
  *  宣告式用法：
@@ -64,7 +61,6 @@
 
   const STYLE_ID = '__weekcal_v2__';
 
-  // ── 地區語系資料 ────────────────────────────────────────────────────────────
   const LOCALE = {
     'zh-TW': {
       dow: ['周日','周一','周二','周三','周四','周五','周六'],
@@ -81,7 +77,6 @@
     },
   };
 
-  // ── 星期名稱對照表（用於 next / last 解析）─────────────────────────────────
   const DOW_MAP = {
     sun: 0, sunday: 0,
     mon: 1, monday: 1,
@@ -92,24 +87,7 @@
     sat: 6, saturday: 6,
   };
 
-  // ── 主題調色盤登錄 ──────────────────────────────────────────────────────────
-  // 內建主題（品牌色盤）：
-  //   dark    — 預設，warning / lavender / ocean 強調色，底色 #0C0D0C
-  //   light   — 淺色背景，深紫選取色
-  //   teal    — teal 今日，indigo 選取，sky 指示點
-  //   ocean   — ocean 今日，lavender 選取，teal 指示點
-  //   indigo  — indigo 今日，sky 選取，lavender 指示點
-  //   warm    — orange 今日，salmon 選取，yellow 指示點
-  //   safe    — safe 今日，vanilla 選取，special 指示點（v2.0 新增）
-  //   sky     — sky 今日，lavender 選取，ocean 指示點（v2.0 新增）
-  //   lavender— lavender 今日，indigo 選取，pink 指示點（v2.0 新增）
-  //   salmon  — salmon 今日，orange 選取，yellow 指示點（v2.0 新增）
-  //   special — special 今日，safe 選取，vanilla 指示點（v2.0 新增）
-  //   pink    — pink 今日，lavender 選取，warning 指示點（v2.0 新增）
-  //   yellow  — yellow 今日，orange 選取，special 指示點（v2.0 新增）
-  // 使用方式：WeekCal.themes.myBrand = { calBg:'…', … }
   const THEMES = {
-    // ── dark（預設）──────────────────────────────────────────────────────
     dark: {
       calBg:        '#0C0D0C',
       shell:        '#C6C7BD',
@@ -123,7 +101,6 @@
       cellHover:    'rgba(198,199,189,0.09)',
       headerText:   '#C6C7BD',
     },
-    // ── light ─────────────────────────────────────────────────────────────
     light: {
       calBg:        '#F4F4F1',
       shell:        '#1A1B1A',
@@ -291,15 +268,7 @@
       cellHover:    'rgba(227,211,34,0.12)',
       headerText:   '#C6C7BD',
     },
-    // ── aurora（漸層主題，v2.0 新增）────────────────────────────────────
-    // CSS 自訂屬性可直接接受 gradient 字串，以下欄位皆對應 background: var(--wc-*)
-    // 規則：
-    //   calBg      → .wc-shell { background }      殼層底色，用漸層打底
-    //   todayBg    → .wc-cell.wc-today .wc-nw      今日圓圈，lavender→indigo 漸層
-    //   selectedBg → .wc-cell.wc-sel .wc-nw        選取圓圈，teal→ocean 漸層
-    //   cellHover  → .wc-cell.wc-go:hover          游標懸停，半透明 lavender
-    //   icon mode  → .wc-cell.wc-im.wc-today /
-    //                .wc-cell.wc-im.wc-sel         整格背景，同樣吃漸層
+
     aurora: {
       calBg:        'linear-gradient(160deg, #0C0D1E 0%, #0D1525 60%, #091420 100%)',
       shell:        '#D4F0FF',
@@ -334,7 +303,6 @@
     onSelect:       null,
   };
 
-  // ── 工具函式 ────────────────────────────────────────────────────────────────
   const pad    = n => String(n).padStart(2, '0');
   const toISO  = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const nowISO = () => toISO(new Date());
@@ -345,10 +313,6 @@
     return r;
   }
 
-  /**
-   * 將彈性日期字串解析為本地 Date 物件。
-   * 不區分大小寫。無法辨識時回傳 null（並輸出 console.warn）。
-   */
   function parseSmartDate(s) {
     if (!s) return new Date();
     const str = String(s).trim().toLowerCase();
@@ -465,7 +429,6 @@ week-cal{display:block}
     D.head.appendChild(s);
   }
 
-  // ── Bootstrap Icons CDN（只在 mode='icon' 時注入一次）──────────────────────
   const BI_LINK_ID = '__wc_bi__';
   const BI_CDN     = 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css';
 
@@ -501,7 +464,6 @@ week-cal{display:block}
     ].forEach(([k, v]) => el.style.setProperty(k, v));
   }
 
-  // ── DOM 建構 ─────────────────────────────────────────────────────────────────
   function buildDOM(cfg, days, today) {
     const loc  = LOCALE[cfg.locale] || LOCALE['zh-TW'];
     const wrap = mk('div', 'wc-wrap');
@@ -563,7 +525,6 @@ week-cal{display:block}
     return { wrap, grid };
   }
 
-  // ── 內容注入 ─────────────────────────────────────────────────────────────────
   function inject(tEl, srcId, anim) {
     if (!tEl || !srcId) return;
     const src = D.getElementById(srcId);
@@ -593,7 +554,6 @@ week-cal{display:block}
     }
   }
 
-  // ── 選取邏輯 ─────────────────────────────────────────────────────────────────
   function doSelect(inst, date) {
     inst.wrap.querySelectorAll('.wc-cell').forEach(c => c.classList.remove('wc-sel'));
     const cell = inst.wrap.querySelector(`.wc-cell[data-date="${date}"]`);
@@ -605,23 +565,12 @@ week-cal{display:block}
     if (typeof inst.cfg.onSelect === 'function') inst.cfg.onSelect(date, srcId || null);
   }
 
-  // ── 實例登錄 ─────────────────────────────────────────────────────────────────
   const _store = new Map();
 
-  // ── 公開 API ─────────────────────────────────────────────────────────────────
   const WeekCal = {
 
-    /**
-     * 主題調色盤登錄。
-     * 新增自訂主題：WeekCal.themes.myBrand = { calBg: '…', … }
-     * 讀取色值：WeekCal.themes.safe.todayBg
-     */
     themes: THEMES,
 
-    /**
-     * 在任何 init() 之前覆蓋全域預設值。
-     * @param {object} overrides
-     */
     configure(overrides) {
       merge(DEF, overrides);
       return this;
@@ -709,21 +658,12 @@ week-cal{display:block}
       return this;
     },
 
-    /**
-     * 程式化選取日期。
-     * @param {string|Element} containerSel
-     * @param {string} date  ISO 字串 'YYYY-MM-DD'
-     */
     select(containerSel, date) {
       const inst = _store.get(resolve(containerSel));
       if (inst) doSelect(inst, date);
       return this;
     },
 
-    /**
-     * 移除實例並還原隱藏的來源 div。
-     * @param {string|Element} containerSel
-     */
     destroy(containerSel) {
       const cEl  = resolve(containerSel);
       const inst = _store.get(cEl);
@@ -739,10 +679,6 @@ week-cal{display:block}
       return this;
     },
 
-    /**
-     * 回傳已掛載實例的目前設定物件。
-     * @param {string|Element} containerSel
-     */
     getConfig(containerSel) {
       const inst = _store.get(resolve(containerSel));
       return inst ? inst.cfg : null;
@@ -751,9 +687,6 @@ week-cal{display:block}
 
   G.WeekCal = WeekCal;
 
-  // ── 自訂元素 <week-cal> ──────────────────────────────────────────────────────
-  // 需要 Custom Elements v1（所有現代瀏覽器均支援）
-  // 建議在 <script defer> 或 </body> 前載入，確保 <wc-day> 子元素已解析完畢。
   if (!G.customElements) return;
 
   class WeekCalElement extends HTMLElement {
@@ -766,8 +699,6 @@ week-cal{display:block}
         'animation', 'mode', 'target', 'days',
       ];
     }
-
-    // ── 生命週期回呼 ─────────────────────────────────────────────────────────
 
     connectedCallback() {
       // setTimeout(0) 確保 <wc-day> 子元素（在 head 載入時可能尚未解析）已就緒
@@ -791,9 +722,6 @@ week-cal{display:block}
       }
     }
 
-    // ── 內部輔助方法 ─────────────────────────────────────────────────────────
-
-    /** 解析 <wc-day> 子元素，轉換為 days[] 設定陣列 */
     _parseChildDays() {
       const days = [];
       this.querySelectorAll('wc-day').forEach(el => {
@@ -808,27 +736,16 @@ week-cal{display:block}
       return days;
     }
 
-    /**
-     * 讀取布林屬性。
-     * - 屬性不存在 → undefined（使用全域預設值）
-     * - 屬性存在且值為 'false' 或 '0' → false
-     * - 其他情況 → true
-     */
     _boolAttr(name) {
       if (!this.hasAttribute(name)) return undefined;
       const v = this.getAttribute(name);
       return v !== 'false' && v !== '0';
     }
 
-    /** 讀取字串屬性；不存在時回傳 undefined（使用全域預設值）*/
     _strAttr(name) {
       return this.hasAttribute(name) ? this.getAttribute(name) : undefined;
     }
 
-    /**
-     * 取得 days 設定陣列。
-     * 優先順序：days 屬性（JSON）> _cachedDays（來自 <wc-day> 子元素）> []
-     */
     _getDays() {
       const attr = this.getAttribute('days');
       if (attr) {
@@ -855,7 +772,7 @@ week-cal{display:block}
         mode:           this._strAttr('mode'),
         target:         this._strAttr('target'),
         days:           days.length ? days : undefined,
-        // 選取事件轉為 CustomEvent 發派
+
         onSelect: (date, srcId) => {
           this.dispatchEvent(new CustomEvent('wc-select', {
             bubbles:    true,
@@ -864,7 +781,7 @@ week-cal{display:block}
           }));
         },
       };
-      // 移除 undefined 值，讓 WeekCal.init 的 DEF merge 正確生效
+
       Object.keys(opts).forEach(k => opts[k] === undefined && delete opts[k]);
       return opts;
     }
@@ -879,31 +796,15 @@ week-cal{display:block}
       this._wcMounted = false;
     }
 
-    // ── 公開元素方法（鏡射 WeekCal API）─────────────────────────────────────
-
-    /**
-     * 程式化選取日期。
-     * @param {string} date  ISO 字串 'YYYY-MM-DD'
-     * @returns {this}
-     */
     select(date) {
       WeekCal.select(this, date);
       return this;
     }
 
-    /**
-     * 回傳目前實例的設定物件。
-     * @returns {object|null}
-     */
     getConfig() {
       return WeekCal.getConfig(this);
     }
 
-    /**
-     * 重新掃描 <wc-day> 子元素並重新掛載。
-     * 動態新增 / 移除 <wc-day> 後呼叫。
-     * @returns {this}
-     */
     refresh() {
       this._cachedDays = this._parseChildDays();
       if (this._wcMounted) {
@@ -913,10 +814,6 @@ week-cal{display:block}
       return this;
     }
 
-    /**
-     * 移除元件（<week-cal> 標籤本身留在 DOM 中）。
-     * @returns {this}
-     */
     destroy() {
       clearTimeout(this._mountTimer);
       this._wcUnmount();
