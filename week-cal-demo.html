@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeekCal v1.1.0 — Demo</title>
+<style>
+/* ── Design tokens ───────────────────────────────── */
+:root {
+  --bg:        #0C0D0C;
+  --shell:     #C6C7BD;
+  --lavender:  #C3A5E5;
+  --sky:       #82C8E5;
+  --warning:   #E6374B;
+  --ocean:     #1CCAE8;
+  --safe:      #27AE60;
+  --teal:      #0DA591;
+  --yellow:    #E3D322;
+  --orange:    #EDA109;
+  --indigo:    #7849C9;
+  --muted:     rgba(198,199,189,0.58);
+  --border:    rgba(198,199,189,0.11);
+  --border-hi: rgba(198,199,189,0.20);
+  --card-bg:   rgba(198,199,189,0.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 18px; }
+body {
+  background: var(--bg);
+  color: var(--shell);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Page wrap ───────────────────────────────────── */
+.page { max-width: 1440px; margin: 0 auto; padding: 44px 56px 72px; }
+
+/* ── Page header ─────────────────────────────────── */
+.ph { display: flex; align-items: baseline; gap: 16px; margin-bottom: 36px; flex-wrap: wrap; }
+.ph-title { font-size: 1.55rem; font-weight: 700; color: var(--lavender); letter-spacing: -0.01em; }
+.ph-ver {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); background: var(--card-bg); border: 0.5px solid var(--border-hi);
+  border-radius: 6px; padding: 3px 9px;
+}
+.ph-sub { font-size: 0.88rem; color: var(--muted); }
+
+/* ── Section label ───────────────────────────────── */
+.slabel {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+}
+
+/* ── Jump buttons ────────────────────────────────── */
+.jump-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.jbtn {
+  font-size: 0.78rem; font-weight: 500; color: rgba(198,199,189,0.76);
+  background: var(--card-bg); border: 0.5px solid var(--border-hi); border-radius: 8px;
+  padding: 6px 14px; cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+  font-family: inherit;
+}
+.jbtn:hover { background: rgba(195,165,229,0.14); border-color: rgba(195,165,229,0.40); color: var(--lavender); }
+
+/* ── Dark theme display area ─────────────────────── */
+.display-area {
+  background: var(--card-bg); border: 0.5px solid var(--border-hi);
+  border-radius: 18px; min-height: 300px; padding: 36px 40px;
+  margin-top: 28px; position: relative;
+}
+.display-empty {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; color: var(--muted); font-size: 0.85rem; pointer-events: none;
+}
+
+/* ── Divider ─────────────────────────────────────── */
+.divider { border: none; border-top: 0.5px solid var(--border); margin: 52px 0 40px; }
+
+/* ── Light theme demo section ────────────────────── */
+.light-section {
+  background: #EBEBEA; border-radius: 22px;
+  padding: 36px 40px; margin-bottom: 0;
+}
+.light-section .slabel { color: rgba(26,27,26,0.45); }
+.light-display {
+  background: #F5F5F2; border: 0.5px solid rgba(26,27,26,0.13);
+  border-radius: 14px; min-height: 220px; padding: 28px 32px;
+  margin-top: 22px; position: relative; color: #1A1B1A;
+}
+.light-display-empty {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; color: rgba(26,27,26,0.40); font-size: 0.85rem; pointer-events: none;
+}
+
+/* ── Bottom two-column ───────────────────────────── */
+.two-col { display: grid; grid-template-columns: auto 1fr; gap: 48px; align-items: start; }
+
+.demo2-target {
+  margin-top: 16px; background: rgba(120,73,201,0.09);
+  border: 0.5px solid rgba(120,73,201,0.28); border-radius: 12px;
+  min-height: 90px; padding: 18px 22px; font-size: 0.88rem;
+  color: rgba(198,199,189,0.78); line-height: 1.5;
+}
+
+/* ── Code panel ──────────────────────────────────── */
+.code-panel {
+  background: rgba(198,199,189,0.04); border: 0.5px solid var(--border-hi);
+  border-radius: 14px; padding: 26px 30px; overflow-x: auto;
+}
+.code-panel pre {
+  font-family: 'Menlo', 'Monaco', 'Consolas', 'SF Mono', monospace;
+  font-size: 0.78rem; line-height: 1.75; color: rgba(198,199,189,0.82); white-space: pre;
+}
+.ck  { color: var(--lavender); }   /* method/keyword */
+.cs  { color: var(--sky); }        /* string */
+.cc  { color: var(--muted); }      /* comment */
+.cp  { color: var(--ocean); }      /* property key */
+.cn  { color: var(--teal); }       /* constructor / object */
+.cv  { color: #DBEDD8; }           /* value */
+.ct  { color: var(--yellow); }     /* theme name string */
+
+/* ── Dark source card styles ─────────────────────── */
+.sc-card { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.sc-date-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.sc-title { font-size: 1.35rem; font-weight: 700; color: var(--shell); line-height: 1.3; margin-bottom: 12px; letter-spacing: -0.01em; }
+.sc-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; }
+.b-progress { background: rgba(130,200,229,0.15); color: var(--sky); }
+.b-done     { background: rgba(13,165,145,0.15);  color: var(--teal); }
+.b-warn     { background: rgba(227,211,34,0.15);   color: var(--yellow); }
+.b-ok       { background: rgba(39,174,96,0.15);    color: var(--safe); }
+.b-today    { background: rgba(230,55,75,0.15);    color: var(--warning); }
+.sc-desc { font-size: 0.88rem; color: rgba(198,199,189,0.80); line-height: 1.5; margin-bottom: 22px; }
+.sc-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.sc-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: rgba(198,199,189,0.82); line-height: 1.45; }
+.sc-list li::before { content: '▸'; color: var(--sky); flex-shrink: 0; margin-top: 2px; font-size: 0.8rem; }
+.sc-stats { display: flex; flex-direction: column; gap: 14px; }
+.sc-stat { background: rgba(198,199,189,0.06); border: 0.5px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+.sc-stat-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.sc-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--shell); line-height: 1.2; }
+.c-sky    { color: var(--sky); }     .c-safe   { color: var(--safe); }
+.c-lavend { color: var(--lavender); } .c-warn   { color: var(--warning); }
+.c-orange { color: var(--orange); }  .c-ocean  { color: var(--ocean); }
+.c-teal   { color: var(--teal); }    .c-yellow { color: var(--yellow); }
+.sc-bar-wrap { background: rgba(198,199,189,0.12); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 8px; }
+.sc-bar { height: 100%; border-radius: 4px; }
+
+/* ── Light source card styles ────────────────────── */
+.lt-card { }
+.lt-date-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(26,27,26,0.45); margin-bottom: 8px; }
+.lt-title { font-size: 1.15rem; font-weight: 700; color: #1A1B1A; line-height: 1.3; margin-bottom: 10px; }
+.lt-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 16px; }
+.lt-b-past    { background: rgba(26,27,26,0.08); color: rgba(26,27,26,0.60); }
+.lt-b-today   { background: rgba(230,55,75,0.12); color: #D43045; }
+.lt-b-upcoming{ background: rgba(13,165,145,0.13); color: #0A8A6F; }
+.lt-desc { font-size: 0.88rem; color: rgba(26,27,26,0.70); line-height: 1.5; margin-bottom: 16px; }
+.lt-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.lt-list li { display: flex; align-items: flex-start; gap: 9px; font-size: 0.84rem; color: rgba(26,27,26,0.72); line-height: 1.45; }
+.lt-list li::before { content: '▸'; color: #0A8A6F; flex-shrink: 0; margin-top: 2px; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Page header ───────────────────────────────── -->
+  <div class="ph">
+    <h1 class="ph-title">WeekCal</h1>
+    <span class="ph-ver">v1.2.0</span>
+    <span class="ph-sub">6 個內建品牌主題 · 日間主題 · 自然語言日期解析 · mode: 'icon'</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       DEMO 1 — Dark theme, 7-day, zh-TW
+       ══════════════════════════════════════════════ -->
+  <div class="slabel">範例一 &nbsp;·&nbsp; 暗色主題，本週記錄（Sep 14~20）</div>
+  <div id="main-cal"></div>
+
+  <div class="jump-row">
+    <button class="jbtn" onclick="WeekCal.select('#main-cal','2026-09-14')">週一</button>
+    <button class="jbtn" onclick="WeekCal.select('#main-cal','2026-09-15')">週二</button>
+    <button class="jbtn" onclick="WeekCal.select('#main-cal','2026-09-16')">週三</button>
+    <button class="jbtn" onclick="WeekCal.select('#main-cal','2026-09-17')">週四</button>
+    <button class="jbtn" onclick="WeekCal.select('#main-cal','2026-09-18')">週五</button>
+    <button class="jbtn" onclick="WeekCal.select('#main-cal','2026-09-19')">今日（土）</button>
+  </div>
+
+  <div id="main-target" class="display-area">
+    <div class="display-empty">↑ 點選上方日期格查看每日記錄</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════
+       DEMO 2 — Light theme + natural language dates
+       ══════════════════════════════════════════════ -->
+  <div class="light-section">
+    <div class="slabel">
+      範例二 &nbsp;·&nbsp; 日間主題（theme: 'light'）&nbsp;·&nbsp;
+      startDate: 'last Monday' &nbsp;/&nbsp; days[].date 使用 yesterday / today / tomorrow
+    </div>
+    <div id="light-cal"></div>
+    <div id="light-target" class="light-display">
+      <div class="light-display-empty">↑ Select a day above</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════
+       Bottom row — Demo 3 (narrow, indigo) + API panel
+       ══════════════════════════════════════════════ -->
+  <div class="two-col">
+
+    <!-- Demo 3: 5-day, English, indigo/teal custom colours -->
+    <div>
+      <div class="slabel">範例三 &nbsp;·&nbsp; 5 天英文，內建 indigo 主題</div>
+      <div id="demo3-cal"></div>
+      <div id="demo3-target" class="demo2-target">Select a date above…</div>
+    </div>
+
+    <!-- API reference -->
+    <div>
+      <div class="slabel">API 速查</div>
+      <div class="code-panel">
+        <pre><span class="cc">/* ── 自然語言日期格式（大小寫不敏感）─────────────── */</span>
+<span class="cn">WeekCal</span>.<span class="ck">init</span>({
+  <span class="cp">startDate</span>: <span class="cs">'last Monday'</span>,    <span class="cc">// today 之前最近一個週一</span>
+  <span class="cp">endDate</span>:   <span class="cs">'next Sunday'</span>,     <span class="cc">// today 之後最近一個週日</span>
+  <span class="cp">days</span>: [
+    { <span class="cp">date</span>: <span class="cs">'yesterday'</span>, <span class="cp">sourceId</span>: <span class="cs">'src-a'</span> },
+    { <span class="cp">date</span>: <span class="cs">'today'</span>,     <span class="cp">sourceId</span>: <span class="cs">'src-b'</span> },
+    { <span class="cp">date</span>: <span class="cs">'tomorrow'</span>,  <span class="cp">sourceId</span>: <span class="cs">'src-c'</span> },
+    { <span class="cp">date</span>: <span class="cs">'next Fri'</span>,  <span class="cp">sourceId</span>: <span class="cs">'src-d'</span> },
+    { <span class="cp">date</span>: <span class="cs">'last Tue'</span>,  <span class="cp">disabled</span>: <span class="cv">true</span>   },
+  ],
+});
+
+<span class="cc">/* ── 內建主題（6 個）───────────────────────────────── */</span>
+<span class="cc">//  theme        today      selected   indicator</span>
+<span class="cc">//  ──────────   ────────   ────────   ─────────</span>
+<span class="cc">//  'dark'       warning    lavender   ocean      ← 預設</span>
+<span class="cc">//  'light'      warning    indigo*    teal       ← 亮色底</span>
+<span class="cc">//  'teal'       teal       indigo     sky</span>
+<span class="cc">//  'ocean'      ocean      lavender   teal</span>
+<span class="cc">//  'indigo'     indigo     sky        lavender</span>
+<span class="cc">//  'warm'       orange     salmon     yellow</span>
+
+<span class="cn">WeekCal</span>.<span class="ck">init</span>({ <span class="cp">theme</span>: <span class="ct">'teal'</span>   });
+<span class="cn">WeekCal</span>.<span class="ck">init</span>({ <span class="cp">theme</span>: <span class="ct">'indigo'</span> });  <span class="cc">// 範例三使用此主題</span>
+<span class="cn">WeekCal</span>.<span class="ck">init</span>({ <span class="cp">theme</span>: <span class="ct">'warm'</span>   });
+
+<span class="cc">// colors{} 在 theme 之上局部覆蓋（只改需要的色鍵）：</span>
+<span class="cn">WeekCal</span>.<span class="ck">init</span>({
+  <span class="cp">theme</span>:  <span class="ct">'teal'</span>,
+  <span class="cp">colors</span>: { <span class="cp">indicator</span>: <span class="cs">'#FF91D7'</span> },   <span class="cc">// pink dot</span>
+});
+
+<span class="cc">/* ── 自訂第七套主題 ─────────────────────────────────── */</span>
+<span class="cn">WeekCal</span>.themes.<span class="ct">myBrand</span> = {
+  <span class="cp">calBg</span>:        <span class="cs">'#0C0D0C'</span>,
+  <span class="cp">shell</span>:        <span class="cs">'#C6C7BD'</span>,
+  <span class="cp">dayNameColor</span>: <span class="cs">'rgba(198,199,189,0.60)'</span>,
+  <span class="cp">todayDayName</span>: <span class="cs">'#B3DE73'</span>,  <span class="cc">// special</span>
+  <span class="cp">todayBg</span>:      <span class="cs">'#B3DE73'</span>,  <span class="cc">// special</span>
+  <span class="cp">todayText</span>:    <span class="cs">'#0C0D0C'</span>,
+  <span class="cp">selectedBg</span>:   <span class="cs">'#FF91D7'</span>,  <span class="cc">// pink</span>
+  <span class="cp">selectedText</span>: <span class="cs">'#0C0D0C'</span>,
+  <span class="cp">indicator</span>:    <span class="cs">'#EDA109'</span>,  <span class="cc">// orange</span>
+  <span class="cp">cellHover</span>:    <span class="cs">'rgba(179,222,115,0.10)'</span>,
+  <span class="cp">headerText</span>:   <span class="cs">'#C6C7BD'</span>,
+};
+<span class="cn">WeekCal</span>.<span class="ck">init</span>({ <span class="cp">theme</span>: <span class="ct">'myBrand'</span> });
+
+<span class="cc">/* ── 讀取主題值 ─────────────────────────────────────── */</span>
+<span class="cn">WeekCal</span>.themes.teal.<span class="cp">todayBg</span>;     <span class="cc">// '#0DA591'</span>
+<span class="cn">WeekCal</span>.themes.warm.<span class="cp">indicator</span>;  <span class="cc">// '#E3D322'</span>
+
+<span class="cc">/* ── 其他 API ──────────────────────────────────────── */</span>
+<span class="cn">WeekCal</span>.<span class="ck">configure</span>({ <span class="cp">animation</span>: <span class="cs">'slide'</span> }); <span class="cc">// 全域預設</span>
+<span class="cn">WeekCal</span>.<span class="ck">select</span>(<span class="cs">'#cal'</span>, <span class="cs">'2026-09-19'</span>);       <span class="cc">// 程式化選取</span>
+<span class="cn">WeekCal</span>.<span class="ck">getConfig</span>(<span class="cs">'#cal'</span>);                  <span class="cc">// 取得設定</span>
+<span class="cn">WeekCal</span>.<span class="ck">destroy</span>(<span class="cs">'#cal'</span>);                   <span class="cc">// 卸載，還原 divs</span></pre>
+      </div>
+    </div>
+  </div><!-- /two-col -->
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════
+       DEMO 4 — mode: 'icon' + warm theme
+       ══════════════════════════════════════════════ -->
+  <div class="slabel">
+    範例四 &nbsp;·&nbsp; mode: 'icon' &nbsp;·&nbsp; Bootstrap Icons + 自訂標籤 &nbsp;·&nbsp; warm 主題
+  </div>
+  <div id="icon-cal"></div>
+  <div id="icon-target" class="display-area" style="min-height:200px">
+    <div class="display-empty">↑ 點選圖示格查看內容</div>
+  </div>
+
+</div><!-- /page -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SOURCE DIVS — DEMO 1 (dark theme, project logs)
+     Hidden by WeekCal.init(); cloned into #main-target on click.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div id="src-mon">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Mon · Sep 14, 2026</div>
+      <h2 class="sc-title">需求討論與範疇確認</h2>
+      <span class="sc-badge b-progress">● 進行中</span>
+      <p class="sc-desc">與客戶及內部 PM 確認 Q4 產品需求，完成功能優先序排列並產出 PRD 初稿，待週五前完成全員審查。</p>
+      <ul class="sc-list">
+        <li>與 PM 同步功能清單，核定三大核心模組的交付順序</li>
+        <li>設計師提供線框稿初版，現場討論互動細節與邊界情況</li>
+        <li>技術可行性評估：排除 2 個高複雜度功能至 Q1</li>
+        <li>下午 3:00 客戶 Zoom，現場確認最終範疇並簽核</li>
+      </ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat-label">Sprint 點數進度</div>
+        <div class="sc-stat-value c-sky">18 / 34 pts</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:53%;background:#82C8E5"></div></div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat-label">待確認需求項目</div>
+        <div class="sc-stat-value c-orange">7 項</div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat-label">參與人員</div>
+        <div class="sc-stat-value" style="font-size:.9rem;font-weight:500">PM、設計、後端 ×2、客戶</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="src-tue">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Tue · Sep 15, 2026</div>
+      <h2 class="sc-title">UI 設計審查</h2>
+      <span class="sc-badge b-done">✔ 完成</span>
+      <p class="sc-desc">完成儀表板、設定頁、通知中心三個主要頁面的設計審查，組件庫同步更新並建立命名規範。</p>
+      <ul class="sc-list">
+        <li>儀表板 v2 設計通過審查，交前端進行切版</li>
+        <li>設定頁合併舊有 3 個子頁面為單一捲動式頁面</li>
+        <li>通知中心新增分類標籤與已讀未讀篩選功能</li>
+        <li>Figma 組件庫新增 12 個基礎組件，完成命名規則統一</li>
+      </ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat-label">審查頁面</div>
+        <div class="sc-stat-value c-safe">3 / 3</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:100%;background:#27AE60"></div></div>
+      </div>
+      <div class="sc-stat"><div class="sc-stat-label">新增組件數</div><div class="sc-stat-value c-lavend">12 個</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">設計備注待修</div><div class="sc-stat-value c-safe">0 項</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="src-wed">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Wed · Sep 16, 2026</div>
+      <h2 class="sc-title">前端開發衝刺</h2>
+      <span class="sc-badge b-progress">● 進行中</span>
+      <p class="sc-desc">儀表板切版進入第二階段，重點攻克圖表互動邏輯與響應式排版邊界情況，API 串接初版完成。</p>
+      <ul class="sc-list">
+        <li>完成折線圖、長條圖、環圈圖三種基礎圖表組件封裝</li>
+        <li>修復 Safari 15 flex gap 相容性問題，影響 3 個佈局</li>
+        <li>Dashboard API 串接初版完成，測試資料顯示正確</li>
+        <li>導覽列動畫效能優化：FCP 改善 140ms</li>
+      </ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat-label">組件完成率</div>
+        <div class="sc-stat-value c-sky">68%</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:68%;background:#82C8E5"></div></div>
+      </div>
+      <div class="sc-stat"><div class="sc-stat-label">修復 Bug</div><div class="sc-stat-value c-safe">5 個</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">預估剩餘工作量</div><div class="sc-stat-value c-orange">約 1.5 天</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="src-thu">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Thu · Sep 17, 2026</div>
+      <h2 class="sc-title">QA 測試與修正</h2>
+      <span class="sc-badge b-warn">⚠ 有阻礙</span>
+      <p class="sc-desc">整合測試發現資料載入競爭條件（Race Condition），導致首屏偶發空白，已進入緊急排查。</p>
+      <ul class="sc-list">
+        <li>根因確認：多個 API 並行呼叫回傳順序不一致，觸發 UI 渲染異常</li>
+        <li>改寫為 Promise.allSettled 並行邏輯，加入 Loading 狀態保護</li>
+        <li>效能測試完成：所有主要頁面 LCP 均低於 1.8 秒</li>
+        <li>跨瀏覽器覆蓋率：Chrome、Firefox、Edge 118+ 全數通過</li>
+      </ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat-label">測試案例通過率</div>
+        <div class="sc-stat-value c-yellow">142 / 158</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:89.8%;background:#E3D322"></div></div>
+      </div>
+      <div class="sc-stat"><div class="sc-stat-label">嚴重 Bug（P0）</div><div class="sc-stat-value c-warn">1 個</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">一般 Bug（P2）</div><div class="sc-stat-value c-orange">4 個</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="src-fri">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Fri · Sep 18, 2026</div>
+      <h2 class="sc-title">版本發布 v2.4.0</h2>
+      <span class="sc-badge b-done">✔ 已發布</span>
+      <p class="sc-desc">競爭條件問題通過全量回歸測試，v2.4.0 於 14:32 以藍綠部署方式正式上線，零停機。</p>
+      <ul class="sc-list">
+        <li>158 / 158 測試案例全數綠燈，P0 Bug 確認關閉</li>
+        <li>Staging 環境完成 1 小時煙霧測試，未發現新問題</li>
+        <li>14:32 推送 Production，切流量 5% → 100% 歷時 12 分鐘</li>
+        <li>發布後監控 2 小時，API 錯誤率持續低於 0.01%</li>
+      </ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="sc-stat-label">發布狀態</div><div class="sc-stat-value c-safe">成功 ✔</div></div>
+      <div class="sc-stat">
+        <div class="sc-stat-label">線上錯誤率</div>
+        <div class="sc-stat-value c-safe">0.008%</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:0.8%;background:#27AE60;min-width:4px"></div></div>
+      </div>
+      <div class="sc-stat"><div class="sc-stat-label">影響活躍用戶</div><div class="sc-stat-value c-sky">24,891</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="src-sat">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Sat · Sep 19, 2026 &nbsp;·&nbsp; <span style="color:var(--warning);font-weight:700">今日</span></div>
+      <h2 class="sc-title">部署後監控</h2>
+      <span class="sc-badge b-today">● 穩定運行中</span>
+      <p class="sc-desc">v2.4.0 上線滿 24 小時，各項指標均在預期範圍內，週末值班人員持續監控。</p>
+      <ul class="sc-list">
+        <li>API 平均回應時間 142ms，P99 延遲低於 480ms</li>
+        <li>伺服器 CPU 使用率 23%，記憶體佔用 61%，均屬正常</li>
+        <li>新功能「通知中心」24 小時啟用率已達 34%</li>
+        <li>客服工單新增 2 件（皆為操作說明類），已回覆完畢</li>
+      </ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat-label">系統可用性</div>
+        <div class="sc-stat-value c-safe">99.98%</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:99.98%;background:#27AE60"></div></div>
+      </div>
+      <div class="sc-stat"><div class="sc-stat-label">即時 RPS</div><div class="sc-stat-value c-ocean">3,241</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">異常告警</div><div class="sc-stat-value c-safe">0</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SOURCE DIVS — DEMO 2 (light theme, natural language dates)
+     Styled for display on light background.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- 'yesterday' → Sep 18 (Fri) -->
+<div id="lt-fri">
+  <div class="lt-card">
+    <div class="lt-date-tag">Fri · Sep 18 &nbsp;·&nbsp; Yesterday</div>
+    <h3 class="lt-title">Sprint Retrospective</h3>
+    <span class="lt-badge lt-b-past">● Completed</span>
+    <p class="lt-desc">Team completed the Q3 sprint retrospective. Identified three process improvements and updated the team agreement for async communication.</p>
+    <ul class="lt-list">
+      <li>Reduce WIP limit from 5 to 3 items per developer</li>
+      <li>Replace daily stand-up with async Slack update by 09:30</li>
+      <li>Hard code freeze on Fridays at 16:00 — no hotfixes without approval</li>
+      <li>Next sprint planning confirmed for Monday 10:00</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 'today' → Sep 19 (Sat) -->
+<div id="lt-sat">
+  <div class="lt-card">
+    <div class="lt-date-tag">Sat · Sep 19 &nbsp;·&nbsp; <strong style="color:#D43045">Today</strong></div>
+    <h3 class="lt-title">Post-Deploy Watch</h3>
+    <span class="lt-badge lt-b-today">● Live Monitoring</span>
+    <p class="lt-desc">v2.4.0 has been live for 24 hours. On-call engineer monitoring dashboards through the weekend. All metrics within SLA thresholds.</p>
+    <ul class="lt-list">
+      <li>API p50: 142ms &nbsp;/&nbsp; p99: 478ms — both within target</li>
+      <li>Error rate: 0.008% — well below 0.1% alert threshold</li>
+      <li>New Notifications feature: 34% opt-in rate in first 24 h</li>
+      <li>2 support tickets opened — both resolved, cosmetic issues only</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 'tomorrow' → Sep 20 (Sun) -->
+<div id="lt-sun">
+  <div class="lt-card">
+    <div class="lt-date-tag">Sun · Sep 20 &nbsp;·&nbsp; Tomorrow</div>
+    <h3 class="lt-title">Pre-Sprint Prep</h3>
+    <span class="lt-badge lt-b-upcoming">▶ Upcoming</span>
+    <p class="lt-desc">Engineering leads sync to finalise backlog grooming before Monday sprint kick-off. Short 30-minute remote call at 17:00.</p>
+    <ul class="lt-list">
+      <li>Review 12 candidate stories — prioritise top 8 for sprint</li>
+      <li>Assign story points with team consensus</li>
+      <li>Confirm dependencies with the Design team for Week 2 stories</li>
+      <li>Send sprint goal summary to stakeholders by 18:30</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SOURCE DIVS — DEMO 3 (narrow, indigo, English)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="d3-mon">
+  <div style="font-size:.88rem;color:rgba(198,199,189,.82);line-height:1.5">
+    <strong style="display:block;font-size:1rem;color:#C6C7BD;margin-bottom:6px">Monday Stand-up</strong>
+    No blockers. Sprint velocity on track — 12 of 30 story points done.
+  </div>
+</div>
+<div id="d3-wed">
+  <div style="font-size:.88rem;color:rgba(198,199,189,.82);line-height:1.5">
+    <strong style="display:block;font-size:1rem;color:#C6C7BD;margin-bottom:6px">Wednesday Milestone</strong>
+    Design handoff complete. First component merged to main branch at 16:45.
+  </div>
+</div>
+<div id="d3-fri">
+  <div style="font-size:.88rem;color:rgba(198,199,189,.82);line-height:1.5">
+    <strong style="display:block;font-size:1rem;color:#C6C7BD;margin-bottom:6px">Friday Review</strong>
+    80% of sprint scope delivered. Remaining items moved to next sprint with PM approval.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     WeekCal initialisation
+     ═══════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SOURCE DIVS — DEMO 4 (icon mode, compact cards)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="ic-mon">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Mon · Sep 14 &nbsp;·&nbsp; bi-clipboard-check</div>
+      <h2 class="sc-title">需求確認</h2>
+      <span class="sc-badge b-done">✔ 完成</span>
+      <p class="sc-desc">PRD 初稿完成並獲得客戶簽核，共確認 12 個功能點，排除 2 個延後至下季。</p>
+      <ul class="sc-list"><li>客戶 Zoom 完成，會議紀錄已發送</li><li>Jira Epic 建立，Story 拆解中</li></ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="sc-stat-label">確認功能點</div><div class="sc-stat-value c-safe">12 項</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">延後項目</div><div class="sc-stat-value c-muted" style="color:var(--muted)">2 項</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="ic-wed">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Wed · Sep 16 &nbsp;·&nbsp; bi-code-slash</div>
+      <h2 class="sc-title">前端實作</h2>
+      <span class="sc-badge b-progress">● 進行中</span>
+      <p class="sc-desc">元件庫搭建完成，Dashboard 主畫面切版進度 68%，圖表互動邏輯正在收尾。</p>
+      <ul class="sc-list"><li>3 個圖表組件封裝完畢</li><li>API 串接初版 OK，測資正常</li></ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat-label">切版進度</div>
+        <div class="sc-stat-value c-sky">68%</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:68%;background:#82C8E5"></div></div>
+      </div>
+      <div class="sc-stat"><div class="sc-stat-label">修復 Bug</div><div class="sc-stat-value c-safe">5</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="ic-fri">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Fri · Sep 18 &nbsp;·&nbsp; bi-rocket-takeoff</div>
+      <h2 class="sc-title">版本發布</h2>
+      <span class="sc-badge b-done">✔ 已發布</span>
+      <p class="sc-desc">v2.4.0 於 14:32 藍綠部署成功，158 個測試案例全數通過，零停機上線。</p>
+      <ul class="sc-list"><li>錯誤率 0.008%，低於 SLA 閾值</li><li>影響 24,891 名活躍用戶</li></ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="sc-stat-label">發布狀態</div><div class="sc-stat-value c-safe">成功 ✔</div></div>
+      <div class="sc-stat"><div class="sc-stat-label">線上錯誤率</div><div class="sc-stat-value c-safe">0.008%</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="ic-sat">
+  <div class="sc-card">
+    <div>
+      <div class="sc-date-tag">Sat · Sep 19 &nbsp;·&nbsp; bi-activity &nbsp;·&nbsp; 今日</div>
+      <h2 class="sc-title">部署監控</h2>
+      <span class="sc-badge b-today">● 監控中</span>
+      <p class="sc-desc">系統可用性 99.98%，各項指標正常，週末值班人員持續待命。</p>
+      <ul class="sc-list"><li>RPS 3,241 &nbsp;/&nbsp; P99 478ms</li><li>異常告警 0</li></ul>
+    </div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat-label">可用性</div>
+        <div class="sc-stat-value c-safe">99.98%</div>
+        <div class="sc-bar-wrap"><div class="sc-bar" style="width:99.98%;background:#27AE60"></div></div>
+      </div>
+      <div class="sc-stat"><div class="sc-stat-label">即時 RPS</div><div class="sc-stat-value c-ocean">3,241</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="week-cal.js"></script>
+<script>
+
+// ── Demo 1: Dark theme, 7-day zh-TW ──────────────────────────────────────────
+WeekCal.init({
+  container:  '#main-cal',
+  target:     '#main-target',
+  startDate:  '2026-09-14',
+  endDate:    '2026-09-20',
+  locale:     'zh-TW',
+  width:      '100%',
+  theme:      'dark',
+  animation:  'fade',
+  colors:     { calBg: '#111312' },   // slightly lighter than page bg
+  days: [
+    { date: '2026-09-14', sourceId: 'src-mon' },
+    { date: '2026-09-15', sourceId: 'src-tue' },
+    { date: '2026-09-16', sourceId: 'src-wed' },
+    { date: '2026-09-17', sourceId: 'src-thu' },
+    { date: '2026-09-18', sourceId: 'src-fri' },
+    { date: '2026-09-19', sourceId: 'src-sat' },
+    // Sep 20 (Sun) not listed → display-only cell, no indicator, no click
+  ],
+  onSelect: () => {
+    const ph = document.querySelector('#main-target .display-empty');
+    if (ph) ph.remove();
+  },
+});
+
+// ── Demo 2: Light theme + natural language dates ──────────────────────────────
+WeekCal.init({
+  container:  '#light-cal',
+  target:     '#light-target',
+  startDate:  'last Monday',    // → Sep 14  (first Mon before today)
+  endDate:    'next Sunday',    // → Sep 20  (first Sun after today)
+  locale:     'en',
+  width:      '100%',
+  theme:      'light',
+  animation:  'slide',
+  days: [
+    { date: 'yesterday', sourceId: 'lt-fri' },   // Sep 18 (Fri)
+    { date: 'today',     sourceId: 'lt-sat' },   // Sep 19 (Sat) — today
+    { date: 'tomorrow',  sourceId: 'lt-sun' },   // Sep 20 (Sun)
+    // Mon-Thu (Sep 14-17) are generated from the range but have no sourceId → display-only
+  ],
+  onSelect: () => {
+    const ph = document.querySelector('#light-target .light-display-empty');
+    if (ph) ph.remove();
+  },
+});
+
+// ── Demo 3: 5-day English, built-in 'indigo' theme ───────────────────────────
+WeekCal.init({
+  container:  '#demo3-cal',
+  target:     '#demo3-target',
+  startDate:  '2026-09-14',
+  endDate:    '2026-09-18',
+  locale:     'en',
+  width:      '360px',
+  theme:      'indigo',   // built-in brand theme — no colors{} override needed
+  animation:  'slide',
+  days: [
+    { date: '2026-09-14', sourceId: 'd3-mon' },
+    // Sep 15 (Tue) — no sourceId, display only
+    { date: '2026-09-16', sourceId: 'd3-wed' },
+    // Sep 17 (Thu) — no sourceId, display only
+    { date: '2026-09-18', sourceId: 'd3-fri' },
+  ],
+});
+
+// ── Demo 4: icon mode + warm theme ───────────────────────────────────────────
+// Bootstrap Icons CDN auto-injected by the component when mode: 'icon'
+WeekCal.init({
+  container:  '#icon-cal',
+  target:     '#icon-target',
+  startDate:  '2026-09-14',
+  endDate:    '2026-09-20',
+  locale:     'zh-TW',
+  width:      '100%',
+  theme:      'warm',
+  mode:       'icon',      // enables Bootstrap Icon + label layout
+  animation:  'fade',
+  days: [
+    { date: '2026-09-14', sourceId: 'ic-mon', icon: 'bi-clipboard-check', label: '需求' },
+    { date: '2026-09-15', icon: 'bi-palette2',    label: '設計' },   // 無 sourceId → 純顯示
+    { date: '2026-09-16', sourceId: 'ic-wed', icon: 'bi-code-slash',       label: '實作' },
+    { date: '2026-09-17', icon: 'bi-bug',          label: '測試' },   // 純顯示
+    { date: '2026-09-18', sourceId: 'ic-fri', icon: 'bi-rocket-takeoff',   label: '發布' },
+    { date: '2026-09-19', sourceId: 'ic-sat', icon: 'bi-activity',         label: '監控' },
+    { date: '2026-09-20', icon: 'bi-cup-hot',      label: '休息' },   // 純顯示
+  ],
+  onSelect: () => {
+    const ph = document.querySelector('#icon-target .display-empty');
+    if (ph) ph.remove();
+  },
+});
+
+</script>
+</body>
+</html>
