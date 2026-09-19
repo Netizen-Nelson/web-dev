@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>practice-tracker Demo</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<style>
+:root { font-size: 18px; }
+body {
+  background: #0C0D0C;
+  color: #C6C7BD;
+  font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  padding: 32px 48px 120px;
+  line-height: 1.5;
+}
+h1 { color: #C3A5E5; font-size: 1.5rem; margin-bottom: 4px; }
+.subtitle { color: #C6C7BD; opacity: 0.55; font-size: 0.85rem; margin-bottom: 40px; }
+
+/* 練習區塊 */
+.ex-section {
+  border: 1px solid rgba(198,199,189,0.12);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 32px;
+  background: #141514;
+}
+.ex-section h2 {
+  font-size: 1rem;
+  color: #82C8E5;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.ex-section p {
+  font-size: 0.88rem;
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+
+/* bp-stepper 最小模擬（僅示範用） */
+.demo-steps { display: flex; flex-direction: column; gap: 10px; }
+.demo-step {
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* 按鈕 */
+.btn-done {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #1a2a1a;
+  border: 1px solid #27AE60;
+  color: #27AE60;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-top: 14px;
+}
+.btn-done:hover { background: #27AE60; color: #0C0D0C; }
+.btn-done:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-done.is-done {
+  background: rgba(39,174,96,0.15);
+  color: #27AE60;
+  cursor: default;
+}
+
+/* 配置面板（展示區） */
+.config-panel {
+  background: #181918;
+  border: 1px solid rgba(195,165,229,0.2);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 40px;
+}
+.config-panel h3 { color: #C3A5E5; font-size: 0.9rem; margin-bottom: 12px; }
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px 20px;
+}
+.config-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.78rem;
+}
+.config-key { color: #82C8E5; font-family: monospace; white-space: nowrap; }
+.config-val { color: #DBEDD8; font-family: monospace; opacity: 0.8; }
+
+/* API 示範 */
+.api-demo {
+  background: #181918;
+  border: 1px solid rgba(130,200,229,0.2);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+}
+.api-demo h3 { color: #82C8E5; font-size: 0.9rem; margin-bottom: 10px; }
+code {
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 0.8rem;
+  color: #DECA4B;
+}
+.tag-label {
+  display: inline-block;
+  background: rgba(195,165,229,0.12);
+  color: #C3A5E5;
+  border-radius: 4px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-family: monospace;
+  margin-right: 4px;
+}
+
+.section-label {
+  font-size: 0.72rem;
+  color: #C3A5E5;
+  opacity: 0.6;
+  font-family: monospace;
+  margin-bottom: 8px;
+}
+
+/* 分隔線 */
+.divider {
+  border: none;
+  border-top: 1px dashed rgba(198,199,189,0.12);
+  margin: 40px 0;
+}
+</style>
+</head>
+<body>
+
+<h1><i class="bi bi-grid-3x3-gap-fill"></i> practice-tracker.js</h1>
+<div class="subtitle">單頁練習完成度追蹤元件 · Demo 09-19-26</div>
+
+<!-- 配置展示 -->
+<div class="config-panel">
+  <h3><i class="bi bi-sliders"></i> 當前設定 <span style="opacity:0.5;font-weight:400">window.PracticeTrackerConfig</span></h3>
+  <div class="config-grid">
+    <div class="config-row"><span class="config-key">prefix</span><span class="config-val">'ex-'</span></div>
+    <div class="config-row"><span class="config-key">position</span><span class="config-val">'bottom-right'</span></div>
+    <div class="config-row"><span class="config-key">cellSize</span><span class="config-val">'16px'（預設）</span></div>
+    <div class="config-row"><span class="config-key">cellsPerRow</span><span class="config-val">5</span></div>
+    <div class="config-row"><span class="config-key">colorDone</span><span class="config-val">#20C21D（safe）</span></div>
+    <div class="config-row"><span class="config-key">colorComplete</span><span class="config-val">#C8DD5A（special）</span></div>
+    <div class="config-row"><span class="config-key">watchStepper</span><span class="config-val">true</span></div>
+    <div class="config-row"><span class="config-key">eventName</span><span class="config-val">'pt:stage-complete'</span></div>
+    <div class="config-row"><span class="config-key">animateCell</span><span class="config-val">true（0.3s）</span></div>
+    <div class="config-row"><span class="config-key">collapsed</span><span class="config-val">false</span></div>
+  </div>
+</div>
+
+<!-- 語意標籤說明 -->
+<div class="api-demo">
+  <h3><i class="bi bi-code-slash"></i> 語意標籤結構</h3>
+  <div style="font-size:0.8rem;line-height:2;opacity:0.85;">
+    <span class="tag-label">practice-tracker</span>面板外框，fixed 定位，自動注入至 body<br>
+    <span class="tag-label">pt-header</span>標題列，點擊收合<br>
+    <span class="tag-label">pt-title</span>標題文字<br>
+    <span class="tag-label">pt-toggle</span>收合符號（− / +）<br>
+    <span class="tag-label">pt-body</span>可收合的主體區域<br>
+    <span class="tag-label">pt-grid</span>格子容器，CSS Grid 排列<br>
+    <span class="tag-label">pt-cell</span>單一格子，完成後加 <code>.is-done</code><br>
+    <span class="tag-label">pt-count</span>「2 / 5 完成」計數文字<br>
+    <span class="tag-label">pt-complete</span>全部完成時顯示<br>
+    <span class="tag-label">pt-complete-sub</span>完成副標（選填）
+  </div>
+</div>
+
+<!-- 觸發方式說明 -->
+<div class="api-demo">
+  <h3><i class="bi bi-lightning-charge"></i> 觸發方式</h3>
+  <div style="font-size:0.8rem;line-height:2.2;opacity:0.85;">
+    <b style="color:#DECA4B">方式一：bp-stepper 自動觸發</b>（watchStepper: true）<br>
+    stepper 走到最後一步時發出 <code>bps:complete</code>，元件自動找最近的 <code>section[id^="ex-"]</code> 打格子。<br><br>
+    <b style="color:#DECA4B">方式二：自定義事件手動觸發</b>（非 stepper 練習）<br>
+    <code>document.dispatchEvent(new CustomEvent('pt:stage-complete', { detail: { sectionId: 'ex-2' } }))</code><br><br>
+    <b style="color:#DECA4B">方式三：公開 API 直接呼叫</b><br>
+    <code>window.PracticeTracker.markDone('ex-3')</code>
+  </div>
+</div>
+
+<hr class="divider">
+<div style="color:#C3A5E5;font-size:0.9rem;margin-bottom:24px;font-weight:600;">
+  <i class="bi bi-play-circle"></i> 以下為練習示範，共 5 個階段
+</div>
+
+<!-- ── 練習階段 1 ──────────────────────────── -->
+<section id="ex-1" class="ex-section">
+  <div class="section-label">section#ex-1</div>
+  <h2>階段一：辨認後位修飾</h2>
+  <p>以下句子的主詞是哪個字？後位修飾片語的範圍是哪裡？</p>
+  <div class="demo-steps">
+    <div class="demo-step">
+      Adults caring for an aging spouse and regularly helping them with household tasks <b>report</b> that this has had a positive impact.
+    </div>
+    <div class="demo-step" style="color:#82C8E5;">
+      主詞：<b>adults</b>　動詞：<b>report</b>　後位修飾：caring for an aging spouse...
+    </div>
+  </div>
+  <button class="btn-done" onclick="manualDone('ex-1', this)">
+    <i class="bi bi-check-circle"></i> 完成這個階段
+  </button>
+</section>
+
+<!-- ── 練習階段 2 ──────────────────────────── -->
+<section id="ex-2" class="ex-section">
+  <div class="section-label">section#ex-2</div>
+  <h2>階段二：中英語序對比</h2>
+  <p>把以下中文改成英文語序（名詞先出，修飾往後掛）</p>
+  <div class="demo-steps">
+    <div class="demo-step">「讓我認識不同背景的人的那段交換學生經歷」</div>
+    <div class="demo-step">提示：先說 the exchange experience，再接關係子句</div>
+    <div class="demo-step" style="color:#DECA4B;">
+      → the exchange experience <span style="color:#C3A5E5">that gave me a chance to meet people from different backgrounds</span>
+    </div>
+  </div>
+  <button class="btn-done" onclick="manualDone('ex-2', this)">
+    <i class="bi bi-check-circle"></i> 完成這個階段
+  </button>
+</section>
+
+<!-- ── 練習階段 3：bp-stepper 示範 ─────────── -->
+<section id="ex-3" class="ex-section">
+  <div class="section-label">section#ex-3　← bps:complete 自動觸發</div>
+  <h2>階段三：四種後位修飾（stepper 走完自動打格子）</h2>
+  <p>點擊「下一種」走完全部四種，格子自動完成，無需手動按鈕。</p>
+
+  <div id="postmod-demo-stepper" style="margin-top:8px;">
+    <div class="demo-step" id="pm-step-1">
+      ① 現在分詞片語：adults <span style="color:#C3A5E5">caring for an aging spouse</span>
+    </div>
+    <div class="demo-step" id="pm-step-2" style="display:none;">
+      ② 過去分詞片語：a habit <span style="color:#C3A5E5">formed during the COVID-19 pandemic</span>
+    </div>
+    <div class="demo-step" id="pm-step-3" style="display:none;">
+      ③ 介系詞片語：users <span style="color:#C3A5E5">of social media and AI chatbots</span>
+    </div>
+    <div class="demo-step" id="pm-step-4" style="display:none;">
+      ④ 關係子句：a habit <span style="color:#C3A5E5">that I managed to stick with</span>
+    </div>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:10px;align-items:center;">
+    <button class="btn-done" id="pm-next-btn" onclick="pmNext()">
+      <i class="bi bi-arrow-right-circle"></i> 下一種
+    </button>
+    <span id="pm-count" style="font-size:0.78rem;opacity:0.5;">1 / 4</span>
+  </div>
+</section>
+
+<!-- ── 練習階段 4 ──────────────────────────── -->
+<section id="ex-4" class="ex-section">
+  <div class="section-label">section#ex-4</div>
+  <h2>階段四：sedentary lifestyle 造句</h2>
+  <p>用後位修飾結構，把 sedentary lifestyle 放進一個口說 Part 3 答案裡。</p>
+  <div class="demo-steps">
+    <div class="demo-step">
+      題目：Do you think people today have a healthy lifestyle?
+    </div>
+    <div class="demo-step" style="color:#DECA4B;">
+      參考答案：Most office workers in Taipei lead <span style="color:#C3A5E5">a sedentary lifestyle shaped entirely by desk jobs and long commutes</span>, even if they hit the gym twice a week.
+    </div>
+  </div>
+  <button class="btn-done" onclick="manualDone('ex-4', this)">
+    <i class="bi bi-check-circle"></i> 完成這個階段
+  </button>
+</section>
+
+<!-- ── 練習階段 5 ──────────────────────────── -->
+<section id="ex-5" class="ex-section">
+  <div class="section-label">section#ex-5　← PracticeTracker.markDone() API 示範</div>
+  <h2>階段五：自由造句提交</h2>
+  <p>用本頁學到的任一後位修飾結構，自己造一句話，然後點「提交」。（此階段示範 API 直接呼叫）</p>
+  <div class="demo-steps">
+    <div class="demo-step">
+      <textarea
+        id="free-sentence"
+        rows="3"
+        style="width:100%;background:#1a1b1a;border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#C6C7BD;padding:8px 10px;font-size:0.84rem;resize:vertical;"
+        placeholder="在這裡輸入你的句子..."></textarea>
+    </div>
+  </div>
+  <button class="btn-done" onclick="submitFree(this)">
+    <i class="bi bi-send"></i> 提交並完成
+  </button>
+</section>
+
+<hr class="divider">
+
+<!-- 手動設定覆蓋示範 -->
+<div class="api-demo">
+  <h3><i class="bi bi-gear"></i> 覆蓋設定範例</h3>
+  <div style="font-size:0.8rem;line-height:2;color:#DBEDD8;opacity:0.85;">
+    在載入 practice-tracker.js 之前宣告：
+  </div>
+<pre style="background:#111;border-radius:8px;padding:14px 18px;font-size:0.76rem;color:#DECA4B;margin-top:8px;overflow-x:auto;"><code>window.PracticeTrackerConfig = {
+  prefix:          'ex-',
+  position:        'bottom-left',   // 改成左下角
+  cellSize:        '20px',          // 格子放大
+  cellsPerRow:     4,
+  colorDone:       '#0DA591',       // teal
+  colorComplete:   '#C3A5E5',       // lavender
+  title:           'My Progress',
+  completeText:    '都做完了！',
+  completeSubText: '繼續下一集',
+  collapsed:       true,            // 預設收合
+  offsetY:         '40px',
+};</code></pre>
+</div>
+
+<script>
+  /* ── 全域設定（此 demo 使用預設值）─────────── */
+  // window.PracticeTrackerConfig = { ... };
+
+  /* ── 手動觸發（按鈕型練習）──────────────────── */
+  function manualDone(sectionId, btn) {
+    if (btn.disabled) return;
+    document.dispatchEvent(new CustomEvent('pt:stage-complete', {
+      detail: { sectionId }
+    }));
+    btn.disabled = true;
+    btn.classList.add('is-done');
+    btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> 已完成';
+  }
+
+  /* ── 階段三：stepper 模擬（逐步顯示） ───────── */
+  let pmCurrent = 1;
+  const pmTotal = 4;
+
+  function pmNext() {
+    if (pmCurrent >= pmTotal) return;
+    pmCurrent++;
+    document.getElementById('pm-step-' + pmCurrent).style.display = 'block';
+    document.getElementById('pm-count').textContent = pmCurrent + ' / ' + pmTotal;
+
+    if (pmCurrent === pmTotal) {
+      const btn = document.getElementById('pm-next-btn');
+      btn.disabled = true;
+      btn.classList.add('is-done');
+      btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> 全部看完';
+      /* 模擬 bps:complete：找 section#ex-3 觸發 */
+      const fakeTarget = document.querySelector('#ex-3');
+      fakeTarget.dispatchEvent(new CustomEvent('bps:complete', {
+        bubbles: true,
+        detail: { el: fakeTarget }
+      }));
+    }
+  }
+
+  /* ── 階段五：API 直接呼叫 ──────────────────── */
+  function submitFree(btn) {
+    const val = document.getElementById('free-sentence').value.trim();
+    if (!val) {
+      document.getElementById('free-sentence').style.borderColor = '#E6374B';
+      return;
+    }
+    if (btn.disabled) return;
+    window.PracticeTracker && window.PracticeTracker.markDone('ex-5');
+    btn.disabled = true;
+    btn.classList.add('is-done');
+    btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> 已提交';
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+<script src="practice-tracker.js"></script>
+</body>
+</html>
