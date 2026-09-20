@@ -46,20 +46,20 @@
   var CFG = global.UiReadingConfig = Object.assign({
     /* text-morph */
     morphTheme:     'sky',
-    morphDuration:  380,        /* ms，淡出淡入時長 */
+    morphDuration:  420,        /* ms，淡出淡入時長 */
     morphLabelFrom: '← 還原',
     morphLabelTo:   '看升級版 →',
 
     /* margin-pin */
-    pinTheme:  'yellow',
-    pinMargin: 20,              /* px，標注框距視窗右邊 */
-    pinWidth:  210,             /* px，標注框最大寬度 */
+    pinTheme:  'sky',
+    pinMargin: 50,              /* px，標注框距視窗右邊 */
+    pinWidth:  500,             /* px，標注框最大寬度 */
 
     /* read-pulse */
     pulseColor:   'teal',
     pulseSpeed:   2800,         /* ms，掃描線從頂到底的時間 */
     pulseWidth:   '3px',        /* 掃描線粗細 */
-    pulseGap:     14,           /* px，左側留白（容納掃描線） */
+    pulseGap:     16,           /* px，左側留白（容納掃描線） */
     pulseTrigger: 'visible',    /* visible | click | hover */
 
     /* chalk-mark */
