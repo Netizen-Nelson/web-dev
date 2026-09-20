@@ -1,7 +1,497 @@
-(function () {
+// ================================================================
+// bp-popnote.js  v2.0  — 合併版
+// 包含兩個獨立元件：
+//
+//  ① bp-notice  公告 / 廣告 / Sticky Bar                <bp-notice>
+//  ② bp-popnote 浮動氣泡 / Panel / Modal / Offcanvas    data-popover-*
+//
+// ── bp-notice 用法 ────────────────────────────────────────────
+//   <!-- 系統公告 -->
+//   <bp-notice type="announcement" notice-id="maint-0921">
+//     系統將於週日 02:00–04:00 進行維護。
+//   </bp-notice>
+//
+//   <!-- 促銷 + CTA -->
+//   <bp-notice type="promo" color="ocean" dismissible
+//              cta-text="立即報名" cta-href="/register">
+//     雅思衝刺班 4 月開課，限額 12 人！
+//   </bp-notice>
+//
+//   <!-- 底部 Sticky Bar -->
+//   <bp-notice type="sticky" position="bottom" color="teal" dismissible>
+//     今日學習進度：3 / 5
+//   </bp-notice>
+//
+// ── bp-notice 屬性 ────────────────────────────────────────────
+//   type          announcement | promo | sticky（預設 announcement）
+//   position      top | bottom（sticky 用，預設 bottom）
+//   notice-id     字串，關閉後以 localStorage 記憶
+//   dismissible   顯示關閉按鈕
+//   icon          Bootstrap Icons class 覆寫
+//   cta-text / cta-href / cta-target
+//   auto-dismiss  秒數後自動關閉（0 = 不自動）
+//   no-anim       停用動畫
+//
+//   color（16 色 + gold）：
+//     lavender · sky · ocean · safe · special · yellow ·
+//     salmon · pink · orange · vanilla · teal · focus ·
+//     indigo · info · wrong
+//     gold（金箔特殊樣式）
+//     直接色碼（#hex / rgb / var(--x)）
+//
+//     ─── v1 別名（向下相容）───────────────────────────────
+//     accent    → lavender      correct  → safe
+//     wrong     → 紅色 #E6374B  warning  → 黃色 #E3D322（= yellow）
+//     note      → yellow        success  → safe
+//     highlight → special
+//     ─── 注意 ─────────────────────────────────────────────
+//     bp-notice 的 warning = 黃色（舊行為保留）
+//     bp-popnote 的 warning theme = 紅色（另一命名空間，互不影響）
+//
+// ── bp-notice 全域設定 ────────────────────────────────────────
+//   BpNotice.config.stickyOffset = '64px';
+//   BpNotice.config.theme.bg     = '#111';
+//
+// ── bp-notice 事件 ────────────────────────────────────────────
+//   bp:notice-close  → detail: { noticeId }
+//   bp:notice-cta    → detail: { noticeId, href }
+//
+// ── bp-notice 全域 API ────────────────────────────────────────
+//   BpNotice.close(el)              關閉
+//   BpNotice.show(el)               重新顯示（清除記憶）
+//   BpNotice.setContent(el, html)   動態更新內容
+//   BpNotice.getInstance(el)        取得 Widget 實例
+//   BpNotice.init()                 掃描並初始化新增的 <bp-notice>
+//   BpNotice.palette                取得共用調色盤
+//
+// ── bp-popnote 用法 ───────────────────────────────────────────
+//   <span data-popover-content="說明文字">觸發詞</span>
+//   <span data-popover-title="標題" data-popover-content="…">觸發詞</span>
+//   <span data-popover-target="#my-tpl" data-popover-theme="sky">觸發詞</span>
+//
+//   多頁 Carousel（content 內含多個 <section>）：
+//   <span data-popover-content="<section>頁1</section><section>頁2</section>">…</span>
+//
+//   Modal：
+//   <span data-popover-title="…" data-popover-content="…"
+//         data-popover-modal="dialog">開啟 Modal</span>
+//
+//   Offcanvas：
+//   <span data-popover-title="…" data-popover-content="…"
+//         data-popover-modal="end">右側 Offcanvas</span>
+//
+//   Panel 模式（渲染至指定容器）：
+//   <span data-popover-content="…" data-popover-panel="#side-box">觸發詞</span>
+//
+// ── bp-popnote 全域設定 ───────────────────────────────────────
+//   PopoverConfig.set({ theme: 'sky', placement: 'bottom', maxWidth: '400px' });
+//   PopoverConfig.set({ carousel: { animation: 'crossfade', interval: 5000 } });
+//   PopoverConfig.set({ modal: 'dialog', modalSize: 'lg', modalStatic: true });
+//   PopoverConfig.addTheme('brand', { bg:'#100820', titleColor:'#A080FF', borderColor:'#A080FF' });
+//
+// ── bp-popnote 事後標注 API ───────────────────────────────────
+//   BpPopnote.annotate({ text:'特定詞', content:'說明', theme:'ocean', within:'#article' });
+//   BpPopnote.clearAnnotations('#article');
+//
+// ── 共用調色盤（BpNotice.palette）────────────────────────────
+//   lavender #C3A5E5 · sky #82C8E5 · ocean #1CCAE8 · wrong #E6374B
+//   safe #27AE60 · special #B3DE73 · yellow #E3D322 · salmon #E5C3B3
+//   pink #FF91D7 · orange #EDA109 · vanilla #DBEDD8 · teal #0DA591
+//   focus #D4FFFC · indigo #7849C9 · info #2351DB
+//   gold（特殊漸層）
+//
+// 無 Shadow DOM；CSS 注入 <head>
+// ================================================================
+
+(function (G) {
   'use strict';
 
-  const CSS = `
+  // ══════════════════════════════════════════════════════════════
+  //  共用調色盤
+  // ══════════════════════════════════════════════════════════════
+
+  var PALETTE = {
+    lavender : '#C3A5E5',
+    sky      : '#82C8E5',
+    ocean    : '#1CCAE8',
+    safe     : '#27AE60',
+    special  : '#B3DE73',
+    yellow   : '#E3D322',
+    salmon   : '#E5C3B3',
+    pink     : '#FF91D7',
+    orange   : '#EDA109',
+    vanilla  : '#DBEDD8',
+    teal     : '#0DA591',
+    focus    : '#D4FFFC',
+    indigo   : '#7849C9',
+    info     : '#2351DB',
+    wrong    : '#E6374B',
+    shell    : '#C6C7BD',
+  };
+
+  // ── bp-notice 專屬色彩對照表 ─────────────────────────────────
+  // 保留 v1 naming（warning = 黃色），獨立於 bp-popnote THEMES 的 warning（紅色）
+  var NOTICE_COLOR_MAP = {
+    // 16 標準色
+    lavender : PALETTE.lavender,
+    sky      : PALETTE.sky,
+    ocean    : PALETTE.ocean,
+    safe     : PALETTE.safe,
+    special  : PALETTE.special,
+    yellow   : PALETTE.yellow,
+    salmon   : PALETTE.salmon,
+    pink     : PALETTE.pink,
+    orange   : PALETTE.orange,
+    vanilla  : PALETTE.vanilla,
+    teal     : PALETTE.teal,
+    focus    : PALETTE.focus,
+    indigo   : PALETTE.indigo,
+    info     : PALETTE.info,
+    wrong    : PALETTE.wrong,   // 紅色（v1 wrong）
+    warning  : PALETTE.yellow,  // 黃色（v1 warning，向下相容）
+    // v1 別名（保留向下相容）
+    accent   : PALETTE.lavender,
+    correct  : PALETTE.safe,
+    note     : PALETTE.yellow,
+    success  : PALETTE.safe,
+    highlight: PALETTE.special,
+  };
+
+
+  // ══════════════════════════════════════════════════════════════
+  //  SECTION I — bp-notice
+  // ══════════════════════════════════════════════════════════════
+
+  var _noticeCssEl = null;
+
+  var BpNoticeConfig = {
+    autoInit     : true,
+    stickyOffset : '0px',
+    theme: {
+      text       : 'var(--shell,#C6C7BD)',
+      bg         : 'var(--area,#1a1b1a)',
+      border     : 'var(--card-border,#2e2f2e)',
+      accent     : PALETTE.lavender,   // 預設邊框強調色
+      ctaBg      : PALETTE.lavender,
+      ctaText    : '#0C0D0C',
+      closeColor : 'rgba(198,199,189,0.78)',
+    },
+  };
+
+  var DEFAULT_NOTICE_ICONS = {
+    announcement : 'bi-megaphone-fill',
+    promo        : 'bi-tag-fill',
+    sticky       : 'bi-info-circle-fill',
+  };
+
+  // ── CSS 注入 ─────────────────────────────────────────────────
+  function injectNoticeCSS() {
+    if (!_noticeCssEl) {
+      _noticeCssEl = document.createElement('style');
+      _noticeCssEl.id = 'bp-notice-styles';
+      document.head.appendChild(_noticeCssEl);
+    }
+    var t  = BpNoticeConfig.theme;
+    var so = BpNoticeConfig.stickyOffset;
+
+    var rules = [
+      /* ── 基礎容器 ── */
+      '.bpn-box{' +
+        'display:flex;align-items:center;gap:10px;' +
+        'padding:11px 16px;' +
+        'background:' + t.bg + ';' +
+        'border:1px solid ' + t.border + ';' +
+        'border-left:3px solid ' + t.accent + ';' +
+        'border-radius:7px;' +
+        'font-size:.88rem;color:' + t.text + ';' +
+        'line-height:1.5;' +
+        'position:relative;' +
+        'transition:opacity .25s,transform .25s;}',
+
+      /* ── 動畫 ── */
+      '@keyframes bpn-slidein{' +
+        'from{opacity:0;transform:translateY(-8px)}' +
+        'to{opacity:1;transform:translateY(0)}}',
+      '.bpn-box.anim{animation:bpn-slidein .25s ease forwards;}',
+
+      '@keyframes bpn-slideup{' +
+        'from{opacity:0;transform:translateY(16px)}' +
+        'to{opacity:1;transform:translateY(0)}}',
+      '.bpn-box.anim-up{animation:bpn-slideup .28s ease forwards;}',
+
+      '.bpn-box.closing{opacity:0;transform:translateY(-6px);pointer-events:none;}',
+      '.bpn-box.closing-down{opacity:0;transform:translateY(10px);pointer-events:none;}',
+
+      /* ── 子元素 ── */
+      '.bpn-icon{flex-shrink:0;font-size:1rem;}',
+      '.bpn-content{flex:1;min-width:0;}',
+
+      /* ── CTA ── */
+      '.bpn-cta{' +
+        'flex-shrink:0;background:' + t.ctaBg + ';color:' + t.ctaText + ';' +
+        'border:none;border-radius:5px;padding:5px 14px;' +
+        'font-size:.8rem;font-weight:700;cursor:pointer;' +
+        'white-space:nowrap;text-decoration:none;display:inline-block;' +
+        'transition:opacity .15s;}',
+      '.bpn-cta:hover{opacity:.85;color:' + t.ctaText + ';}',
+
+      /* ── 關閉按鈕 ── */
+      '.bpn-close{' +
+        'flex-shrink:0;background:none;border:none;' +
+        'color:' + t.closeColor + ';cursor:pointer;font-size:1rem;' +
+        'padding:2px 4px;border-radius:4px;line-height:1;' +
+        'transition:color .15s;}',
+      '.bpn-close:hover{color:' + t.text + ';}',
+
+      /* ── Sticky ── */
+      'bp-notice[type="sticky"]{' +
+        'display:block;position:fixed;left:0;right:0;z-index:1040;padding:0 16px;}',
+      'bp-notice[type="sticky"][position="top"]{top:' + so + ';}',
+      'bp-notice[type="sticky"]:not([position="top"]){bottom:' + so + ';}',
+      'bp-notice[type="sticky"] .bpn-box{' +
+        'border-radius:0;border-left-width:1px;' +
+        'border-top:2px solid ' + t.accent + ';' +
+        'max-width:100%;justify-content:center;}',
+    ];
+
+    /* ── 標準色 token（動態生成，包含別名）── */
+    Object.keys(NOTICE_COLOR_MAP).forEach(function (token) {
+      var color = NOTICE_COLOR_MAP[token];
+      rules.push(
+        '.bpn-box[data-color="' + token + '"]{border-left-color:' + color + ';}',
+        '.bpn-box[data-color="' + token + '"] .bpn-icon{color:' + color + ';}',
+        'bp-notice[type="sticky"] .bpn-box[data-color="' + token + '"]{border-top-color:' + color + ';}'
+      );
+    });
+
+    /* ── 金箔 gold（特殊樣式）── */
+    rules.push(
+      '.bpn-box[data-color="gold"]{' +
+        'background:linear-gradient(150deg,#1A1200 0%,#2A1E00 40%,#1F1600 100%);' +
+        'border-color:rgba(185,140,55,0.82);border-left-color:#C9973F;' +
+        'color:#EFD9A2;overflow:hidden;}',
+      '.bpn-box[data-color="gold"]::before{' +
+        'content:"";position:absolute;inset:0;pointer-events:none;' +
+        'background:linear-gradient(102deg,transparent 25%,rgba(255,210,80,.13) 50%,transparent 75%);' +
+        'background-size:200% 100%;' +
+        'animation:bpn-gold-shimmer 4s ease-in-out infinite;}',
+      '@keyframes bpn-gold-shimmer{' +
+        '0%{background-position:-60% center}' +
+        '100%{background-position:160% center}}',
+      '.bpn-box[data-color="gold"]>.bpn-icon{color:#C9973F;position:relative;z-index:1;}',
+      '.bpn-box[data-color="gold"]>.bpn-content{position:relative;z-index:1;}',
+      '.bpn-box[data-color="gold"]>.bpn-cta{background:#C9973F;color:#0C0D0C;position:relative;z-index:1;}',
+      '.bpn-box[data-color="gold"]>.bpn-close{color:rgba(239,217,162,.82);position:relative;z-index:1;}',
+      '.bpn-box[data-color="gold"]>.bpn-close:hover{color:#EFD9A2;}',
+      'bp-notice[type="sticky"] .bpn-box[data-color="gold"]{border-top-color:#C9973F;}'
+    );
+
+    _noticeCssEl.textContent = rules.join('\n');
+  }
+
+  // ── 色彩套用 ─────────────────────────────────────────────────
+  function applyNoticeColor(box, colorAttr, isSticky) {
+    if (!colorAttr) return;
+    if (colorAttr === 'gold') {
+      box.setAttribute('data-color', 'gold');
+      return;
+    }
+    if (Object.prototype.hasOwnProperty.call(NOTICE_COLOR_MAP, colorAttr)) {
+      box.setAttribute('data-color', colorAttr);
+    } else {
+      // 直接色碼
+      box.style.borderLeftColor = colorAttr;
+      var icon = box.querySelector('.bpn-icon');
+      if (icon) icon.style.color = colorAttr;
+      if (isSticky) box.style.borderTopColor = colorAttr;
+    }
+  }
+
+  // ── BpNoticeWidget ───────────────────────────────────────────
+  function BpNoticeWidget(el) {
+    this.el      = el;
+    this._closed = false;
+    this._parse();
+    this._render();
+  }
+
+  BpNoticeWidget.prototype._parse = function () {
+    var el = this.el;
+    this._type        = el.getAttribute('type')         || 'announcement';
+    this._position    = el.getAttribute('position')     || 'bottom';
+    this._noticeId    = el.getAttribute('notice-id')    || '';
+    this._dismissible = el.hasAttribute('dismissible');
+    this._icon        = el.getAttribute('icon')         || DEFAULT_NOTICE_ICONS[this._type] || 'bi-info-circle-fill';
+    this._ctaText     = el.getAttribute('cta-text')     || '';
+    this._ctaHref     = el.getAttribute('cta-href')     || '#';
+    this._ctaTarget   = el.getAttribute('cta-target')   || '_self';
+    this._autoDismiss = parseInt(el.getAttribute('auto-dismiss') || '0', 10);
+    this._color       = el.getAttribute('color')        || '';
+    this._noAnim      = el.hasAttribute('no-anim');
+    this._contentHtml = el.getAttribute('data-content') || el.innerHTML.trim();
+  };
+
+  BpNoticeWidget.prototype._render = function () {
+    injectNoticeCSS();
+    var el   = this.el;
+    var self = this;
+
+    if (this._noticeId && this._wasClosedBefore()) {
+      el.style.display = 'none';
+      return;
+    }
+
+    el.innerHTML = '';
+    var isSticky = this._type === 'sticky';
+
+    /* 外框 */
+    var box = document.createElement('div');
+    box.className = 'bpn-box';
+    if (!this._noAnim) {
+      box.classList.add(isSticky && this._position !== 'top' ? 'anim-up' : 'anim');
+    }
+    applyNoticeColor(box, this._color, isSticky);
+    this._box = box;
+
+    /* 圖示 */
+    var icon = document.createElement('i');
+    icon.className = 'bi ' + this._icon + ' bpn-icon';
+    box.appendChild(icon);
+
+    /* 內容 */
+    var content = document.createElement('div');
+    content.className = 'bpn-content';
+    content.innerHTML = this._contentHtml;
+    box.appendChild(content);
+
+    /* CTA */
+    if (this._ctaText) {
+      var cta = document.createElement('a');
+      cta.className   = 'bpn-cta';
+      cta.href        = this._ctaHref;
+      cta.target      = this._ctaTarget;
+      cta.textContent = this._ctaText;
+      if (this._ctaTarget === '_blank') cta.rel = 'noopener';
+      cta.addEventListener('click', function () {
+        el.dispatchEvent(new CustomEvent('bp:notice-cta', {
+          bubbles: true,
+          detail : { noticeId: self._noticeId, href: self._ctaHref },
+        }));
+      });
+      box.appendChild(cta);
+    }
+
+    /* 關閉按鈕 */
+    if (this._dismissible) {
+      var closeBtn       = document.createElement('button');
+      closeBtn.type      = 'button';
+      closeBtn.className = 'bpn-close';
+      closeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+      closeBtn.setAttribute('aria-label', '關閉');
+      closeBtn.addEventListener('click', function () { self.close(); });
+      box.appendChild(closeBtn);
+    }
+
+    el.appendChild(box);
+
+    /* 自動關閉 */
+    if (this._autoDismiss > 0) {
+      setTimeout(function () { self.close(); }, this._autoDismiss * 1000);
+    }
+  };
+
+  BpNoticeWidget.prototype.close = function () {
+    if (this._closed) return;
+    this._closed = true;
+    var el      = this.el;
+    var box     = this._box;
+    var self    = this;
+    var isDown  = this._type === 'sticky' && this._position !== 'top';
+
+    if (!this._noAnim && box) {
+      box.classList.add(isDown ? 'closing-down' : 'closing');
+      setTimeout(function () { el.style.display = 'none'; }, 280);
+    } else {
+      el.style.display = 'none';
+    }
+
+    if (this._noticeId) {
+      try { localStorage.setItem('bpn-closed-' + this._noticeId, '1'); } catch (e) {}
+    }
+
+    el.dispatchEvent(new CustomEvent('bp:notice-close', {
+      bubbles: true,
+      detail : { noticeId: this._noticeId },
+    }));
+  };
+
+  BpNoticeWidget.prototype.show = function () {
+    this._closed = false;
+    if (this._noticeId) {
+      try { localStorage.removeItem('bpn-closed-' + this._noticeId); } catch (e) {}
+    }
+    this.el.style.display = '';
+    this._render();
+  };
+
+  BpNoticeWidget.prototype.setContent = function (html) {
+    this._contentHtml = html;
+    var content = this._box && this._box.querySelector('.bpn-content');
+    if (content) content.innerHTML = html;
+  };
+
+  BpNoticeWidget.prototype._wasClosedBefore = function () {
+    try { return !!localStorage.getItem('bpn-closed-' + this._noticeId); } catch (e) { return false; }
+  };
+
+  // ── 自動初始化 ───────────────────────────────────────────────
+  function initAllNotices() {
+    document.querySelectorAll('bp-notice:not([data-bp-init])').forEach(function (el) {
+      el.setAttribute('data-bp-init', '1');
+      el._bpNotice = new BpNoticeWidget(el);
+    });
+  }
+
+  // ── 全域 API ─────────────────────────────────────────────────
+  G.BpNotice = {
+    config     : BpNoticeConfig,
+    palette    : PALETTE,        // 共用調色盤（唯讀參考）
+    colorMap   : NOTICE_COLOR_MAP,
+    init       : initAllNotices,
+    _reCSS     : function () { if (_noticeCssEl) injectNoticeCSS(); },
+
+    close: function (el) {
+      if (typeof el === 'string') el = document.getElementById(el);
+      if (el && el._bpNotice) el._bpNotice.close();
+    },
+    show: function (el) {
+      if (typeof el === 'string') el = document.getElementById(el);
+      if (el && el._bpNotice) el._bpNotice.show();
+    },
+    setContent: function (el, html) {
+      if (typeof el === 'string') el = document.getElementById(el);
+      if (el && el._bpNotice) el._bpNotice.setContent(html);
+    },
+    getInstance: function (el) {
+      if (typeof el === 'string') el = document.getElementById(el);
+      return (el && el._bpNotice) ? el._bpNotice : null;
+    },
+  };
+
+  if (BpNoticeConfig.autoInit) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAllNotices);
+    } else {
+      initAllNotices();
+    }
+  }
+
+
+  // ══════════════════════════════════════════════════════════════
+  //  SECTION II — bp-popnote
+  // ══════════════════════════════════════════════════════════════
+
+  const POPNOTE_CSS = `
     [data-popover-title],
     [data-popover-content],
     [data-popover-target] {
@@ -31,7 +521,7 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35);
       pointer-events: auto;
       font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-      line-height: 1.6;
+      line-height: 1.5;
       opacity: 0;
       transform: scale(0.88);
       transform-origin: var(--xpop-origin, center bottom);
@@ -91,7 +581,7 @@
       border-right-color: var(--xpop-bg, #130e1e);
     }
 
-    /* ── Shared header / body / carousel ─────────────────────── */
+    /* ── Header / Body / Carousel ────────────────────────────── */
     .xpop-header {
       padding: 10px 16px 8px;
       font-size: calc(var(--xpop-font-size, 1rem) * 1.05);
@@ -103,17 +593,18 @@
     .xpop-header:empty { display: none; }
     .xpop-body { padding: 12px 16px 14px; }
     .xpop-carousel-track { width: 100%; }
-    .xpop-carousel-track section {
+    /* 只選直接子 section（carousel 頁面），避免頁面內容包含 <section> 時被誤選 */
+    .xpop-carousel-track > section {
       display: none;
       width: 100%;
       box-sizing: border-box;
       padding: 2px 0;
     }
-    .xpop-carousel-track section.xpop-active { display: block; }
-    .xpop-carousel-track section.xpop-anim-forward {
+    .xpop-carousel-track > section.xpop-active { display: block; }
+    .xpop-carousel-track > section.xpop-anim-forward {
       animation: xpop-slide-forward 0.28s cubic-bezier(.4,0,.2,1) both;
     }
-    .xpop-carousel-track section.xpop-anim-back {
+    .xpop-carousel-track > section.xpop-anim-back {
       animation: xpop-slide-back 0.28s cubic-bezier(.4,0,.2,1) both;
     }
     @keyframes xpop-slide-forward {
@@ -124,8 +615,8 @@
       from { opacity: 0; transform: translateY(-14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .xpop-carousel-track.xpop-crossfade section.xpop-anim-forward,
-    .xpop-carousel-track.xpop-crossfade section.xpop-anim-back {
+    .xpop-carousel-track.xpop-crossfade > section.xpop-anim-forward,
+    .xpop-carousel-track.xpop-crossfade > section.xpop-anim-back {
       animation: xpop-fadein 0.28s ease both;
     }
     @keyframes xpop-fadein {
@@ -185,6 +676,7 @@
       transition: width linear;
     }
 
+    /* ── Panel wrap ──────────────────────────────────────────── */
     .xpop-panel-wrap {
       border-radius: 8px;
       border-width: 1px;
@@ -194,7 +686,7 @@
       font-size: var(--xpop-font-size, 1rem);
       color: #c6c7bd;
       font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-      line-height: 1.6;
+      line-height: 1.5;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       animation: xpop-panel-in 0.28s cubic-bezier(.4,0,.2,1) both;
@@ -232,12 +724,12 @@
       color: var(--xpop-hint-color, #C3A5E5);
     }
 
-
-    /* ── 事後標注 mark 元素：重設瀏覽器預設黃色底 ── */
+    /* 事後標注 mark 元素：重設瀏覽器預設黃色底 */
     mark.bpn-annotated {
       background: none;
       color: inherit;
     }
+
     /* ── Bootstrap Modal theming ─────────────────────────────── */
     #xpop-bs-modal .modal-content {
       border-width: 1px;
@@ -251,7 +743,7 @@
     #xpop-bs-modal .modal-body {
       color: #C6C7BD;
       font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-      line-height: 1.6;
+      line-height: 1.5;
       overflow-y: auto;
     }
 
@@ -264,7 +756,7 @@
     #xpop-bs-offcanvas .offcanvas-body {
       color: #C6C7BD;
       font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-      line-height: 1.6;
+      line-height: 1.5;
       overflow-y: auto;
     }
 
@@ -281,52 +773,54 @@
     }
   `;
 
+  // ── 主題定義（參照共用調色盤）────────────────────────────────
   const THEMES = {
-    dark:      { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' },
-    lavender:  { bg: '#130e1e', titleColor: '#C3A5E5', borderColor: '#C3A5E5' }, // alias
-    sky:       { bg: '#071318', titleColor: '#82C8E5', borderColor: '#82C8E5' },
-    ocean:     { bg: '#041418', titleColor: '#1CCAE8', borderColor: '#1CCAE8' },
-    warning:   { bg: '#190d0d', titleColor: '#E6374B', borderColor: '#E6374B' },
-    success:   { bg: '#091508', titleColor: '#27AE60', borderColor: '#27AE60' },
-    safe:      { bg: '#091508', titleColor: '#27AE60', borderColor: '#27AE60' }, // alias
-    special:   { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' },
-    highlight: { bg: '#111605', titleColor: '#B3DE73', borderColor: '#B3DE73' }, // alias
-    note:      { bg: '#141200', titleColor: '#E3D322', borderColor: '#E3D322' },
-    yellow:    { bg: '#141200', titleColor: '#E3D322', borderColor: '#E3D322' }, // alias
-    salmon:    { bg: '#180e0a', titleColor: '#E5C3B3', borderColor: '#E5C3B3' },
-    pink:      { bg: '#180a12', titleColor: '#FF91D7', borderColor: '#FF91D7' },
-    orange:    { bg: '#181005', titleColor: '#EDA109', borderColor: '#EDA109' },
-    vanilla:   { bg: '#171815', titleColor: '#DBEDD8', borderColor: '#DBEDD8' },
-    teal:      { bg: '#061412', titleColor: '#0DA591', borderColor: '#0DA591' },
-    focus:     { bg: '#070d16', titleColor: '#D4FFFC', borderColor: '#D4FFFC' },
-    indigo:    { bg: '#0e0a18', titleColor: '#7849C9', borderColor: '#7849C9' },
-    info:      { bg: '#060c1c', titleColor: '#2351DB', borderColor: '#2351DB' },
+    dark      : { bg: '#130e1e', titleColor: PALETTE.lavender, borderColor: PALETTE.lavender },
+    lavender  : { bg: '#130e1e', titleColor: PALETTE.lavender, borderColor: PALETTE.lavender },
+    sky       : { bg: '#071318', titleColor: PALETTE.sky,      borderColor: PALETTE.sky      },
+    ocean     : { bg: '#041418', titleColor: PALETTE.ocean,    borderColor: PALETTE.ocean    },
+    warning   : { bg: '#190d0d', titleColor: PALETTE.wrong,    borderColor: PALETTE.wrong    }, // 紅色
+    success   : { bg: '#091508', titleColor: PALETTE.safe,     borderColor: PALETTE.safe     },
+    safe      : { bg: '#091508', titleColor: PALETTE.safe,     borderColor: PALETTE.safe     },
+    special   : { bg: '#111605', titleColor: PALETTE.special,  borderColor: PALETTE.special  },
+    highlight : { bg: '#111605', titleColor: PALETTE.special,  borderColor: PALETTE.special  },
+    note      : { bg: '#141200', titleColor: PALETTE.yellow,   borderColor: PALETTE.yellow   },
+    yellow    : { bg: '#141200', titleColor: PALETTE.yellow,   borderColor: PALETTE.yellow   },
+    salmon    : { bg: '#180e0a', titleColor: PALETTE.salmon,   borderColor: PALETTE.salmon   },
+    pink      : { bg: '#180a12', titleColor: PALETTE.pink,     borderColor: PALETTE.pink     },
+    orange    : { bg: '#181005', titleColor: PALETTE.orange,   borderColor: PALETTE.orange   },
+    vanilla   : { bg: '#171815', titleColor: PALETTE.vanilla,  borderColor: PALETTE.vanilla  },
+    teal      : { bg: '#061412', titleColor: PALETTE.teal,     borderColor: PALETTE.teal     },
+    focus     : { bg: '#070d16', titleColor: PALETTE.focus,    borderColor: PALETTE.focus    },
+    indigo    : { bg: '#0e0a18', titleColor: PALETTE.indigo,   borderColor: PALETTE.indigo   },
+    info      : { bg: '#060c1c', titleColor: PALETTE.info,     borderColor: PALETTE.info     },
+    wrong     : { bg: '#190d0d', titleColor: PALETTE.wrong,    borderColor: PALETTE.wrong    }, // alias for warning
+    correct   : { bg: '#091508', titleColor: PALETTE.safe,     borderColor: PALETTE.safe     }, // alias for safe
+    accent    : { bg: '#130e1e', titleColor: PALETTE.lavender, borderColor: PALETTE.lavender }, // alias for lavender
   };
 
   let config = {
-    theme:       'dark',
-    maxWidth:    '560px',
-    offset:      8,
-    fontSize:    '1rem',
-    borderStyle: 'solid',
-    placement:   'top',
-    carousel:    { animation: 'slide', interval: 3000 },
-    panelTarget: null,
+    theme       : 'dark',
+    maxWidth    : '560px',
+    offset      : 8,
+    fontSize    : '1rem',
+    borderStyle : 'solid',
+    placement   : 'top',
+    carousel    : { animation: 'slide', interval: 3000 },
+    panelTarget : null,
     _customThemes: {},
-    modal:       false,
-    modalSize:   '',      // CSS value: '480px', '80vw' … or Bootstrap keyword 'sm'|'lg'|'xl'
-    modalStatic: false,   // true → clicking backdrop does NOT close
+    modal       : false,
+    modalSize   : '',
+    modalStatic : false,
   };
 
-  window.BpPopnote = {
+  // ── 全域 API ─────────────────────────────────────────────────
+  G.BpPopnote = {
     /**
      * 對已存在的文字進行事後標注。
      * @param {Object|Object[]} rules
-     *   每條規則包含：
-     *   必填 — text: string               要標注的文字
-     *   定位 — within: string             CSS selector（限定搜尋範圍，強烈建議填寫）
-     *          context: { before, after }  前後文字確認（配合 within 使用）
-     *          occurrence: number          第幾個符合（預設 1）
+     *   必填 — text: string
+     *   定位 — within, context: { before, after }, occurrence
      *   popover — title / content / theme / placement / panel /
      *             modal / label / hint / maxwidth / fontsize /
      *             arrow / interval / carouselAnim / offset / target
@@ -334,11 +828,10 @@
     annotate(rules) {
       (Array.isArray(rules) ? rules : [rules]).forEach(_annotateRule);
     },
-    /** 移除所有（或指定 CSS selector 範圍內）的事後標注 mark */
     clearAnnotations: _clearAnnotations,
   };
 
-  window.PopoverConfig = {
+  G.PopoverConfig = {
     set(opts) {
       if (opts.carousel) { Object.assign(config.carousel, opts.carousel); delete opts.carousel; }
       Object.assign(config, opts);
@@ -346,17 +839,14 @@
     addTheme(name, def) { config._customThemes[name] = def; },
   };
 
-  // ─── State ───────────────────────────────────────────────────────────────────
+  // ── State ─────────────────────────────────────────────────────
   let currentPop = null, currentTrigger = null, carouselState = null;
   let panelActiveTrigger = null, panelCarouselState = null;
 
-  function getTheme(n)  { return config._customThemes[n] || THEMES[n] || THEMES.dark; }
-  function ra(el, k, fb){ return el.dataset[k] !== undefined ? el.dataset[k] : fb; }
+  function getTheme(n)   { return config._customThemes[n] || THEMES[n] || THEMES.dark; }
+  function ra(el, k, fb) { return el.dataset[k] !== undefined ? el.dataset[k] : fb; }
 
-
-  // ─── 事後標注 API ─────────────────────────────────────────────────────────────
-
-  // 取得文字節點附近的區塊祖先，用於 context 檢查
+  // ── 事後標注 API ──────────────────────────────────────────────
   function _contextMatches(textNode, targetText, ctx) {
     const block = textNode.parentNode.closest(
       'p,li,td,th,div,section,article,blockquote,h1,h2,h3,h4,h5,h6'
@@ -364,12 +854,11 @@
     const text = block.textContent;
     const pos  = text.indexOf(targetText);
     if (pos === -1) return false;
-    if (ctx.before && !text.slice(0, pos).includes(ctx.before))                  return false;
-    if (ctx.after  && !text.slice(pos + targetText.length).includes(ctx.after))  return false;
+    if (ctx.before && !text.slice(0, pos).includes(ctx.before))               return false;
+    if (ctx.after  && !text.slice(pos + targetText.length).includes(ctx.after)) return false;
     return true;
   }
 
-  // 將文字節點在指定位置切割並包入 <mark>
   function _wrapNode(textNode, start, length, rule) {
     const mid = textNode.splitText(start);
     mid.splitText(length);
@@ -391,23 +880,20 @@
     if (rule.arrow  !== undefined) mark.dataset.popoverArrow      = String(rule.arrow);
     if (rule.hint   === false)     mark.dataset.popoverHint       = 'false';
     if (rule.interval !== undefined) mark.dataset.popoverInterval = String(rule.interval);
-    if (rule.offset !== undefined) mark.dataset.popoverOffset     = String(rule.offset);
+    if (rule.offset !== undefined)   mark.dataset.popoverOffset   = String(rule.offset);
 
     mid.parentNode.insertBefore(mark, mid);
     mark.appendChild(mid);
     return mark;
   }
 
-  // 執行單條標注規則
   function _annotateRule(rule) {
     if (!rule || !rule.text) {
       console.warn('[BpPopnote.annotate] text 為必填'); return;
     }
-
     const scopeEl = rule.within
       ? (typeof rule.within === 'string' ? document.querySelector(rule.within) : rule.within)
       : document.body;
-
     if (!scopeEl) {
       console.warn('[BpPopnote.annotate] within selector "' + rule.within + '" 找不到'); return;
     }
@@ -416,7 +902,6 @@
     const wantNth = rule.occurrence || 1;
     let nthCount  = 0;
     let found     = false;
-
     const walker  = document.createTreeWalker(scopeEl, NodeFilter.SHOW_TEXT);
     let node;
 
@@ -431,8 +916,7 @@
 
       while ((idx = val.indexOf(target, searchFrom)) !== -1) {
         if (rule.context && !_contextMatches(node, target, rule.context)) {
-          searchFrom = idx + 1;
-          continue;
+          searchFrom = idx + 1; continue;
         }
         nthCount++;
         if (nthCount === wantNth) {
@@ -443,7 +927,6 @@
         searchFrom = idx + target.length;
       }
     }
-
     if (!found) {
       console.warn(
         '[BpPopnote.annotate] "' + target + '" 第 ' + wantNth + ' 個未找到' +
@@ -452,7 +935,6 @@
     }
   }
 
-  // 移除所有 / 指定範圍的事後標注
   function _clearAnnotations(scopeSelector) {
     const scope = scopeSelector ? document.querySelector(scopeSelector) : document;
     if (!scope) return;
@@ -464,41 +946,44 @@
     });
   }
 
-  function injectCSS() {
+  // ── CSS 注入 ─────────────────────────────────────────────────
+  function injectPopnoteCSS() {
     if (document.getElementById('bp-popnote-style')) return;
     const s = document.createElement('style');
     s.id = 'bp-popnote-style';
-    s.textContent = CSS;
+    s.textContent = POPNOTE_CSS;
     document.head.appendChild(s);
   }
 
+  // ── 位置計算 ─────────────────────────────────────────────────
   function calcPosition(trigger, pop, placement, offset) {
     const tr = trigger.getBoundingClientRect();
     const pw = pop.offsetWidth, ph = pop.offsetHeight;
-    const vw = window.innerWidth,  vh = window.innerHeight;
+    const vw = window.innerWidth, vh = window.innerHeight;
     const pos = {
-      top:    { top: tr.top  - ph - offset,         left: tr.left + tr.width/2  - pw/2 },
-      bottom: { top: tr.bottom + offset,             left: tr.left + tr.width/2  - pw/2 },
-      left:   { top: tr.top  + tr.height/2 - ph/2,  left: tr.left - pw - offset        },
-      right:  { top: tr.top  + tr.height/2 - ph/2,  left: tr.right + offset            },
+      top:    { top: tr.top    - ph - offset,        left: tr.left + tr.width / 2 - pw / 2 },
+      bottom: { top: tr.bottom + offset,             left: tr.left + tr.width / 2 - pw / 2 },
+      left:   { top: tr.top    + tr.height / 2 - ph / 2, left: tr.left - pw - offset       },
+      right:  { top: tr.top    + tr.height / 2 - ph / 2, left: tr.right + offset           },
     };
     let p = placement;
-    if (p==='top'    && pos.top.top    < 8)         p = 'bottom';
-    if (p==='bottom' && pos.bottom.top + ph > vh-8) p = 'top';
-    if (p==='left'   && pos.left.left  < 8)         p = 'right';
-    if (p==='right'  && pos.right.left + pw > vw-8) p = 'left';
+    if (p === 'top'    && pos.top.top    < 8)         p = 'bottom';
+    if (p === 'bottom' && pos.bottom.top + ph > vh-8) p = 'top';
+    if (p === 'left'   && pos.left.left  < 8)         p = 'right';
+    if (p === 'right'  && pos.right.left + pw > vw-8) p = 'left';
     let { top, left } = pos[p];
-    left = Math.max(8, Math.min(left, vw-pw-8));
-    top  = Math.max(8, Math.min(top,  vh-ph-8));
+    left = Math.max(8, Math.min(left, vw - pw - 8));
+    top  = Math.max(8, Math.min(top,  vh - ph - 8));
     return { top, left, finalPlacement: p };
   }
 
   function originOf(p) {
-    return ({top:'center bottom',bottom:'center top',left:'right center',right:'left center'})[p] || 'center bottom';
+    return ({ top: 'center bottom', bottom: 'center top', left: 'right center', right: 'left center' })[p] || 'center bottom';
   }
 
+  // ── 內容抽取 ─────────────────────────────────────────────────
   function extractContent(trigger) {
-    const targetId = trigger.dataset.popoverTarget  || '';
+    const targetId = trigger.dataset.popoverTarget || '';
     if (targetId) {
       const tpl = document.querySelector(targetId);
       if (tpl && tpl.content) {
@@ -511,8 +996,9 @@
     return trigger.dataset.popoverContent || '';
   }
 
+  // ── 內容 DOM 建構 ─────────────────────────────────────────────
   function buildContentDOM(html) {
-    const tmp  = document.createElement('div');
+    const tmp = document.createElement('div');
     tmp.innerHTML = html;
     const secs = Array.from(tmp.querySelectorAll(':scope > section'));
     const isCarousel = secs.length > 1;
@@ -560,6 +1046,7 @@
     return { isCarousel, body, progressEl, barEl };
   }
 
+  // ── Carousel ─────────────────────────────────────────────────
   function buildCarousel(sections, wrap, interval, animType) {
     const track    = wrap.querySelector('.xpop-carousel-track');
     const dotsWrap = wrap.querySelector('.xpop-dots');
@@ -574,17 +1061,17 @@
 
     sections.forEach((_, i) => {
       const d = document.createElement('button');
-      d.className = 'xpop-dot' + (i===0 ? ' xpop-dot-active' : '');
+      d.className = 'xpop-dot' + (i === 0 ? ' xpop-dot-active' : '');
       d.addEventListener('click', () => goTo(i));
       dotsWrap.appendChild(d);
     });
 
     function syncUI() {
       dotsWrap.querySelectorAll('.xpop-dot').forEach((d, i) =>
-        d.classList.toggle('xpop-dot-active', i===cur));
-      if (counter) counter.textContent = `${cur+1} / ${total}`;
+        d.classList.toggle('xpop-dot-active', i === cur));
+      if (counter) counter.textContent = `${cur + 1} / ${total}`;
       if (btnPrev) btnPrev.disabled = cur === 0;
-      if (btnNext) btnNext.disabled = cur === total-1;
+      if (btnNext) btnNext.disabled = cur === total - 1;
     }
 
     function goTo(idx) {
@@ -596,7 +1083,7 @@
       const nxt = sections[cur];
       nxt.classList.remove('xpop-anim-forward', 'xpop-anim-back');
       void nxt.offsetWidth;
-      nxt.classList.add('xpop-active', dir==='forward' ? 'xpop-anim-forward' : 'xpop-anim-back');
+      nxt.classList.add('xpop-active', dir === 'forward' ? 'xpop-anim-forward' : 'xpop-anim-back');
       syncUI();
       startProgress();
     }
@@ -606,12 +1093,12 @@
       if (pBar) { pBar.style.transition = 'none'; pBar.style.width = '0%'; void pBar.offsetWidth; }
       if (interval > 0) {
         if (pBar) { pBar.style.transition = `width ${interval}ms linear`; pBar.style.width = '100%'; }
-        timer = setTimeout(() => goTo(cur < total-1 ? cur+1 : 0), interval);
+        timer = setTimeout(() => goTo(cur < total - 1 ? cur + 1 : 0), interval);
       }
     }
 
-    btnPrev && btnPrev.addEventListener('click', () => goTo(cur-1));
-    btnNext && btnNext.addEventListener('click', () => goTo(cur+1));
+    btnPrev && btnPrev.addEventListener('click', () => goTo(cur - 1));
+    btnNext && btnNext.addEventListener('click', () => goTo(cur + 1));
     sections[0].classList.add('xpop-active');
     syncUI();
     startProgress();
@@ -619,30 +1106,28 @@
     return { stop: () => clearTimeout(timer) };
   }
 
+  // ── Modal / Offcanvas ─────────────────────────────────────────
   const OC_PLACEMENTS = ['start', 'end', 'top', 'bottom'];
 
   function getModalMode(trigger) {
     const attr = trigger.dataset.popoverModal;
     let val;
-
     if (attr !== undefined) {
       val = (attr === '') ? 'dialog' : attr;
     } else if (config.modal) {
       val = config.modal;
     } else {
-      return null; // not modal mode
+      return null;
     }
-
-    if (val === 'false' || val === false)          return null;
-    if (val === true || val === 'true' || val === 'dialog') return 'dialog';
-    if (OC_PLACEMENTS.includes(val))               return val;
+    if (val === 'false' || val === false)                            return null;
+    if (val === true || val === 'true' || val === 'dialog')          return 'dialog';
+    if (OC_PLACEMENTS.includes(val))                                 return val;
     return 'dialog';
   }
 
   function ensureModal() {
     let el = document.getElementById('xpop-bs-modal');
     if (el) return el;
-
     el = document.createElement('div');
     el.className = 'modal fade';
     el.id = 'xpop-bs-modal';
@@ -666,7 +1151,6 @@
   function ensureOffcanvas() {
     let el = document.getElementById('xpop-bs-offcanvas');
     if (el) return el;
-
     el = document.createElement('div');
     el.className = 'offcanvas';
     el.id = 'xpop-bs-offcanvas';
@@ -683,36 +1167,27 @@
     return el;
   }
 
-  // Apply theme colours as inline styles to a modal/offcanvas root and its header
   function applyThemeStyles(rootEl, headerEl, titleEl, theme) {
     rootEl.style.background   = theme.bg;
     rootEl.style.borderColor  = theme.borderColor;
-
-    headerEl.style.background        = theme.bg;
-    headerEl.style.borderBottomColor  = theme.borderColor;
-
+    headerEl.style.background       = theme.bg;
+    headerEl.style.borderBottomColor = theme.borderColor;
     titleEl.style.color = theme.titleColor;
   }
 
-  // Resolve Bootstrap named size → CSS class name (dialog only)
   const NAMED_SIZES = { sm: 'modal-sm', lg: 'modal-lg', xl: 'modal-xl' };
 
   function showModal(trigger) {
     const modalEl  = ensureModal();
-    const theme    = getTheme(ra(trigger, 'popoverTheme',      config.theme));
+    const theme    = getTheme(ra(trigger, 'popoverTheme', config.theme));
     const title    = trigger.dataset.popoverTitle || '';
     const html     = extractContent(trigger);
     const rawSize  = ra(trigger, 'popoverModalSize',   config.modalSize);
     const isStatic = ra(trigger, 'popoverModalStatic', String(config.modalStatic)) === 'true';
 
-    // Close any open Offcanvas first
     const ocEl = document.getElementById('xpop-bs-offcanvas');
-    if (ocEl) {
-      const ocInst = bootstrap.Offcanvas.getInstance(ocEl);
-      if (ocInst) ocInst.hide();
-    }
+    if (ocEl) { const ocInst = bootstrap.Offcanvas.getInstance(ocEl); if (ocInst) ocInst.hide(); }
 
-    // Populate content
     const content = modalEl.querySelector('.modal-content');
     const header  = modalEl.querySelector('.modal-header');
     const titleEl = modalEl.querySelector('.modal-title');
@@ -722,18 +1197,15 @@
     titleEl.innerHTML = title;
     body.innerHTML    = html;
 
-    // Dialog size
     const dialog = modalEl.querySelector('.modal-dialog');
     dialog.className = 'modal-dialog modal-dialog-scrollable';
     dialog.style.maxWidth = '';
-
     if (NAMED_SIZES[rawSize]) {
       dialog.classList.add(NAMED_SIZES[rawSize]);
     } else if (rawSize) {
       dialog.style.maxWidth = rawSize;
     }
 
-    // Dispose previous instance so backdrop option can change
     const prev = bootstrap.Modal.getInstance(modalEl);
     if (prev) prev.dispose();
 
@@ -745,23 +1217,16 @@
 
   function showOffcanvas(trigger, placement) {
     const ocEl    = ensureOffcanvas();
-    const theme   = getTheme(ra(trigger, 'popoverTheme',      config.theme));
+    const theme   = getTheme(ra(trigger, 'popoverTheme', config.theme));
     const title   = trigger.dataset.popoverTitle || '';
     const html    = extractContent(trigger);
     const rawSize = ra(trigger, 'popoverModalSize',   config.modalSize);
     const isStatic = ra(trigger, 'popoverModalStatic', String(config.modalStatic)) === 'true';
 
-    // Close any open Modal first
     const mEl = document.getElementById('xpop-bs-modal');
-    if (mEl) {
-      const mInst = bootstrap.Modal.getInstance(mEl);
-      if (mInst) mInst.hide();
-    }
+    if (mEl) { const mInst = bootstrap.Modal.getInstance(mEl); if (mInst) mInst.hide(); }
 
-    // Reset placement class — offcanvas-{start|end|top|bottom}
     ocEl.className = 'offcanvas offcanvas-' + placement;
-
-    // Size: start/end → width, top/bottom → height
     ocEl.style.width  = '';
     ocEl.style.height = '';
     if (rawSize) {
@@ -780,7 +1245,6 @@
     titleEl.innerHTML = title;
     body.innerHTML    = html;
 
-    // Dispose previous instance so options can change
     const prev = bootstrap.Offcanvas.getInstance(ocEl);
     if (prev) prev.dispose();
 
@@ -791,20 +1255,7 @@
     }).show();
   }
 
-  // ─── Panel mode ──────────────────────────────────────────────────────────────
-  //
-  // Usage A — per-trigger:
-  //   <span data-popover-content="…" data-popover-panel="#notes-box">…</span>
-  //
-  // Usage B — global (all triggers go to the same panel):
-  //   PopoverConfig.set({ panelTarget: '#notes-box' });
-  //
-  // Usage C — opt a single trigger out of the global panel:
-  //   <span data-popover-content="…" data-popover-panel="false">…</span>
-  //
-  // Optional — custom source label (falls back to trigger text):
-  //   data-popover-label="My label"
-
+  // ── Panel mode ────────────────────────────────────────────────
   function getPanelTargetEl(trigger) {
     const attr = trigger.dataset.popoverPanel;
     if (attr === 'false') return null;
@@ -824,15 +1275,15 @@
   function renderToPanel(trigger, panelEl) {
     const same = panelActiveTrigger === trigger;
     clearPanel();
-    if (same) { panelEl.innerHTML = ''; return; }   // second click → toggle off
+    if (same) { panelEl.innerHTML = ''; return; }
 
-    const themeName = ra(trigger, 'popoverTheme',       config.theme);
-    const fontSize  = ra(trigger, 'popoverFontsize',    config.fontSize);
-    const bStyle    = ra(trigger, 'popoverBorder',      config.borderStyle);
-    const title     = trigger.dataset.popoverTitle      || '';
-    const cInterval = parseInt(ra(trigger, 'popoverInterval',    config.carousel.interval), 10);
-    const cAnim     = ra(trigger, 'popoverCarouselAnim',config.carousel.animation);
-    const label     = trigger.dataset.popoverLabel      || trigger.textContent.trim().slice(0, 60);
+    const themeName = ra(trigger, 'popoverTheme',        config.theme);
+    const fontSize  = ra(trigger, 'popoverFontsize',     config.fontSize);
+    const bStyle    = ra(trigger, 'popoverBorder',       config.borderStyle);
+    const title     = trigger.dataset.popoverTitle       || '';
+    const cInterval = parseInt(ra(trigger, 'popoverInterval', config.carousel.interval), 10);
+    const cAnim     = ra(trigger, 'popoverCarouselAnim', config.carousel.animation);
+    const label     = trigger.dataset.popoverLabel       || trigger.textContent.trim().slice(0, 60);
     const theme     = getTheme(themeName);
     const html      = extractContent(trigger);
 
@@ -871,7 +1322,7 @@
 
     if (isCarousel) {
       panelCarouselState = buildCarousel(
-        Array.from(wrap.querySelectorAll('.xpop-carousel-track section')),
+        Array.from(wrap.querySelectorAll('.xpop-carousel-track > section')),
         wrap, cInterval, cAnim
       );
     }
@@ -880,6 +1331,7 @@
     panelActiveTrigger = trigger;
   }
 
+  // ── Floating Popover ─────────────────────────────────────────
   function createPopover(trigger) {
     const themeName = ra(trigger, 'popoverTheme',      config.theme);
     const placement = ra(trigger, 'popoverPlacement',  config.placement);
@@ -888,7 +1340,7 @@
     const maxWidth  = ra(trigger, 'popoverMaxwidth',   config.maxWidth);
     const showArrow = ra(trigger, 'popoverArrow', 'true') !== 'false';
     const title     = trigger.dataset.popoverTitle     || '';
-    const cInterval = parseInt(ra(trigger, 'popoverInterval',   config.carousel.interval), 10);
+    const cInterval = parseInt(ra(trigger, 'popoverInterval', config.carousel.interval), 10);
     const cAnim     = ra(trigger, 'popoverCarouselAnim', config.carousel.animation);
     const theme     = getTheme(themeName);
     const html      = extractContent(trigger);
@@ -930,9 +1382,10 @@
     pop.style.setProperty('--xpop-origin', originOf(finalPlacement));
     pop.style.top  = top  + 'px';
     pop.style.left = left + 'px';
+
     if (isCarousel) {
       carouselState = buildCarousel(
-        Array.from(pop.querySelectorAll('.xpop-carousel-track section')),
+        Array.from(pop.querySelectorAll('.xpop-carousel-track > section')),
         pop, cInterval, cAnim
       );
     }
@@ -949,6 +1402,7 @@
     currentPop = currentTrigger = null;
   }
 
+  // ── 事件監聽 ─────────────────────────────────────────────────
   document.addEventListener('click', function (e) {
     const trigger = e.target.closest(
       '[data-popover-title],[data-popover-content],[data-popover-target]'
@@ -957,16 +1411,13 @@
     if (trigger) {
       e.stopPropagation();
 
-      // ① Modal / Offcanvas mode (highest priority)
+      // ① Modal / Offcanvas（優先）
       const modalMode = getModalMode(trigger);
       if (modalMode) {
         closePop();
         clearPanel();
-        if (modalMode === 'dialog') {
-          showModal(trigger);
-        } else {
-          showOffcanvas(trigger, modalMode);
-        }
+        if (modalMode === 'dialog') { showModal(trigger); }
+        else                        { showOffcanvas(trigger, modalMode); }
         return;
       }
 
@@ -978,7 +1429,7 @@
         return;
       }
 
-      // ③ Floating Popover (default)
+      // ③ Floating Popover（預設）
       if (currentTrigger === trigger) { closePop(); return; }
       closePop();
       currentTrigger = trigger;
@@ -1003,5 +1454,6 @@
     currentPop.style.left = left + 'px';
   });
 
-  injectCSS();
-})();
+  injectPopnoteCSS();
+
+})(window);
