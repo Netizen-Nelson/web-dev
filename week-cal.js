@@ -1,5 +1,9 @@
 /*!
- * WeekCal v2.0.0
+ * WeekCal v2.0.1
+ * ── v2.0.1 修正 ──────────────────────────────────────────────────────────────
+ *   1. parseSmartDate()：新增 YYYY/M/D、YYYY/MM/DD 斜線日期格式支援
+ *   2. _getDays()：JSON.parse 結果須為陣列才採用；非陣列值（如 days="3"）
+ *      不再攔截 <wc-day> 子元素解析，標籤與圖示得以正確顯示
  * ── v2.0 新增：自訂元素 <week-cal> ─────────────────────────────────────────
  *
  *  宣告式用法：
@@ -319,6 +323,12 @@
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
       const [y, m, dd] = str.split('-').map(Number);
+      return new Date(y, m - 1, dd);
+    }
+
+    // 支援 YYYY/M/D 或 YYYY/MM/DD（斜線格式）
+    if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(str)) {
+      const [y, m, dd] = str.split('/').map(Number);
       return new Date(y, m - 1, dd);
     }
 
@@ -749,8 +759,14 @@ week-cal{display:block}
     _getDays() {
       const attr = this.getAttribute('days');
       if (attr) {
-        try { return JSON.parse(attr); }
-        catch (e) { console.warn('[WeekCal] <week-cal days="..."> JSON 格式錯誤', e); }
+        try {
+          const parsed = JSON.parse(attr);
+          // 僅在解析結果確實為陣列時才採用，否則忽略並回落至 <wc-day> 子元素
+          // （防止 days="3" 這類非陣列值攔截 _cachedDays）
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) {
+          console.warn('[WeekCal] <week-cal days="..."> JSON 格式錯誤', e);
+        }
       }
       return this._cachedDays || [];
     }
