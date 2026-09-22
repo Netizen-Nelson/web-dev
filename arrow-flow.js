@@ -60,6 +60,7 @@
     reveal      : 'cumulative',
     animation   : 'fade',
     current     : 0,
+    stepWidth   : null,   // null = flex:1 (fill); any CSS length = fixed width
   };
 
   /* ─────────────────────────────────────────────────────────────────────────
@@ -158,20 +159,9 @@ arrow-flow { display: block; }
 .af-ar.ac { opacity: 1;   cursor: pointer;  pointer-events: auto; }
 .af-ar.ps { opacity: .35; cursor: default;  pointer-events: none; }
 
-/* Active arrow: pulse + hover nudge */
-.af-ar.ac .af-sv { animation: af-pulse 1.7s ease-in-out infinite; }
-.af-ar.ac:hover .af-sv {
-  animation: none;
-  transform: translateX(6px);
-  transition: transform .15s ease;
-}
-
+/* Active arrow: subtle opacity on hover only — no transforms to avoid click miss */
+.af-ar.ac:hover { opacity: 0.76; }
 .af-sv { display: block; width: 86%; height: auto; }
-
-@keyframes af-pulse {
-  0%,100% { transform: translateX(0); }
-  50%      { transform: translateX(6px); }
-}
 
 /* on-complete target: fade + rise reveal */
 .af-reveal { animation: af-reveal-in .5s ease both; }
@@ -185,8 +175,11 @@ arrow-flow { display: block; }
 
   /* ─────────────────────────────────────────────────────────────────────────
    *  SVG Arrow builder
+   *  style: 'solid' (default) | 'dashed'
+   *    solid  — filled <rect> shaft
+   *    dashed — <line> with stroke-dasharray; head stays solid
    * ───────────────────────────────────────────────────────────────────────── */
-  function makeSVG(tipKey, fill) {
+  function makeSVG(tipKey, fill, style) {
     const t  = TIPS[tipKey] || TIPS.md;
     const W  = 80;
     const cy = 20;
@@ -254,6 +247,7 @@ arrow-flow { display: block; }
         title : el.getAttribute('title') || '',
         hc    : el.getAttribute('header-color'),
         bc    : el.getAttribute('border-color'),
+        width : el.getAttribute('width'),   // per-step fixed width (optional)
         html  : el.innerHTML,
       }));
       if (!steps.length) return;
@@ -275,6 +269,9 @@ arrow-flow { display: block; }
         Math.max(parseInt(this._o('current', 'current', '0')) || 0, 0),
         steps.length - 1
       );
+      /** Normalise a width value to a CSS length string, or null. */
+      const toW = v => (!v ? null : /^\d+$/.test(v) ? v + 'px' : v);
+      const globalW = toW(this._o('step-width', 'stepWidth', null));
 
       /* ── Store instance state ── */
       this._rev  = rev;
@@ -309,6 +306,13 @@ arrow-flow { display: block; }
         /* Step column */
         const col = document.createElement('div');
         col.className = 'af-sc';
+        // Per-step width overrides global step-width; both override default flex:1
+        const colW = toW(s.width) || globalW;
+        if (colW) {
+          col.style.flex     = `0 0 ${colW}`;
+          col.style.width    = colW;
+          col.style.maxWidth = colW;
+        }
 
         /* Box */
         const box = document.createElement('div');

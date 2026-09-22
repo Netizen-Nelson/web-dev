@@ -606,6 +606,49 @@
 
     <hr class="divider">
 
+    <!-- ══ DEMO 8b: step-width ════════════════════════════════════ -->
+    <section class="demo-sec">
+      <div class="sec-head">
+        <h2 class="sec-title">
+          <span class="sec-num" style="background:rgba(237,161,9,0.14);border-color:rgba(237,161,9,0.5);color:var(--orange)">+</span>框寬度設定
+        </h2>
+        <p class="sec-desc">
+          <code>step-width</code> 屬性設定所有框的固定寬度 ·
+          個別 <code>&lt;flow-step width="…"&gt;</code> 可覆蓋全域值 ·
+          未設定時預設 <code>flex:1</code>（均分剩餘空間）
+        </p>
+      </div>
+
+      <p class="sec-desc" style="margin-bottom:14px;">
+        ▸ <code>step-width="220px"</code>：所有框固定 220px，超出容器可橫向捲動
+      </p>
+      <div style="overflow-x:auto; padding-bottom:4px;">
+        <arrow-flow theme="vanilla" step-width="220px" gap="56px">
+          <flow-step title="資料收集">收集原始數據並進行前處理。</flow-step>
+          <flow-step title="特徵工程">選取關鍵特徵，執行標準化。</flow-step>
+          <flow-step title="模型訓練">分割訓練集與驗證集，開始訓練。</flow-step>
+          <flow-step title="評估上線">計算指標後部署至生產環境。</flow-step>
+        </arrow-flow>
+      </div>
+
+      <p class="sec-desc" style="margin:24px 0 14px;">
+        ▸ 個別 <code>&lt;flow-step width="…"&gt;</code>：各框獨立寬度
+      </p>
+      <arrow-flow theme="focus" gap="48px">
+        <flow-step title="輸入（窄）" width="160px">
+          固定 160px。
+        </flow-step>
+        <flow-step title="處理（中）" width="280px">
+          固定 280px，較寬以容納較多內容說明。
+        </flow-step>
+        <flow-step title="輸出（窄）" width="160px">
+          固定 160px。
+        </flow-step>
+      </arrow-flow>
+    </section>
+
+    <hr class="divider">
+
     <!-- ══ API Reference ════════════════════════════════════════════ -->
     <section class="demo-sec">
       <div class="sec-head">
@@ -628,11 +671,13 @@
   <span class="a-attr">equal-height</span>          <span class="a-cm">&lt;!-- Boolean：強制所有框等高（取最大值）           --&gt;</span>
   <span class="a-attr">current</span>=<span class="a-val">"0"</span>          <span class="a-cm">&lt;!-- 初始顯示至第幾框（0-based）                  --&gt;</span>
   <span class="a-attr">on-complete</span>=<span class="a-val">"div-id"</span> <span class="a-cm">&lt;!-- 完成後顯示的 div id（初始自動隱藏）          --&gt;</span>
+  <span class="a-attr">step-width</span>=<span class="a-val">"240px"</span>   <span class="a-cm">&lt;!-- 所有框固定寬度（省略 = flex:1 均分）          --&gt;</span>
 <span class="a-tag">&gt;</span>
   <span class="a-tag">&lt;flow-step</span>
     <span class="a-attr">title</span>=<span class="a-val">"標題"</span>
     <span class="a-attr">header-color</span>=<span class="a-val">"lavender"</span>  <span class="a-cm">&lt;!-- 覆蓋此框 header 底色 --&gt;</span>
     <span class="a-attr">border-color</span>=<span class="a-val">"indigo"</span>    <span class="a-cm">&lt;!-- 覆蓋此框框線色       --&gt;</span>
+    <span class="a-attr">width</span>=<span class="a-val">"300px"</span>           <span class="a-cm">&lt;!-- 覆蓋此框寬度（優先於 step-width） --&gt;</span>
   <span class="a-tag">&gt;</span>
     支援 &lt;strong&gt;HTML&lt;/strong&gt; 標籤、&lt;ul&gt; 列表等
   <span class="a-tag">&lt;/flow-step&gt;</span>
@@ -641,11 +686,12 @@
 <span class="a-cm">/* ─── 全域設定 ───────────────────────────────────────────────────────── */</span>
 <span class="a-js">ArrowFlow</span>.config({
   theme      : 'sky',
-  arrowTip   : 'lg',   <span class="a-cm">// 同 arrow-tip 屬性，接受 camelCase 或 kebab-case</span>
+  arrowTip   : 'lg',    <span class="a-cm">// 同 arrow-tip 屬性，接受 camelCase 或 kebab-case</span>
   gap        : '80px',
   animation  : 'slide',
   reveal     : 'cumulative',
   equalHeight: true,
+  stepWidth  : '260px', <span class="a-cm">// 同 step-width 屬性</span>
 });
 
 <span class="a-cm">/* ─── 事件 ───────────────────────────────────────────────────────────── */</span>
