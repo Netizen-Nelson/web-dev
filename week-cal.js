@@ -1,5 +1,10 @@
 /*!
- * WeekCal v2.0.1
+ * WeekCal v2.0.3
+ * ── v2.0.3 修正 ──────────────────────────────────────────────────────────────
+ *   3. 移除 ensureBootstrapIcons()、BI_LINK_ID、BI_CDN：
+ *      元件不再自行注入 Bootstrap Icons CSS。
+ *      請在專案層級自行引用 Bootstrap Icons（<link> 或 npm 皆可）。
+ *      icon="house" 等 BI 格式名稱仍可正常使用，emoji 同樣支援。
  * ── v2.0.1 修正 ──────────────────────────────────────────────────────────────
  *   1. parseSmartDate()：新增 YYYY/M/D、YYYY/MM/DD 斜線日期格式支援
  *   2. _getDays()：JSON.parse 結果須為陣列才採用；非陣列值（如 days="3"）
@@ -435,20 +440,10 @@ week-cal{display:block}
 .wc-cell.wc-im.wc-today .wc-ic,.wc-cell.wc-im.wc-today .wc-dn{color:var(--wc-tt)}
 .wc-cell.wc-im.wc-sel:not(.wc-today){background:var(--wc-sb)}
 .wc-cell.wc-im.wc-sel:not(.wc-today) .wc-ic,.wc-cell.wc-im.wc-sel:not(.wc-today) .wc-dn{color:var(--wc-st)}
-.wc-cell.wc-im.wc-go:hover:not(.wc-today):not(.wc-sel){background:var(--wc-ch)}`.trim();
+.wc-cell.wc-im.wc-go:hover:not(.wc-today):not(.wc-sel){background:var(--wc-ch)}
+.wc-ic-txt{font-style:normal;font-size:1.25rem;line-height:1;display:block;text-align:center;color:var(--wc-sh);transition:color .15s}
+.wc-cell.wc-im.wc-today .wc-ic-txt,.wc-cell.wc-im.wc-sel:not(.wc-today) .wc-ic-txt{color:inherit}`.trim();
     D.head.appendChild(s);
-  }
-
-  const BI_LINK_ID = '__wc_bi__';
-  const BI_CDN     = 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css';
-
-  function ensureBootstrapIcons() {
-    if (D.getElementById(BI_LINK_ID)) return;
-    const link  = D.createElement('link');
-    link.id     = BI_LINK_ID;
-    link.rel    = 'stylesheet';
-    link.href   = BI_CDN;
-    D.head.appendChild(link);
   }
 
   function bsIconClass(icon) {
@@ -456,6 +451,14 @@ week-cal{display:block}
     const raw  = String(icon).trim().replace(/^bi\s+/, '');
     const name = raw.startsWith('bi-') ? raw : 'bi-' + raw;
     return 'bi ' + name;
+  }
+
+  /**
+   * 判斷 icon 屬性值是否為 Bootstrap Icons 格式名稱（僅含小寫英數與連字號）。
+   * emoji、中文或其他非 ASCII 字元視為純文字圖示，不需要外部 CSS。
+   */
+  function isBIicon(icon) {
+    return !!icon && /^[a-z][a-z0-9-]*$/.test(String(icon).trim());
   }
 
   function applyVars(el, c) {
@@ -515,10 +518,17 @@ week-cal{display:block}
 
       if (iconMode) {
         cell.classList.add('wc-im');
-        const ic = mk('i', bsIconClass(dc.icon) + ' wc-ic');
+        // isBIicon → 用 Bootstrap Icons <i> 字型；否則（emoji / 文字）用 <span> 直接渲染
+        let icEl;
+        if (isBIicon(dc.icon)) {
+          icEl = mk('i', bsIconClass(dc.icon) + ' wc-ic');
+        } else {
+          icEl = mk('span', 'wc-ic-txt');
+          icEl.textContent = dc.icon || '';
+        }
         const dn = mk('div', 'wc-dn');
         dn.textContent = dc.label || '';
-        cell.append(ic, dn, mk('div', 'wc-dot'));
+        cell.append(icEl, dn, mk('div', 'wc-dot'));
       } else {
         const dn = mk('div', 'wc-dn');
         dn.textContent = dc.label || loc.dow[d.getDay()];
@@ -646,7 +656,6 @@ week-cal{display:block}
       });
 
       ensureCSS();
-      if (cfg.mode === 'icon') ensureBootstrapIcons();
 
       const { wrap, grid } = buildDOM(cfg, days, nowISO());
       cEl.innerHTML = '';
