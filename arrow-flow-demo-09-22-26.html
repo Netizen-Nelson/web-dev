@@ -606,6 +606,45 @@
 
     <hr class="divider">
 
+    <!-- ══ DEMO 8a: dashed arrow ═══════════════════════════════════ -->
+    <section class="demo-sec">
+      <div class="sec-head">
+        <h2 class="sec-title">
+          <span class="sec-num" style="background:rgba(28,202,232,0.12);border-color:rgba(28,202,232,0.45);color:var(--ocean)">─</span>虛線箭頭
+        </h2>
+        <p class="sec-desc">
+          <code>arrow-style="dashed"</code> · 桿以圓頭虛線繪製，箭頭三角形保持實心 ·
+          省略或設 <code>"solid"</code> 為預設實線
+        </p>
+      </div>
+
+      <p class="sec-desc" style="margin-bottom:14px;">
+        ▸ <code>arrow-style="dashed"</code> + <code>theme="ocean"</code> + <code>arrow-tip="lg"</code>
+      </p>
+      <arrow-flow theme="ocean" arrow-style="dashed" arrow-tip="lg" gap="80px">
+        <flow-step title="需求分析">
+          與利害關係人訪談，整理功能需求清單並確認優先級。
+        </flow-step>
+        <flow-step title="原型設計">
+          使用低保真線框圖進行快速驗證，收集回饋後調整。
+        </flow-step>
+        <flow-step title="開發上線">
+          分批交付功能，持續整合並在每個 Sprint 結束時部署至測試環境。
+        </flow-step>
+      </arrow-flow>
+
+      <p class="sec-desc" style="margin:28px 0 14px;">
+        ▸ <code>arrow-style="dashed"</code> + <code>arrow-tip="sm"</code> + <code>theme="yellow"</code> · 對比風格
+      </p>
+      <arrow-flow theme="yellow" arrow-style="dashed" arrow-tip="sm" gap="64px">
+        <flow-step title="收集">蒐集原始資料並建立資料倉儲。</flow-step>
+        <flow-step title="清理">移除重複值與異常值，補全缺失欄位。</flow-step>
+        <flow-step title="分析">產出報表與視覺化圖表，供決策使用。</flow-step>
+      </arrow-flow>
+    </section>
+
+    <hr class="divider">
+
     <!-- ══ DEMO 8b: step-width ════════════════════════════════════ -->
     <section class="demo-sec">
       <div class="sec-head">
@@ -665,6 +704,7 @@
   <span class="a-attr">border-color</span>=<span class="a-val">"sky"</span>    <span class="a-cm">&lt;!-- 覆蓋所有框線色                               --&gt;</span>
   <span class="a-attr">arrow-color</span>=<span class="a-val">"shell"</span>  <span class="a-cm">&lt;!-- 箭頭填色（預設繼承 theme）                   --&gt;</span>
   <span class="a-attr">arrow-tip</span>=<span class="a-val">"md"</span>       <span class="a-cm">&lt;!-- sm / md / lg / xl（只改頭部三角形）          --&gt;</span>
+  <span class="a-attr">arrow-style</span>=<span class="a-val">"solid"</span>  <span class="a-cm">&lt;!-- solid（預設實線）/ dashed（虛線桿＋實心頭）  --&gt;</span>
   <span class="a-attr">gap</span>=<span class="a-val">"72px"</span>           <span class="a-cm">&lt;!-- 框間距（整個可點擊箭頭區域的寬度）           --&gt;</span>
   <span class="a-attr">reveal</span>=<span class="a-val">"cumulative"</span> <span class="a-cm">&lt;!-- cumulative（前框保留）/ single（前框淡出）   --&gt;</span>
   <span class="a-attr">animation</span>=<span class="a-val">"fade"</span>    <span class="a-cm">&lt;!-- fade / slide / none                         --&gt;</span>
@@ -692,6 +732,7 @@
   reveal     : 'cumulative',
   equalHeight: true,
   stepWidth  : '260px', <span class="a-cm">// 同 step-width 屬性</span>
+  arrowStyle : 'dashed',<span class="a-cm">// 同 arrow-style 屬性</span>
 });
 
 <span class="a-cm">/* ─── 事件 ───────────────────────────────────────────────────────────── */</span>

@@ -61,6 +61,7 @@
     animation   : 'fade',
     current     : 0,
     stepWidth   : null,   // null = flex:1 (fill); any CSS length = fixed width
+    arrowStyle  : 'solid',  // 'solid' | 'dashed'
   };
 
   /* ─────────────────────────────────────────────────────────────────────────
@@ -192,15 +193,28 @@ arrow-flow { display: block; }
     svg.setAttribute('aria-hidden', 'true');
     svg.classList.add('af-sv');
 
-    /* Shaft */
-    const shaft = document.createElementNS(ns, 'rect');
-    shaft.setAttribute('x',      '0');
-    shaft.setAttribute('y',      '17');
-    shaft.setAttribute('width',  String(hs + 3)); // +3 overlap under head
-    shaft.setAttribute('height', '6');
-    shaft.setAttribute('fill',   fill);
+    /* Shaft — solid rect or dashed line */
+    let shaft;
+    if (style === 'dashed') {
+      shaft = document.createElementNS(ns, 'line');
+      shaft.setAttribute('x1',               '0');
+      shaft.setAttribute('y1',               String(cy));
+      shaft.setAttribute('x2',               String(hs + 1)); // +1 tucks under head
+      shaft.setAttribute('y2',               String(cy));
+      shaft.setAttribute('stroke',           fill);
+      shaft.setAttribute('stroke-width',     '5');
+      shaft.setAttribute('stroke-dasharray', '8 5');
+      shaft.setAttribute('stroke-linecap',   'round');
+    } else {
+      shaft = document.createElementNS(ns, 'rect');
+      shaft.setAttribute('x',      '0');
+      shaft.setAttribute('y',      '17');
+      shaft.setAttribute('width',  String(hs + 3)); // +3 overlap under head
+      shaft.setAttribute('height', '6');
+      shaft.setAttribute('fill',   fill);
+    }
 
-    /* Head (arrowhead triangle) */
+    /* Head (arrowhead triangle — always solid) */
     const head = document.createElementNS(ns, 'polygon');
     head.setAttribute('points',
       `${hs},${cy - t.hh / 2} ${W},${cy} ${hs},${cy + t.hh / 2}`
@@ -271,7 +285,8 @@ arrow-flow { display: block; }
       );
       /** Normalise a width value to a CSS length string, or null. */
       const toW = v => (!v ? null : /^\d+$/.test(v) ? v + 'px' : v);
-      const globalW = toW(this._o('step-width', 'stepWidth', null));
+      const globalW  = toW(this._o('step-width',  'stepWidth',  null));
+      const arStyle  = this._o('arrow-style', 'arrowStyle', 'solid');
 
       /* ── Store instance state ── */
       this._rev  = rev;
@@ -356,7 +371,7 @@ arrow-flow { display: block; }
           ar.style.width    = gap;
           ar.style.minWidth = gap;
           ar.setAttribute('title', '點擊繼續');
-          ar.appendChild(makeSVG(tip, arrClr));
+          ar.appendChild(makeSVG(tip, arrClr, arStyle));
           ar.addEventListener('click', () => this._fwd(i));
           wrap.appendChild(ar);
           this._ar.push(ar);
