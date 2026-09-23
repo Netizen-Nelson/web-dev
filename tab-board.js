@@ -60,26 +60,25 @@
 
   // ── 主題調色盤 ────────────────────────────────────────────────────────────────
   const THEMES = {
-    dark:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#C3A5E5',     at:'#0C0D0C', bar:'#1CCAE8',  hv:'rgba(198,199,189,0.09)', bd:'rgba(198,199,189,0.12)' },
-    light:    { bg:'#F4F4F1', sh:'#1A1B1A', dim:'rgba(26,27,26,0.76)',    ab:'#9B6FD4',      at:'#ffffff', bar:'#0DA591',  hv:'rgba(26,27,26,0.07)',    bd:'rgba(26,27,26,0.12)'   },
-    teal:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#7849C9',      at:'#ffffff', bar:'#82C8E5',  hv:'rgba(13,165,145,0.12)',  bd:'rgba(198,199,189,0.12)' },
-    ocean:    { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#C3A5E5',      at:'#0C0D0C', bar:'#0DA591',  hv:'rgba(28,202,232,0.10)',  bd:'rgba(198,199,189,0.12)' },
-    indigo:   { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#82C8E5',      at:'#0C0D0C', bar:'#C3A5E5',  hv:'rgba(120,73,201,0.12)',  bd:'rgba(198,199,189,0.12)' },
-    warm:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#E5C3B3',      at:'#0C0D0C', bar:'#E3D322',  hv:'rgba(237,161,9,0.12)',   bd:'rgba(198,199,189,0.12)' },
-    safe:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#DBEDD8',      at:'#0C0D0C', bar:'#B3DE73',  hv:'rgba(39,174,96,0.12)',   bd:'rgba(198,199,189,0.12)' },
-    sky:      { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#C3A5E5',      at:'#0C0D0C', bar:'#1CCAE8',  hv:'rgba(130,200,229,0.12)', bd:'rgba(198,199,189,0.12)' },
-    lavender: { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#7849C9',      at:'#ffffff', bar:'#FF91D7',  hv:'rgba(195,165,229,0.12)', bd:'rgba(198,199,189,0.12)' },
-    salmon:   { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#EDA109',      at:'#0C0D0C', bar:'#E3D322',  hv:'rgba(229,195,179,0.12)', bd:'rgba(198,199,189,0.12)' },
-    special:  { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#27AE60',      at:'#ffffff', bar:'#DBEDD8',  hv:'rgba(179,222,115,0.12)', bd:'rgba(198,199,189,0.12)' },
-    pink:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#C3A5E5',      at:'#0C0D0C', bar:'#E6374B',  hv:'rgba(255,145,215,0.12)', bd:'rgba(198,199,189,0.12)' },
-    yellow:   { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.76)', ab:'#EDA109',      at:'#0C0D0C', bar:'#B3DE73',  hv:'rgba(227,211,34,0.12)',  bd:'rgba(198,199,189,0.12)' },
+    dark:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#C3A5E5',     at:'#0C0D0C', bar:'#1CCAE8',  hv:'rgba(198,199,189,0.09)', bd:'rgba(198,199,189,0.25)' },
+    light:    { bg:'#F4F4F1', sh:'#1A1B1A', dim:'rgba(26,27,26,0.81)',    ab:'#9B6FD4',      at:'#ffffff', bar:'#0DA591',  hv:'rgba(26,27,26,0.07)',    bd:'rgba(26,27,26,0.25)'   },
+    teal:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#7849C9',      at:'#ffffff', bar:'#82C8E5',  hv:'rgba(13,165,145,0.25)',  bd:'rgba(198,199,189,0.25)' },
+    ocean:    { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#C3A5E5',      at:'#0C0D0C', bar:'#0DA591',  hv:'rgba(28,202,232,0.10)',  bd:'rgba(198,199,189,0.25)' },
+    indigo:   { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#82C8E5',      at:'#0C0D0C', bar:'#C3A5E5',  hv:'rgba(120,73,201,0.25)',  bd:'rgba(198,199,189,0.25)' },
+    warm:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#E5C3B3',      at:'#0C0D0C', bar:'#E3D322',  hv:'rgba(237,161,9,0.25)',   bd:'rgba(198,199,189,0.25)' },
+    safe:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#DBEDD8',      at:'#0C0D0C', bar:'#B3DE73',  hv:'rgba(39,174,96,0.25)',   bd:'rgba(198,199,189,0.25)' },
+    sky:      { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#C3A5E5',      at:'#0C0D0C', bar:'#1CCAE8',  hv:'rgba(130,200,229,0.25)', bd:'rgba(198,199,189,0.25)' },
+    lavender: { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#7849C9',      at:'#ffffff', bar:'#FF91D7',  hv:'rgba(195,165,229,0.25)', bd:'rgba(198,199,189,0.25)' },
+    salmon:   { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#EDA109',      at:'#0C0D0C', bar:'#E3D322',  hv:'rgba(229,195,179,0.25)', bd:'rgba(198,199,189,0.25)' },
+    special:  { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#27AE60',      at:'#ffffff', bar:'#DBEDD8',  hv:'rgba(179,222,115,0.25)', bd:'rgba(198,199,189,0.25)' },
+    pink:     { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#C3A5E5',      at:'#0C0D0C', bar:'#E6374B',  hv:'rgba(255,145,215,0.25)', bd:'rgba(198,199,189,0.25)' },
+    yellow:   { bg:'#0C0D0C', sh:'#C6C7BD', dim:'rgba(198,199,189,0.81)', ab:'#EDA109',      at:'#0C0D0C', bar:'#B3DE73',  hv:'rgba(227,211,34,0.25)',  bd:'rgba(198,199,189,0.25)' },
     aurora:   { bg:'linear-gradient(160deg,#0C0D1E 0%,#0D1525 60%,#091420 100%)',
-                sh:'#D4F0FF', dim:'rgba(212,240,255,0.76)',
+                sh:'#D4F0FF', dim:'rgba(212,240,255,0.81)',
                 ab:'linear-gradient(135deg,#0DA591 0%,#1CCAE8 100%)',
-                at:'#0C0D0C', bar:'#FF91D7', hv:'rgba(195,165,229,0.14)', bd:'rgba(212,240,255,0.12)' },
+                at:'#0C0D0C', bar:'#FF91D7', hv:'rgba(195,165,229,0.24)', bd:'rgba(212,240,255,0.25)' },
   };
 
-  // ── 全域預設值 ────────────────────────────────────────────────────────────────
   const DEF = {
     theme:          'dark',
     tabStyle:       'side',
@@ -95,14 +94,12 @@
     ordersKey:      '',
   };
 
-  // ── 工具 ──────────────────────────────────────────────────────────────────────
   const mk = (tag, cls) => {
     const e = D.createElement(tag);
     if (cls) e.className = cls;
     return e;
   };
-
-  // ── localStorage 輔助（orders 持久化）────────────────────────────────────────
+──
   function ordersLoad(key) {
     try { return parseInt(localStorage.getItem(LS_PREFIX + key), 10) || 0; } catch(e) { return 0; }
   }
@@ -113,8 +110,6 @@
     try { localStorage.removeItem(LS_PREFIX + key); } catch(e) {}
   }
 
-  // ── Orders 序列輔助 ───────────────────────────────────────────────────────────
-  // 找出 from 之後第一個非 disabled 的頁籤索引，無則回傳 -1
   function nextNonDisabled(tabs, from) {
     for (let i = from + 1; i < tabs.length; i++) {
       if (!tabs[i].disabled) return i;
@@ -122,7 +117,6 @@
     return -1;
   }
 
-  // 更新所有頁籤的 orders 視覺狀態（圖示 + 樣式類別）
   function updateOrdersVisuals(inst) {
     const { tabs, tabListEl } = inst;
     const cur     = inst.ordersActive;
@@ -266,7 +260,6 @@ tb-tab{display:none!important}
     ].forEach(([k, v]) => el.style.setProperty(k, v));
   }
 
-  // ── DOM 建構輔助 ──────────────────────────────────────────────────────────────
   function makeItem(tab, i) {
     const item = mk('div', 'tb-item');
     if (tab.disabled) item.classList.add('tb-dis');
@@ -369,7 +362,6 @@ tb-tab{display:none!important}
       el.classList.toggle('tb-active', i === idx);
     });
 
-    // 注入內容
     const html = tabs[idx].content;
     if (cfg.animation === 'fade') {
       contentEl.style.transition = 'opacity .15s ease';
@@ -388,7 +380,6 @@ tb-tab{display:none!important}
       contentEl.innerHTML = html;
     }
 
-    // Orders 進度更新（init 模式不推進）
     if (cfg.orders && mode !== 'init') {
       if (idx >= inst.ordersActive) {
         inst.ordersActive = idx;
@@ -396,10 +387,8 @@ tb-tab{display:none!important}
       }
     }
 
-    // Orders 視覺同步（init 也需要）
     if (cfg.orders) updateOrdersVisuals(inst);
 
-    // tb-complete：最後一個可用頁籤被進入時觸發（不含 init）
     if (cfg.orders && mode !== 'init') {
       if (nextNonDisabled(tabs, inst.ordersActive) === -1) {
         host.dispatchEvent(new CustomEvent('tb-complete', {
@@ -409,7 +398,6 @@ tb-tab{display:none!important}
       }
     }
 
-    // tb-select（所有模式均觸發）
     inst.activeIndex = idx;
     host.dispatchEvent(new CustomEvent('tb-select', {
       bubbles: true, cancelable: false,
@@ -417,7 +405,6 @@ tb-tab{display:none!important}
     }));
   }
 
-  // ── Custom Element ────────────────────────────────────────────────────────────
   if (!G.customElements) return;
 
   class TabBoardElement extends HTMLElement {
@@ -509,14 +496,11 @@ tb-tab{display:none!important}
       this._mounted = true;
 
       if (cfg.orders) {
-        // 從 localStorage 讀取進度，邊界保護
         const raw   = cfg.ordersKey ? ordersLoad(cfg.ordersKey) : 0;
         const bound = Math.max(0, Math.min(raw, tabs.length - 1));
-        // 確保落在非 disabled 的頁籤
         let start = bound;
         while (start > 0 && tabs[start] && tabs[start].disabled) start--;
         this._inst.ordersActive = start;
-        // 顯示目前進度頁籤（不推進）
         setTimeout(() => doSelect(this._inst, start, 'init'), 50);
       } else if (cfg.defaultFirst) {
         const first = tabs.findIndex(t => !t.disabled);
@@ -530,16 +514,11 @@ tb-tab{display:none!important}
       this._inst     = null;
     }
 
-    /** 程式化選取（跳過 orders 順序驗證，仍會更新進度與持久化）*/
     select(index) {
       if (this._inst) doSelect(this._inst, index, 'api');
       return this;
     }
 
-    /**
-     * 重置 orders 模式：清除 localStorage，回到第一個可用頁籤。
-     * 在非 orders 模式下無作用。
-     */
     reset() {
       if (!this._inst || !this._inst.cfg.orders) return this;
       const { cfg, tabs } = this._inst;
@@ -550,14 +529,12 @@ tb-tab{display:none!important}
       return this;
     }
 
-    /** 重新掃描 <tb-tab> 子元素並重新掛載 */
     refresh() {
       this._cachedTabs = this._parseTabs();
       if (this._mounted) { this._unmount(); this._mount(); }
       return this;
     }
 
-    /** 取得目前有效設定 */
     getConfig() { return this._readCfg(); }
   }
 
