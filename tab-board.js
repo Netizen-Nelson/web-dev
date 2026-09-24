@@ -99,7 +99,7 @@
     if (cls) e.className = cls;
     return e;
   };
-──
+
   function ordersLoad(key) {
     try { return parseInt(localStorage.getItem(LS_PREFIX + key), 10) || 0; } catch(e) { return 0; }
   }
