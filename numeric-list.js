@@ -55,10 +55,10 @@
     borderWidth:    '1px',
     rowGap:         '4px',
     lineHeight:     1.5,
-    padV:           '16px',
-    padH:           '24px',
-    numberPad:      '16px 22px',
-    lineGap:        '4px'
+    padV:           '8px',
+    padH:           '12px',
+    numberPad:      '12px 16px',
+    lineGap:        '3px'
   };
 
   var store = (typeof WeakMap !== 'undefined') ? new WeakMap() : null;
