@@ -1,33 +1,34 @@
-/*!
- * NumericList v2.1.0
- * <ui-list> / <list-item> 自訂標籤元件 — 2026-09-11
- *
- * 全域設定：NumericList.setup({ key: value })
- * 手動渲染：NumericList.render(uiListEl)
- * 設定快照：NumericList.defaults
- *
- * <ui-list> 屬性：
- *   width="80%/360px"   width / min-width
- *   gap="8px"           項目間距（覆蓋 Config.rowGap）
- *   hover="#color"      hover 邊框色（覆蓋 Config.borderHoverColor）
- *
- * setup() 自動同步規則：
- *   設定 numberColor → 自動同步 themeColor（數字統一色）與 borderHoverColor
- *   可個別傳入 themeColor / borderHoverColor 覆蓋自動同步
- *   傳入 themeColor: null → 恢復 accentColors 循環
- */
 (function (global) {
   'use strict';
 
   /* ═══════════════════════════════════════════════════════════════════
-   *  全域設定
+   *  品牌色票（theme-color、hover、active 屬性皆可使用名稱）
    * ═══════════════════════════════════════════════════════════════════ */
+  var Palette = {
+    shell:    '#C6C7BD',
+    lavender: '#C3A5E5',
+    sky:      '#82C8E5',
+    warning:  '#E6374B',
+    salmon:   '#E5C3B3',
+    ocean:    '#1CCAE8',
+    safe:     '#27AE60',
+    teal:     '#0DA591',
+    vanilla:  '#DBEDD8',
+    yellow:   '#E3D322',
+    focus:    '#D4FFFC',
+    special:  '#B3DE73',
+    info:     '#2351DB',
+    indigo:   '#7849C9',
+    pink:     '#FF91D7',
+    orange:   '#EDA109'
+  };
+
   var Config = {
     borderColor:        '#31332f',
-    borderHoverColor:   '#95C9DE',   /* hover 邊框（global） */
+    borderHoverColor:   '#82C8E5',
     borderActiveColor:  '#C3A5E5',
-    numberColor:        '#95C9DE',   /* CSS 用，JS 端以 themeColor 優先 */
-    themeColor:         null,        /* 非 null 時，所有數字統一此色；null 則循環 accentColors */
+    numberColor:        '#82C8E5',
+    themeColor:         null,        /* 全域主題色：非 null 時所有數字統一此色，可填品牌色名稱 */
     numberBg:           '#0d1b24',
     numberDivider:      '#1c2d38',
     textColor:          '#C6C7BD',
@@ -35,16 +36,16 @@
     activeBackground:   '#10192a',
 
     accentColors: [
-      '#95C9DE',   /* sky     */
-      '#C3A5E5',   /* lavender*/
-      '#1CCAE8',   /* ocean   */
+      '#82C8E5',   /* sky */
+      '#C3A5E5',   /* lavender */
+      '#1CCAE8',   /* ocean */
       '#B3DE73',   /* special */
-      '#E3D322',   /* yellow  */
-      '#E5C3B3',   /* salmon  */
-      '#0DA591',   /* teal    */
-      '#FF91D7',   /* pink    */
-      '#EDA109',   /* orange  */
-      '#7849C9',   /* indigo  */
+      '#E3D322',   /* yellow */
+      '#E5C3B3',   /* salmon */
+      '#0DA591',   /* teal */
+      '#FF91D7',   /* pink */
+      '#EDA109',   /* orange */
+      '#7849C9'    /* indigo */
     ],
 
     fontSize:       '1.125rem',
@@ -52,24 +53,39 @@
     numberMinWidth: '84px',
     borderRadius:   '6px',
     borderWidth:    '1px',
-    rowGap:         '4px',          /* 全局預設 gap */
+    rowGap:         '4px',
     lineHeight:     1.5,
     padV:           '16px',
     padH:           '24px',
     numberPad:      '16px 22px',
-    lineGap:        '4px',
+    lineGap:        '4px'
   };
 
-  /* ═══════════════════════════════════════════════════════════════════
-   *  WeakMap：儲存每個 <ui-list> 的解析資料
-   * ═══════════════════════════════════════════════════════════════════ */
   var store = (typeof WeakMap !== 'undefined') ? new WeakMap() : null;
 
   /* ═══════════════════════════════════════════════════════════════════
-   *  CSS 注入
-   *  hover / gap / active 邊框色以 CSS 自訂屬性 (--nl-*) 表達，
-   *  fallback 使用 Config 當時的全局值，支援 per-list 屬性覆蓋。
+   *  顏色解析
+   *  1. 品牌色名稱（不分大小寫）：sky、Lavender ...
+   *  2. 合法 CSS 顏色：#82C8E5、rgb(...)
+   *  3. 其餘視為無效，回傳 null 並在 console 提示
    * ═══════════════════════════════════════════════════════════════════ */
+  function resolveColor(value, attrName) {
+    if (value === null || value === undefined) return null;
+    var v = String(value).trim();
+    if (!v) return null;
+
+    var key = v.toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(Palette, key)) return Palette[key];
+
+    if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('color', v)) return v;
+
+    if (global.console && console.warn) {
+      console.warn('[NumericList] ' + (attrName || 'color') + '="' + v + '" 無效，可用名稱：' +
+        Object.keys(Palette).join(', '));
+    }
+    return null;
+  }
+
   function buildCSS() {
     var c = Config;
     return (
@@ -77,7 +93,7 @@
 
       '.nl-list{' +
         'display:flex;flex-direction:column;' +
-        'gap:var(--nl-gap,' + c.rowGap + ');' +   /* per-list gap 屬性在此生效 */
+        'gap:var(--nl-gap,' + c.rowGap + ');' +
         'list-style:none;margin:0;padding:0' +
       '}' +
 
@@ -89,17 +105,15 @@
         'transition:border-color .18s ease,background .18s ease' +
       '}' +
 
-      /* hover 邊框：per-list --nl-hover-color 優先，fallback 全局 borderHoverColor */
       '.nl-item:hover{' +
         'border-color:var(--nl-hover-color,' + c.borderHoverColor + ')' +
       '}' +
 
       '.nl-item--clickable{cursor:pointer}' +
 
-      /* active 邊框：per-list --nl-active-color 優先 */
       '.nl-item--active{' +
         'border-color:var(--nl-active-color,' + c.borderActiveColor + ')!important;' +
-        'background:' + c.activeBackground +
+        'background:var(--nl-active-bg,' + c.activeBackground + ')' +
       '}' +
 
       '.nl-number{' +
@@ -132,10 +146,7 @@
     el.textContent = buildCSS();
   }
 
-  /* ═══════════════════════════════════════════════════════════════════
-   *  width 屬性解析
-   *  "80%/360px" → width:80%; min-width:360px
-   * ═══════════════════════════════════════════════════════════════════ */
+  /* width="80%/360px" → width:80%; min-width:360px */
   function applyWidth(el, attr) {
     if (!attr) { el.style.width = '100%'; return; }
     var parts = attr.split('/');
@@ -144,25 +155,39 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-   *  per-list CSS 自訂屬性設置
-   *  gap / hover / active 屬性寫入 ui-list 元素的 CSS 變數，
-   *  讓 .nl-* 的 var(--nl-*) 取用，不影響其他清單。
+   *  取得此清單的主題色（theme-color 屬性優先，其次全域 themeColor）
    * ═══════════════════════════════════════════════════════════════════ */
-  function applyListProps(listEl) {
-    var gap    = listEl.getAttribute('gap');
-    var hover  = listEl.getAttribute('hover');
-    var active = listEl.getAttribute('active');
-
-    if (gap)    listEl.style.setProperty('--nl-gap',          gap);
-    if (hover)  listEl.style.setProperty('--nl-hover-color',  hover);
-    /* active 顏色通常與 hover 一致；未設定時跟隨 hover */
-    if (active) listEl.style.setProperty('--nl-active-color', active);
-    else if (hover) listEl.style.setProperty('--nl-active-color', hover);
+  function getListTheme(listEl) {
+    return resolveColor(listEl.getAttribute('theme-color'), 'theme-color');
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-   *  資料擷取
+   *  per-list CSS 自訂屬性
+   *
+   *  hover  顏色：hover 屬性 > theme-color > 全域設定
+   *  active 顏色：active 屬性 > hover 屬性 > theme-color > 全域設定
+   *  active 背景：有 theme-color 或 active 色時，自動以該色混入底色
    * ═══════════════════════════════════════════════════════════════════ */
+  function applyListProps(listEl, theme) {
+    var props = ['--nl-gap', '--nl-hover-color', '--nl-active-color', '--nl-active-bg'];
+    for (var p = 0; p < props.length; p++) listEl.style.removeProperty(props[p]);
+
+    var gap    = listEl.getAttribute('gap');
+    var hover  = resolveColor(listEl.getAttribute('hover'),  'hover');
+    var active = resolveColor(listEl.getAttribute('active'), 'active');
+
+    var hoverColor  = hover || theme;
+    var activeColor = active || hover || theme;
+
+    if (gap)         listEl.style.setProperty('--nl-gap', gap);
+    if (hoverColor)  listEl.style.setProperty('--nl-hover-color', hoverColor);
+    if (activeColor) {
+      listEl.style.setProperty('--nl-active-color', activeColor);
+      listEl.style.setProperty('--nl-active-bg',
+        'color-mix(in srgb,' + activeColor + ' 12%,' + Config.backgroundColor + ')');
+    }
+  }
+
   function extractItems(listEl) {
     var items = listEl.querySelectorAll(':scope > list-item');
     return Array.prototype.map.call(items, function (item, i) {
@@ -171,7 +196,7 @@
         accent : item.getAttribute('accent') || null,
         source : item.getAttribute('source') || null,
         target : item.getAttribute('target') || null,
-        html   : item.innerHTML.trim(),
+        html   : item.innerHTML.trim()
       };
     });
   }
@@ -180,13 +205,15 @@
    *  建立單一 <li>
    *
    *  數字顏色優先序：
-   *    1. data.accent（list-item accent 屬性）
-   *    2. Config.themeColor（theme 統一色，setup() 自動同步）
-   *    3. Config.accentColors 循環（無 theme 時的彩色預設）
+   *    1. list-item 的 accent 屬性（可用品牌色名稱）
+   *    2. ui-list 的 theme-color 屬性
+   *    3. Config.themeColor（全域）
+   *    4. Config.accentColors 循環
    * ═══════════════════════════════════════════════════════════════════ */
-  function buildLi(data, idx, siblings) {
-    var accent = data.accent
-      || Config.themeColor
+  function buildLi(data, idx, siblings, listTheme) {
+    var accent = resolveColor(data.accent, 'accent')
+      || listTheme
+      || resolveColor(Config.themeColor, 'themeColor')
       || Config.accentColors[idx % Config.accentColors.length];
 
     var isClickable = !!(data.source && data.target);
@@ -227,9 +254,6 @@
     return li;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════
-   *  渲染單一 <ui-list>
-   * ═══════════════════════════════════════════════════════════════════ */
   function renderUIList(listEl) {
     var widthAttr;
     var itemData;
@@ -253,18 +277,21 @@
       }
     }
 
+    /* theme-color 每次渲染都重新讀取，修改屬性後呼叫 render(el) 即可生效 */
+    var theme = getListTheme(listEl);
+
     var ol       = document.createElement('ol');
     ol.className = 'nl-list';
     var liEls    = [];
 
     for (var i = 0; i < itemData.length; i++) {
-      var li = buildLi(itemData[i], i, liEls);
+      var li = buildLi(itemData[i], i, liEls, theme);
       liEls.push(li);
       ol.appendChild(li);
     }
 
     applyWidth(listEl, widthAttr);
-    applyListProps(listEl);   /* gap / hover / active 屬性 → CSS 自訂屬性 */
+    applyListProps(listEl, theme);
 
     listEl.innerHTML = '';
     listEl.appendChild(ol);
@@ -276,15 +303,12 @@
   var NumericList = {
     get defaults() { return Object.assign({}, Config); },
 
+    /* 品牌色票（唯讀副本） */
+    get colors() { return Object.assign({}, Palette); },
+
     /**
      * 覆蓋全域設定並重建 CSS。
-     *
-     * 自動同步規則（可個別傳入覆蓋）：
-     *   opts.numberColor 有值，且未傳入 themeColor
-     *     → Config.themeColor = opts.numberColor（數字統一色）
-     *   opts.numberColor 或 opts.themeColor 有值，且未傳入 borderHoverColor
-     *     → Config.borderHoverColor = theme 色（hover 跟 theme 走）
-     *
+     * themeColor 可填品牌色名稱，例如 setup({ themeColor: 'lavender' })。
      * 恢復循環色：setup({ themeColor: null })
      */
     setup: function (opts) {
@@ -292,18 +316,22 @@
 
       Object.assign(Config, opts);
 
-      /* themeColor 自動同步 */
-      if (opts.numberColor !== undefined && opts.themeColor === undefined) {
-        Config.themeColor = opts.numberColor;
+      /* themeColor、numberColor 允許使用品牌色名稱 */
+      if (opts.themeColor !== undefined && opts.themeColor !== null) {
+        Config.themeColor = resolveColor(opts.themeColor, 'themeColor');
+      }
+      if (opts.numberColor !== undefined) {
+        Config.numberColor = resolveColor(opts.numberColor, 'numberColor') || Config.numberColor;
       }
 
-      /* borderHoverColor 自動同步 */
+      if (opts.numberColor !== undefined && opts.themeColor === undefined) {
+        Config.themeColor = Config.numberColor;
+      }
+
       var themeChanged = opts.numberColor !== undefined || opts.themeColor !== undefined;
       if (themeChanged && opts.borderHoverColor === undefined) {
         Config.borderHoverColor = Config.themeColor || Config.numberColor;
       }
-
-      /* borderActiveColor 同步（若未明確傳入） */
       if (themeChanged && opts.borderActiveColor === undefined) {
         Config.borderActiveColor = Config.themeColor || Config.numberColor;
       }
@@ -321,7 +349,7 @@
       if (!el) return;
       injectCSS();
       renderUIList(el);
-    },
+    }
   };
 
   global.NumericList = NumericList;
